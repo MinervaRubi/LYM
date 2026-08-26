@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LMY Diseño e Impresión - Personaliza tus regalos y promocionales</title>
+    <link rel="stylesheet" href="Proyecto.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+
+</head>
+
+<body>
+    <!-- Header simple (puedes copiar tu header completo si quieres) -->
+    <header class="header">
+        <nav class="nav">
+            <div class="nav-container">
+                <div class="logo">
+                    <h1>LMY</h1>
+                    <span>diseño e impresión</span>
+                </div>
+
+                <ul class="nav-menu">
+                    <li><a href="index.html">Inicio</a></li>
+                    <li><a href="index.html#productos">Productos</a></li>
+                    <li><a href="index.html#paquetes">Paquetes</a></li>
+                    <li><a href="index.html#contacto">Contacto</a></li>
+                </ul>
+
+                <div class="auth-buttons">
+                    <a href="index.html" class="btn btn-outline">Volver</a>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main class="page">
+        <div class="cart-wrap">
+
+            <div class="cart-header">
+                <div>
+                    <h1><i class="fas fa-shopping-cart"></i> Carrito</h1>
+                    <small>Vista (demo): productos de ejemplo para validar diseño.</small>
+                </div>
+                <small id="itemsCount">0 artículos</small>
+            </div>
+
+            <div class="cart-grid">
+
+                <!-- Lista -->
+                <div class="cart-card">
+                    <div class="cart-items-header">
+                        <h2>Productos</h2>
+                        <small>Modifica cantidades (demo)</small>
+                    </div>
+
+                    <div class="cart-items" id="cartItems">
+                        <!-- Se renderiza con JS -->
+                    </div>
+
+                    <div id="emptyState" class="empty" style="display:none;">
+                        Tu carrito está vacío.
+                    </div>
+                </div>
+
+                <!-- Resumen -->
+                <aside class="cart-card summary">
+                    <h2>Resumen</h2>
+
+                    <div class="summary-row">
+                        <span>Subtotal</span>
+                        <span id="subtotalTxt">$0</span>
+                    </div>
+
+                    <div class="summary-row">
+                        <span>Envío <small>(demo)</small></span>
+                        <span id="shippingTxt">$0</span>
+                    </div>
+
+                    <div class="summary-row total">
+                        <span>Total</span>
+                        <span id="totalTxt">$0</span>
+                    </div>
+
+                    <div class="summary-actions">
+                        <a href="index.html#productos" class="btn btn-outline btn-block">
+                            <i class="fas fa-arrow-left"></i> Seguir comprando
+                        </a>
+
+                        <a href="php/pago.php" class="btn btn-primary btn-block">
+                            <i class="fas fa-credit-card"></i> Continuar a pago
+                        </a>
+                    </div>
+
+                    <small style="display:block; margin-top:12px; color: var(--text-light);">
+                        *Esto solo es vista. Luego conectamos el carrito real cuando existan las páginas de productos.
+                    </small>
+                </aside>
+
+            </div>
+        </div>
+    </main>

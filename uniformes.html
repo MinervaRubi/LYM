@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Uniformes | LMY</title>
+
+    <!-- Tu CSS principal -->
+    <link rel="stylesheet" href="Proyecto.css">
+
+    <!-- Tipografía -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+
+    <!-- Iconos -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+
+<body>
+
+    <div class="container" style="padding-top:120px; padding-bottom:60px;">
+
+        <div class="producto-card">
+            <div class="producto-container">
+
+                <!-- Imagen -->
+                <div class="producto-image">
+                    <img src="imagen/uniforme.jpg" alt="Uniforme personalizado" style="width:220px;">
+                    <div class="producto-overlay">
+                        <span class="precio">Desde $195</span>
+                    </div>
+                </div>
+
+                <!-- Información -->
+                <div class="producto-content">
+                    <h3>Camisas de Uniforme Personalizadas</h3>
+
+                    <ul class="producto-features">
+                        <li><i class="fas fa-check"></i> Camisa tipo polo o gabardina</li>
+                        <li><i class="fas fa-check"></i> Bordado o impresión DTF</li>
+                        <li><i class="fas fa-check"></i> Ideal para negocios, escuelas y equipos</li>
+                        <li><i class="fas fa-check"></i> Tallas: CH, M, G, XL, XXL</li>
+                        <li><i class="fas fa-check"></i> Colores variados a elegir</li>
+                        <li><i class="fas fa-check"></i> Personalización con logotipo o nombre</li>
+                    </ul>
+
+                    <!-- Selección de tipo -->
+                    <h4>Selecciona el tipo de uniforme:</h4>
+
+                    <select id="tipoUniforme" class="select-producto">
+                        <option value="195">Camisa básica estampada - $195</option>
+                        <option value="250">Camisa bordada premium - $250</option>
+                        <option value="320">Camisa ejecutiva gabardina - $320</option>
+                    </select>
+
+                    <br><br>
+
+                    <!-- Botón -->
+                    <div class="producto-actions" style="display:flex; gap:12px; flex-wrap:wrap;">
+                        <button class="btn btn-primary" onclick="agregarCarrito()">
+                            <i class="fas fa-cart-plus"></i> Agregar al carrito
+                        </button>
+
+                        <a href="carrito.html" class="btn btn-outline">
+                            <i class="fas fa-shopping-cart"></i> Ver carrito
+                        </a>
+                    </div>
+
+                    <p id="mensaje" class="success-mini" style="display:none;">
+                        ✔ Producto agregado al carrito
+                    </p>
+
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        function agregarCarrito() {
+
+            const select = document.getElementById("tipoUniforme");
+            const tipo = select.options[select.selectedIndex].text;
+            const precio = Number(select.value);
+
+            let carrito = JSON.parse(localStorage.getItem("carrito")) || [];
+
+            carrito.push({
+                producto: "Uniforme personalizado",
+                descripcion: tipo,
+                precio: precio,
+                cantidad: 1
+            });
+
+            localStorage.setItem("carrito", JSON.stringify(carrito));
+
+            document.getElementById("mensaje").style.display = "block";
+
+            setTimeout(() => {
+                document.getElementById("mensaje").style.display = "none";
+            }, 2000);
+        }
+    </script>
+
+</body>
+
+</html>

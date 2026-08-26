@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de Administración - LYM</title>
+    <link rel="stylesheet" href="Proyecto.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .admin-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+            margin-top: 80px;
+        }
+
+        .admin-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid #E5E7EB;
+        }
+
+        .admin-title {
+            font-size: 2rem;
+            color: var(--text-dark);
+            margin: 0;
+        }
+
+        .admin-actions {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .admin-product-card {
+            background: var(--white);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            padding: 1.5rem;
+            transition: var(--transition);
+        }
+
+        .admin-product-card:hover {
+            box-shadow: var(--shadow-hover);
+        }
+
+        .product-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1rem;
+        }
+
+        .product-status {
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .status-active {
+            background: #D1FAE5;
+            color: #065F46;
+        }
+
+        .status-inactive {
+            background: #FEE2E2;
+            color: #991B1B;
+        }
+
+        .product-actions {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        .btn-small {
+            padding: 6px 12px;
+            font-size: 0.8rem;
+        }
+
+        .btn-edit {
+            background: #F59E0B;
+            color: white;
+        }
+
+        .btn-delete {
+            background: #EF4444;
+            color: white;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-light);
+        }
+
+        .error {
+            background: #FEE2E2;
+            color: #991B1B;
+            padding: 1rem;
+            border-radius: var(--border-radius);
+            margin-bottom: 1rem;
+        }
+
+        .success {
+            background: #D1FAE5;
+            color: #065F46;
+            padding: 1rem;
+            border-radius: var(--border-radius);
+            margin-bottom: 1rem;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Header simplificado -->
+    <header class="header">
+        <nav class="nav">
+            <div class="nav-container">
+                <div class="logo">
+                    <h1>nikenza</h1>
+                    <span>panel admin</span>
+                </div>
+                <div class="user-menu">
+                    <span class="user-greeting" id="userGreeting"></span>
+                    <div class="user-dropdown">
+                        <a href="index.html" class="btn btn-outline">Volver al Sitio</a>
+                        <button class="btn btn-outline" onclick="logout()">Cerrar Sesión</button>
+                    </div>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <div class="admin-container">
+        <div class="admin-header">
+            <h1 class="admin-title">Gestión de Productos</h1>
+            <div class="admin-actions">
+                <button class="btn btn-primary" onclick="showAddProductModal()">
+                    <i class="fas fa-plus"></i> Agregar Producto
+                </button>
+                <button class="btn btn-secondary" onclick="loadProducts()">
+                    <i class="fas fa-refresh"></i> Actualizar
+                </button>
+            </div>
+        </div>
+
+        <div id="messages"></div>
+
+        <div id="productsContainer">
+            <div class="loading">
+                <i class="fas fa-spinner fa-spin"></i> Cargando productos...
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para agregar/editar producto -->
+    <div id="productModal" class="modal">
+        <div class="modal-content" style="max-width: 600px;">
+            <div class="modal-header">
+                <h2 id="modalTitle">Agregar Producto</h2>
+                <span class="close" onclick="closeProductModal()">&times;</span>
+            </div>
+            <form id="productForm">
+                <div class="form-group">
+                    <label for="productName">Nombre del Producto:</label>
+                    <input type="text" id="productName" required>
+                </div>
+                <div class="form-group">
+                    <label for="productDescription">Descripción:</label>
+                    <textarea id="productDescription" rows="3"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="productPrice">Precio:</label>
+                    <input type="number" id="productPrice" step="0.01" min="0" required>
+                </div>
+                <div class="form-group">
+                    <label for="productCategory">Categoría:</label>
+                    <select id="productCategory" required>
+                        <option value="">Seleccionar categoría</option>
+                        <option value="tazas">Tazas</option>
+                        <option value="tapetes">Tapetes</option>
+                        <option value="sudaderas">Sudaderas</option>
+                        <option value="uniformes">Uniformes</option>
+                        <option value="otros">Otros</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="productIcon">Icono (clase FontAwesome):</label>
+                    <input type="text" id="productIcon" placeholder="fas fa-mug-hot">
+                </div>
+                <div class="form-group">
+                    <label for="productFeatures">Características (una por línea):</label>
+                    <textarea id="productFeatures" rows="4"
+                        placeholder="Característica 1&#10;Característica 2&#10;Característica 3"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="productActive" checked>
+                        Producto activo
+                    </label>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">Guardar</button>
+                    <button type="button" class="btn btn-secondary" onclick="closeProductModal()">Cancelar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        let currentUser = null;
+        let editingProductId = null;
+
+        // Verificar autenticación al cargar
+        document.addEventListener("DOMContentLoaded", () => {
+            checkAdminAuth();
+        });
+
+        async function checkAdminAuth() {
+            try {
+                const response = await fetch('php/check_session.php');
+                const data = await response.json();
+
+                if (!data.authenticated || data.user.role !== 'admin') {
+                    alert('Acceso denegado. Se requieren permisos de administrador.');
+                    window.location.href = 'index.html';
+                    return;
+                }
+
+                currentUser = data.user;
+                document.getElementById('userGreeting').textContent = `Hola, ${currentUser.username}`;
+                loadProducts();
+            } catch (error) {
+                console.error('Error verificando autenticación:', error);
+                window.location.href = 'index.html';
+            }
+        }
+
+        async function loadProducts() {
+            try {
+                const response = await fetch('php/admin_products.php');
+                const data = await response.json();
+
+                if (data.success) {
+                    displayProducts(data.productos);
+                } else {
+                    showMessage(data.error || 'Error cargando productos', 'error');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showMessage('Error de conexión', 'error');
+            }
+        }
+
+        function displayProducts(productos) {
+            const container = document.getElementById('productsContainer');
+
+            if (productos.length === 0) {
+                container.innerHTML = '<div class="loading">No hay productos registrados</div>';
+                return;
+            }
+
+            const html = `
+                <div class="products-grid">
+                    ${productos.map(producto => `
+                        <div class="admin-product-card">
+                            <div class="product-header">
+                                <h3>${producto.name}</h3>
+                                <span class="product-status ${producto.active ? 'status-active' : 'status-inactive'}">
+                                    ${producto.active ? 'Activo' : 'Inactivo'}
+                                </span>
+                            </div>
+                            <p><strong>Precio:</strong> $${producto.price}</p>
+                            <p><strong>Categoría:</strong> ${producto.category}</p>
+                            <p><strong>Descripción:</strong> ${producto.description || 'Sin descripción'}</p>
+                            <div class="product-actions">
+                                <button class="btn btn-edit btn-small" onclick="editProduct(${producto.id})">
+                                    <i class="fas fa-edit"></i> Editar
+                                </button>
+                                <button class="btn btn-delete btn-small" onclick="deleteProduct(${producto.id})">
+                                    <i class="fas fa-trash"></i> Eliminar
+                                </button>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+
+            container.innerHTML = html;
+        }
+
+        function showAddProductModal() {
+            editingProductId = null;
+            document.getElementById('modalTitle').textContent = 'Agregar Producto';
+            document.getElementById('productForm').reset();
+            document.getElementById('productActive').checked = true;
+            document.getElementById('productModal').style.display = 'flex';
+        }
+
+        function closeProductModal() {
+            document.getElementById('productModal').style.display = 'none';
+            editingProductId = null;
+        }
+
+        async function editProduct(id) {
+            try {
+                const response = await fetch('php/admin_products.php');
+                const data = await response.json();
+
+                if (data.success) {
+                    const producto = data.productos.find(p => p.id == id);
+                    if (producto) {
+                        editingProductId = id;
+                        document.getElementById('modalTitle').textContent = 'Editar Producto';
+                        document.getElementById('productName').value = producto.name;
+                        document.getElementById('productDescription').value = producto.description || '';
+                        document.getElementById('productPrice').value = producto.price;
+                        document.getElementById('productCategory').value = producto.category;
+                        document.getElementById('productIcon').value = producto.image_icon || '';
+                        document.getElementById('productFeatures').value = producto.features.join('\n');
+                        document.getElementById('productActive').checked = producto.active;
+                        document.getElementById('productModal').style.display = 'flex';
+                    }
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showMessage('Error cargando producto', 'error');
+            }
+        }
+
+        async function deleteProduct(id) {
+            if (!confirm('¿Estás seguro de que quieres eliminar este producto?')) {
+                return;
+            }
+
+            try {
+                const response = await fetch('php/admin_products.php', {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ id })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    showMessage('Producto eliminado exitosamente', 'success');
+                    loadProducts();
+                } else {
+                    showMessage(data.error || 'Error eliminando producto', 'error');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showMessage('Error de conexión', 'error');
+            }
+        }
+
+        document.getElementById('productForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const formData = {
+                name: document.getElementById('productName').value,
+                description: document.getElementById('productDescription').value,
+                price: parseFloat(document.getElementById('productPrice').value),
+                category: document.getElementById('productCategory').value,
+                image_icon: document.getElementById('productIcon').value,
+                features: document.getElementById('productFeatures').value.split('\n').filter(f => f.trim()),
+                active: document.getElementById('productActive').checked
+            };
+
+            try {
+                let url = 'php/admin_products.php';
+                let method = 'POST';
+
+                if (editingProductId) {
+                    method = 'PUT';
+                    formData.id = editingProductId;
+                }
+
+                const response = await fetch(url, {
+                    method: method,
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(formData)
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    showMessage(data.message, 'success');
+                    closeProductModal();
+                    loadProducts();
+                } else {
+                    showMessage(data.error || 'Error guardando producto', 'error');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showMessage('Error de conexión', 'error');
+            }
+        });
+
+        function showMessage(message, type) {
+            const messagesDiv = document.getElementById('messages');
+            messagesDiv.innerHTML = `<div class="${type}">${message}</div>`;
+            setTimeout(() => {
+                messagesDiv.innerHTML = '';
+            }, 5000);
+        }
+
+        async function logout() {
+            try {
+                const response = await fetch('php/logout.php', {
+                    method: 'POST'
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    window.location.href = 'index.html';
+                } else {
+                    alert(data.error || 'Error al cerrar sesión');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error de conexión');
+            }
+        }
+    </script>
+</body>
+
+</html>
