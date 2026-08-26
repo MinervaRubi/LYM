@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Mis Publicaciones - LMY</title>
+
+    <link rel="stylesheet" href="Proyecto.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+
+    <style>
+        .preview-img {
+            width: 100%;
+            max-width: 220px;
+            border-radius: 12px;
+            margin: 10px auto 0;
+            display: block;
+            object-fit: cover;
+        }
+
+        .producto-img {
+            width: 100%;
+            height: 220px;
+            object-fit: cover;
+            border-radius: 14px 14px 0 0;
+        }
+
+        .producto-card {
+            background: #fff;
+            border-radius: 14px;
+            overflow: hidden;
+            box-shadow: 0 8px 18px rgba(0, 0, 0, 0.08);
+        }
+
+        .producto-content {
+            padding: 18px;
+        }
+
+        .precio-post {
+            font-weight: 700;
+            color: #b3002d;
+            margin-top: 8px;
+            font-size: 1.1rem;
+        }
+
+        .acciones-post {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+
+        #imagenActualTexto {
+            font-size: 14px;
+            color: #666;
+            margin-top: 6px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- HEADER -->
+    <header class="header">
+        <nav class="nav">
+            <div class="nav-container">
+
+                <div class="logo">
+                    <h1>LMY</h1>
+                    <span>diseño e impresión</span>
+                </div>
+
+                <ul class="nav-menu">
+                    <li><a href="sistema.html">Inicio</a></li>
+                    <li><a href="sistema.html#productos">Productos</a></li>
+                    <li><a href="sistema.html#paquetes">Paquetes</a></li>
+                    <li><a href="sistema.html#contacto">Contacto</a></li>
+                </ul>
+
+                <div class="auth-buttons">
+                    <a href="carrito.html" class="btn btn-outline btn-cart">
+                        <i class="fas fa-shopping-cart"></i>
+                        <span class="cart-text">Carrito</span>
+                        <span class="cart-badge">0</span>
+                    </a>
+                </div>
+
+            </div>
+        </nav>
+    </header>
+
+    <!-- CONTENIDO -->
+    <section class="productos" style="padding-top:120px;">
+        <div class="container">
+
+            <h2 class="section-title">Mis Publicaciones</h2>
+            <p class="section-subtitle">Crea, edita y administra tus publicaciones</p>
+
+            <!-- FORM -->
+            <div class="contacto-form" style="max-width:600px; margin:auto;">
+                <input type="text" id="titulo" placeholder="Título" style="margin-bottom:10px;">
+
+                <input type="text" id="contenido" placeholder="Contenido" style="margin-bottom:10px;">
+
+                <input type="number" id="precio" placeholder="Precio" style="margin-bottom:10px;">
+
+                <input type="file" id="imagen" accept="image/*" style="margin-bottom:10px;">
+                <div id="imagenActualTexto"></div>
+                <img id="previewImagen" class="preview-img" style="display:none;" alt="Vista previa">
+
+                <button onclick="agregarPost()" class="btn btn-primary" style="margin-top:15px; width:100%;">
+                    Publicar
+                </button>
+            </div>
+
+            <!-- POSTS -->
+            <div class="productos-grid" id="listaPosts" style="margin-top:40px;"></div>
+
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-bottom">
+                <p>&copy; 2025 LMY Diseño e Impresión</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        let posts = [];
+        let editando = null;
+
+        const STORAGE_KEY = "lmy_posts";
+
+        function obtenerPublicacionInicial() {
+            return {
+                titulo: "Taza personalizada LMY",
+                contenido: "Diseño especial listo para personalizar con nombre, frase o fotografía.",
+                precio: "120",
+                imagen: "imagen/taza.jpeg"
+
+            };
+        }
+
+        function guardarEnLocalStorage() {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(posts));
+        }
+
+        function cargarDesdeLocalStorage() {
+            const guardados = localStorage.getItem(STORAGE_KEY);
+
+            if (guardados) {
+                posts = JSON.parse(guardados);
+            } else {
+                posts = [obtenerPublicacionInicial()];
+                guardarEnLocalStorage();
+            }
+        }
+
+        function renderPosts() {
+            const contenedor = document.getElementById("listaPosts");
+            contenedor.innerHTML = "";
+
+            if (posts.length === 0) {
+                contenedor.innerHTML = `
+                    <p style="text-align:center; width:100%;">No hay publicaciones todavía.</p>
+                `;
+                return;
+            }
+
+            posts.forEach((post, index) => {
+                contenedor.innerHTML += `
+                    <div class="producto-card">
+                        <img src="${post.imagen}" alt="${post.titulo}" class="producto-img"
+                             onerror="this.src='https://via.placeholder.com/400x220?text=Imagen+no+disponible'">
+
+                        <div class="producto-content">
+                            <h3>${post.titulo}</h3>
+                            <p>${post.contenido}</p>
+                            <p class="precio-post">$${post.precio}</p>
+
+                            <div class="acciones-post">
+                                <button class="btn btn-outline" onclick="editarPost(${index})">
+                                    <i class="fas fa-edit"></i> Editar
+                                </button>
+
+                                <button class="btn btn-outline" style="border-color:red; color:red;"
+                                    onclick="eliminarPost(${index})">
+                                    <i class="fas fa-trash"></i> Eliminar
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        function convertirImagenABase64(file) {
+            return new Promise((resolve, reject) => {
+                if (!file) {
+                    resolve(null);
+                    return;
+                }
+
+                const reader = new FileReader();
+
+                reader.onload = function (e) {
+                    resolve(e.target.result);
+                };
+
+                reader.onerror = function () {
+                    reject("No se pudo leer la imagen.");
+                };
+
+                reader.readAsDataURL(file);
+            });
+        }
+
+        async function agregarPost() {
+            const titulo = document.getElementById("titulo").value.trim();
+            const contenido = document.getElementById("contenido").value.trim();
+            const precio = document.getElementById("precio").value.trim();
+            const imagenInput = document.getElementById("imagen");
+            const archivoImagen = imagenInput.files[0];
+
+            if (titulo === "" || contenido === "" || precio === "") {
+                alert("Llena título, contenido y precio.");
+                return;
+            }
+
+            try {
+                let imagenBase64 = null;
+
+                if (archivoImagen) {
+                    imagenBase64 = await convertirImagenABase64(archivoImagen);
+                }
+
+                if (editando !== null) {
+                    posts[editando] = {
+                        ...posts[editando],
+                        titulo,
+                        contenido,
+                        precio,
+                        imagen: imagenBase64 ? imagenBase64 : posts[editando].imagen
+                    };
+                    editando = null;
+                } else {
+                    posts.push({
+                        titulo,
+                        contenido,
+                        precio,
+                        imagen: imagenBase64 || "img/publicacion-inicial.jpg"
+                    });
+                }
+
+                guardarEnLocalStorage();
+                limpiarFormulario();
+                renderPosts();
+            } catch (error) {
+                alert("Ocurrió un error al guardar la publicación.");
+                console.error(error);
+            }
+        }
+
+        function editarPost(index) {
+            const post = posts[index];
+
+            document.getElementById("titulo").value = post.titulo;
+            document.getElementById("contenido").value = post.contenido;
+            document.getElementById("precio").value = post.precio;
+
+            document.getElementById("imagenActualTexto").textContent =
+                "Si seleccionas otra imagen, se reemplazará la actual. Si no, se conserva la misma.";
+
+            const preview = document.getElementById("previewImagen");
+            preview.src = post.imagen;
+            preview.style.display = "block";
+
+            editando = index;
+            window.scrollTo({ top: 0, behavior: "smooth" });
+        }
+
+        function eliminarPost(index) {
+            if (confirm("¿Seguro que quieres eliminar esta publicación?")) {
+                posts.splice(index, 1);
+                guardarEnLocalStorage();
+                renderPosts();
+            }
+        }
+
+        function limpiarFormulario() {
+            document.getElementById("titulo").value = "";
+            document.getElementById("contenido").value = "";
+            document.getElementById("precio").value = "";
+            document.getElementById("imagen").value = "";
+            document.getElementById("imagenActualTexto").textContent = "";
+
+            const preview = document.getElementById("previewImagen");
+            preview.src = "";
+            preview.style.display = "none";
+        }
+
+        document.getElementById("imagen").addEventListener("change", function () {
+            const file = this.files[0];
+            const preview = document.getElementById("previewImagen");
+
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    preview.src = e.target.result;
+                    preview.style.display = "block";
+                };
+                reader.readAsDataURL(file);
+            } else {
+                preview.src = "";
+                preview.style.display = "none";
+            }
+        });
+
+        cargarDesdeLocalStorage();
+        renderPosts();
+    </script>
+
+</body>
+
+</html>

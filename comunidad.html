@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Comunidad | LMY</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #ffffff, #f4ecff);
+            color: #2f2340;
+            min-height: 100vh;
+        }
+
+        header {
+            width: 100%;
+            background: #fff;
+            border-bottom: 1px solid #e8d8ff;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .nav {
+            width: 92%;
+            max-width: 1200px;
+            margin: auto;
+            min-height: 82px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .logo {
+            font-size: 2.2rem;
+            font-weight: 700;
+            color: #5b21b6;
+            text-decoration: none;
+        }
+
+        .logo span {
+            color: #7c3aed;
+            font-size: 1.2rem;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 14px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: #4b3d5d;
+            padding: 10px 16px;
+            border-radius: 14px;
+            font-weight: 500;
+            transition: .2s;
+        }
+
+        .nav-links a:hover,
+        .nav-links a.active {
+            background: #eadcff;
+            color: #5b21b6;
+        }
+
+        .login-btn {
+            text-decoration: none;
+            color: #5b21b6;
+            border: 1px solid #dcc5ff;
+            padding: 10px 18px;
+            border-radius: 14px;
+            font-weight: 600;
+            background: #fff;
+        }
+
+        main {
+            width: 92%;
+            max-width: 850px;
+            margin: 50px auto 70px;
+        }
+
+        .hero {
+            margin-bottom: 25px;
+        }
+
+        .hero h1 {
+            font-size: 3rem;
+            margin-bottom: 10px;
+            color: #2d1e40;
+        }
+
+        .hero p {
+            color: #6b5f7b;
+            font-size: 1rem;
+        }
+
+        .card {
+            background: #fff;
+            border: 1px solid #eadcff;
+            border-radius: 24px;
+            padding: 24px;
+            box-shadow: 0 14px 35px rgba(96, 59, 181, 0.08);
+            margin-bottom: 24px;
+        }
+
+        .row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+            margin-bottom: 14px;
+        }
+
+        .input,
+        .textarea {
+            width: 100%;
+            border: 1px solid #dec8ff;
+            border-radius: 16px;
+            padding: 14px 16px;
+            outline: none;
+            font-size: 1rem;
+            background: #fff;
+        }
+
+        .input:focus,
+        .textarea:focus {
+            border-color: #7c3aed;
+            box-shadow: 0 0 0 4px rgba(124, 58, 237, 0.12);
+        }
+
+        .textarea {
+            min-height: 120px;
+            resize: vertical;
+            margin-bottom: 14px;
+        }
+
+        .toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .hint {
+            color: #7a6f89;
+            font-size: .92rem;
+        }
+
+        .btn {
+            border: none;
+            background: linear-gradient(135deg, #6a0dad, #7c3aed);
+            color: #fff;
+            padding: 13px 22px;
+            border-radius: 14px;
+            font-size: .97rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: .2s;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .message {
+            display: none;
+            margin-top: 14px;
+            padding: 12px 14px;
+            border-radius: 14px;
+            font-size: .95rem;
+            font-weight: 500;
+        }
+
+        .success {
+            background: #f3e8ff;
+            color: #5b21b6;
+        }
+
+        .error {
+            background: #fff1f2;
+            color: #be123c;
+        }
+
+        .section-title {
+            font-size: 1.15rem;
+            margin-bottom: 14px;
+            color: #33214a;
+        }
+
+        .comments {
+            display: grid;
+            gap: 16px;
+        }
+
+        .comment {
+            background: #fff;
+            border: 1px solid #eadcff;
+            border-radius: 22px;
+            padding: 20px;
+            box-shadow: 0 10px 24px rgba(96, 59, 181, 0.06);
+        }
+
+        .comment-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 12px;
+            margin-bottom: 10px;
+            flex-wrap: wrap;
+        }
+
+        .user-box {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .avatar {
+            width: 46px;
+            height: 46px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            color: #4b0082;
+            background: #f3e8ff;
+            border: 1px solid #e9d5ff;
+        }
+
+        .name {
+            font-weight: 700;
+            color: #2f2340;
+        }
+
+        .date {
+            color: #7a6f89;
+            font-size: .92rem;
+        }
+
+        .comment p {
+            color: #4d415f;
+            line-height: 1.7;
+        }
+
+        .comment-actions {
+            margin-top: 14px;
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        .comment-actions button {
+            border: none;
+            background: transparent;
+            color: #6b5f7b;
+            cursor: pointer;
+            font-size: .94rem;
+            font-weight: 500;
+        }
+
+        .comment-actions button:hover {
+            color: #6a0dad;
+        }
+
+        footer {
+            margin-top: 36px;
+            padding: 28px 20px;
+            text-align: center;
+            color: #6b5f7b;
+            background: rgba(255, 255, 255, 0.72);
+            border-top: 1px solid #eadcff;
+        }
+
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 18px;
+            flex-wrap: wrap;
+            margin-bottom: 10px;
+        }
+
+        footer a {
+            text-decoration: none;
+            color: #4b0082;
+            font-weight: 500;
+        }
+
+        @media (max-width:700px) {
+            .row {
+                grid-template-columns: 1fr;
+            }
+
+            .nav {
+                justify-content: center;
+                padding: 14px 0;
+            }
+
+            .hero h1 {
+                font-size: 2.2rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <header>
+        <nav class="nav">
+            <a href="sistema.html" class="logo">LMY <span>MX</span></a>
+
+            <div class="nav-links">
+                <a href="sistema.html">Inicio</a>
+                <a href="catalogo.html">Catálogo</a>
+                <a href="campana.html">Campaña</a>
+                <a href="nosotros.html">Nosotros</a>
+                <a href="contacto.html">Contacto</a>
+                <a href="promos.html">Promos</a>
+                <a href="foro.html" class="active">Comunidad</a>
+            </div>
+
+            <a href="login.html" class="login-btn">Iniciar sesión</a>
+        </nav>
+    </header>
+
+    <main>
+        <section class="hero">
+            <h1>Comunidad</h1>
+            <p>Comparte tu experiencia con la comunidad de LMY Diseño e Impresión.</p>
+        </section>
+
+        <section class="card">
+            <div class="row">
+                <input type="text" id="nombreUsuario" class="input" placeholder="Escribe tu nombre">
+                <input type="text" id="tituloComentario" class="input" placeholder="Título opcional del comentario">
+            </div>
+
+            <textarea id="comentarioTexto" class="textarea" placeholder="Escribe tu comentario..."></textarea>
+
+            <div class="toolbar">
+                <span class="hint">Tus comentarios se guardan directamente en esta página.</span>
+                <button class="btn" onclick="publicarComentario()">Publicar</button>
+            </div>
+
+            <div id="mensajeExito" class="message success">Comentario publicado correctamente.</div>
+            <div id="mensajeError" class="message error">Escribe al menos tu nombre y un comentario.</div>
+        </section>
+
+        <section>
+            <h2 class="section-title">Comentarios recientes</h2>
+            <div id="listaComentarios" class="comments"></div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="footer-links">
+            <a href="sistema.html">Inicio</a>
+            <a href="catalogo.html">Catálogo</a>
+            <a href="subasta_tazas_personalizadas.html">Subasta</a>
+            <a href="foro.html">Comunidad</a>
+            <a href="contacto.html">Contacto</a>
+        </div>
+        <p>LMY Diseño e Impresión · Foro funcional sin base de datos</p>
+    </footer>
+
+    <script>
+        const comentariosBase = [
+            {
+                nombre: 'Laura R.',
+                titulo: 'Muy recomendado',
+                texto: 'Me encanta esta tienda. Las tazas personalizadas quedaron muy bonitas y la impresión se ve de excelente calidad.',
+                fecha: '2026-03-20',
+                likes: 4
+            },
+            {
+                nombre: 'Pedro M.',
+                titulo: 'Buen servicio',
+                texto: 'Excelente atención y muy buen acabado en la cerámica. Volvería a comprar para un regalo especial.',
+                fecha: '2026-03-18',
+                likes: 2
+            }
+        ];
+
+        let comentariosGuardados = JSON.parse(localStorage.getItem('foroComentariosLMY'));
+
+        if (!comentariosGuardados || !Array.isArray(comentariosGuardados)) {
+            comentariosGuardados = comentariosBase;
+            localStorage.setItem('foroComentariosLMY', JSON.stringify(comentariosGuardados));
+        }
+
+        const listaComentarios = document.getElementById('listaComentarios');
+        const inputNombre = document.getElementById('nombreUsuario');
+        const inputTitulo = document.getElementById('tituloComentario');
+        const inputTexto = document.getElementById('comentarioTexto');
+        const mensajeExito = document.getElementById('mensajeExito');
+        const mensajeError = document.getElementById('mensajeError');
+
+        function mostrarMensaje(tipo) {
+            mensajeExito.style.display = 'none';
+            mensajeError.style.display = 'none';
+
+            if (tipo === 'exito') {
+                mensajeExito.style.display = 'block';
+                setTimeout(() => {
+                    mensajeExito.style.display = 'none';
+                }, 2200);
+            }
+
+            if (tipo === 'error') {
+                mensajeError.style.display = 'block';
+                setTimeout(() => {
+                    mensajeError.style.display = 'none';
+                }, 2200);
+            }
+        }
+
+        function obtenerIniciales(nombre) {
+            return nombre
+                .split(' ')
+                .filter(Boolean)
+                .slice(0, 2)
+                .map(parte => parte.charAt(0).toUpperCase())
+                .join('');
+        }
+
+        function guardarComentarios() {
+            localStorage.setItem('foroComentariosLMY', JSON.stringify(comentariosGuardados));
+        }
+
+        function renderizarComentarios() {
+            listaComentarios.innerHTML = '';
+
+            const comentariosOrdenados = comentariosGuardados.slice().reverse();
+
+            comentariosOrdenados.forEach((comentario, indexInvertido) => {
+                const indexReal = comentariosGuardados.length - 1 - indexInvertido;
+
+                const card = document.createElement('article');
+                card.className = 'comment';
+                card.innerHTML = `
+                    <div class="comment-head">
+                        <div class="user-box">
+                            <div class="avatar">${obtenerIniciales(comentario.nombre)}</div>
+                            <div>
+                                <div class="name">${comentario.nombre}</div>
+                                <div class="date">${comentario.fecha}${comentario.titulo ? ' · ' + comentario.titulo : ''}</div>
+                            </div>
+                        </div>
+                        <div class="date">#${indexReal + 1}</div>
+                    </div>
+                    <p>${comentario.texto}</p>
+                    <div class="comment-actions">
+                        <button onclick="darLike(${indexReal})">Me gusta (${comentario.likes || 0})</button>
+                       
+                    </div>
+                `;
+                listaComentarios.appendChild(card);
+            });
+        }
+
+        function publicarComentario() {
+            const nombre = inputNombre.value.trim();
+            const titulo = inputTitulo.value.trim();
+            const texto = inputTexto.value.trim();
+
+            if (!nombre || !texto) {
+                mostrarMensaje('error');
+                return;
+            }
+
+            const hoy = new Date();
+            const fecha = hoy.getFullYear() + '-' +
+                String(hoy.getMonth() + 1).padStart(2, '0') + '-' +
+                String(hoy.getDate()).padStart(2, '0');
+
+            comentariosGuardados.push({
+                nombre: nombre,
+                titulo: titulo,
+                texto: texto,
+                fecha: fecha,
+                likes: 0
+            });
+
+            guardarComentarios();
+            renderizarComentarios();
+
+            inputNombre.value = '';
+            inputTitulo.value = '';
+            inputTexto.value = '';
+            mostrarMensaje('exito');
+        }
+
+        function darLike(index) {
+            comentariosGuardados[index].likes = (comentariosGuardados[index].likes || 0) + 1;
+            guardarComentarios();
+            renderizarComentarios();
+        }
+
+        function eliminarComentario(index) {
+            comentariosGuardados.splice(index, 1);
+            guardarComentarios();
+            renderizarComentarios();
+        }
+
+        renderizarComentarios();
+    </script>
+
+</body>
+
+</html>

@@ -1,0 +1,728 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Método de pago | LYM Diseño e Impresión</title>
+
+    <link rel="stylesheet" href="Proyecto.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <script src="https://www.paypal.com/sdk/js?client-id=TU_CLIENT_ID&currency=MXN"></script>
+
+    <style>
+        :root {
+            --primary: #667eea;
+            --secondary: #764ba2;
+            --accent: #f093fb;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --text-dark: #1f2937;
+            --text-light: #6b7280;
+            --border: #e5e7eb;
+            --bg-soft: #f8fafc;
+            --white: #ffffff;
+            --shadow: 0 12px 35px rgba(102, 126, 234, 0.18);
+            --shadow-soft: 0 8px 20px rgba(0, 0, 0, 0.07);
+            --radius: 24px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            color: var(--text-dark);
+            min-height: 100vh;
+            background:
+                radial-gradient(circle at top left, rgba(240, 147, 251, 0.14), transparent 25%),
+                radial-gradient(circle at bottom right, rgba(102, 126, 234, 0.16), transparent 25%),
+                linear-gradient(135deg, #f8fafc 0%, #eef2ff 100%);
+            padding: 30px 16px;
+        }
+
+        .checkout-wrapper {
+            max-width: 1150px;
+            margin: 0 auto;
+        }
+
+        .checkout-card {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.96);
+            backdrop-filter: blur(12px);
+            border-radius: 30px;
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.75);
+        }
+
+        .checkout-header {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            padding: 28px 28px 22px;
+        }
+
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+            flex-wrap: wrap;
+            margin-bottom: 18px;
+        }
+
+        .back-btn {
+            background: rgba(255, 255, 255, 0.18);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            border-radius: 999px;
+            padding: 10px 16px;
+            font-family: inherit;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .back-btn:hover {
+            transform: translateY(-2px);
+            background: rgba(255, 255, 255, 0.25);
+        }
+
+        .step-badge {
+            background: rgba(255, 255, 255, 0.18);
+            padding: 9px 14px;
+            border-radius: 999px;
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .checkout-header h1 {
+            font-size: 2rem;
+            margin-bottom: 8px;
+            font-weight: 800;
+        }
+
+        .checkout-header p {
+            font-size: 0.98rem;
+            opacity: 0.95;
+        }
+
+        /* PROGRESO */
+        .progress-wrapper {
+            margin-top: 24px;
+            background: rgba(255, 255, 255, 0.12);
+            border-radius: 22px;
+            padding: 18px;
+        }
+
+        .progress-bar-line {
+            position: relative;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.28);
+            border-radius: 999px;
+            overflow: hidden;
+            margin: 0 10px 20px;
+        }
+
+        .progress-bar-fill {
+            width: 66.66%;
+            height: 100%;
+            background: white;
+            border-radius: 999px;
+        }
+
+        .steps {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            text-align: center;
+        }
+
+        .step {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 13px;
+            font-weight: 600;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .step-circle {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            background: rgba(255, 255, 255, 0.18);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .step.active {
+            color: white;
+        }
+
+        .step.active .step-circle {
+            background: white;
+            color: var(--secondary);
+            border-color: white;
+            box-shadow: 0 8px 18px rgba(0, 0, 0, 0.15);
+        }
+
+        .checkout-body {
+            display: grid;
+            grid-template-columns: 1.15fr 0.95fr;
+            gap: 28px;
+            padding: 30px 28px;
+        }
+
+        .resumen-box,
+        .pago-box {
+            background: #f8f9ff;
+            border-radius: 24px;
+            padding: 24px;
+            border: 1px solid rgba(102, 126, 234, 0.12);
+        }
+
+        .section-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 18px;
+            color: #4b3f72;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .productos-lista {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            margin-bottom: 20px;
+        }
+
+        .producto-item {
+            background: white;
+            border-radius: 18px;
+            padding: 15px 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+            box-shadow: var(--shadow-soft);
+            border-left: 5px solid var(--primary);
+        }
+
+        .producto-info {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .producto-nombre {
+            font-weight: 700;
+            color: #333;
+        }
+
+        .producto-detalle {
+            font-size: 0.92rem;
+            color: #666;
+        }
+
+        .producto-subtotal {
+            font-weight: 800;
+            color: var(--secondary);
+            font-size: 1rem;
+            white-space: nowrap;
+        }
+
+        .total-box {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            border-radius: 20px;
+            padding: 18px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 15px;
+        }
+
+        .total-box strong {
+            font-size: 1.55rem;
+        }
+
+        .info-pago {
+            background: white;
+            border-radius: 18px;
+            padding: 16px;
+            margin-bottom: 18px;
+            color: #555;
+            line-height: 1.7;
+            box-shadow: var(--shadow-soft);
+        }
+
+        .metodos-pago {
+            display: flex;
+            justify-content: flex-start;
+            align-items: center;
+            gap: 14px;
+            flex-wrap: wrap;
+            margin-bottom: 24px;
+        }
+
+        .metodos-pago img {
+            height: 28px;
+            object-fit: contain;
+            transition: 0.3s;
+            background: white;
+            padding: 6px 10px;
+            border-radius: 12px;
+            box-shadow: var(--shadow-soft);
+        }
+
+        .metodos-pago img:hover {
+            transform: scale(1.05);
+        }
+
+        .payment-options {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .payment-btn,
+        .ewallet-card {
+            width: 100%;
+            border: none;
+            border-radius: 20px;
+            padding: 16px 18px;
+            font-family: inherit;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            transition: 0.3s ease;
+        }
+
+        .payment-btn {
+            cursor: pointer;
+            text-decoration: none;
+        }
+
+        .payment-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-soft);
+        }
+
+        .payment-left {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            text-align: left;
+        }
+
+        .payment-icon-box {
+            width: 48px;
+            height: 48px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(102, 126, 234, 0.12);
+            flex-shrink: 0;
+        }
+
+        .payment-icon-box img {
+            max-width: 28px;
+            max-height: 28px;
+            object-fit: contain;
+        }
+
+        .payment-text strong {
+            display: block;
+            font-size: 15px;
+            color: var(--text-dark);
+        }
+
+        .payment-text span {
+            display: block;
+            font-size: 13px;
+            color: var(--text-light);
+            margin-top: 3px;
+        }
+
+        .payment-arrow {
+            color: var(--primary);
+            font-size: 16px;
+            flex-shrink: 0;
+        }
+
+        .card-option {
+            background: white;
+            border: 1px solid rgba(102, 126, 234, 0.15);
+        }
+
+        .paypal-option {
+            background: linear-gradient(135deg, #ffffff, #f7f9ff);
+            border: 1px solid rgba(0, 48, 135, 0.15);
+        }
+
+        .ewallet-card {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.12), rgba(102, 126, 234, 0.10));
+            border: 1px dashed rgba(16, 185, 129, 0.35);
+            cursor: default;
+        }
+
+        .ewallet-credit {
+            background: rgba(16, 185, 129, 0.15);
+            color: #047857;
+            padding: 8px 12px;
+            border-radius: 999px;
+            font-weight: 700;
+            font-size: 13px;
+            white-space: nowrap;
+        }
+
+        .acciones {
+            display: flex;
+            gap: 15px;
+            margin-top: 25px;
+            flex-wrap: wrap;
+        }
+
+        .btn-lym {
+            text-decoration: none;
+            border: none;
+            cursor: pointer;
+            padding: 12px 22px;
+            border-radius: 999px;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-secundario {
+            background: #eef1ff;
+            color: #5a4b8a;
+        }
+
+        .btn-secundario:hover {
+            background: #dde3ff;
+            transform: translateY(-2px);
+        }
+
+        .btn-primario {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.25);
+        }
+
+        .btn-primario:hover {
+            transform: translateY(-2px);
+        }
+
+        #paypal-button-container {
+            margin-top: 18px;
+        }
+
+        @media (max-width: 860px) {
+            .checkout-body {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .checkout-header h1 {
+                font-size: 1.6rem;
+            }
+
+            .checkout-body {
+                padding: 22px 16px;
+            }
+
+            .checkout-header {
+                padding: 22px 18px 18px;
+            }
+
+            .producto-item {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .total-box {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 8px;
+            }
+
+            .steps {
+                grid-template-columns: 1fr;
+                gap: 14px;
+            }
+
+            .payment-btn,
+            .ewallet-card {
+                align-items: flex-start;
+                flex-direction: column;
+            }
+
+            .payment-arrow,
+            .ewallet-credit {
+                align-self: flex-start;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="checkout-wrapper">
+        <div class="checkout-card">
+
+            <div class="checkout-header">
+                <div class="header-top">
+                    <button class="back-btn" type="button" onclick="history.back()">
+                        <i class="fa-solid fa-arrow-left"></i>
+                        Volver
+                    </button>
+
+                    <div class="step-badge">Paso 2 de 3</div>
+                </div>
+
+                <h1><i class="fa-solid fa-credit-card"></i> Método de pago</h1>
+                <p>Revisa tu pedido y selecciona cómo quieres completar tu pago</p>
+
+                <div class="progress-wrapper">
+                    <div class="progress-bar-line">
+                        <div class="progress-bar-fill"></div>
+                    </div>
+
+                    <div class="steps">
+                        <div class="step">
+                            <div class="step-circle">1</div>
+                            <span>Domicilio</span>
+                        </div>
+
+                        <div class="step active">
+                            <div class="step-circle">2</div>
+                            <span>Método de pago</span>
+                        </div>
+
+                        <div class="step">
+                            <div class="step-circle">3</div>
+                            <span>Confirmación</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="checkout-body">
+                <div class="resumen-box">
+                    <h2 class="section-title">
+                        <i class="fa-solid fa-cart-shopping"></i>
+                        Resumen de tu pedido
+                    </h2>
+
+                    <div id="resumen-pago"></div>
+
+                    <div class="acciones">
+                        <a href="carrito.html" class="btn-lym btn-secundario">
+                            <i class="fa-solid fa-arrow-left"></i>
+                            Volver al carrito
+                        </a>
+
+                        <a href="sistema.html" class="btn-lym btn-primario">
+                            <i class="fa-solid fa-store"></i>
+                            Seguir comprando
+                        </a>
+                    </div>
+                </div>
+
+                <div class="pago-box">
+                    <h2 class="section-title">
+                        <i class="fa-solid fa-wallet"></i>
+                        Método de pago
+                    </h2>
+
+                    <div class="info-pago">
+                        Elige tu forma de pago preferida en <strong>LYM Diseño e Impresión</strong>. Tu compra se
+                        procesa en un entorno visual limpio y seguro.
+                    </div>
+
+                    <div class="metodos-pago">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/4/41/Visa_Logo.png" alt="Visa">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/0/04/Mastercard-logo.png"
+                            alt="Mastercard">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/b/b5/PayPal.svg" alt="PayPal">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/5/5e/Oxxo_Logo.svg" alt="OXXO">
+                    </div>
+
+                    <div class="payment-options">
+                        <!-- TARJETA -->
+                        <a href="Tarjeta.html" class="payment-btn card-option">
+                            <div class="payment-left">
+                                <div class="payment-icon-box">
+                                    <i class="fa-solid fa-credit-card" style="color:#667eea; font-size: 20px;"></i>
+                                </div>
+
+                                <div class="payment-text">
+                                    <strong>Pago con tarjeta</strong>
+                                    <span>Visa, Mastercard y más</span>
+                                </div>
+                            </div>
+
+                            <i class="fa-solid fa-chevron-right payment-arrow"></i>
+                        </a>
+                        <!-- PAYPAL CON IMAGEN -->
+                        <a href="ticket.html" class="payment-btn paypal-option">
+                            <div class="payment-left">
+                                <div class="payment-icon-box">
+                                    <img src="https://upload.wikimedia.org/wikipedia/commons/b/b5/PayPal.svg"
+                                        alt="PayPal">
+                                </div>
+
+                                <div class="payment-text">
+                                    <strong>Pagar con PayPal</strong>
+                                    <span>Usa tu cuenta PayPal para completar el pago</span>
+                                </div>
+                            </div>
+
+                            <i class="fa-solid fa-chevron-right payment-arrow"></i>
+                        </a>
+
+                        <!-- EWALLET SOLO VISUAL -->
+                        <div class="ewallet-card">
+                            <div class="payment-left">
+                                <div class="payment-icon-box" style="background: rgba(16, 185, 129, 0.15);">
+                                    <i class="fa-solid fa-wallet" style="color:#10b981; font-size: 20px;"></i>
+                                </div>
+
+                                <div class="payment-text">
+                                    <strong>E-Wallet</strong>
+                                    <span>Crédito disponible en tu monedero digital</span>
+                                </div>
+                            </div>
+
+                            <div class="ewallet-credit">$1500 MXN</div>
+                        </div>
+                    </div>
+
+                    <div id="paypal-button-container"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let carrito = JSON.parse(localStorage.getItem("carrito")) || [];
+
+        if (carrito.length === 0) {
+            carrito = [
+                {
+                    producto: "Taza personalizada LYM",
+                    precio: 85,
+                    cantidad: 1
+                }
+            ];
+
+            localStorage.setItem("carrito", JSON.stringify(carrito));
+        }
+
+        const resumenPago = document.getElementById("resumen-pago");
+
+        function mostrarResumen() {
+            let html = `<div class="productos-lista">`;
+            let total = 0;
+
+            carrito.forEach(producto => {
+                const precio = Number(producto.precio) || 0;
+                const cantidad = Number(producto.cantidad) || 1;
+                const subtotal = precio * cantidad;
+                total += subtotal;
+
+                html += `
+                    <div class="producto-item">
+                        <div class="producto-info">
+                            <span class="producto-nombre">${producto.producto || "Producto sin nombre"}</span>
+                            <span class="producto-detalle">Cantidad: ${cantidad} | Precio unitario: $${precio.toFixed(2)} MXN</span>
+                        </div>
+                        <div class="producto-subtotal">$${subtotal.toFixed(2)}</div>
+                    </div>
+                `;
+            });
+
+            html += `</div>
+                <div class="total-box">
+                    <span>Total a pagar</span>
+                    <strong>$${total.toFixed(2)} MXN</strong>
+                </div>
+            `;
+
+            resumenPago.innerHTML = html;
+            return total;
+        }
+
+        const total = mostrarResumen();
+
+        function irPagoTarjeta() {
+            window.location.href = "ticket.html";
+        }
+
+        if (typeof paypal !== "undefined") {
+            paypal.Buttons({
+                style: {
+                    layout: 'vertical',
+                    color: 'blue',
+                    shape: 'pill',
+                    label: 'pay'
+                },
+
+                createOrder: function (data, actions) {
+                    if (total <= 0) {
+                        alert("El carrito está vacío");
+                        return;
+                    }
+
+                    return actions.order.create({
+                        purchase_units: [{
+                            amount: {
+                                value: total.toFixed(2)
+                            },
+                            description: "Compra en LYM Diseño e Impresión"
+                        }]
+                    });
+                },
+
+                onApprove: function (data, actions) {
+                    return actions.order.capture().then(function (orderData) {
+                        const nombre = orderData.payer.name.given_name || "cliente";
+                        alert("¡Gracias por tu compra, " + nombre + "!");
+                        localStorage.removeItem("carrito");
+                        window.location.href = "index.html";
+                    });
+                },
+
+                onError: function (err) {
+                    console.error("Error en PayPal:", err);
+                    alert("Hubo un error con el pago. Revisa la consola para más detalles.");
+                }
+            }).render('#paypal-button-container');
+        }
+    </script>
+
+</body>
+
+</html>

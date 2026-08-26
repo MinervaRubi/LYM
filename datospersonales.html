@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Nuevo domicilio | LYM</title>
+
+    <link rel="stylesheet" href="Proyecto.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+
+    <style>
+        :root {
+            --primary: #667eea;
+            --secondary: #764ba2;
+            --accent: #f093fb;
+            --success: #10b981;
+            --text-dark: #1f2937;
+            --text-light: #6b7280;
+            --border: #e5e7eb;
+            --bg-soft: #f8fafc;
+            --white: #ffffff;
+            --shadow: 0 10px 30px rgba(102, 126, 234, 0.15);
+            --shadow-soft: 0 4px 15px rgba(0, 0, 0, 0.08);
+            --radius: 20px;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "Poppins", sans-serif;
+            margin: 0;
+            background:
+                radial-gradient(circle at top left, rgba(240, 147, 251, 0.15), transparent 25%),
+                radial-gradient(circle at bottom right, rgba(102, 126, 234, 0.18), transparent 25%),
+                linear-gradient(135deg, #f8fafc 0%, #eef2ff 100%);
+            color: var(--text-dark);
+            min-height: 100vh;
+            padding-top: 120px;
+        }
+
+        /* ===== HEADER AJUSTADO ===== */
+        .header {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 1000;
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(14px);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+        }
+
+        .nav {
+            width: 100%;
+        }
+
+        .nav-container {
+            max-width: 1300px;
+            margin: 0 auto;
+            padding: 14px 22px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 18px;
+            flex-wrap: wrap;
+        }
+
+        .logo h1 {
+            margin: 0;
+            font-size: 28px;
+            line-height: 1;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .logo span {
+            font-size: 12px;
+            color: var(--text-light);
+            font-weight: 500;
+            letter-spacing: 0.5px;
+        }
+
+        .nav-menu {
+            list-style: none;
+            display: flex;
+            gap: 18px;
+            margin: 0;
+            padding: 0;
+            flex-wrap: wrap;
+        }
+
+        .nav-menu a {
+            text-decoration: none;
+            color: var(--text-dark);
+            font-weight: 500;
+            transition: 0.3s ease;
+        }
+
+        .nav-menu a:hover {
+            color: var(--primary);
+        }
+
+        .auth-buttons {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .btn {
+            border: none;
+            border-radius: 999px;
+            padding: 10px 18px;
+            font-family: inherit;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-outline {
+            background: #fff;
+            color: var(--primary);
+            border: 1.5px solid rgba(102, 126, 234, 0.25);
+        }
+
+        .btn-outline:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-soft);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            box-shadow: var(--shadow-soft);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+        }
+
+        .btn-cart {
+            position: relative;
+        }
+
+        .cart-badge {
+            background: #ef4444;
+            color: #fff;
+            font-size: 11px;
+            font-weight: 700;
+            padding: 2px 7px;
+            border-radius: 999px;
+            min-width: 20px;
+            text-align: center;
+        }
+
+        .hamburger {
+            display: none;
+        }
+
+        .user-dropdown {
+            position: absolute;
+            top: calc(100% + 10px);
+            right: 0;
+            background: white;
+            border-radius: 16px;
+            box-shadow: var(--shadow);
+            min-width: 220px;
+            padding: 10px;
+            display: none;
+        }
+
+        .user-dropdown.show {
+            display: block;
+        }
+
+        .dropdown-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            width: 100%;
+            text-decoration: none;
+            color: var(--text-dark);
+            padding: 12px 14px;
+            border-radius: 12px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 14px;
+        }
+
+        .dropdown-item:hover {
+            background: #f3f4f6;
+        }
+
+        .dropdown-divider {
+            height: 1px;
+            background: #e5e7eb;
+            margin: 6px 0;
+        }
+
+        /* ===== CONTENIDO ===== */
+        .page-wrapper {
+            max-width: 760px;
+            margin: 0 auto;
+            padding: 28px 18px 40px;
+        }
+
+        .form-card {
+            background: rgba(255, 255, 255, 0.96);
+            border-radius: 28px;
+            padding: 34px;
+            box-shadow: var(--shadow);
+            border: 1px solid rgba(255, 255, 255, 0.7);
+        }
+
+        .card-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            flex-wrap: wrap;
+            margin-bottom: 18px;
+        }
+
+        .back-btn {
+            background: #fff;
+            border: 1px solid rgba(102, 126, 234, 0.2);
+            color: var(--primary);
+            border-radius: 999px;
+            padding: 10px 16px;
+            font-weight: 600;
+            font-family: inherit;
+            cursor: pointer;
+            transition: 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .back-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-soft);
+        }
+
+        .step-label {
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--secondary);
+            background: rgba(118, 75, 162, 0.08);
+            padding: 8px 14px;
+            border-radius: 999px;
+        }
+
+        h2 {
+            margin: 0 0 6px;
+            font-size: 30px;
+            font-weight: 800;
+            color: var(--text-dark);
+        }
+
+        .page-subtitle {
+            margin: 0 0 24px;
+            color: var(--text-light);
+            font-size: 15px;
+        }
+
+        /* ===== PROGRESO ===== */
+        .progress-wrapper {
+            margin: 18px 0 32px;
+            padding: 20px;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.06), rgba(118, 75, 162, 0.08));
+            border-radius: 22px;
+        }
+
+        .progress-bar-line {
+            position: relative;
+            height: 6px;
+            background: #e5e7eb;
+            border-radius: 999px;
+            overflow: hidden;
+            margin: 0 12px 24px;
+        }
+
+        .progress-bar-fill {
+            width: 33.33%;
+            height: 100%;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border-radius: 999px;
+        }
+
+        .steps {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            text-align: center;
+        }
+
+        .step {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            color: var(--text-light);
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .step-circle {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            border: 2px solid #d1d5db;
+            background: #fff;
+            color: var(--text-light);
+            transition: 0.3s ease;
+        }
+
+        .step.active .step-circle {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border-color: transparent;
+            color: #fff;
+            box-shadow: 0 8px 18px rgba(102, 126, 234, 0.25);
+        }
+
+        .step.active {
+            color: var(--primary);
+        }
+
+        /* ===== FORMULARIO ===== */
+        .location-btn {
+            width: 100%;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.12), rgba(118, 75, 162, 0.12));
+            color: var(--primary);
+            border: 1px solid rgba(102, 126, 234, 0.18);
+            padding: 14px 16px;
+            border-radius: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 26px;
+            transition: 0.3s ease;
+            font-family: inherit;
+        }
+
+        .location-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-soft);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .row {
+            display: flex;
+            gap: 16px;
+        }
+
+        .row .form-group {
+            flex: 1;
+        }
+
+        label {
+            display: block;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-dark);
+            margin-bottom: 8px;
+        }
+
+        input[type="text"],
+        input[type="tel"],
+        select {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1.5px solid #dbe2ea;
+            border-radius: 16px;
+            font-size: 15px;
+            outline: none;
+            font-family: inherit;
+            background: #fff;
+            transition: 0.25s ease;
+        }
+
+        input:focus,
+        select:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.12);
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 14px;
+            color: var(--text-dark);
+            margin-top: 10px;
+        }
+
+        .checkbox-group input {
+            accent-color: var(--primary);
+            transform: scale(1.1);
+        }
+
+        .section-title {
+            font-size: 20px;
+            font-weight: 800;
+            margin: 34px 0 8px;
+            color: var(--text-dark);
+        }
+
+        .subtitle {
+            font-size: 14px;
+            color: var(--text-light);
+            margin-bottom: 16px;
+        }
+
+        .continue-btn {
+            width: 100%;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            border: none;
+            padding: 16px;
+            border-radius: 18px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            margin-top: 22px;
+            transition: 0.3s ease;
+            font-family: inherit;
+            box-shadow: 0 12px 24px rgba(102, 126, 234, 0.24);
+        }
+
+        .continue-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 16px 28px rgba(102, 126, 234, 0.3);
+        }
+
+        @media (max-width: 900px) {
+            .nav-menu {
+                display: none;
+            }
+
+            .hamburger {
+                display: flex;
+                flex-direction: column;
+                gap: 4px;
+            }
+
+            .hamburger span {
+                width: 22px;
+                height: 2px;
+                background: #333;
+                border-radius: 999px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding-top: 110px;
+            }
+
+            .form-card {
+                padding: 24px 18px;
+                border-radius: 22px;
+            }
+
+            .row {
+                flex-direction: column;
+                gap: 0;
+            }
+
+            .steps {
+                grid-template-columns: 1fr;
+                gap: 16px;
+            }
+
+            .progress-bar-line {
+                margin-bottom: 18px;
+            }
+
+            h2 {
+                font-size: 24px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Header -->
+    <header class="header">
+        <nav class="nav">
+            <div class="nav-container">
+                <div class="logo">
+                    <h1>LYM</h1>
+                    <span>diseño e impresión</span>
+                </div>
+
+                <ul class="nav-menu">
+                    <li><a href="#inicio">Inicio</a></li>
+                    <li><a href="#productos">Productos</a></li>
+                    <li><a href="#paquetes">Paquetes</a></li>
+                    <li><a href="#contacto">Contacto</a></li>
+                    <li><a href="#ticket">Tickets</a></li>
+                    <li><a href="#nosotros">Nosotros</a></li>
+                    <li><a href="Promociones.html">Promociones</a></li>
+                </ul>
+
+                <div class="auth-buttons">
+                    <div id="guestButtons">
+                        <button type="button" class="btn btn-outline" onclick="showLoginModal()">Iniciar Sesión</button>
+                        <button type="button" class="btn btn-primary" onclick="showRegisterModal()">Registrarse</button>
+                        <button type="button" class="btn btn-outline" onclick="showAdminModal()">Intranet</button>
+                    </div>
+
+                    <div class="user-menu" id="userMenu" style="display:none; position:relative;">
+                        <button type="button" class="btn btn-outline user-btn" onclick="toggleUserMenu(event)">
+                            <i class="fas fa-user"></i>
+                            <span id="userGreeting">Usuario</span>
+                            <i class="fas fa-bars"></i>
+                        </button>
+
+                        <div class="user-dropdown" id="userDropdown">
+                            <a href="carrito.html" class="dropdown-item">
+                                <i class="fas fa-box"></i> Mis compras
+                            </a>
+
+                            <a href="perfil.html" class="dropdown-item">
+                                <i class="fas fa-id-card"></i> Información
+                            </a>
+
+                            <div class="dropdown-divider"></div>
+
+                            <button type="button" class="dropdown-item logout-btn" onclick="logout()">
+                                <i class="fas fa-sign-out-alt"></i> Cerrar sesión
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="hamburger">
+                        <span></span><span></span><span></span>
+                    </div>
+                </div>
+
+                <a href="carrito.html" class="btn btn-outline btn-cart">
+                    <i class="fas fa-shopping-cart"></i>
+                    <span class="cart-text">Carrito</span>
+                    <span class="cart-badge" id="cartBadge">0</span>
+                </a>
+            </div>
+        </nav>
+    </header>
+
+    <main class="page-wrapper">
+        <div class="form-card">
+
+            <div class="card-top">
+                <button class="back-btn" type="button" onclick="history.back()">
+                    <i class="fas fa-arrow-left"></i> Volver
+                </button>
+
+                <div class="step-label">
+                    Paso 1 de 3
+                </div>
+            </div>
+
+            <h2>Nuevo domicilio</h2>
+            <p class="page-subtitle">Completa tu dirección de entrega para continuar con tu compra</p>
+
+            <!-- Barra de progreso -->
+            <div class="progress-wrapper">
+                <div class="progress-bar-line">
+                    <div class="progress-bar-fill"></div>
+                </div>
+
+                <div class="steps">
+                    <div class="step active">
+                        <div class="step-circle">1</div>
+                        <span>Domicilio</span>
+                    </div>
+
+                    <div class="step">
+                        <div class="step-circle">2</div>
+                        <span>Método de pago</span>
+                    </div>
+
+                    <div class="step">
+                        <div class="step-circle">3</div>
+                        <span>Confirmación</span>
+                    </div>
+                </div>
+            </div>
+
+            <button class="location-btn" type="button">
+                <i class="fas fa-location-crosshairs"></i>
+                Usar mi ubicación
+            </button>
+
+            <form>
+                <div class="form-group">
+                    <label for="address">Dirección o lugar de entrega</label>
+                    <input type="text" id="address" placeholder="Ej: Avenida los leones 4563">
+
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="no-number">
+                        <label for="no-number" style="margin:0">Mi calle no tiene número</label>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="form-group">
+                        <label for="state">Estado</label>
+                        <select id="state">
+                            <option value="">Debes seleccionar una opción</option>
+                            <option value="ags">Aguascalientes</option>
+                            <option value="cdmx">Ciudad de México</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="city">Municipio o alcaldía</label>
+                        <input type="text" id="city" placeholder="Ej: Aguascalientes">
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="form-group">
+                        <label for="locality">Localidad</label>
+                        <input type="text" id="locality" placeholder="Ej: Ojocaliente">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="neighborhood">Colonia o barrio</label>
+                        <input type="text" id="neighborhood" placeholder="Ej: Centro">
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="form-group">
+                        <label for="zip">Código Postal</label>
+                        <input type="text" id="zip" placeholder="Ej: 09440">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="interior">Número interior / Depto. (opcional)</label>
+                        <input type="text" id="interior" placeholder="Ej: 201">
+                    </div>
+                </div>
+
+                <div class="section-title">Datos de contacto</div>
+                <div class="subtitle">Asegúrate de que tus datos estén correctos para cualquier actualización del pedido
+                </div>
+
+                <div class="form-group">
+                    <label for="name">Nombre y apellido</label>
+                    <input type="text" id="name" value="" placeholder="Tu nombre completo">
+                </div>
+
+                <div class="form-group">
+                    <label for="phone">Teléfono</label>
+                    <input type="tel" id="phone" value="" placeholder="Tu número de contacto">
+                </div>
+
+                <button type="button" class="continue-btn" onclick="window.location.href='checkout.html';">
+                    Continuar al pago
+                </button>
+            </form>
+        </div>
+    </main>
+
+    <script>
+        function toggleUserMenu(event) {
+            event.stopPropagation();
+            document.getElementById("userDropdown").classList.toggle("show");
+        }
+
+        document.addEventListener("click", function () {
+            const dropdown = document.getElementById("userDropdown");
+            if (dropdown) dropdown.classList.remove("show");
+        });
+
+        function showLoginModal() {
+            console.log("Abrir modal login");
+        }
+
+        function showRegisterModal() {
+            console.log("Abrir modal registro");
+        }
+
+        function showAdminModal() {
+            console.log("Abrir modal admin");
+        }
+
+        function logout() {
+            console.log("Cerrar sesión");
+        }
+    </script>
+
+</body>
+
+</html>

@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Ticket de compra | LYM</title>
+
+    <link rel="stylesheet" href="Proyecto.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+
+    <style>
+        :root {
+            --primary: #667eea;
+            --secondary: #764ba2;
+            --success: #10b981;
+            --text-dark: #1f2937;
+            --text-light: #6b7280;
+            --shadow: 0 14px 30px rgba(102, 126, 234, 0.15);
+            --shadow-soft: 0 8px 20px rgba(0, 0, 0, 0.08);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: "Poppins", sans-serif;
+            min-height: 100vh;
+            background:
+                radial-gradient(circle at top left, rgba(240, 147, 251, 0.14), transparent 25%),
+                radial-gradient(circle at bottom right, rgba(102, 126, 234, 0.18), transparent 25%),
+                linear-gradient(135deg, #f8fafc 0%, #eef2ff 100%);
+            color: var(--text-dark);
+            padding: 24px 16px;
+        }
+
+        .download-banner {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            padding: 14px 18px;
+            border-radius: 16px;
+            box-shadow: 0 14px 30px rgba(16, 185, 129, 0.28);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 700;
+            z-index: 2000;
+            opacity: 0;
+            transform: translateY(-18px);
+            pointer-events: none;
+            transition: all 0.35s ease;
+        }
+
+        .download-banner.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .ticket-page {
+            max-width: 780px;
+            margin: 0 auto;
+        }
+
+        .ticket-shell {
+            background: rgba(255, 255, 255, 0.97);
+            border-radius: 30px;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+        }
+
+        .ticket-header {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            padding: 28px 24px;
+        }
+
+        .top-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .back-btn,
+        .btn {
+            border: none;
+            cursor: pointer;
+            padding: 12px 18px;
+            border-radius: 999px;
+            font-family: inherit;
+            font-weight: 700;
+            transition: 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .back-btn {
+            background: rgba(255, 255, 255, 0.18);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.28);
+        }
+
+        .ticket-header h1 {
+            margin: 18px 0 6px;
+            font-size: 2rem;
+        }
+
+        .ticket-header p {
+            margin: 0;
+            opacity: 0.95;
+        }
+
+        .ticket-content {
+            padding: 28px 22px 32px;
+        }
+
+        .ticket-card {
+            background: white;
+            border-radius: 26px;
+            border: 1px solid rgba(102, 126, 234, 0.1);
+            box-shadow: var(--shadow-soft);
+            overflow: hidden;
+        }
+
+        .ticket-top {
+            text-align: center;
+            padding: 24px 20px 18px;
+            background: linear-gradient(135deg, #ffffff 0%, #f8faff 100%);
+        }
+
+        .logo {
+            font-weight: 800;
+            font-size: 28px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 6px;
+        }
+
+        .ticket-title {
+            margin: 0;
+            font-size: 1.5rem;
+            font-weight: 800;
+        }
+
+        .ticket-subtitle {
+            color: var(--text-light);
+            font-size: 14px;
+            margin-top: 5px;
+        }
+
+        .divider {
+            border-top: 1px dashed #d1d5db;
+            margin: 0 20px;
+        }
+
+        .ticket-body {
+            padding: 22px 20px;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 14px;
+            margin-bottom: 18px;
+        }
+
+        .info-card {
+            background: #f8fafc;
+            border-radius: 18px;
+            padding: 14px;
+            border: 1px solid #edf2f7;
+        }
+
+        .info-label {
+            display: block;
+            font-size: 12px;
+            color: var(--text-light);
+            margin-bottom: 5px;
+        }
+
+        .info-value {
+            font-size: 14px;
+            font-weight: 700;
+        }
+
+        .products-box {
+            background: #f8f9ff;
+            border-radius: 18px;
+            padding: 16px;
+            margin-top: 8px;
+        }
+
+        .products-box h3 {
+            margin-top: 0;
+            margin-bottom: 12px;
+        }
+
+        .ticket-item {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+            font-size: 14px;
+        }
+
+        .ticket-item:last-child {
+            border-bottom: none;
+        }
+
+        .total-box {
+            margin-top: 18px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            border-radius: 18px;
+            padding: 16px 18px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .total-box strong {
+            font-size: 1.35rem;
+        }
+
+        .actions {
+            margin-top: 24px;
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+        }
+
+        .btn-soft {
+            background: #eef1ff;
+            color: #5a4b8a;
+        }
+
+        @media (max-width: 720px) {
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .total-box,
+            .ticket-item {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .download-banner {
+                left: 16px;
+                right: 16px;
+                top: 16px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="download-banner" id="downloadBanner">
+        <i class="fas fa-circle-check"></i>
+        <span>Descarga exitosa</span>
+    </div>
+
+    <div class="ticket-page">
+        <div class="ticket-shell">
+
+            <div class="ticket-header">
+                <div class="top-row">
+                    <button class="back-btn" onclick="history.back()">
+                        <i class="fas fa-arrow-left"></i>
+                        Volver
+                    </button>
+                </div>
+
+                <h1><i class="fas fa-file-invoice"></i> Ticket de compra</h1>
+                <p>Consulta los datos de tu compra y descarga tu comprobante.</p>
+            </div>
+
+            <div class="ticket-content">
+                <div class="ticket-card">
+                    <div class="ticket-top">
+                        <div class="logo">LYM</div>
+                        <h2 class="ticket-title">Diseño e Impresión</h2>
+                        <div class="ticket-subtitle">Comprobante de compra</div>
+                    </div>
+
+                    <div class="divider"></div>
+
+                    <div class="ticket-body">
+                        <div class="info-grid">
+                            <div class="info-card">
+                                <span class="info-label">Folio</span>
+                                <span class="info-value" id="folioTxt">#LYM-00000</span>
+                            </div>
+
+                            <div class="info-card">
+                                <span class="info-label">Fecha</span>
+                                <span class="info-value" id="fechaTxt">00/00/0000</span>
+                            </div>
+
+                            <div class="info-card">
+                                <span class="info-label">Estado</span>
+                                <span class="info-value" id="estadoTxt">Entregado</span>
+                            </div>
+
+                            <div class="info-card">
+                                <span class="info-label">Método</span>
+                                <span class="info-value">Pago con tarjeta</span>
+                            </div>
+                        </div>
+
+                        <div class="products-box">
+                            <h3>Detalle del ticket</h3>
+                            <div id="ticketItems"></div>
+
+                            <div class="total-box">
+                                <span>Total pagado</span>
+                                <strong id="totalTxt">$0.00 MXN</strong>
+                            </div>
+                        </div>
+
+                        <div class="actions">
+                            <button class="btn btn-primary" onclick="mostrarDescargaExitosa()">
+                                <i class="fas fa-download"></i>
+                                Descargar ticket
+                            </button>
+
+                            <a href="carrito.html#mis-compras" class="btn btn-soft">
+                                <i class="fas fa-bag-shopping"></i>
+                                Volver a mis compras
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        const params = new URLSearchParams(window.location.search);
+
+        const folio = params.get("folio") || "#LYM-00000";
+        const fecha = params.get("fecha") || "Sin fecha";
+        const total = params.get("total") || "0";
+        const estado = params.get("estado") || "Entregado";
+
+        document.getElementById("folioTxt").textContent = folio;
+        document.getElementById("fechaTxt").textContent = fecha;
+        document.getElementById("estadoTxt").textContent = estado;
+        document.getElementById("totalTxt").textContent = `$${Number(total).toFixed(2)} MXN`;
+
+        const ticketItems = document.getElementById("ticketItems");
+
+        const productosDemo = [
+            { nombre: "Producto personalizado", precio: Number(total) * 0.55 },
+            { nombre: "Servicio de impresión", precio: Number(total) * 0.25 },
+            { nombre: "Acabado premium", precio: Number(total) * 0.20 }
+        ];
+
+        productosDemo.forEach(item => {
+            const row = document.createElement("div");
+            row.className = "ticket-item";
+            row.innerHTML = `
+                <span>${item.nombre}</span>
+                <strong>$${item.precio.toFixed(2)} MXN</strong>
+            `;
+            ticketItems.appendChild(row);
+        });
+
+        const downloadBanner = document.getElementById("downloadBanner");
+
+        function mostrarDescargaExitosa() {
+            downloadBanner.classList.add("show");
+
+            setTimeout(() => {
+                downloadBanner.classList.remove("show");
+            }, 2200);
+        }
+    </script>
+</body>
+
+</html>

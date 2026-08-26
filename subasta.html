@@ -1,0 +1,739 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Subasta de Tazas Personalizadas | LMY</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #ffffff, #f3e8ff);
+            color: #2f2f2f;
+            min-height: 100vh;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            margin: auto;
+            padding-top: 120px;
+            padding-bottom: 60px;
+        }
+
+        .back-button {
+            margin-bottom: 24px;
+        }
+
+        .btn-back {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+            background: #ffffff;
+            color: #6a0dad;
+            padding: 12px 18px;
+            border-radius: 999px;
+            font-weight: 600;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+            transition: all .2s ease;
+        }
+
+        .btn-back:hover {
+            transform: translateY(-2px);
+            background: #fff1ea;
+        }
+
+        .producto-card {
+            background: #fff;
+            border-radius: 28px;
+            box-shadow: 0 16px 40px rgba(0, 0, 0, 0.10);
+            overflow: hidden;
+        }
+
+        .producto-container {
+            display: grid;
+            grid-template-columns: 1fr 1.1fr;
+            gap: 0;
+        }
+
+        .producto-image {
+            position: relative;
+            background: #faf5ff;
+            min-height: 620px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 35px;
+        }
+
+        .producto-image img {
+            width: 100%;
+            max-width: 470px;
+            height: 520px;
+            object-fit: cover;
+            border-radius: 24px;
+            box-shadow: 0 14px 35px rgba(0, 0, 0, 0.15);
+        }
+
+        .producto-overlay {
+            position: absolute;
+            top: 28px;
+            left: 28px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .precio,
+        .estado-subasta {
+            background: rgba(255, 255, 255, 0.95);
+            color: #4b0082;
+            font-weight: 700;
+            padding: 10px 16px;
+            border-radius: 999px;
+            box-shadow: 0 8px 22px rgba(0, 0, 0, 0.12);
+        }
+
+        .producto-content {
+            padding: 34px;
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+        }
+
+        .etiqueta-top {
+            display: inline-block;
+            background: #f3e8ff;
+            color: #6a0dad;
+            border-radius: 999px;
+            padding: 8px 14px;
+            font-size: 0.90rem;
+            font-weight: 600;
+            width: fit-content;
+        }
+
+        .producto-content h3 {
+            font-size: clamp(2rem, 4vw, 3rem);
+            color: #2b1d17;
+            line-height: 1.05;
+        }
+
+        .descripcion {
+            color: #6b5a53;
+            line-height: 1.7;
+            font-size: 1rem;
+        }
+
+        .producto-features {
+            list-style: none;
+            display: grid;
+            gap: 12px;
+        }
+
+        .producto-features li {
+            background: #faf5ff;
+            padding: 14px 16px;
+            border-radius: 16px;
+            font-size: 0.98rem;
+            color: #4a3a33;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .producto-features i {
+            color: #6a0dad;
+        }
+
+        .timer-box {
+            background: linear-gradient(135deg, #6a0dad, #4b0082);
+            color: #fff;
+            border-radius: 22px;
+            padding: 22px;
+        }
+
+        .timer-box h4 {
+            margin-bottom: 14px;
+            font-size: 1.05rem;
+        }
+
+        .timer-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+        }
+
+        .time-item {
+            background: rgba(255, 255, 255, 0.14);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            border-radius: 18px;
+            padding: 14px 8px;
+            text-align: center;
+        }
+
+        .time-item span {
+            display: block;
+            font-size: 1.7rem;
+            font-weight: 700;
+        }
+
+        .time-item small {
+            font-size: 0.82rem;
+            opacity: 0.95;
+        }
+
+        .price-board {
+            background: #ffffff;
+            border: 1px solid #e9d5ff;
+            border-radius: 22px;
+            padding: 22px;
+            display: grid;
+            gap: 18px;
+        }
+
+        .price-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        .label {
+            color: #7d6a61;
+            font-size: 0.92rem;
+            margin-bottom: 4px;
+            display: block;
+        }
+
+        .main-price {
+            font-size: clamp(2rem, 4vw, 2.8rem);
+            font-weight: 700;
+            color: #1d7a43;
+        }
+
+        .small-price {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #4b0082;
+        }
+
+        .pujas-rapidas {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+        }
+
+        .btn-puja,
+        .btn-principal,
+        .btn-secundario {
+            border: none;
+            border-radius: 14px;
+            padding: 14px 16px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all .2s ease;
+        }
+
+        .btn-puja {
+            background: #fff;
+            color: #6a0dad;
+            border: 1px solid #d8b4fe;
+        }
+
+        .btn-puja:hover {
+            background: #f3e8ff;
+            transform: translateY(-2px);
+        }
+
+        .panel-manual {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 12px;
+        }
+
+        .input-puja {
+            width: 100%;
+            border: 1px solid #d8b4fe;
+            border-radius: 14px;
+            padding: 14px 16px;
+            font-size: 1rem;
+            outline: none;
+        }
+
+        .input-puja:focus {
+            border-color: #6a0dad;
+            box-shadow: 0 0 0 4px rgba(198, 93, 46, 0.12);
+        }
+
+        .btn-principal {
+            background: #6a0dad;
+            color: #fff;
+            min-width: 170px;
+        }
+
+        .btn-principal:hover {
+            background: #a74c23;
+            transform: translateY(-2px);
+        }
+
+        .btn-secundario {
+            background: #fff;
+            color: #5d4d46;
+            border: 1px solid #e9d5ff;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-secundario:hover {
+            background: #fff3ec;
+        }
+
+        .producto-actions {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .mensajes {
+            display: grid;
+            gap: 10px;
+        }
+
+        .success-mini,
+        .warning-mini,
+        .info-mini {
+            display: none;
+            border-radius: 14px;
+            padding: 12px 14px;
+            font-size: 0.95rem;
+            font-weight: 500;
+        }
+
+        .success-mini {
+            background: #eaf8ef;
+            color: #1d7a43;
+        }
+
+        .warning-mini {
+            background: #fff4e8;
+            color: #9a5b12;
+        }
+
+        .info-mini {
+            display: block;
+            background: #f3f7ff;
+            color: #315a9b;
+        }
+
+        .historial-box {
+            background: #faf5ff;
+            border-radius: 22px;
+            padding: 20px;
+            border: 1px solid #e9d5ff;
+        }
+
+        .historial-box h4 {
+            margin-bottom: 12px;
+            color: #2b1d17;
+        }
+
+        #historialPujas {
+            list-style: none;
+            display: grid;
+            gap: 10px;
+            max-height: 220px;
+            overflow-y: auto;
+            padding-right: 4px;
+        }
+
+        #historialPujas li {
+            background: #fff;
+            border-radius: 14px;
+            padding: 12px 14px;
+            color: #5a4b44;
+            border: 1px solid #ede9fe;
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .agotada {
+            opacity: 0.75;
+        }
+
+        .agotada .btn-puja,
+        .agotada .btn-principal,
+        .agotada .input-puja {
+            pointer-events: none;
+        }
+
+        @media (max-width: 980px) {
+            .producto-container {
+                grid-template-columns: 1fr;
+            }
+
+            .producto-image {
+                min-height: auto;
+                padding-top: 80px;
+            }
+
+            .producto-image img {
+                height: 420px;
+            }
+        }
+
+        @media (max-width: 700px) {
+            .container {
+                width: 94%;
+                padding-top: 40px;
+            }
+
+            .producto-content {
+                padding: 24px;
+            }
+
+            .timer-grid,
+            .pujas-rapidas {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .panel-manual {
+                grid-template-columns: 1fr;
+            }
+
+            .btn-principal {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <div class="back-button">
+            <a href="#" class="btn-back" onclick="volverPagina(event)">
+                <i class="fas fa-arrow-left"></i>
+                Regresar
+            </a>
+        </div>
+
+        <div class="producto-card" id="subastaCard">
+            <div class="producto-container">
+
+                <div class="producto-image">
+                    <img src="imagen/taaza.jpeg" alt="Paquete de 3 tazas personalizadas">
+                    <div class="producto-overlay">
+                        <span class="precio">Inicio: $250</span>
+                        <span class="estado-subasta" id="estadoSubasta">Subasta activa</span>
+                    </div>
+                </div>
+
+                <div class="producto-content">
+                    <span class="etiqueta-top">Subasta especial LMY</span>
+                    <h3>Paquete de 3 Tazas Personalizadas</h3>
+
+                    <p class="descripcion">
+                        Llévate un paquete de 3 tazas totalmente personalizadas con el diseño que tú quieras.
+                        Ideal para regalo, negocios, aniversarios, cumpleaños o recuerdos especiales. Esta página
+                        funciona sin base de datos: todo corre directamente en el navegador con JavaScript.
+                    </p>
+
+                    <ul class="producto-features">
+                        <li><i class="fas fa-check"></i> Incluye 3 tazas personalizadas en un solo paquete</li>
+                        <li><i class="fas fa-check"></i> Impresión de alta calidad y gran durabilidad</li>
+                        <li><i class="fas fa-check"></i> Diseño libre: fotos, nombres, frases o logotipos</li>
+                        <li><i class="fas fa-check"></i> Pujas rápidas automáticas y puja manual</li>
+                    </ul>
+
+                    <div class="timer-box">
+                        <h4><i class="fas fa-clock"></i> Tiempo restante de la subasta</h4>
+                        <div class="timer-grid">
+                            <div class="time-item">
+                                <span id="dias">00</span>
+                                <small>Días</small>
+                            </div>
+                            <div class="time-item">
+                                <span id="horas">00</span>
+                                <small>Horas</small>
+                            </div>
+                            <div class="time-item">
+                                <span id="minutos">00</span>
+                                <small>Minutos</small>
+                            </div>
+                            <div class="time-item">
+                                <span id="segundos">00</span>
+                                <small>Segundos</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="price-board">
+                        <div class="price-header">
+                            <div>
+                                <span class="label">Puja actual</span>
+                                <div class="main-price" id="precioActual">$250</div>
+                            </div>
+                            <div>
+                                <span class="label">Incremento mínimo</span>
+                                <div class="small-price">$10 MXN</div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <span class="label">Pujas rápidas</span>
+                            <div class="pujas-rapidas">
+                                <button class="btn-puja" onclick="pujar(10)">+ $10</button>
+                                <button class="btn-puja" onclick="pujar(20)">+ $20</button>
+                                <button class="btn-puja" onclick="pujar(50)">+ $50</button>
+                                <button class="btn-puja" onclick="pujar(100)">+ $100</button>
+                            </div>
+                        </div>
+
+                        <div>
+                            <span class="label">Haz tu propia puja</span>
+                            <div class="panel-manual">
+                                <input type="number" id="pujaManual" class="input-puja" min="260" step="10"
+                                    placeholder="Escribe tu oferta en MXN">
+                                <button class="btn-principal" onclick="hacerPujaManual()">
+                                    <i class="fas fa-gavel"></i> Pujar ahora
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="producto-actions">
+
+                        </div>
+
+                        <div class="mensajes">
+                            <p id="mensajeExito" class="success-mini">✔ Tu puja fue registrada correctamente.</p>
+                            <p id="mensajeError" class="warning-mini">⚠ Ingresa una cantidad válida mayor a la puja
+                                actual.</p>
+                            <p class="info-mini"><i class="fas fa-circle-info"></i> Todo se guarda localmente en el
+                                navegador con <strong>localStorage</strong>, así que no necesita base de datos.</p>
+                        </div>
+                    </div>
+
+                    <div class="historial-box">
+                        <h4><i class="fas fa-list"></i> Historial de pujas</h4>
+                        <ul id="historialPujas"></ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const precioInicial = 250;
+            const incrementoMinimo = 10;
+            const duracionMinutos = 15;
+
+            let precioActual = Number(localStorage.getItem('subastaPrecioActual')) || precioInicial;
+            let historial = JSON.parse(localStorage.getItem('subastaHistorial')) || [];
+            let finSubasta = Number(localStorage.getItem('subastaFin'));
+
+            if (!finSubasta || isNaN(finSubasta) || finSubasta <= Date.now()) {
+                finSubasta = Date.now() + duracionMinutos * 60 * 1000;
+                localStorage.setItem('subastaFin', String(finSubasta));
+            }
+
+            const precioActualEl = document.getElementById('precioActual');
+            const historialEl = document.getElementById('historialPujas');
+            const mensajeExito = document.getElementById('mensajeExito');
+            const mensajeError = document.getElementById('mensajeError');
+            const estadoSubasta = document.getElementById('estadoSubasta');
+            const cardSubasta = document.getElementById('subastaCard');
+            const inputPuja = document.getElementById('pujaManual');
+            const diasEl = document.getElementById('dias');
+            const horasEl = document.getElementById('horas');
+            const minutosEl = document.getElementById('minutos');
+            const segundosEl = document.getElementById('segundos');
+
+            function formatearPrecio(valor) {
+                return '$' + Number(valor).toLocaleString('es-MX');
+            }
+
+            function guardarDatos() {
+                localStorage.setItem('subastaPrecioActual', String(precioActual));
+                localStorage.setItem('subastaHistorial', JSON.stringify(historial));
+            }
+
+            function mostrarMensaje(tipo) {
+                mensajeExito.style.display = 'none';
+                mensajeError.style.display = 'none';
+
+                if (tipo === 'exito') {
+                    mensajeExito.style.display = 'block';
+                    setTimeout(function () {
+                        mensajeExito.style.display = 'none';
+                    }, 2200);
+                }
+
+                if (tipo === 'error') {
+                    mensajeError.style.display = 'block';
+                    setTimeout(function () {
+                        mensajeError.style.display = 'none';
+                    }, 2200);
+                }
+            }
+
+            function renderizarPrecio() {
+                precioActualEl.textContent = formatearPrecio(precioActual);
+                inputPuja.min = String(precioActual + incrementoMinimo);
+                inputPuja.placeholder = 'Mínimo ' + formatearPrecio(precioActual + incrementoMinimo);
+            }
+
+            function renderizarHistorial() {
+                historialEl.innerHTML = '';
+
+                if (!historial.length) {
+                    historialEl.innerHTML = '<li><span>No hay pujas todavía.</span><strong>Empieza tú</strong></li>';
+                    return;
+                }
+
+                const historialInvertido = historial.slice().reverse();
+                historialInvertido.forEach(function (item, index) {
+                    const li = document.createElement('li');
+                    li.innerHTML = '<span><strong>Puja #' + (historial.length - index) + '</strong> - ' + item.fecha + '</span><strong>' + formatearPrecio(item.monto) + '</strong>';
+                    historialEl.appendChild(li);
+                });
+            }
+
+            function subastaTerminada() {
+                return Date.now() >= finSubasta;
+            }
+
+            function registrarPuja(monto) {
+                const fecha = new Date().toLocaleString('es-MX', {
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+
+                historial.push({ monto: monto, fecha: fecha });
+                guardarDatos();
+                renderizarPrecio();
+                renderizarHistorial();
+            }
+
+            function finalizarSubasta() {
+                diasEl.textContent = '00';
+                horasEl.textContent = '00';
+                minutosEl.textContent = '00';
+                segundosEl.textContent = '00';
+                estadoSubasta.textContent = 'Subasta finalizada';
+                cardSubasta.classList.add('agotada');
+            }
+
+            function actualizarTemporizador() {
+                const restante = finSubasta - Date.now();
+
+                if (restante <= 0) {
+                    finalizarSubasta();
+                    return false;
+                }
+
+                const dias = Math.floor(restante / (1000 * 60 * 60 * 24));
+                const horas = Math.floor((restante % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const minutos = Math.floor((restante % (1000 * 60 * 60)) / (1000 * 60));
+                const segundos = Math.floor((restante % (1000 * 60)) / 1000);
+
+                diasEl.textContent = String(dias).padStart(2, '0');
+                horasEl.textContent = String(horas).padStart(2, '0');
+                minutosEl.textContent = String(minutos).padStart(2, '0');
+                segundosEl.textContent = String(segundos).padStart(2, '0');
+                estadoSubasta.textContent = 'Subasta activa';
+                return true;
+            }
+
+            function pujar(incremento) {
+                if (subastaTerminada()) {
+                    finalizarSubasta();
+                    mostrarMensaje('error');
+                    return;
+                }
+
+                precioActual += incremento;
+                registrarPuja(precioActual);
+                mostrarMensaje('exito');
+            }
+
+            function hacerPujaManual() {
+                if (subastaTerminada()) {
+                    finalizarSubasta();
+                    mostrarMensaje('error');
+                    return;
+                }
+
+                const oferta = Number(inputPuja.value);
+                if (isNaN(oferta) || oferta < precioActual + incrementoMinimo) {
+                    mostrarMensaje('error');
+                    return;
+                }
+
+                precioActual = oferta;
+                registrarPuja(precioActual);
+                inputPuja.value = '';
+                mostrarMensaje('exito');
+            }
+
+            function volverPagina(event) {
+                event.preventDefault();
+                if (window.history.length > 1) {
+                    window.history.back();
+                } else {
+                    window.location.href = 'sistema.html';
+                }
+            }
+
+            window.pujar = pujar;
+            window.hacerPujaManual = hacerPujaManual;
+            window.volverPagina = volverPagina;
+
+            renderizarPrecio();
+            renderizarHistorial();
+            const sigueActiva = actualizarTemporizador();
+
+            if (sigueActiva) {
+                setInterval(function () {
+                    actualizarTemporizador();
+                }, 1000);
+            }
+        });
+    </script>
+    <footer
+        style="margin-top: 40px; padding: 28px 20px; text-align: center; color: #6b5a53; background: rgba(255,255,255,0.55); border-top: 1px solid #f0d7cb;">
+        <div style="display: flex; justify-content: center; gap: 18px; flex-wrap: wrap; font-weight: 500;">
+            <a href="sistema.html" style="text-decoration: none; color: #4b0082;">Inicio</a>
+            <a href="carrito.html" style="text-decoration: none; color: #4b0082;">Carrito</a>
+            <a href="prodrelacionados.html" style="text-decoration: none; color: #4b0082;">Relacionados</a>
+            <a href="subasta_tazas_personalizadas.html"
+                style="text-decoration: none; color: #6a0dad; font-weight: 700;">Subasta</a>
+        </div>
+        <p style="margin-top: 12px; font-size: 0.94rem;">LMY Diseño e Impresión · Página de subasta funcional sin base
+            de datos</p>
+    </footer>
+</body>
+
+</html>

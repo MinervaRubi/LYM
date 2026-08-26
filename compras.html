@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LMY Diseño e Impresión - Mis compras</title>
+    <link rel="stylesheet" href="Proyecto.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+    <style>
+        :root {
+            --primary: #667eea;
+            --secondary: #764ba2;
+            --accent: #f093fb;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --text-dark: #1f2937;
+            --text-light: #6b7280;
+            --border: #e5e7eb;
+            --bg-soft: #f8fafc;
+            --white: #ffffff;
+            --shadow: 0 10px 30px rgba(102, 126, 234, 0.12);
+            --shadow-soft: 0 6px 16px rgba(0, 0, 0, 0.06);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: "Poppins", sans-serif;
+            color: var(--text-dark);
+            background:
+                radial-gradient(circle at top left, rgba(240, 147, 251, 0.12), transparent 25%),
+                radial-gradient(circle at bottom right, rgba(102, 126, 234, 0.16), transparent 25%),
+                linear-gradient(135deg, #f8fafc 0%, #eef2ff 100%);
+            min-height: 100vh;
+        }
+
+        .header {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: rgba(255, 255, 255, 0.88);
+            backdrop-filter: blur(12px);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+        }
+
+        .nav-container {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 14px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .logo h1 {
+            margin: 0;
+            font-size: 30px;
+            line-height: 1;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .logo span {
+            font-size: 12px;
+            color: var(--text-light);
+            font-weight: 500;
+        }
+
+        .nav-menu {
+            list-style: none;
+            display: flex;
+            gap: 18px;
+            margin: 0;
+            padding: 0;
+            flex-wrap: wrap;
+        }
+
+        .nav-menu a {
+            text-decoration: none;
+            color: var(--text-dark);
+            font-weight: 500;
+        }
+
+        .auth-buttons {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .btn {
+            border: none;
+            cursor: pointer;
+            padding: 12px 18px;
+            border-radius: 999px;
+            font-family: inherit;
+            font-weight: 700;
+            transition: 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .btn-outline {
+            background: white;
+            color: var(--primary);
+            border: 1px solid rgba(102, 126, 234, 0.2);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            box-shadow: var(--shadow-soft);
+        }
+
+        .btn-soft {
+            background: #eef1ff;
+            color: #5a4b8a;
+        }
+
+        .btn-block {
+            width: 100%;
+        }
+
+        .page {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 28px 18px 40px;
+        }
+
+        .section-card {
+            background: rgba(255, 255, 255, 0.96);
+            border-radius: 28px;
+            box-shadow: var(--shadow);
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+
+        .cart-wrap {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .cart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-bottom: 4px;
+        }
+
+        .cart-header h1 {
+            margin: 0;
+            font-size: 2rem;
+        }
+
+        .cart-header small {
+            color: var(--text-light);
+        }
+
+        .cart-grid {
+            display: grid;
+            grid-template-columns: 1.35fr 0.9fr;
+            gap: 24px;
+        }
+
+        .cart-card {
+            background: #fff;
+            border-radius: 24px;
+            padding: 22px;
+            box-shadow: var(--shadow-soft);
+            border: 1px solid rgba(102, 126, 234, 0.08);
+        }
+
+        .cart-items-header,
+        .section-title-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-bottom: 18px;
+        }
+
+        .cart-items-header h2,
+        .section-title-row h2 {
+            margin: 0;
+            font-size: 1.35rem;
+        }
+
+        .cart-items-header small,
+        .section-title-row small {
+            color: var(--text-light);
+        }
+
+        .cart-items {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .cart-item {
+            display: flex;
+            gap: 14px;
+            align-items: center;
+            background: #f8f9ff;
+            border-radius: 18px;
+            padding: 14px;
+            border: 1px solid rgba(102, 126, 234, 0.08);
+        }
+
+        .cart-item button {
+            border: none;
+            background: #eef1ff;
+            color: var(--primary);
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            font-size: 18px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .empty {
+            text-align: center;
+            padding: 24px;
+            background: #f8fafc;
+            border-radius: 18px;
+            color: var(--text-light);
+        }
+
+        .summary {
+            align-self: start;
+            position: sticky;
+            top: 98px;
+        }
+
+        .summary h2 {
+            margin-top: 0;
+        }
+
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .summary-row.total {
+            font-weight: 800;
+            font-size: 1.05rem;
+            border-bottom: none;
+            padding-top: 16px;
+        }
+
+        .summary-actions {
+            margin-top: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .history-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+        }
+
+        .history-card {
+            background: linear-gradient(135deg, #ffffff, #f7f9ff);
+            border: 1px solid rgba(102, 126, 234, 0.12);
+            border-radius: 22px;
+            padding: 18px;
+            box-shadow: var(--shadow-soft);
+        }
+
+        .history-top {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            align-items: flex-start;
+            margin-bottom: 12px;
+        }
+
+        .history-folio {
+            font-weight: 800;
+            color: var(--secondary);
+            font-size: 1rem;
+        }
+
+        .status {
+            padding: 6px 10px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+
+        .status.entregado {
+            background: rgba(16, 185, 129, 0.12);
+            color: #047857;
+        }
+
+        .status.preparacion {
+            background: rgba(245, 158, 11, 0.14);
+            color: #b45309;
+        }
+
+        .status.enviado {
+            background: rgba(102, 126, 234, 0.12);
+            color: #4338ca;
+        }
+
+        .history-meta {
+            display: grid;
+            gap: 8px;
+            margin-bottom: 14px;
+            color: var(--text-light);
+            font-size: 14px;
+        }
+
+        .history-products {
+            background: #fff;
+            border-radius: 16px;
+            padding: 12px;
+            font-size: 14px;
+            margin-bottom: 14px;
+            border: 1px solid #eef2ff;
+        }
+
+        .history-products strong {
+            display: block;
+            margin-bottom: 6px;
+            color: var(--text-dark);
+        }
+
+        .history-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .badge-total {
+            background: rgba(118, 75, 162, 0.1);
+            color: var(--secondary);
+            font-weight: 800;
+            padding: 8px 12px;
+            border-radius: 999px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            margin-top: 4px;
+        }
+
+        @media (max-width: 980px) {
+            .cart-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .summary {
+                position: static;
+            }
+
+            .history-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 720px) {
+            .cart-item {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .nav-menu {
+                display: none;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <header class="header">
+        <nav class="nav">
+            <div class="nav-container">
+                <div class="logo">
+                    <h1>LYM</h1>
+                    <span>diseño e impresión</span>
+                </div>
+
+                <ul class="nav-menu">
+                    <li><a href="sistema.html">Inicio</a></li>
+                    <li><a href="sistema.html#productos">Productos</a></li>
+                    <li><a href="sistema.html#paquetes">Paquetes</a></li>
+                    <li><a href="sistema.html#contacto">Contacto</a></li>
+                </ul>
+
+                <div class="auth-buttons">
+                    <a href="sistema.html" class="btn btn-outline">Volver</a>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main class="page">
+        <div class="cart-wrap">
+
+            <!-- CARRITO -->
+            <section class="section-card">
+                <div class="cart-header">
+                    <div>
+                        <h1><i class="fas fa-shopping-cart"></i> Carrito</h1>
+                        <small>Administra tus productos y revisa tu resumen.</small>
+                    </div>
+                    <small id="itemsCount">0 artículos</small>
+                </div>
+
+                <div class="cart-grid">
+
+                    <div class="cart-card">
+                        <div class="cart-items-header">
+                            <h2>Productos</h2>
+                            <small>Modifica cantidades</small>
+                        </div>
+
+                        <div class="cart-items" id="cartItems"></div>
+
+                        <div id="emptyState" class="empty" style="display:none;">
+                            Tu carrito está vacío.
+                        </div>
+                    </div>
+
+                    <aside class="cart-card summary">
+                        <h2>Resumen</h2>
+
+                        <div class="summary-row">
+                            <span>Subtotal</span>
+                            <span id="subtotalTxt">$0</span>
+                        </div>
+
+                        <div class="summary-row">
+                            <span>Envío</span>
+                            <span id="shippingTxt">$0</span>
+                        </div>
+
+                        <div class="summary-row total">
+                            <span>Total</span>
+                            <span id="totalTxt">$0</span>
+                        </div>
+
+                        <div class="summary-actions">
+                            <a href="sistema.html" class="btn btn-outline btn-block">
+                                <i class="fas fa-arrow-left"></i> Seguir comprando
+                            </a>
+
+                            <a href="#mis-compras" class="btn btn-primary btn-block">
+                                <i class="fas fa-bag-shopping"></i> Ir a mis compras
+                            </a>
+                        </div>
+                    </aside>
+                </div>
+            </section>
+
+            <!-- MIS COMPRAS -->
+            <section class="section-card" id="mis-compras">
+                <div class="section-title-row">
+                    <div>
+                        <h2><i class="fas fa-receipt"></i> Mis compras</h2>
+                        <small>Historial reciente de 5 compras realizadas</small>
+                    </div>
+                </div>
+
+                <div class="history-grid" id="historyGrid"></div>
+            </section>
+        </div>
+    </main>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const contenedor = document.getElementById("cartItems");
+            const emptyState = document.getElementById("emptyState");
+            const subtotalTxt = document.getElementById("subtotalTxt");
+            const shippingTxt = document.getElementById("shippingTxt");
+            const totalTxt = document.getElementById("totalTxt");
+            const itemsCount = document.getElementById("itemsCount");
+            const historyGrid = document.getElementById("historyGrid");
+
+            let carrito = JSON.parse(localStorage.getItem("carrito")) || [];
+
+            const IMG_DEFAULT = "imagenes/default.png";
+
+            const historialCompras = [
+                {
+                    folio: "#LYM-10245",
+                    fecha: "10/04/2026",
+                    total: 1480,
+                    estado: "Entregado",
+                    clase: "entregado",
+                    productos: ["2 Tazas personalizadas", "1 Playera sublimada"]
+                },
+                {
+                    folio: "#LYM-10238",
+                    fecha: "05/04/2026",
+                    total: 890,
+                    estado: "En preparación",
+                    clase: "preparacion",
+                    productos: ["1 Lona publicitaria", "20 Stickers"]
+                },
+                {
+                    folio: "#LYM-10231",
+                    fecha: "29/03/2026",
+                    total: 2100,
+                    estado: "Enviado",
+                    clase: "enviado",
+                    productos: ["50 Tarjetas de presentación", "10 Tazas premium"]
+                },
+                {
+                    folio: "#LYM-10220",
+                    fecha: "21/03/2026",
+                    total: 760,
+                    estado: "Entregado",
+                    clase: "entregado",
+                    productos: ["1 Agenda personalizada", "5 Llaveros acrílicos"]
+                },
+                {
+                    folio: "#LYM-10211",
+                    fecha: "14/03/2026",
+                    total: 1350,
+                    estado: "Entregado",
+                    clase: "entregado",
+                    productos: ["3 Sudaderas estampadas", "1 Termo grabado"]
+                }
+            ];
+
+            function renderCarrito() {
+                contenedor.innerHTML = "";
+
+                if (carrito.length === 0) {
+                    emptyState.style.display = "block";
+                    subtotalTxt.textContent = "$0";
+                    shippingTxt.textContent = "$0";
+                    totalTxt.textContent = "$0";
+                    itemsCount.textContent = "0 artículos";
+                    localStorage.setItem("carrito", JSON.stringify(carrito));
+                    return;
+                }
+
+                emptyState.style.display = "none";
+
+                let subtotal = 0;
+                let totalArticulos = 0;
+
+                carrito.forEach((item, index) => {
+                    const itemTotal = Number(item.precio) * Number(item.cantidad);
+                    subtotal += itemTotal;
+                    totalArticulos += Number(item.cantidad);
+
+                    const imgSrc = item.imagen && item.imagen.trim() ? item.imagen : IMG_DEFAULT;
+
+                    const card = document.createElement("div");
+                    card.className = "cart-item";
+
+                    card.innerHTML = `
+                        <div style="width:84px; height:84px; flex:0 0 84px; border-radius:12px; overflow:hidden; border:1px solid rgba(0,0,0,.08); background:#fff;">
+                            <img 
+                                src="${imgSrc}" 
+                                alt="${item.producto}" 
+                                style="width:100%; height:100%; object-fit:cover; display:block;"
+                                onerror="this.onerror=null; this.src='${IMG_DEFAULT}';"
+                            >
+                        </div>
+
+                        <div style="flex:1;">
+                            <strong>${item.producto}</strong><br>
+                            <small>${item.descripcion || "Producto personalizado con acabado de alta calidad."}</small><br>
+                            <small>Precio: $${Number(item.precio).toFixed(2)}</small>
+                        </div>
+
+                        <div style="display:flex; align-items:center; gap:8px;">
+                            <button onclick="cambiarCantidad(${index}, -1)">−</button>
+                            <span>${item.cantidad}</span>
+                            <button onclick="cambiarCantidad(${index}, 1)">+</button>
+                        </div>
+
+                        <div style="width:110px; text-align:right;">
+                            <strong>$${itemTotal.toFixed(2)}</strong><br>
+                            <button onclick="eliminarItem(${index})" style="color:red; border:none; background:none; cursor:pointer;">
+                                Quitar
+                            </button>
+                        </div>
+                    `;
+
+                    contenedor.appendChild(card);
+                });
+
+                let envio = subtotal >= 500 ? 0 : 80;
+                let total = subtotal + envio;
+
+                subtotalTxt.textContent = "$" + subtotal.toFixed(2);
+                shippingTxt.textContent = "$" + envio.toFixed(2);
+                totalTxt.textContent = "$" + total.toFixed(2);
+                itemsCount.textContent = totalArticulos + (totalArticulos === 1 ? " artículo" : " artículos");
+
+                localStorage.setItem("carrito", JSON.stringify(carrito));
+            }
+
+            function renderHistorial() {
+                historyGrid.innerHTML = "";
+
+                historialCompras.forEach((compra, index) => {
+                    const card = document.createElement("div");
+                    card.className = "history-card";
+
+                    card.innerHTML = `
+                        <div class="history-top">
+                            <div>
+                                <div class="history-folio">${compra.folio}</div>
+                                <small style="color: var(--text-light);">Compra ${index + 1}</small>
+                            </div>
+                            <span class="status ${compra.clase}">${compra.estado}</span>
+                        </div>
+
+                        <div class="history-meta">
+                            <span><i class="fas fa-calendar-days"></i> ${compra.fecha}</span>
+                            <span class="badge-total"><i class="fas fa-money-bill-wave"></i> $${compra.total.toFixed(2)} MXN</span>
+                        </div>
+
+                        <div class="history-products">
+                            <strong>Productos</strong>
+                            <div>${compra.productos.join("<br>")}</div>
+                        </div>
+
+                        <div class="history-actions">
+                            <a href="ticketcompras.html?folio=${encodeURIComponent(compra.folio)}&fecha=${encodeURIComponent(compra.fecha)}&total=${encodeURIComponent(compra.total)}&estado=${encodeURIComponent(compra.estado)}" class="btn btn-primary">
+                                <i class="fas fa-file-invoice"></i> Ver ticket
+                            </a>
+                        </div>
+                    `;
+
+                    historyGrid.appendChild(card);
+                });
+            }
+
+            window.cambiarCantidad = function (index, cambio) {
+                carrito[index].cantidad += cambio;
+
+                if (carrito[index].cantidad <= 0) {
+                    carrito.splice(index, 1);
+                }
+
+                renderCarrito();
+            }
+
+            window.eliminarItem = function (index) {
+                carrito.splice(index, 1);
+                renderCarrito();
+            }
+
+            renderCarrito();
+            renderHistorial();
+        });
+    </script>
+</body>
+
+</html>
