@@ -39,6 +39,7 @@ try {
         echo json_encode(['error' => 'Credenciales inválidas']);
         exit();
     }
+
     
     // Iniciar sesión
     $_SESSION['user_id'] = $user['id'];
@@ -61,12 +62,12 @@ try {
         ]
     ]);
     
-} // catch (PDOException $e) {
- //   http_response_code(500);
-  //  echo json_encode(['error' => 'Error de base de datos: ' . $e->getMessage()]);
-} //catch (Exception $e) {
-   // http_response_code(500);
-   // echo json_encode(['error' => 'Error interno del servidor: ' . $e->getMessage()]);
+} catch (PDOException $e) {
+    http_response_code(500);
+    echo json_encode(['error' => 'Error de base de datos: ' . $e->getMessage()]);
+} catch (Exception $e) {
+    http_response_code(500);
+    echo json_encode(['error' => 'Error interno del servidor: ' . $e->getMessage()]);
 }
 ?>
 
