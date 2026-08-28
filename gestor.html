@@ -1,0 +1,2202 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>LMY - Panel de Gestión</title>
+
+    <link rel="stylesheet" href="Proyecto.css">
+
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+    <style>
+        body {
+            background: #f4f6fb;
+        }
+
+        .gestor-page {
+            padding-top: 90px;
+            min-height: 100vh;
+        }
+
+        /* TOPBAR */
+
+        .gestor-topbar {
+            background: white;
+            height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 30px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, .08);
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+        }
+
+        .gestor-logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .gestor-logo h1 {
+            font-size: 1.8rem;
+            margin: 0;
+            background: var(--gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .gestor-logo span {
+            color: var(--text-light);
+            font-size: .9rem;
+        }
+
+        .gestor-user {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .gestor-avatar {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            background: var(--gradient);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .gestor-user-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .gestor-user-info strong {
+            font-size: .9rem;
+        }
+
+        .gestor-user-info span {
+            font-size: .75rem;
+            color: var(--text-light);
+        }
+
+        /* LAYOUT */
+
+        .gestor-wrapper {
+            display: flex;
+            min-height: calc(100vh - 80px);
+        }
+
+        /* SIDEBAR */
+
+        .gestor-sidebar {
+            width: 250px;
+            background: linear-gradient(180deg, #6B46C1, #4c2d91);
+            color: white;
+            padding: 25px 15px;
+            flex-shrink: 0;
+        }
+
+        .sidebar-section-title {
+            font-size: .7rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            opacity: .6;
+            padding: 0 12px;
+            margin: 15px 0 8px;
+        }
+
+        .gestor-nav {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .gestor-nav button {
+            width: 100%;
+            border: none;
+            background: transparent;
+            color: rgba(255, 255, 255, .9);
+            padding: 12px 14px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-family: inherit;
+            font-size: .9rem;
+            cursor: pointer;
+            text-align: left;
+            transition: .25s;
+        }
+
+        .gestor-nav button i {
+            width: 20px;
+            text-align: center;
+        }
+
+        .gestor-nav button:hover {
+            background: rgba(255, 255, 255, .15);
+            transform: translateX(3px);
+        }
+
+        .gestor-nav button.active {
+            background: white;
+            color: #6B46C1;
+            font-weight: 600;
+        }
+
+        .logout-gestor {
+            margin-top: 30px;
+            border-top: 1px solid rgba(255, 255, 255, .15);
+            padding-top: 15px;
+        }
+
+        .logout-gestor button {
+            color: #ffd4d4;
+        }
+
+        /* CONTENIDO */
+
+        .gestor-content {
+            flex: 1;
+            padding: 30px;
+            overflow-x: auto;
+        }
+
+        .gestor-view {
+            display: none;
+            animation: gestorFade .3s ease;
+        }
+
+        .gestor-view.active {
+            display: block;
+        }
+
+        @keyframes gestorFade {
+            from {
+                opacity: 0;
+                transform: translateY(8px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* TITULOS */
+
+        .view-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        .view-title h2 {
+            margin: 0;
+            font-size: 1.8rem;
+            color: var(--text-dark);
+        }
+
+        .view-title p {
+            margin: 5px 0 0;
+            color: var(--text-light);
+        }
+
+        /* BOTONES */
+
+        .gestor-btn {
+            border: none;
+            border-radius: 10px;
+            padding: 11px 18px;
+            font-family: inherit;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: .25s;
+        }
+
+        .gestor-btn-primary {
+            background: var(--gradient);
+            color: white;
+        }
+
+        .gestor-btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow);
+        }
+
+        .gestor-btn-light {
+            background: white;
+            border: 1px solid #e5e7eb;
+            color: var(--text-dark);
+        }
+
+        .gestor-btn-danger {
+            background: #fee2e2;
+            color: #b91c1c;
+        }
+
+        .gestor-btn-warning {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        /* DASHBOARD */
+
+        .dashboard-cards {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            margin-bottom: 25px;
+        }
+
+        .dashboard-card {
+            background: white;
+            padding: 22px;
+            border-radius: 14px;
+            box-shadow: var(--shadow);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: .25s;
+        }
+
+        .dashboard-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-hover);
+        }
+
+        .dashboard-card-info span {
+            color: var(--text-light);
+            font-size: .85rem;
+        }
+
+        .dashboard-card-info h3 {
+            margin: 5px 0 0;
+            font-size: 1.7rem;
+        }
+
+        .dashboard-icon {
+            width: 52px;
+            height: 52px;
+            border-radius: 14px;
+            background: linear-gradient(135deg,
+                    rgba(107, 70, 193, .12),
+                    rgba(236, 72, 153, .12));
+            color: var(--primary-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.4rem;
+        }
+
+        /* PANELES */
+
+        .gestor-panel {
+            background: white;
+            border-radius: 14px;
+            box-shadow: var(--shadow);
+            padding: 22px;
+            margin-bottom: 25px;
+        }
+
+        .panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 18px;
+        }
+
+        .panel-header h3 {
+            margin: 0;
+            font-size: 1.1rem;
+        }
+
+        /* TABLAS */
+
+        .gestor-table-wrapper {
+            overflow-x: auto;
+        }
+
+        .gestor-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .gestor-table th {
+            background: #f8f9fc;
+            padding: 13px;
+            text-align: left;
+            font-size: .8rem;
+            color: var(--text-light);
+        }
+
+        .gestor-table td {
+            padding: 14px 13px;
+            border-bottom: 1px solid #edf0f5;
+            font-size: .85rem;
+        }
+
+        .gestor-table tr:hover td {
+            background: #faf9ff;
+        }
+
+        /* ESTADOS */
+
+        .status {
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: .75rem;
+            font-weight: 600;
+            display: inline-block;
+        }
+
+        .status-success {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .status-warning {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .status-danger {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .status-info {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        /* PRODUCTOS */
+
+        .gestor-products {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+        }
+
+        .gestor-product {
+            background: #fff;
+            border: 1px solid #eee;
+            border-radius: 14px;
+            overflow: hidden;
+            transition: .25s;
+        }
+
+        .gestor-product:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow);
+        }
+
+        .gestor-product-image {
+            height: 130px;
+            background: var(--gradient);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 3rem;
+        }
+
+        .gestor-product-body {
+            padding: 18px;
+        }
+
+        .gestor-product-body h3 {
+            margin: 0 0 5px;
+            font-size: 1rem;
+        }
+
+        .gestor-product-body p {
+            color: var(--text-light);
+            font-size: .85rem;
+            margin-bottom: 12px;
+        }
+
+        .product-price {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--primary-color);
+        }
+
+        .product-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 15px;
+        }
+
+        .product-actions button {
+            flex: 1;
+        }
+
+        /* ACCIONES */
+
+        .quick-actions {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+        }
+
+        .quick-action {
+            border: 1px solid #eee;
+            background: white;
+            border-radius: 12px;
+            padding: 18px;
+            cursor: pointer;
+            text-align: center;
+            transition: .25s;
+            font-family: inherit;
+        }
+
+        .quick-action:hover {
+            border-color: var(--primary-color);
+            transform: translateY(-3px);
+        }
+
+        .quick-action i {
+            font-size: 1.5rem;
+            color: var(--primary-color);
+            margin-bottom: 8px;
+        }
+
+        .quick-action span {
+            display: block;
+            font-size: .85rem;
+            font-weight: 600;
+        }
+
+        /* BUSCADOR */
+
+        .gestor-search {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .gestor-search input,
+        .gestor-form input,
+        .gestor-form select,
+        .gestor-form textarea {
+            width: 100%;
+            padding: 11px 13px;
+            border: 2px solid #e5e7eb;
+            border-radius: 10px;
+            font-family: inherit;
+            outline: none;
+            transition: .2s;
+        }
+
+        .gestor-search input:focus,
+        .gestor-form input:focus,
+        .gestor-form select:focus,
+        .gestor-form textarea:focus {
+            border-color: var(--primary-color);
+        }
+
+        /* FORMULARIO */
+
+        .gestor-form {
+            display: grid;
+            gap: 15px;
+        }
+
+        .gestor-form label {
+            font-size: .85rem;
+            font-weight: 600;
+            margin-bottom: 5px;
+            display: block;
+        }
+
+        .form-two {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        /* RESPONSIVE */
+
+        @media(max-width:1100px) {
+
+            .dashboard-cards {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .gestor-products {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .quick-actions {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media(max-width:800px) {
+
+            .gestor-wrapper {
+                flex-direction: column;
+            }
+
+            .gestor-sidebar {
+                width: 100%;
+            }
+
+            .gestor-nav {
+                flex-direction: row;
+                flex-wrap: wrap;
+            }
+
+            .gestor-nav button {
+                width: auto;
+            }
+
+            .dashboard-cards {
+                grid-template-columns: 1fr;
+            }
+
+            .gestor-products {
+                grid-template-columns: 1fr;
+            }
+
+            .gestor-content {
+                padding: 20px;
+            }
+
+            .form-two {
+                grid-template-columns: 1fr;
+            }
+
+            .gestor-user-info {
+                display: none;
+            }
+        }
+
+        @media(max-width:500px) {
+
+            .gestor-topbar {
+                padding: 0 15px;
+            }
+
+            .gestor-logo span {
+                display: none;
+            }
+
+            .quick-actions {
+                grid-template-columns: 1fr;
+            }
+
+            .view-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- TOPBAR -->
+
+    <header class="gestor-topbar">
+
+        <div class="gestor-logo">
+            <h1>LMY</h1>
+            <span>Panel de Gestión</span>
+        </div>
+
+        <div class="gestor-user">
+
+            <div class="gestor-user-info">
+                <strong id="gestorName">Gestor</strong>
+                <span>Gestor del sistema</span>
+            </div>
+
+            <div class="gestor-avatar">
+                <i class="fas fa-user"></i>
+            </div>
+
+        </div>
+
+    </header>
+
+
+    <div class="gestor-page">
+
+        <div class="gestor-wrapper">
+
+
+            <!-- SIDEBAR -->
+
+            <aside class="gestor-sidebar">
+
+                <div class="sidebar-section-title">
+                    Principal
+                </div>
+
+                <nav class="gestor-nav">
+
+                    <button class="active" onclick="showView('dashboard', this)">
+                        <i class="fas fa-chart-line"></i>
+                        Dashboard
+                    </button>
+
+                    <button onclick="showView('productos', this)">
+                        <i class="fas fa-box"></i>
+                        Productos
+                    </button>
+
+                    <button onclick="showView('pedidos', this)">
+                        <i class="fas fa-shopping-cart"></i>
+                        Pedidos
+                    </button>
+
+                    <button onclick="showView('clientes', this)">
+                        <i class="fas fa-users"></i>
+                        Clientes
+                    </button>
+
+                </nav>
+
+
+                <div class="sidebar-section-title">
+                    Gestión
+                </div>
+
+                <nav class="gestor-nav">
+
+                    <button onclick="showView('ventas', this)">
+                        <i class="fas fa-dollar-sign"></i>
+                        Ventas
+                    </button>
+
+                    <button onclick="showView('publicaciones', this)">
+                        <i class="fas fa-images"></i>
+                        Publicaciones
+                    </button>
+
+                    <button onclick="showView('promociones', this)">
+                        <i class="fas fa-tags"></i>
+                        Promociones
+                    </button>
+
+                    <button onclick="showView('facturacion', this)">
+                        <i class="fas fa-file-invoice"></i>
+                        Facturación
+                    </button>
+
+                </nav>
+
+
+                <div class="sidebar-section-title">
+                    Sistema
+                </div>
+
+                <nav class="gestor-nav">
+
+                    <button onclick="showView('configuracion', this)">
+                        <i class="fas fa-cog"></i>
+                        Configuración
+                    </button>
+
+                </nav>
+
+
+                <div class="logout-gestor">
+
+                    <nav class="gestor-nav">
+
+                        <button onclick="logoutGestor()">
+                            <i class="fas fa-sign-out-alt"></i>
+                            Cerrar sesión
+                        </button>
+
+                    </nav>
+
+                </div>
+
+            </aside>
+
+
+            <!-- CONTENIDO -->
+
+            <main class="gestor-content">
+
+
+                <!-- DASHBOARD -->
+
+                <section id="dashboard" class="gestor-view active">
+
+                    <div class="view-header">
+
+                        <div class="view-title">
+                            <h2>Dashboard</h2>
+                            <p>
+                                Resumen general de LMY Diseño e Impresión
+                            </p>
+                        </div>
+
+                        <button class="gestor-btn gestor-btn-primary"
+                            onclick="showNotification('Información actualizada')">
+
+                            <i class="fas fa-sync"></i>
+                            Actualizar
+
+                        </button>
+
+                    </div>
+
+
+                    <div class="dashboard-cards">
+
+                        <div class="dashboard-card">
+
+                            <div class="dashboard-card-info">
+                                <span>Ventas del mes</span>
+                                <h3>$18,450</h3>
+                            </div>
+
+                            <div class="dashboard-icon">
+                                <i class="fas fa-dollar-sign"></i>
+                            </div>
+
+                        </div>
+
+
+                        <div class="dashboard-card">
+
+                            <div class="dashboard-card-info">
+                                <span>Pedidos</span>
+                                <h3>42</h3>
+                            </div>
+
+                            <div class="dashboard-icon">
+                                <i class="fas fa-shopping-bag"></i>
+                            </div>
+
+                        </div>
+
+
+                        <div class="dashboard-card">
+
+                            <div class="dashboard-card-info">
+                                <span>Clientes</span>
+                                <h3>128</h3>
+                            </div>
+
+                            <div class="dashboard-icon">
+                                <i class="fas fa-users"></i>
+                            </div>
+
+                        </div>
+
+
+                        <div class="dashboard-card">
+
+                            <div class="dashboard-card-info">
+                                <span>Productos</span>
+                                <h3>24</h3>
+                            </div>
+
+                            <div class="dashboard-icon">
+                                <i class="fas fa-box-open"></i>
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- ACCIONES RÁPIDAS -->
+
+                    <div class="gestor-panel">
+
+                        <div class="panel-header">
+                            <h3>Acciones rápidas</h3>
+                        </div>
+
+                        <div class="quick-actions">
+
+                            <button class="quick-action" onclick="showViewByName('productos')">
+
+                                <i class="fas fa-plus-circle"></i>
+
+                                <span>Agregar producto</span>
+
+                            </button>
+
+                            <button class="quick-action" onclick="showViewByName('pedidos')">
+
+                                <i class="fas fa-shopping-cart"></i>
+
+                                <span>Ver pedidos</span>
+
+                            </button>
+
+                            <button class="quick-action" onclick="showViewByName('promociones')">
+
+                                <i class="fas fa-tag"></i>
+
+                                <span>Nueva promoción</span>
+
+                            </button>
+
+                            <button class="quick-action" onclick="showViewByName('clientes')">
+
+                                <i class="fas fa-user-plus"></i>
+
+                                <span>Ver clientes</span>
+
+                            </button>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- PEDIDOS RECIENTES -->
+
+                    <div class="gestor-panel">
+
+                        <div class="panel-header">
+
+                            <h3>Pedidos recientes</h3>
+
+                            <button class="gestor-btn gestor-btn-light" onclick="showViewByName('pedidos')">
+
+                                Ver todos
+
+                            </button>
+
+                        </div>
+
+
+                        <div class="gestor-table-wrapper">
+
+                            <table class="gestor-table">
+
+                                <thead>
+
+                                    <tr>
+                                        <th>Pedido</th>
+                                        <th>Cliente</th>
+                                        <th>Producto</th>
+                                        <th>Total</th>
+                                        <th>Estado</th>
+                                    </tr>
+
+                                </thead>
+
+                                <tbody>
+
+                                    <tr>
+                                        <td>#LMY-00125</td>
+                                        <td>María López</td>
+                                        <td>Taza personalizada</td>
+                                        <td>$120</td>
+                                        <td>
+                                            <span class="status status-success">
+                                                Entregado
+                                            </span>
+                                        </td>
+                                    </tr>
+
+                                    <tr>
+                                        <td>#LMY-00124</td>
+                                        <td>Carlos Ramírez</td>
+                                        <td>Sudadera</td>
+                                        <td>$425</td>
+                                        <td>
+                                            <span class="status status-warning">
+                                                Pendiente
+                                            </span>
+                                        </td>
+                                    </tr>
+
+                                    <tr>
+                                        <td>#LMY-00123</td>
+                                        <td>Fernanda Torres</td>
+                                        <td>Paquete estudiante</td>
+                                        <td>$520</td>
+                                        <td>
+                                            <span class="status status-info">
+                                                En preparación
+                                            </span>
+                                        </td>
+                                    </tr>
+
+                                </tbody>
+
+                            </table>
+
+                        </div>
+
+                    </div>
+
+                </section>
+
+
+                <!-- PRODUCTOS -->
+
+                <section id="productos" class="gestor-view">
+
+                    <div class="view-header">
+
+                        <div class="view-title">
+
+                            <h2>Productos</h2>
+
+                            <p>
+                                Administra el catálogo de LMY
+                            </p>
+
+                        </div>
+
+                        <button class="gestor-btn gestor-btn-primary"
+                            onclick="showNotification('Formulario de producto')">
+
+                            <i class="fas fa-plus"></i>
+
+                            Nuevo producto
+
+                        </button>
+
+                    </div>
+
+
+                    <div class="gestor-search">
+
+                        <input type="text" placeholder="Buscar producto..." onkeyup="searchProducts(this.value)">
+
+                    </div>
+
+
+                    <div class="gestor-products" id="productsContainer">
+
+
+                        <div class="gestor-product" data-name="Tazas Personalizadas">
+
+                            <div class="gestor-product-image">
+                                <i class="fas fa-mug-hot"></i>
+                            </div>
+
+                            <div class="gestor-product-body">
+
+                                <h3>Tazas Personalizadas</h3>
+
+                                <p>
+                                    Personalizadas con diseño del cliente.
+                                </p>
+
+                                <span class="product-price">
+                                    Desde $85
+                                </span>
+
+                                <div class="product-actions">
+
+                                    <button class="gestor-btn gestor-btn-warning">
+
+                                        <i class="fas fa-edit"></i>
+                                        Editar
+
+                                    </button>
+
+                                    <button class="gestor-btn gestor-btn-danger" onclick="deleteProduct(this)">
+
+                                        <i class="fas fa-trash"></i>
+                                        Eliminar
+
+                                    </button>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="gestor-product" data-name="Tapete Afelpado">
+
+                            <div class="gestor-product-image">
+                                <i class="fas fa-home"></i>
+                            </div>
+
+                            <div class="gestor-product-body">
+
+                                <h3>Tapete Afelpado</h3>
+
+                                <p>
+                                    Tapetes personalizados.
+                                </p>
+
+                                <span class="product-price">
+                                    $300
+                                </span>
+
+                                <div class="product-actions">
+
+                                    <button class="gestor-btn gestor-btn-warning">
+
+                                        <i class="fas fa-edit"></i>
+                                        Editar
+
+                                    </button>
+
+                                    <button class="gestor-btn gestor-btn-danger" onclick="deleteProduct(this)">
+
+                                        <i class="fas fa-trash"></i>
+                                        Eliminar
+
+                                    </button>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="gestor-product" data-name="Sudaderas">
+
+                            <div class="gestor-product-image">
+                                <i class="fas fa-shirt"></i>
+                            </div>
+
+                            <div class="gestor-product-body">
+
+                                <h3>Sudaderas</h3>
+
+                                <p>
+                                    Sudaderas personalizadas.
+                                </p>
+
+                                <span class="product-price">
+                                    Desde $425
+                                </span>
+
+                                <div class="product-actions">
+
+                                    <button class="gestor-btn gestor-btn-warning">
+
+                                        <i class="fas fa-edit"></i>
+                                        Editar
+
+                                    </button>
+
+                                    <button class="gestor-btn gestor-btn-danger" onclick="deleteProduct(this)">
+
+                                        <i class="fas fa-trash"></i>
+                                        Eliminar
+
+                                    </button>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="gestor-product" data-name="Camisas de Uniforme">
+
+                            <div class="gestor-product-image">
+                                <i class="fas fa-user-tie"></i>
+                            </div>
+
+                            <div class="gestor-product-body">
+
+                                <h3>Camisas de Uniforme</h3>
+
+                                <p>
+                                    Uniformes personalizados.
+                                </p>
+
+                                <span class="product-price">
+                                    Desde $195
+                                </span>
+
+                                <div class="product-actions">
+
+                                    <button class="gestor-btn gestor-btn-warning">
+
+                                        <i class="fas fa-edit"></i>
+                                        Editar
+
+                                    </button>
+
+                                    <button class="gestor-btn gestor-btn-danger" onclick="deleteProduct(this)">
+
+                                        <i class="fas fa-trash"></i>
+                                        Eliminar
+
+                                    </button>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="gestor-product" data-name="Termos Personalizados">
+
+                            <div class="gestor-product-image">
+                                <i class="fas fa-bottle-water"></i>
+                            </div>
+
+                            <div class="gestor-product-body">
+
+                                <h3>Termos Personalizados</h3>
+
+                                <p>
+                                    Termos personalizados.
+                                </p>
+
+                                <span class="product-price">
+                                    Desde $180
+                                </span>
+
+                                <div class="product-actions">
+
+                                    <button class="gestor-btn gestor-btn-warning">
+
+                                        <i class="fas fa-edit"></i>
+                                        Editar
+
+                                    </button>
+
+                                    <button class="gestor-btn gestor-btn-danger" onclick="deleteProduct(this)">
+
+                                        <i class="fas fa-trash"></i>
+                                        Eliminar
+
+                                    </button>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </section>
+
+
+                <!-- PEDIDOS -->
+
+                <section id="pedidos" class="gestor-view">
+
+                    <div class="view-header">
+
+                        <div class="view-title">
+
+                            <h2>Pedidos</h2>
+
+                            <p>
+                                Consulta y administra los pedidos realizados
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="gestor-panel">
+
+                        <div class="gestor-table-wrapper">
+
+                            <table class="gestor-table">
+
+                                <thead>
+
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Cliente</th>
+                                        <th>Fecha</th>
+                                        <th>Producto</th>
+                                        <th>Total</th>
+                                        <th>Estado</th>
+                                        <th>Acciones</th>
+                                    </tr>
+
+                                </thead>
+
+                                <tbody>
+
+                                    <tr>
+
+                                        <td>#125</td>
+                                        <td>María López</td>
+                                        <td>28/08/2026</td>
+                                        <td>Taza personalizada</td>
+                                        <td>$120</td>
+
+                                        <td>
+                                            <span class="status status-success">
+                                                Entregado
+                                            </span>
+                                        </td>
+
+                                        <td>
+                                            <button class="gestor-btn gestor-btn-light">
+                                                Ver
+                                            </button>
+                                        </td>
+
+                                    </tr>
+
+
+                                    <tr>
+
+                                        <td>#124</td>
+                                        <td>Carlos Ramírez</td>
+                                        <td>28/08/2026</td>
+                                        <td>Sudadera</td>
+                                        <td>$425</td>
+
+                                        <td>
+                                            <span class="status status-warning">
+                                                Pendiente
+                                            </span>
+                                        </td>
+
+                                        <td>
+                                            <button class="gestor-btn gestor-btn-light">
+                                                Ver
+                                            </button>
+                                        </td>
+
+                                    </tr>
+
+
+                                    <tr>
+
+                                        <td>#123</td>
+                                        <td>Fernanda Torres</td>
+                                        <td>27/08/2026</td>
+                                        <td>Paquete estudiante</td>
+                                        <td>$520</td>
+
+                                        <td>
+                                            <span class="status status-info">
+                                                En preparación
+                                            </span>
+                                        </td>
+
+                                        <td>
+                                            <button class="gestor-btn gestor-btn-light">
+                                                Ver
+                                            </button>
+                                        </td>
+
+                                    </tr>
+
+                                </tbody>
+
+                            </table>
+
+                        </div>
+
+                    </div>
+
+                </section>
+
+
+                <!-- CLIENTES -->
+
+                <section id="clientes" class="gestor-view">
+
+                    <div class="view-header">
+
+                        <div class="view-title">
+
+                            <h2>Clientes</h2>
+
+                            <p>
+                                Usuarios registrados en LMY
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="gestor-panel">
+
+                        <div class="gestor-search">
+
+                            <input type="text" placeholder="Buscar cliente...">
+
+                        </div>
+
+
+                        <div class="gestor-table-wrapper">
+
+                            <table class="gestor-table">
+
+                                <thead>
+
+                                    <tr>
+                                        <th>Cliente</th>
+                                        <th>Email</th>
+                                        <th>Pedidos</th>
+                                        <th>Total comprado</th>
+                                        <th>Estado</th>
+                                    </tr>
+
+                                </thead>
+
+                                <tbody>
+
+                                    <tr>
+
+                                        <td>María López</td>
+                                        <td>maria@email.com</td>
+                                        <td>12</td>
+                                        <td>$4,850</td>
+
+                                        <td>
+                                            <span class="status status-success">
+                                                Activo
+                                            </span>
+                                        </td>
+
+                                    </tr>
+
+
+                                    <tr>
+
+                                        <td>Carlos Ramírez</td>
+                                        <td>carlos@email.com</td>
+                                        <td>8</td>
+                                        <td>$3,240</td>
+
+                                        <td>
+                                            <span class="status status-success">
+                                                Activo
+                                            </span>
+                                        </td>
+
+                                    </tr>
+
+
+                                    <tr>
+
+                                        <td>Fernanda Torres</td>
+                                        <td>fernanda@email.com</td>
+                                        <td>5</td>
+                                        <td>$1,950</td>
+
+                                        <td>
+                                            <span class="status status-success">
+                                                Activo
+                                            </span>
+                                        </td>
+
+                                    </tr>
+
+                                </tbody>
+
+                            </table>
+
+                        </div>
+
+                    </div>
+
+                </section>
+
+
+                <!-- VENTAS -->
+
+                <section id="ventas" class="gestor-view">
+
+                    <div class="view-header">
+
+                        <div class="view-title">
+
+                            <h2>Ventas</h2>
+
+                            <p>
+                                Resumen de ingresos y ventas
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="dashboard-cards">
+
+                        <div class="dashboard-card">
+
+                            <div class="dashboard-card-info">
+                                <span>Ventas hoy</span>
+                                <h3>$1,250</h3>
+                            </div>
+
+                            <div class="dashboard-icon">
+                                <i class="fas fa-money-bill"></i>
+                            </div>
+
+                        </div>
+
+
+                        <div class="dashboard-card">
+
+                            <div class="dashboard-card-info">
+                                <span>Esta semana</span>
+                                <h3>$7,890</h3>
+                            </div>
+
+                            <div class="dashboard-icon">
+                                <i class="fas fa-chart-line"></i>
+                            </div>
+
+                        </div>
+
+
+                        <div class="dashboard-card">
+
+                            <div class="dashboard-card-info">
+                                <span>Este mes</span>
+                                <h3>$18,450</h3>
+                            </div>
+
+                            <div class="dashboard-icon">
+                                <i class="fas fa-calendar"></i>
+                            </div>
+
+                        </div>
+
+
+                        <div class="dashboard-card">
+
+                            <div class="dashboard-card-info">
+                                <span>Ticket promedio</span>
+                                <h3>$385</h3>
+                            </div>
+
+                            <div class="dashboard-icon">
+                                <i class="fas fa-receipt"></i>
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="gestor-panel">
+
+                        <div class="panel-header">
+
+                            <h3>Últimas ventas</h3>
+
+                        </div>
+
+
+                        <div class="gestor-table-wrapper">
+
+                            <table class="gestor-table">
+
+                                <thead>
+
+                                    <tr>
+                                        <th>Fecha</th>
+                                        <th>Cliente</th>
+                                        <th>Producto</th>
+                                        <th>Método</th>
+                                        <th>Total</th>
+                                    </tr>
+
+                                </thead>
+
+                                <tbody>
+
+                                    <tr>
+                                        <td>28/08/2026</td>
+                                        <td>María López</td>
+                                        <td>Taza</td>
+                                        <td>Tarjeta</td>
+                                        <td>$120</td>
+                                    </tr>
+
+                                    <tr>
+                                        <td>28/08/2026</td>
+                                        <td>Carlos Ramírez</td>
+                                        <td>Sudadera</td>
+                                        <td>PayPal</td>
+                                        <td>$425</td>
+                                    </tr>
+
+                                    <tr>
+                                        <td>27/08/2026</td>
+                                        <td>Fernanda Torres</td>
+                                        <td>Paquete</td>
+                                        <td>Efectivo</td>
+                                        <td>$520</td>
+                                    </tr>
+
+                                </tbody>
+
+                            </table>
+
+                        </div>
+
+                    </div>
+
+                </section>
+
+
+                <!-- PUBLICACIONES -->
+
+                <section id="publicaciones" class="gestor-view">
+
+                    <div class="view-header">
+
+                        <div class="view-title">
+
+                            <h2>Publicaciones</h2>
+
+                            <p>
+                                Administra las publicaciones de LMY
+                            </p>
+
+                        </div>
+
+                        <button class="gestor-btn gestor-btn-primary">
+
+                            <i class="fas fa-plus"></i>
+
+                            Nueva publicación
+
+                        </button>
+
+                    </div>
+
+
+                    <div class="gestor-products">
+
+                        <div class="gestor-product">
+
+                            <div class="gestor-product-image">
+                                <i class="fas fa-image"></i>
+                            </div>
+
+                            <div class="gestor-product-body">
+
+                                <h3>Promo Día de las Madres</h3>
+
+                                <p>
+                                    Publicación promocional.
+                                </p>
+
+                                <span class="status status-success">
+                                    Publicada
+                                </span>
+
+                                <div class="product-actions">
+
+                                    <button class="gestor-btn gestor-btn-warning">
+                                        <i class="fas fa-edit"></i>
+                                        Editar
+                                    </button>
+
+                                    <button class="gestor-btn gestor-btn-danger">
+                                        <i class="fas fa-trash"></i>
+                                        Eliminar
+                                    </button>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="gestor-product">
+
+                            <div class="gestor-product-image">
+                                <i class="fas fa-bullhorn"></i>
+                            </div>
+
+                            <div class="gestor-product-body">
+
+                                <h3>Promoción de verano</h3>
+
+                                <p>
+                                    Campaña especial.
+                                </p>
+
+                                <span class="status status-warning">
+                                    Borrador
+                                </span>
+
+                                <div class="product-actions">
+
+                                    <button class="gestor-btn gestor-btn-warning">
+                                        <i class="fas fa-edit"></i>
+                                        Editar
+                                    </button>
+
+                                    <button class="gestor-btn gestor-btn-danger">
+                                        <i class="fas fa-trash"></i>
+                                        Eliminar
+                                    </button>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </section>
+
+
+                <!-- PROMOCIONES -->
+
+                <section id="promociones" class="gestor-view">
+
+                    <div class="view-header">
+
+                        <div class="view-title">
+
+                            <h2>Promociones</h2>
+
+                            <p>
+                                Administra descuentos y campañas
+                            </p>
+
+                        </div>
+
+                        <button class="gestor-btn gestor-btn-primary">
+
+                            <i class="fas fa-plus"></i>
+
+                            Nueva promoción
+
+                        </button>
+
+                    </div>
+
+
+                    <div class="gestor-panel">
+
+                        <div class="gestor-table-wrapper">
+
+                            <table class="gestor-table">
+
+                                <thead>
+
+                                    <tr>
+                                        <th>Promoción</th>
+                                        <th>Descuento</th>
+                                        <th>Inicio</th>
+                                        <th>Fin</th>
+                                        <th>Estado</th>
+                                    </tr>
+
+                                </thead>
+
+                                <tbody>
+
+                                    <tr>
+
+                                        <td>20 piezas iguales</td>
+                                        <td>10%</td>
+                                        <td>01/08/2026</td>
+                                        <td>31/08/2026</td>
+
+                                        <td>
+                                            <span class="status status-success">
+                                                Activa
+                                            </span>
+                                        </td>
+
+                                    </tr>
+
+
+                                    <tr>
+
+                                        <td>Promo especial</td>
+                                        <td>15%</td>
+                                        <td>01/09/2026</td>
+                                        <td>30/09/2026</td>
+
+                                        <td>
+                                            <span class="status status-warning">
+                                                Programada
+                                            </span>
+                                        </td>
+
+                                    </tr>
+
+                                </tbody>
+
+                            </table>
+
+                        </div>
+
+                    </div>
+
+                </section>
+
+
+                <!-- FACTURACIÓN -->
+
+                <section id="facturacion" class="gestor-view">
+
+                    <div class="view-header">
+
+                        <div class="view-title">
+
+                            <h2>Facturación</h2>
+
+                            <p>
+                                Solicitudes de facturación de clientes
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="gestor-panel">
+
+                        <div class="gestor-table-wrapper">
+
+                            <table class="gestor-table">
+
+                                <thead>
+
+                                    <tr>
+                                        <th>Folio</th>
+                                        <th>Razón social</th>
+                                        <th>RFC</th>
+                                        <th>Correo</th>
+                                        <th>CFDI</th>
+                                        <th>Estado</th>
+                                    </tr>
+
+                                </thead>
+
+                                <tbody>
+
+                                    <tr>
+
+                                        <td>TK-1025</td>
+                                        <td>Empresa ABC</td>
+                                        <td>ABC123456XYZ</td>
+                                        <td>facturacion@empresa.com</td>
+                                        <td>G03</td>
+
+                                        <td>
+                                            <span class="status status-warning">
+                                                Pendiente
+                                            </span>
+                                        </td>
+
+                                    </tr>
+
+
+                                    <tr>
+
+                                        <td>TK-1024</td>
+                                        <td>Comercial XYZ</td>
+                                        <td>XYZ987654ABC</td>
+                                        <td>admin@xyz.com</td>
+                                        <td>G01</td>
+
+                                        <td>
+                                            <span class="status status-success">
+                                                Facturada
+                                            </span>
+                                        </td>
+
+                                    </tr>
+
+                                </tbody>
+
+                            </table>
+
+                        </div>
+
+                    </div>
+
+                </section>
+
+
+                <!-- CONFIGURACIÓN -->
+
+                <section id="configuracion" class="gestor-view">
+
+                    <div class="view-header">
+
+                        <div class="view-title">
+
+                            <h2>Configuración</h2>
+
+                            <p>
+                                Configuración general del sistema
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="gestor-panel">
+
+                        <form class="gestor-form" onsubmit="saveSettings(event)">
+
+                            <div class="form-two">
+
+                                <div>
+
+                                    <label>
+                                        Nombre del negocio
+                                    </label>
+
+                                    <input type="text" value="LMY Diseño e Impresión">
+
+                                </div>
+
+
+                                <div>
+
+                                    <label>
+                                        Correo administrativo
+                                    </label>
+
+                                    <input type="email" value="admin@lmy.com">
+
+                                </div>
+
+                            </div>
+
+
+                            <div>
+
+                                <label>
+                                    Teléfono
+                                </label>
+
+                                <input type="text" value="449-362-0191">
+
+                            </div>
+
+
+                            <div>
+
+                                <label>
+                                    Descripción
+                                </label>
+
+                                <textarea rows="4">Diseño, sublimación e impresión personalizada.</textarea>
+
+                            </div>
+
+
+                            <button class="gestor-btn gestor-btn-primary" type="submit">
+
+                                <i class="fas fa-save"></i>
+
+                                Guardar cambios
+
+                            </button>
+
+                        </form>
+
+                    </div>
+
+                </section>
+
+
+            </main>
+
+        </div>
+
+    </div>
+
+
+    <!-- JAVASCRIPT -->
+
+    <script>
+
+        /* CAMBIAR VISTA */
+
+        function showView(viewId, button) {
+
+            document.querySelectorAll(".gestor-view")
+                .forEach(view => {
+
+                    view.classList.remove("active");
+
+                });
+
+
+            const selectedView =
+                document.getElementById(viewId);
+
+            if (selectedView) {
+
+                selectedView.classList.add("active");
+
+            }
+
+
+            document.querySelectorAll(".gestor-nav button")
+                .forEach(btn => {
+
+                    btn.classList.remove("active");
+
+                });
+
+
+            if (button) {
+
+                button.classList.add("active");
+
+            }
+
+        }
+
+
+        /* CAMBIAR VISTA DESDE ACCIONES */
+
+        function showViewByName(viewId) {
+
+            const buttons =
+                document.querySelectorAll(".gestor-nav button");
+
+            let targetButton = null;
+
+            buttons.forEach(button => {
+
+                const text =
+                    button.innerText.toLowerCase();
+
+                if (
+                    (viewId === "productos" && text.includes("productos")) ||
+                    (viewId === "pedidos" && text.includes("pedidos")) ||
+                    (viewId === "clientes" && text.includes("clientes")) ||
+                    (viewId === "promociones" && text.includes("promociones"))
+                ) {
+
+                    targetButton = button;
+
+                }
+
+            });
+
+            showView(viewId, targetButton);
+
+        }
+
+
+        /* BUSCAR PRODUCTOS */
+
+        function searchProducts(text) {
+
+            const products =
+                document.querySelectorAll(".gestor-product");
+
+            const search =
+                text.toLowerCase();
+
+            products.forEach(product => {
+
+                const name =
+                    product.dataset.name || "";
+
+                if (
+                    name.toLowerCase().includes(search)
+                ) {
+
+                    product.style.display = "";
+
+                } else {
+
+                    product.style.display = "none";
+
+                }
+
+            });
+
+        }
+
+
+        /* ELIMINAR PRODUCTO */
+
+        function deleteProduct(button) {
+
+            const confirmation =
+                confirm(
+                    "¿Seguro que deseas eliminar este producto?"
+                );
+
+            if (!confirmation) {
+                return;
+            }
+
+            const product =
+                button.closest(".gestor-product");
+
+            product.remove();
+
+            showNotification(
+                "Producto eliminado correctamente"
+            );
+
+        }
+
+
+        /* NOTIFICACIÓN */
+
+        function showNotification(message) {
+
+            let notification =
+                document.getElementById("gestorNotification");
+
+
+            if (!notification) {
+
+                notification =
+                    document.createElement("div");
+
+                notification.id =
+                    "gestorNotification";
+
+                notification.style.position =
+                    "fixed";
+
+                notification.style.top =
+                    "100px";
+
+                notification.style.right =
+                    "25px";
+
+                notification.style.background =
+                    "linear-gradient(135deg,#6B46C1,#EC4899)";
+
+                notification.style.color =
+                    "white";
+
+                notification.style.padding =
+                    "15px 22px";
+
+                notification.style.borderRadius =
+                    "12px";
+
+                notification.style.fontWeight =
+                    "600";
+
+                notification.style.boxShadow =
+                    "0 10px 30px rgba(0,0,0,.2)";
+
+                notification.style.zIndex =
+                    "9999";
+
+                notification.style.transition =
+                    ".3s";
+
+                document.body.appendChild(
+                    notification
+                );
+
+            }
+
+
+            notification.innerHTML =
+                "✔ " + message;
+
+            notification.style.opacity = "1";
+
+
+            setTimeout(() => {
+
+                notification.style.opacity = "0";
+
+            }, 2500);
+
+        }
+
+
+        /* GUARDAR CONFIGURACIÓN */
+
+        function saveSettings(event) {
+
+            event.preventDefault();
+
+            showNotification(
+                "Configuración guardada correctamente"
+            );
+
+        }
+
+
+        /* CERRAR SESIÓN */
+
+        function logoutGestor() {
+
+            const confirmation =
+                confirm(
+                    "¿Deseas cerrar sesión?"
+                );
+
+            if (!confirmation) {
+                return;
+            }
+
+            window.location.href =
+                "index.html";
+
+        }
+
+
+        /* CARGAR NOMBRE DEL GESTOR */
+
+        document.addEventListener(
+            "DOMContentLoaded",
+            function () {
+
+                const storedUser =
+                    localStorage.getItem("gestorUser");
+
+                if (storedUser) {
+
+                    document.getElementById(
+                        "gestorName"
+                    ).textContent =
+                        storedUser;
+
+                }
+
+            }
+        );
+
+    </script>
+
+</body>
+
+</html>
