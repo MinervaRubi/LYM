@@ -1,5 +1,5 @@
 -- Seleccionar la base de datos
-USE `nikenza_store`;
+USE `LYMSQL`;
 
 -- --------------------------------------------------------
 -- 1. Tabla de Clientes

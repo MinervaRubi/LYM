@@ -729,7 +729,6 @@
 
                 </section>
 
-
                 <!-- CLIENTES -->
 
                 <section id="clientes" class="gestor-view">
@@ -737,91 +736,143 @@
                     <div class="view-header">
 
                         <div class="view-title">
-
                             <h2>Clientes</h2>
+                            <p>Administra y consulta los clientes registrados en LMY</p>
+                        </div>
 
-                            <p>
-                                Usuarios registrados en LMY
-                            </p>
+                        <button class="gestor-btn gestor-btn-primary" onclick="actualizarClientes()">
+
+                            <i class="fas fa-sync-alt"></i>
+                            Actualizar
+
+                        </button>
+
+                    </div>
+
+
+                    <!-- RESUMEN DE CLIENTES -->
+
+                    <div class="clientes-resumen">
+
+                        <div class="cliente-stat">
+
+                            <div class="cliente-stat-icon">
+                                <i class="fas fa-users"></i>
+                            </div>
+
+                            <div>
+                                <span>Total de clientes</span>
+                                <strong id="totalClientes">0</strong>
+                            </div>
+
+                        </div>
+
+
+                        <div class="cliente-stat">
+
+                            <div class="cliente-stat-icon activo">
+                                <i class="fas fa-user-check"></i>
+                            </div>
+
+                            <div>
+                                <span>Clientes activos</span>
+                                <strong id="clientesActivos">0</strong>
+                            </div>
+
+                        </div>
+
+
+                        <div class="cliente-stat">
+
+                            <div class="cliente-stat-icon inactivo">
+                                <i class="fas fa-user-slash"></i>
+                            </div>
+
+                            <div>
+                                <span>Clientes inactivos</span>
+                                <strong id="clientesInactivos">0</strong>
+                            </div>
 
                         </div>
 
                     </div>
 
 
-                    <div class="gestor-panel">
+                    <!-- PANEL CLIENTES -->
 
-                        <div class="gestor-search">
+                    <div class="gestor-panel clientes-panel">
 
-                            <input type="text" placeholder="Buscar cliente...">
+                        <div class="clientes-toolbar">
+
+                            <div class="clientes-search">
+
+                                <i class="fas fa-search"></i>
+
+                                <input type="text" id="buscarCliente" placeholder="Buscar por nombre o correo..."
+                                    oninput="filtrarClientes()">
+
+                            </div>
+
+
+                            <div class="clientes-filter">
+
+                                <label for="filtroEstado">
+                                    Estado
+                                </label>
+
+                                <select id="filtroEstado" onchange="filtrarClientes()">
+
+                                    <option value="todos">
+                                        Todos
+                                    </option>
+
+                                    <option value="activo">
+                                        Activos
+                                    </option>
+
+                                    <option value="prospecto">
+                                        Prospecto
+                                    </option>
+
+                                    <option value="frecuente">
+                                        Frecuente
+                                    </option>
+
+                                </select>
+
+                            </div>
 
                         </div>
 
 
+                        <!-- TABLA -->
+
                         <div class="gestor-table-wrapper">
 
-                            <table class="gestor-table">
+                            <table class="gestor-table clientes-table">
 
                                 <thead>
 
                                     <tr>
+
                                         <th>Cliente</th>
+
                                         <th>Email</th>
+
                                         <th>Pedidos</th>
+
                                         <th>Total comprado</th>
+
                                         <th>Estado</th>
+
                                     </tr>
 
                                 </thead>
 
-                                <tbody>
 
-                                    <tr>
+                                <tbody id="clientesTableBody">
 
-                                        <td>María López</td>
-                                        <td>maria@email.com</td>
-                                        <td>12</td>
-                                        <td>$4,850</td>
-
-                                        <td>
-                                            <span class="status status-success">
-                                                Activo
-                                            </span>
-                                        </td>
-
-                                    </tr>
-
-
-                                    <tr>
-
-                                        <td>Carlos Ramírez</td>
-                                        <td>carlos@email.com</td>
-                                        <td>8</td>
-                                        <td>$3,240</td>
-
-                                        <td>
-                                            <span class="status status-success">
-                                                Activo
-                                            </span>
-                                        </td>
-
-                                    </tr>
-
-
-                                    <tr>
-
-                                        <td>Fernanda Torres</td>
-                                        <td>fernanda@email.com</td>
-                                        <td>5</td>
-                                        <td>$1,950</td>
-
-                                        <td>
-                                            <span class="status status-success">
-                                                Activo
-                                            </span>
-                                        </td>
-
-                                    </tr>
+                                    <!-- JavaScript -->
 
                                 </tbody>
 
