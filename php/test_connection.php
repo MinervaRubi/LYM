@@ -1,43 +1,95 @@
 <?php
+
 require_once '../includes/config.php';
 
 try {
+
+    // Obtener conexión
     $pdo = getDBConnection();
-    echo "<h2>✅ Conexión a la base de datos exitosa</h2>";
-    
-    // Verificar si las tablas existen
-    $tables = ['usuarios', 'productos', 'paquetes'];
-    echo "<h3>Estado de las tablas:</h3>";
-    
+
+    echo "<h1>✅ Conexión exitosa</h1>";
+
+    echo "<p><strong>Base de datos:</strong> LYM</p>";
+
+    // =====================================================
+    // TABLAS DE LA BASE DE DATOS
+    // =====================================================
+
+    $tables = [
+        'usuarios',
+        'clientes',
+        'productos',
+        'paquetes',
+        'pedidos',
+        'detalle_pedido',
+        'pagos',
+        'interacciones',
+        'evaluaciones_crm'
+    ];
+
+    echo "<h2>Estado de las tablas</h2>";
+
     foreach ($tables as $table) {
+
         $stmt = $pdo->query("SHOW TABLES LIKE '$table'");
+
         if ($stmt->rowCount() > 0) {
-            echo "<p>✅ Tabla '$table' existe</p>";
-            
-            // Contar registros
-            $countStmt = $pdo->query("SELECT COUNT(*) as count FROM $table");
-            $count = $countStmt->fetch()['count'];
-            echo "<p>&nbsp;&nbsp;&nbsp;📊 Registros: $count</p>";
+
+            echo "<p>✅ Tabla <strong>$table</strong> existe</p>";
+
+            $countStmt = $pdo->query(
+                "SELECT COUNT(*) AS total FROM `$table`"
+            );
+
+            $result = $countStmt->fetch();
+
+            echo "<p style='margin-left:30px;'>";
+            echo "📊 Registros: " . $result['total'];
+            echo "</p>";
+
         } else {
-            echo "<p>❌ Tabla '$table' no existe</p>";
+
+            echo "<p>❌ Tabla <strong>$table</strong> NO existe</p>";
         }
     }
-    
-    // Mostrar información de PHP
-    echo "<h3>Información de PHP:</h3>";
-    echo "<p>Versión de PHP: " . phpversion() . "</p>";
-    echo "<p>Extensiones PDO disponibles: " . implode(', ', PDO::getAvailableDrivers()) . "</p>";
-    
+
+    // =====================================================
+    // INFORMACIÓN DEL SISTEMA
+    // =====================================================
+
+    echo "<hr>";
+
+    echo "<h2>Información del sistema</h2>";
+
+    echo "<p>";
+    echo "<strong>PHP:</strong> ";
+    echo phpversion();
+    echo "</p>";
+
+    echo "<p>";
+    echo "<strong>PDO:</strong> ";
+    echo implode(', ', PDO::getAvailableDrivers());
+    echo "</p>";
+
 } catch (Exception $e) {
-    echo "<h2>❌ Error de conexión</h2>";
-    echo "<p>Error: " . $e->getMessage() . "</p>";
-    echo "<p>Asegúrate de que:</p>";
+
+    echo "<h1>❌ Error de conexión</h1>";
+
+    echo "<p>";
+    echo "<strong>Error:</strong> ";
+    echo htmlspecialchars($e->getMessage());
+    echo "</p>";
+
+    echo "<hr>";
+
+    echo "<h3>Revisa lo siguiente:</h3>";
+
     echo "<ul>";
-    echo "<li>XAMPP esté ejecutándose</li>";
-    echo "<li>MySQL esté iniciado</li>";
-    echo "<li>La base de datos 'nikenza_store' exista</li>";
-    echo "<li>Las tablas hayan sido creadas ejecutando database.sql</li>";
+    echo "<li>Apache esté iniciado en XAMPP</li>";
+    echo "<li>MySQL esté iniciado en XAMPP</li>";
+    echo "<li>La base de datos se llame exactamente <strong>LYM</strong></li>";
+    echo "<li>Las tablas de la BD hayan sido creadas</li>";
+    echo "<li>includes/config.php esté apuntando a LYM</li>";
     echo "</ul>";
 }
 ?>
-
