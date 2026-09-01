@@ -2,6 +2,19 @@
 <html lang="es">
 
 <head>
+    <script>
+fetch('php/check_session.php')
+    .then(res => res.json())
+    .then(data => {
+        if (!data.authenticated || !data.user || data.user.role !== 'admin') {
+            alert('Acceso restringido: Se requieren permisos de administrador.');
+            window.location.href = 'sistema.html';
+        }
+    })
+    .catch(() => {
+        window.location.href = 'sistema.html';
+    });
+</script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Panel Admin - LYM</title>
