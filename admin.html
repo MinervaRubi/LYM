@@ -3,18 +3,18 @@
 
 <head>
     <script>
-fetch('php/check_session.php')
-    .then(res => res.json())
-    .then(data => {
-        if (!data.authenticated || !data.user || data.user.role !== 'admin') {
-            alert('Acceso restringido: Se requieren permisos de administrador.');
-            window.location.href = 'sistema.html';
-        }
-    })
-    .catch(() => {
-        window.location.href = 'sistema.html';
-    });
-</script>
+        fetch('php/check_session.php')
+            .then(res => res.json())
+            .then(data => {
+                if (!data.authenticated || !data.user || data.user.role !== 'admin') {
+                    alert('Acceso restringido: Se requieren permisos de administrador.');
+                    window.location.href = 'sistema.html';
+                }
+            })
+            .catch(() => {
+                window.location.href = 'sistema.html';
+            });
+    </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Panel Admin - LYM</title>
@@ -39,7 +39,7 @@ fetch('php/check_session.php')
             color: white;
             padding: 15px 25px;
             display: flex;
-            justify-content:  space-between;
+            justify-content: space-between;
             align-items: center;
         }
 
@@ -351,18 +351,27 @@ fetch('php/check_session.php')
                 <i class="fas fa-sliders-h"></i> Administración
             </div>
             <nav class="sidebar-nav">
+
                 <div class="sidebar-link active" data-vista="resumen">
                     <i class="fas fa-chart-pie"></i> Resumen
                 </div>
+
+                <div class="sidebar-link" data-vista="clientes">
+                    <i class="fas fa-users"></i> Clientes
+                </div>
+
                 <div class="sidebar-link" data-vista="productos">
                     <i class="fas fa-box"></i> Productos
                 </div>
+
                 <div class="sidebar-link" data-vista="pedidos">
                     <i class="fas fa-receipt"></i> Pedidos
                 </div>
+
                 <div class="sidebar-link" data-vista="promociones">
                     <i class="fas fa-tags"></i> Promociones
                 </div>
+
             </nav>
         </aside>
 
@@ -390,6 +399,48 @@ fetch('php/check_session.php')
                         </div>
                     </div>
                 </div>
+            </div>
+
+            <!-- Vista Clientes -->
+            <div id="clientes" class="vista">
+
+                <div class="admin-container">
+
+                    <h2 class="admin-title">
+                        Gestión de Clientes
+                    </h2>
+
+                    <p>
+                        Consulta y administra los clientes registrados.
+                    </p>
+
+                    <div class="tabla-contenedor">
+
+                        <table class="tabla-productos">
+
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Nombre</th>
+                                    <th>Correo</th>
+                                    <th>Teléfono</th>
+                                    <th>Estado</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+
+                            <tbody id="tabla-clientes-body">
+
+                                <!-- Los clientes se cargarán desde MySQL -->
+
+                            </tbody>
+
+                        </table>
+
+                    </div>
+
+                </div>
+
             </div>
 
             <!-- Vista Productos -->
@@ -498,6 +549,78 @@ fetch('php/check_session.php')
             // Actualizar contador en resumen si es necesario
             if (vistaId === 'resumen') {
                 actualizarResumen();
+            }
+
+            if (vistaId === 'clientes') {
+                cargarClientes();
+            }
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text ?? '';
+            return div.innerHTML;
+        }
+
+        async function cargarClientes() {
+            const tbody = document.getElementById('tabla-clientes-body');
+
+            if (!tbody) return;
+
+            tbody.innerHTML = `
+        <tr>
+            <td colspan="6">Cargando clientes...</td>
+        </tr>
+    `;
+
+            try {
+                const response = await fetch('php/clientes.php', {
+                    method: 'GET',
+                    credentials: 'same-origin'
+                });
+
+                const data = await response.json();
+
+                if (!response.ok || !data.success) {
+                    throw new Error(data.error || 'No se pudieron cargar los clientes');
+                }
+
+                if (!data.clientes || data.clientes.length === 0) {
+                    tbody.innerHTML = `
+                <tr>
+                    <td colspan="6">No hay clientes registrados.</td>
+                </tr>
+            `;
+                    return;
+                }
+
+                tbody.innerHTML = data.clientes.map(cliente => `
+            <tr>
+                <td>${cliente.id}</td>
+                <td>${escapeHtml(cliente.nombre)}</td>
+                <td>${escapeHtml(cliente.correo)}</td>
+                <td>${escapeHtml(cliente.telefono)}</td>
+                <td>${escapeHtml(cliente.estado)}</td>
+                <td>
+                    <button 
+                        class="btn btn-secondary"
+                        onclick="alert('Cliente: ${escapeHtml(cliente.nombre)}')">
+                        Ver
+                    </button>
+                </td>
+            </tr>
+        `).join('');
+
+            } catch (error) {
+                console.error('Error al cargar clientes:', error);
+
+                tbody.innerHTML = `
+            <tr>
+                <td colspan="6">
+                    Error al cargar los clientes: ${escapeHtml(error.message)}
+                </td>
+            </tr>
+        `;
             }
         }
 

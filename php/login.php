@@ -1,73 +1,191 @@
 <?php
+
 require_once '../includes/config.php';
 
-header('Content-Type: application/json');
+header('Content-Type: application/json; charset=utf-8');
+
+
+// =====================================================
+// SOLO PERMITIR POST
+// =====================================================
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+
     http_response_code(405);
-    echo json_encode(['error' => 'Método no permitido']);
+
+    echo json_encode([
+        'success' => false,
+        'error' => 'Método no permitido'
+    ]);
+
     exit();
 }
 
+
 try {
-    // Obtener datos JSON
-    $input = json_decode(file_get_contents('php://input'), true);
-    
-    if (!$input) {
-        $input = $_POST; // Fallback para formularios normales
+
+    // =================================================
+    // OBTENER DATOS
+    // =================================================
+
+    $input = json_decode(
+        file_get_contents('php://input'),
+        true
+    );
+
+
+    // Compatibilidad con formularios normales
+
+    if (!is_array($input)) {
+        $input = $_POST;
     }
-    
-    // Validar datos requeridos
-    if (empty($input['username']) || empty($input['password'])) {
+
+
+    // =================================================
+    // VALIDAR DATOS
+    // =================================================
+
+    if (
+        empty($input['username']) ||
+        empty($input['password'])
+    ) {
+
         http_response_code(400);
-        echo json_encode(['error' => 'Faltan datos requeridos']);
-        exit();
-    }
-    
-    $username = cleanInput($input['username']);
-    $password = $input['password'];
-    
-    $pdo = getDBConnection();
-    
-    // Buscar usuario por username o email
-    $stmt = $pdo->prepare("SELECT id, username, email, password_hash, role FROM usuarios WHERE username = ? OR email = ?");
-    $stmt->execute([$username, $username]);
-    $user = $stmt->fetch();
-    
-    if (!$user || !password_verify($password, $user['password_hash'])) {
-        http_response_code(401);
-        echo json_encode(['error' => 'Credenciales inválidas']);
+
+        echo json_encode([
+            'success' => false,
+            'error' => 'Faltan usuario y contraseña'
+        ]);
+
         exit();
     }
 
-    
-    // Iniciar sesión
-    $_SESSION['user_id'] = $user['id'];
-    $_SESSION['username'] = $user['username'];
-    $_SESSION['user_role'] = $user['role'];
-    $_SESSION['logged_in'] = true;
-    
-    // Regenerar ID de sesión por seguridad
+
+    // =================================================
+    // LIMPIAR USUARIO
+    // =================================================
+
+    $username = trim($input['username']);
+    $password = $input['password'];
+
+
+    // =================================================
+    // CONEXIÓN
+    // =================================================
+
+    $pdo = getDBConnection();
+
+
+    // =================================================
+    // BUSCAR USUARIO
+    // =================================================
+
+    $stmt = $pdo->prepare("
+        SELECT
+            id,
+            username,
+            email,
+            password_hash,
+            role
+        FROM usuarios
+        WHERE username = ?
+           OR email = ?
+        LIMIT 1
+    ");
+
+    $stmt->execute([
+        $username,
+        $username
+    ]);
+
+    $user = $stmt->fetch();
+
+
+    // =================================================
+    // VERIFICAR CREDENCIALES
+    // =================================================
+
+    if (
+        !$user ||
+        !password_verify(
+            $password,
+            $user['password_hash']
+        )
+    ) {
+
+        http_response_code(401);
+
+        echo json_encode([
+            'success' => false,
+            'error' => 'Usuario o contraseña incorrectos'
+        ]);
+
+        exit();
+    }
+
+
+    // =================================================
+    // REGENERAR SESIÓN
+    // =================================================
+
     session_regenerate_id(true);
-    
-    // Respuesta exitosa
+
+
+    // =================================================
+    // CREAR SESIÓN
+    // =================================================
+
+    $_SESSION['user_id'] = (int) $user['id'];
+
+    $_SESSION['username'] = $user['username'];
+
+    $_SESSION['user_role'] = $user['role'];
+
+    $_SESSION['logged_in'] = true;
+
+
+    // =================================================
+    // RESPUESTA
+    // =================================================
+
     echo json_encode([
         'success' => true,
+
         'message' => 'Inicio de sesión exitoso',
+
         'user' => [
-            'id' => $user['id'],
+            'id' => (int) $user['id'],
             'username' => $user['username'],
             'email' => $user['email'],
             'role' => $user['role']
         ]
     ]);
-    
-} catch (PDOException $e) {
-    http_response_code(500);
-    echo json_encode(['error' => 'Error de base de datos: ' . $e->getMessage()]);
-} catch (Exception $e) {
-    http_response_code(500);
-    echo json_encode(['error' => 'Error interno del servidor: ' . $e->getMessage()]);
-}
-?>
 
+    exit();
+
+
+} catch (PDOException $e) {
+
+    http_response_code(500);
+
+    echo json_encode([
+        'success' => false,
+        'error' => 'Error de base de datos'
+    ]);
+
+    exit();
+
+
+} catch (Exception $e) {
+
+    http_response_code(500);
+
+    echo json_encode([
+        'success' => false,
+        'error' => 'Error interno del servidor'
+    ]);
+
+    exit();
+}
+
+?>

@@ -915,71 +915,618 @@
             });
         });
 
-        // ========= Sistema de autenticación (SIMULADO) =========
+        // ========= Sistema de autenticación REAL =========
+
         let currentUser = null;
 
+
+        // =====================================================
+        // ACTUALIZAR INTERFAZ - USUARIO LOGUEADO
+        // =====================================================
+
         function updateUIForLoggedInUser() {
-            document.getElementById('guestButtons').style.display = 'none';
-            document.getElementById('userMenu').style.display = 'flex';
-            document.getElementById('userGreeting').textContent = currentUser.username || "Usuario";
+
+            const guestButtons = document.getElementById('guestButtons');
+            const userMenu = document.getElementById('userMenu');
+            const userGreeting = document.getElementById('userGreeting');
+
+            if (guestButtons) {
+                guestButtons.style.display = 'none';
+            }
+
+            if (userMenu) {
+                userMenu.style.display = 'flex';
+            }
+
+            if (userGreeting) {
+                userGreeting.textContent =
+                    currentUser?.username || "Usuario";
+            }
         }
+
+
+        // =====================================================
+        // ACTUALIZAR INTERFAZ - USUARIO NO LOGUEADO
+        // =====================================================
 
         function updateUIForLoggedOutUser() {
-            document.getElementById('guestButtons').style.display = 'flex';
-            document.getElementById('userMenu').style.display = 'none';
+
+            const guestButtons = document.getElementById('guestButtons');
+            const userMenu = document.getElementById('userMenu');
+
+            if (guestButtons) {
+                guestButtons.style.display = 'flex';
+            }
+
+            if (userMenu) {
+                userMenu.style.display = 'none';
+            }
+
+            currentUser = null;
         }
 
-        document.addEventListener("DOMContentLoaded", () => {
-            updateUIForLoggedOutUser();
-        });
+
+        // =====================================================
+        // COMPROBAR SESIÓN PHP
+        // =====================================================
+
+        async function checkSession() {
+
+            try {
+
+                const response = await fetch(
+                    "php/check_session.php",
+                    {
+                        method: "GET",
+                        credentials: "same-origin",
+                        cache: "no-store"
+                    }
+                );
+
+                const text = await response.text();
+
+                let data;
+
+                try {
+
+                    data = JSON.parse(text);
+
+                } catch (error) {
+
+                    console.error(
+                        "Respuesta inválida de check_session.php:",
+                        text
+                    );
+
+                    updateUIForLoggedOutUser();
+
+                    return;
+                }
+
+
+                if (
+                    response.ok &&
+                    data.authenticated &&
+                    data.user
+                ) {
+
+                    currentUser = data.user;
+
+                    updateUIForLoggedInUser();
+
+                } else {
+
+                    updateUIForLoggedOutUser();
+                }
+
+
+            } catch (error) {
+
+                console.error(
+                    "Error comprobando sesión:",
+                    error
+                );
+
+                updateUIForLoggedOutUser();
+            }
+        }
+
+
+        // =====================================================
+        // COMPROBAR SESIÓN AL CARGAR LA PÁGINA
+        // =====================================================
+
+        document.addEventListener(
+            "DOMContentLoaded",
+            () => {
+
+                checkSession();
+
+            }
+        );
+
+
+        // =====================================================
+        // LOGIN REAL
+        // =====================================================
 
         async function login(event) {
             event.preventDefault();
-            showSuccessBanner("Inicio exitoso");
-            closeModal('loginModal');
 
-            currentUser = {
-                username: document.getElementById('loginUsername').value || "Cliente",
-                role: "user"
-            };
+            const username = document.getElementById('loginUsername').value.trim();
+            const password = document.getElementById('loginPassword').value;
 
-            updateUIForLoggedInUser();
-        }
-
-        async function register(event) {
-            event.preventDefault();
-
-            const p1 = document.getElementById('registerPassword').value;
-            const p2 = document.getElementById('registerConfirmPassword').value;
-
-            if (p1 !== p2) {
-                showSuccessBanner("Las contraseñas no coinciden");
+            if (!username || !password) {
+                showSuccessBanner("Completa todos los campos");
                 return;
             }
 
-            showSuccessBanner("Registro exitoso");
-            closeModal('registerModal');
+            try {
+                const response = await fetch("php/login.php", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Accept": "application/json"
+                    },
+                    credentials: "same-origin",
+                    body: JSON.stringify({
+                        username: username,
+                        password: password
+                    })
+                });
 
-            setTimeout(() => { showLoginModal(); }, 800);
+                const text = await response.text();
+                console.log("Respuesta login.php:", text);
+
+                let data;
+
+                try {
+                    data = JSON.parse(text);
+                } catch (error) {
+                    console.error("Respuesta inválida de login.php:", text);
+                    showSuccessBanner("El servidor devolvió una respuesta inválida");
+                    return;
+                }
+
+                if (!response.ok || !data.success) {
+                    showSuccessBanner(
+                        data.error || "Usuario o contraseña incorrectos"
+                    );
+                    return;
+                }
+
+                currentUser = data.user;
+
+                console.log("Usuario autenticado:", currentUser);
+
+                updateUIForLoggedInUser();
+                closeModal("loginModal");
+
+                showSuccessBanner("Inicio de sesión exitoso");
+
+                // Si es administrador
+                if (currentUser.role === "admin") {
+
+                    setTimeout(() => {
+                        window.location.href = "admin.html";
+                    }, 700);
+
+                    return;
+                }
+
+                // Usuario normal
+                document.getElementById("loginUsername").value = "";
+                document.getElementById("loginPassword").value = "";
+
+            } catch (error) {
+
+                console.error("Error REAL de login:", error);
+
+                showSuccessBanner(
+                    "No se pudo conectar con el servidor"
+                );
+            }
         }
 
-        async function adminLogin(event) {
+        // =====================================================
+        // REGISTRO REAL
+        // =====================================================
+
+        async function register(event) {
+
             event.preventDefault();
 
-            showSuccessBanner("Bienvenido a Intranet");
-            closeModal('adminModal');
 
-            currentUser = {
-                username: document.getElementById('adminUsername').value || "Admin",
-                role: "admin"
-            };
+            const username =
+                document
+                    .getElementById('registerUsername')
+                    .value
+                    .trim();
 
-            updateUIForLoggedInUser();
+            const email =
+                document
+                    .getElementById('registerEmail')
+                    .value
+                    .trim();
 
-            // REDIRECCIÓN A INTRANET
-            setTimeout(() => {
-                window.location.href = "admin.html";
-            }, 800);
+            const password =
+                document
+                    .getElementById('registerPassword')
+                    .value;
+
+            const confirmPassword =
+                document
+                    .getElementById('registerConfirmPassword')
+                    .value;
+
+
+            // ==========================================
+            // VALIDACIONES
+            // ==========================================
+
+            if (
+                !username ||
+                !email ||
+                !password ||
+                !confirmPassword
+            ) {
+
+                showSuccessBanner(
+                    "Completa todos los campos"
+                );
+
+                return;
+            }
+
+
+            if (
+                password !== confirmPassword
+            ) {
+
+                showSuccessBanner(
+                    "Las contraseñas no coinciden"
+                );
+
+                return;
+            }
+
+
+            if (
+                password.length < 6
+            ) {
+
+                showSuccessBanner(
+                    "La contraseña debe tener al menos 6 caracteres"
+                );
+
+                return;
+            }
+
+
+            // ==========================================
+            // ENVIAR AL PHP
+            // ==========================================
+
+            try {
+
+                const response = await fetch(
+                    "php/register.php",
+                    {
+                        method: "POST",
+
+                        headers: {
+                            "Content-Type": "application/json",
+                            "Accept": "application/json"
+                        },
+
+                        credentials: "same-origin",
+
+                        body: JSON.stringify({
+
+                            username: username,
+                            email: email,
+                            password: password
+
+                        })
+                    }
+                );
+
+
+                const text = await response.text();
+
+                let data;
+
+
+                try {
+
+                    data = JSON.parse(text);
+
+                } catch (error) {
+
+                    console.error(
+                        "Respuesta inválida de register.php:",
+                        text
+                    );
+
+                    showSuccessBanner(
+                        "El servidor devolvió una respuesta inválida"
+                    );
+
+                    return;
+                }
+
+
+                // ==========================================
+                // ERROR
+                // ==========================================
+
+                if (
+                    !response.ok ||
+                    !data.success
+                ) {
+
+                    showSuccessBanner(
+                        data.error ||
+                        "No se pudo completar el registro"
+                    );
+
+                    return;
+                }
+
+
+                // ==========================================
+                // ÉXITO
+                // ==========================================
+
+                showSuccessBanner(
+                    "Registro exitoso"
+                );
+
+
+                // Limpiar formulario
+
+                document
+                    .getElementById('registerUsername')
+                    .value = "";
+
+                document
+                    .getElementById('registerEmail')
+                    .value = "";
+
+                document
+                    .getElementById('registerPassword')
+                    .value = "";
+
+                document
+                    .getElementById('registerConfirmPassword')
+                    .value = "";
+
+
+                // Cerrar registro
+
+                closeModal(
+                    'registerModal'
+                );
+
+
+                // Abrir login
+
+                setTimeout(() => {
+
+                    showLoginModal();
+
+                }, 800);
+
+
+            } catch (error) {
+
+                console.error(
+                    "Error en registro:",
+                    error
+                );
+
+                showSuccessBanner(
+                    "No se pudo conectar con el servidor"
+                );
+            }
+        }
+
+
+        // =====================================================
+        // CERRAR SESIÓN REAL
+        // =====================================================
+
+        async function logout() {
+
+            try {
+
+                const response = await fetch(
+                    "php/logout.php",
+                    {
+                        method: "POST",
+                        credentials: "same-origin",
+                        cache: "no-store"
+                    }
+                );
+
+
+                if (!response.ok) {
+
+                    console.warn(
+                        "logout.php respondió:",
+                        response.status
+                    );
+                }
+
+
+            } catch (error) {
+
+                console.error(
+                    "Error cerrando sesión:",
+                    error
+                );
+
+            } finally {
+
+                updateUIForLoggedOutUser();
+
+
+                showSuccessBanner(
+                    "Sesión cerrada"
+                );
+
+
+                setTimeout(() => {
+
+                    window.location.reload();
+
+                }, 500);
+            }
+        }
+
+
+        // =====================================================
+        // LOGIN DE ADMINISTRADOR REAL
+        // =====================================================
+
+        async function adminLogin(event) {
+
+            event.preventDefault();
+
+
+            const username =
+                document
+                    .getElementById('adminUsername')
+                    .value
+                    .trim();
+
+            const password =
+                document
+                    .getElementById('adminPassword')
+                    .value;
+
+
+            if (!username || !password) {
+
+                showSuccessBanner(
+                    "Completa usuario y contraseña"
+                );
+
+                return;
+            }
+
+
+            try {
+
+                const response = await fetch(
+                    "php/login.php",
+                    {
+                        method: "POST",
+
+                        headers: {
+                            "Content-Type": "application/json",
+                            "Accept": "application/json"
+                        },
+
+                        credentials: "same-origin",
+
+                        body: JSON.stringify({
+
+                            username: username,
+                            password: password
+
+                        })
+                    }
+                );
+
+
+                const text = await response.text();
+
+                let data;
+
+
+                try {
+
+                    data = JSON.parse(text);
+
+                } catch (error) {
+
+                    console.error(
+                        "Respuesta inválida de login.php:",
+                        text
+                    );
+
+                    showSuccessBanner(
+                        "El servidor devolvió una respuesta inválida"
+                    );
+
+                    return;
+                }
+
+
+                if (
+                    !response.ok ||
+                    !data.success
+                ) {
+
+                    showSuccessBanner(
+                        data.error ||
+                        "Usuario o contraseña incorrectos"
+                    );
+
+                    return;
+                }
+
+
+                // Verificar que realmente sea administrador
+
+                if (
+                    data.user.role !== "admin"
+                ) {
+
+                    showSuccessBanner(
+                        "Este usuario no tiene permisos de administrador"
+                    );
+
+                    return;
+                }
+
+
+                currentUser = data.user;
+
+
+                updateUIForLoggedInUser();
+
+
+                closeModal(
+                    'adminModal'
+                );
+
+
+                showSuccessBanner(
+                    "Bienvenido a Intranet"
+                );
+
+
+                setTimeout(() => {
+
+                    window.location.href =
+                        "admin.html";
+
+                }, 700);
+
+
+            } catch (error) {
+
+                console.error(
+                    "Error en acceso de administrador:",
+                    error
+                );
+
+                showSuccessBanner(
+                    "No se pudo conectar con el servidor"
+                );
+            }
         }
 
         // ========= Dropdown usuario =========
