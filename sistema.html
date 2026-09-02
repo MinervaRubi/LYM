@@ -40,7 +40,6 @@
                     <div id="guestButtons">
                         <button type="button" class="btn btn-outline" onclick="showLoginModal()">Iniciar Sesión</button>
                         <button type="button" class="btn btn-primary" onclick="showRegisterModal()">Registrarse</button>
-                        <button type="button" class="btn btn-outline" onclick="showAdminModal()">Intranet</button>
                     </div>
 
                     <!-- MENÚ USUARIO -->
@@ -62,6 +61,10 @@
 
                             <a href="publicaciones.html" class="dropdown-item">
                                 <i class="fas fa-id-card"></i> Mis publicaciones
+                            </a>
+
+                            <a href="admin.html" class="dropdown-item" id="gestorLink" style="display:none;">
+                                <i class="fas fa-cogs"></i> Admin
                             </a>
 
                             <div class="dropdown-divider"></div>
@@ -797,33 +800,6 @@
         </div>
     </div>
 
-    <!-- Modal de Admin / Intranet -->
-    <div id="adminModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2>Intranet</h2>
-                <span class="close" onclick="closeModal('adminModal')">&times;</span>
-            </div>
-
-            <form onsubmit="adminLogin(event)">
-                <div class="form-group">
-                    <label for="adminUsername">Usuario o Email:</label>
-                    <input type="text" id="adminUsername" required>
-                </div>
-
-                <div class="form-group">
-                    <label for="adminPassword">Contraseña:</label>
-                    <input type="password" id="adminPassword" required>
-                </div>
-
-                <div class="form-actions">
-                    <button type="submit" class="btn btn-primary">Iniciar Sesión</button>
-                    <button type="button" class="btn btn-secondary" onclick="closeModal('adminModal')">Cancelar</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
     <script>
         // ========= Banner =========
         function showSuccessBanner(texto = "Operación exitosa") {
@@ -901,7 +877,6 @@
         // ========= Modales =========
         function showLoginModal() { document.getElementById('loginModal').style.display = 'flex'; }
         function showRegisterModal() { document.getElementById('registerModal').style.display = 'flex'; }
-        function showAdminModal() { document.getElementById('adminModal').style.display = 'flex'; }
 
         function closeModal(modalId) {
             const m = document.getElementById(modalId);
@@ -942,6 +917,12 @@
                 userGreeting.textContent =
                     currentUser?.username || "Usuario";
             }
+
+            const gestorLink = document.getElementById("gestorLink");
+            if (gestorLink) {
+                gestorLink.style.display =
+                    currentUser?.role === "admin" ? "flex" : "none";
+            }
         }
 
 
@@ -960,6 +941,11 @@
 
             if (userMenu) {
                 userMenu.style.display = 'none';
+            }
+
+            const gestorLink = document.getElementById("gestorLink");
+            if (gestorLink) {
+                gestorLink.style.display = "none";
             }
 
             currentUser = null;
@@ -1104,17 +1090,7 @@
 
                 showSuccessBanner("Inicio de sesión exitoso");
 
-                // Si es administrador
-                if (currentUser.role === "admin") {
-
-                    setTimeout(() => {
-                        window.location.href = "admin.html";
-                    }, 700);
-
-                    return;
-                }
-
-                // Usuario normal
+                // Limpiar formulario
                 document.getElementById("loginUsername").value = "";
                 document.getElementById("loginPassword").value = "";
 
@@ -1384,150 +1360,6 @@
             }
         }
 
-
-        // =====================================================
-        // LOGIN DE ADMINISTRADOR REAL
-        // =====================================================
-
-        async function adminLogin(event) {
-
-            event.preventDefault();
-
-
-            const username =
-                document
-                    .getElementById('adminUsername')
-                    .value
-                    .trim();
-
-            const password =
-                document
-                    .getElementById('adminPassword')
-                    .value;
-
-
-            if (!username || !password) {
-
-                showSuccessBanner(
-                    "Completa usuario y contraseña"
-                );
-
-                return;
-            }
-
-
-            try {
-
-                const response = await fetch(
-                    "php/login.php",
-                    {
-                        method: "POST",
-
-                        headers: {
-                            "Content-Type": "application/json",
-                            "Accept": "application/json"
-                        },
-
-                        credentials: "same-origin",
-
-                        body: JSON.stringify({
-
-                            username: username,
-                            password: password
-
-                        })
-                    }
-                );
-
-
-                const text = await response.text();
-
-                let data;
-
-
-                try {
-
-                    data = JSON.parse(text);
-
-                } catch (error) {
-
-                    console.error(
-                        "Respuesta inválida de login.php:",
-                        text
-                    );
-
-                    showSuccessBanner(
-                        "El servidor devolvió una respuesta inválida"
-                    );
-
-                    return;
-                }
-
-
-                if (
-                    !response.ok ||
-                    !data.success
-                ) {
-
-                    showSuccessBanner(
-                        data.error ||
-                        "Usuario o contraseña incorrectos"
-                    );
-
-                    return;
-                }
-
-
-                // Verificar que realmente sea administrador
-
-                if (
-                    data.user.role !== "admin"
-                ) {
-
-                    showSuccessBanner(
-                        "Este usuario no tiene permisos de administrador"
-                    );
-
-                    return;
-                }
-
-
-                currentUser = data.user;
-
-
-                updateUIForLoggedInUser();
-
-
-                closeModal(
-                    'adminModal'
-                );
-
-
-                showSuccessBanner(
-                    "Bienvenido a Intranet"
-                );
-
-
-                setTimeout(() => {
-
-                    window.location.href =
-                        "admin.html";
-
-                }, 700);
-
-
-            } catch (error) {
-
-                console.error(
-                    "Error en acceso de administrador:",
-                    error
-                );
-
-                showSuccessBanner(
-                    "No se pudo conectar con el servidor"
-                );
-            }
-        }
 
         // ========= Dropdown usuario =========
         function toggleUserMenu(e) {
