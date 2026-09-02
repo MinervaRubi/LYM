@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Intranet CRM - LYM</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: 'Poppins', sans-serif;
+      background: #f4f7fb;
+      color: #1f2a44;
+    }
+    .topbar {
+      background: #0d1b3d;
+      color: #fff;
+      padding: 18px 28px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 8px 20px rgba(13, 27, 61, 0.18);
+    }
+    .brand {
+      font-size: 1.5rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+    }
+    .header-actions {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+    .btn {
+      border: none;
+      border-radius: 10px;
+      padding: 10px 16px;
+      font-family: 'Poppins', sans-serif;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 600;
+    }
+    .btn-primary { background: #1e62ff; color: white; }
+    .btn-secondary { background: #eef3ff; color: #0d1b3d; }
+    .container { max-width: 1280px; margin: 24px auto; padding: 0 20px 40px; }
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 18px;
+      margin-bottom: 24px;
+    }
+    .card {
+      background: white;
+      border-radius: 16px;
+      padding: 22px;
+      box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
+    }
+    .card-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 14px;
+      color: white;
+      font-size: 1.2rem;
+    }
+    .icon-a { background: linear-gradient(135deg, #1e62ff, #56a4ff); }
+    .icon-b { background: linear-gradient(135deg, #0f766e, #34d399); }
+    .icon-c { background: linear-gradient(135deg, #a855f7, #c084fc); }
+    .icon-d { background: linear-gradient(135deg, #f59e0b, #fbbf24); }
+    .card-label { color: #64748b; font-size: 0.9rem; font-weight: 600; }
+    .card-value { font-size: 2rem; font-weight: 700; margin-top: 8px; }
+    .panel {
+      background: #fff;
+      border-radius: 16px;
+      box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
+      overflow: hidden;
+    }
+    .panel-header {
+      padding: 22px 24px 14px;
+      border-bottom: 1px solid #eef2f7;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .panel-title { font-size: 1.25rem; font-weight: 700; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    th, td {
+      text-align: left;
+      padding: 14px 18px;
+      border-bottom: 1px solid #edf2f7;
+      vertical-align: top;
+    }
+    th {
+      background: #f8fafc;
+      color: #475569;
+      font-size: 0.82rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    .badge {
+      display: inline-block;
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      background: #eaf4ff;
+      color: #0f4fb5;
+    }
+    .badge-success { background: #e8f9f0; color: #118a57; }
+    .badge-warning { background: #fff5dc; color: #9b7000; }
+    .badge-danger { background: #feeceb; color: #b42318; }
+    .muted { color: #64748b; }
+    .empty { padding: 30px; text-align: center; color: #64748b; }
+    @media (max-width: 700px) {
+      .topbar { flex-direction: column; align-items: flex-start; gap: 12px; }
+      .container { padding: 0 12px 30px; }
+      table { display: block; overflow-x: auto; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">LYM • Intranet CRM</div>
+    <div class="header-actions">
+      <a href="admin.html" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> Panel admin</a>
+      <button class="btn btn-primary" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Salir</button>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="cards">
+      <div class="card">
+        <div class="card-icon icon-a"><i class="fas fa-user-friends"></i></div>
+        <div class="card-label">Clientes</div>
+        <div id="clientesTotal" class="card-value">0</div>
+      </div>
+      <div class="card">
+        <div class="card-icon icon-b"><i class="fas fa-eye"></i></div>
+        <div class="card-label">Prospectos</div>
+        <div id="prospectosTotal" class="card-value">0</div>
+      </div>
+      <div class="card">
+        <div class="card-icon icon-c"><i class="fas fa-shopping-bag"></i></div>
+        <div class="card-label">Ventas</div>
+        <div id="ventasTotal" class="card-value">$0.00</div>
+      </div>
+      <div class="card">
+        <div class="card-icon icon-d"><i class="fas fa-star"></i></div>
+        <div class="card-label">Etapa más alta</div>
+        <div id="etapaTop" class="card-value">-</div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="panel-header">
+        <div class="panel-title">CRM de clientes y seguimiento</div>
+        <a href="sistema.html" class="btn btn-secondary"><i class="fas fa-store"></i> Ir a la tienda</a>
+      </div>
+      <div id="crmTableWrapper"></div>
+    </section>
+  </main>
+
+  <script>
+    function formatCurrency(value) {
+      return new Intl.NumberFormat('es-MX', {
+        style: 'currency',
+        currency: 'MXN'
+      }).format(Number(value || 0));
+    }
+
+    function getBadgeClass(stage) {
+      const value = String(stage || '').toLowerCase();
+      if (value.includes('cliente') || value.includes('venta') || value.includes('cerrado')) return 'badge-success';
+      if (value.includes('prospecto') || value.includes('caliente')) return 'badge-warning';
+      return 'badge-danger';
+    }
+
+    async function checkAccess() {
+      try {
+        const res = await fetch('php/check_session.php', { credentials: 'same-origin' });
+        const data = await res.json();
+        if (!data.authenticated || !data.user || data.user.role !== 'admin') {
+          alert('Acceso restringido. Debes iniciar sesión como administrador.');
+          window.location.href = 'sistema.html';
+          return false;
+        }
+        return true;
+      } catch (error) {
+        window.location.href = 'sistema.html';
+        return false;
+      }
+    }
+
+    async function loadCRM() {
+      const wrapper = document.getElementById('crmTableWrapper');
+      wrapper.innerHTML = '<div class="empty">Cargando CRM...</div>';
+
+      try {
+        const response = await fetch('php/crm.php', { credentials: 'same-origin' });
+        const data = await response.json();
+
+        if (!response.ok || !data.success) {
+          throw new Error(data.error || 'No se pudo cargar el CRM');
+        }
+
+        document.getElementById('clientesTotal').textContent = data.metrics?.clientes ?? 0;
+        document.getElementById('prospectosTotal').textContent = data.metrics?.prospectos ?? 0;
+        document.getElementById('ventasTotal').textContent = formatCurrency(data.metrics?.ventas ?? 0);
+        document.getElementById('etapaTop').textContent = data.metrics?.etapaMasAlta || '-';
+
+        const clientes = data.clientes || [];
+        if (!clientes.length) {
+          wrapper.innerHTML = '<div class="empty">No hay clientes registrados en el CRM.</div>';
+          return;
+        }
+
+        wrapper.innerHTML = `
+          <table>
+            <thead>
+              <tr>
+                <th>Cliente</th>
+                <th>Usuario</th>
+                <th>Etapa</th>
+                <th>Pedidos</th>
+                <th>Total vendido</th>
+                <th>Última compra</th>
+                <th>Estado</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${clientes.map(cliente => `
+                <tr>
+                  <td>
+                    <strong>${cliente.nombre || 'Sin nombre'}</strong><br>
+                    <span class="muted">${cliente.correo || 'Sin correo'}</span>
+                  </td>
+                  <td>${cliente.username || '—'}</td>
+                  <td>
+                    <span class="badge ${getBadgeClass(cliente.etapa_crm)}">${cliente.etapa_crm || 'Sin etapa'}</span>
+                  </td>
+                  <td>${cliente.pedidos || 0}</td>
+                  <td>${formatCurrency(cliente.total_vendido || 0)}</td>
+                  <td>${cliente.ultima_compra || 'Sin compras'}</td>
+                  <td>${cliente.estado || 'activo'}</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        `;
+      } catch (error) {
+        console.error(error);
+        wrapper.innerHTML = `<div class="empty">Error al cargar el CRM: ${error.message}</div>`;
+      }
+    }
+
+    async function logout() {
+      try {
+        await fetch('php/logout.php', { method: 'POST', credentials: 'same-origin' });
+      } catch (error) {
+        console.warn('Logout error', error);
+      }
+      window.location.href = 'sistema.html';
+    }
+
+    (async function init() {
+      const ok = await checkAccess();
+      if (ok) loadCRM();
+    })();
+  </script>
+</body>
+</html>

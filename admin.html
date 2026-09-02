@@ -136,6 +136,15 @@
             margin-top: 20px;
         }
 
+        .mt-20 {
+            margin-top: 24px;
+        }
+
+        .subtitulo-tabla {
+            margin: 0 0 15px;
+            color: #0d1b3d;
+        }
+
         .card {
             background: white;
             padding: 25px;
@@ -380,23 +389,51 @@
             <!-- Vista Resumen -->
             <div id="resumen" class="vista activa">
                 <div class="admin-container">
-                    <h2 class="admin-title">Resumen</h2>
+                    <h2 class="admin-title">Resumen financiero</h2>
                     <div class="resumen-cards">
+                        <div class="card">
+                            <i class="fas fa-user-friends"></i>
+                            <h3 id="total-clientes">0</h3>
+                            <p>Clientes</p>
+                        </div>
                         <div class="card">
                             <i class="fas fa-box"></i>
                             <h3 id="total-productos">0</h3>
                             <p>Productos</p>
                         </div>
                         <div class="card">
-                            <i class="fas fa-receipt"></i>
-                            <h3>5</h3>
-                            <p>Pedidos</p>
+                            <i class="fas fa-dollar-sign"></i>
+                            <h3 id="total-ingresos">$0.00</h3>
+                            <p>Ingresos</p>
                         </div>
                         <div class="card">
-                            <i class="fas fa-tags"></i>
-                            <h3>3</h3>
-                            <p>Promociones</p>
+                            <i class="fas fa-credit-card"></i>
+                            <h3 id="total-pagos">0</h3>
+                            <p>Pagos aprobados</p>
                         </div>
+                    </div>
+
+                    <div class="tabla-contenedor mt-20">
+                        <h3 class="subtitulo-tabla">Relación de tablas contables</h3>
+                        <table class="tabla-productos">
+                            <thead>
+                                <tr>
+                                    <th>Pedido</th>
+                                    <th>Cliente</th>
+                                    <th>Producto</th>
+                                    <th>Cantidad</th>
+                                    <th>Subtotal</th>
+                                    <th>Total</th>
+                                    <th>Pago</th>
+                                    <th>Estado</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tabla-relaciones-body">
+                                <tr>
+                                    <td colspan="8">Cargando información de la base de datos...</td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
@@ -513,20 +550,16 @@
     </div>
 
     <script>
-        // Datos simulados
-        let productos = [
-            { id: 1, nombre: 'Taza personalizada', precio: 120 },
-            { id: 2, nombre: 'Sudadera estampada', precio: 350 },
-            { id: 3, nombre: 'Gorra con logo', precio: 180 },
-        ];
+        let productos = [];
+        let nextId = 1;
 
-        let nextId = 4; // Para nuevos productos
-
-        // Elementos del DOM
         const vistas = document.querySelectorAll('.vista');
         const sidebarLinks = document.querySelectorAll('.sidebar-link');
         const tbody = document.getElementById('tabla-productos-body');
         const totalProductosSpan = document.getElementById('total-productos');
+        const totalClientesSpan = document.getElementById('total-clientes');
+        const totalIngresosSpan = document.getElementById('total-ingresos');
+        const totalPagosSpan = document.getElementById('total-pagos');
         const btnAgregar = document.getElementById('btn-agregar-producto');
         const modal = document.getElementById('modal-producto');
         const modalTitulo = document.getElementById('modal-titulo');
@@ -536,7 +569,6 @@
         const productoPrecio = document.getElementById('producto-precio');
         const btnCancelar = document.getElementById('btn-cancelar');
 
-        // Función para cambiar de vista
         function mostrarVista(vistaId) {
             vistas.forEach(v => v.classList.remove('activa'));
             document.getElementById(vistaId).classList.add('activa');
@@ -546,13 +578,17 @@
                     link.classList.add('active');
                 }
             });
-            // Actualizar contador en resumen si es necesario
+
             if (vistaId === 'resumen') {
-                actualizarResumen();
+                cargarDashboard();
             }
 
             if (vistaId === 'clientes') {
                 cargarClientes();
+            }
+
+            if (vistaId === 'productos') {
+                cargarProductos();
             }
         }
 
@@ -562,16 +598,71 @@
             return div.innerHTML;
         }
 
+        function formatCurrency(value) {
+            return new Intl.NumberFormat('es-MX', {
+                style: 'currency',
+                currency: 'MXN'
+            }).format(Number(value || 0));
+        }
+
+        async function cargarDashboard() {
+            try {
+                const response = await fetch('php/dashboard_data.php', {
+                    method: 'GET',
+                    credentials: 'same-origin'
+                });
+
+                const data = await response.json();
+
+                if (!response.ok || !data.success) {
+                    throw new Error(data.error || 'No se pudo cargar el resumen');
+                }
+
+                if (totalClientesSpan) totalClientesSpan.textContent = data.metrics?.clientes ?? 0;
+                if (totalProductosSpan) totalProductosSpan.textContent = data.metrics?.productos ?? 0;
+                if (totalIngresosSpan) totalIngresosSpan.textContent = formatCurrency(data.metrics?.ingresos ?? 0);
+                if (totalPagosSpan) totalPagosSpan.textContent = data.metrics?.pagos ?? 0;
+
+                const tablaRelaciones = document.getElementById('tabla-relaciones-body');
+                if (!tablaRelaciones) return;
+
+                const relaciones = data.relaciones || [];
+                if (relaciones.length === 0) {
+                    tablaRelaciones.innerHTML = '<tr><td colspan="8">No hay movimientos contables registrados.</td></tr>';
+                    return;
+                }
+
+                tablaRelaciones.innerHTML = relaciones.map(item => `
+                    <tr>
+                        <td>#${item.pedido_id ?? '-'}</td>
+                        <td>${escapeHtml(item.cliente ?? 'Sin cliente')}</td>
+                        <td>${escapeHtml(item.producto ?? 'Sin producto')}</td>
+                        <td>${escapeHtml(item.cantidad ?? 0)}</td>
+                        <td>${formatCurrency(item.subtotal ?? 0)}</td>
+                        <td>${formatCurrency(item.total ?? 0)}</td>
+                        <td>${escapeHtml(item.pago_metodo ?? 'Sin pago')} (${formatCurrency(item.pago_monto ?? 0)})</td>
+                        <td>${escapeHtml(item.estado ?? item.pago_estado ?? 'Pendiente')}</td>
+                    </tr>
+                `).join('');
+            } catch (error) {
+                console.error('Error al cargar dashboard:', error);
+                if (totalClientesSpan) totalClientesSpan.textContent = '0';
+                if (totalProductosSpan) totalProductosSpan.textContent = '0';
+                if (totalIngresosSpan) totalIngresosSpan.textContent = '$0.00';
+                if (totalPagosSpan) totalPagosSpan.textContent = '0';
+
+                const tablaRelaciones = document.getElementById('tabla-relaciones-body');
+                if (tablaRelaciones) {
+                    tablaRelaciones.innerHTML = `<tr><td colspan="8">Error al cargar la información: ${escapeHtml(error.message)}</td></tr>`;
+                }
+            }
+        }
+
         async function cargarClientes() {
-            const tbody = document.getElementById('tabla-clientes-body');
+            const tbodyClientes = document.getElementById('tabla-clientes-body');
+            if (!tbodyClientes) return;
 
-            if (!tbody) return;
-
-            tbody.innerHTML = `
-        <tr>
-            <td colspan="6">Cargando clientes...</td>
-        </tr>
-    `;
+            tbodyClientes.innerHTML = '<tr><td colspan="6">Cargando clientes...</td></tr>';
 
             try {
                 const response = await fetch('php/clientes.php', {
@@ -586,61 +677,77 @@
                 }
 
                 if (!data.clientes || data.clientes.length === 0) {
-                    tbody.innerHTML = `
-                <tr>
-                    <td colspan="6">No hay clientes registrados.</td>
-                </tr>
-            `;
+                    tbodyClientes.innerHTML = '<tr><td colspan="6">No hay clientes registrados.</td></tr>';
                     return;
                 }
 
-                tbody.innerHTML = data.clientes.map(cliente => `
-            <tr>
-                <td>${cliente.id}</td>
-                <td>${escapeHtml(cliente.nombre)}</td>
-                <td>${escapeHtml(cliente.correo)}</td>
-                <td>${escapeHtml(cliente.telefono)}</td>
-                <td>${escapeHtml(cliente.estado)}</td>
-                <td>
-                    <button 
-                        class="btn btn-secondary"
-                        onclick="alert('Cliente: ${escapeHtml(cliente.nombre)}')">
-                        Ver
-                    </button>
-                </td>
-            </tr>
-        `).join('');
-
+                tbodyClientes.innerHTML = data.clientes.map(cliente => `
+                    <tr>
+                        <td>${cliente.id}</td>
+                        <td>${escapeHtml(cliente.nombre)}</td>
+                        <td>${escapeHtml(cliente.correo)}</td>
+                        <td>${escapeHtml(cliente.telefono || 'N/A')}</td>
+                        <td>${escapeHtml(cliente.estado)}</td>
+                        <td>
+                            <button class="btn btn-secondary" onclick="alert('Cliente: ${escapeHtml(cliente.nombre)}')">Ver</button>
+                        </td>
+                    </tr>
+                `).join('');
             } catch (error) {
                 console.error('Error al cargar clientes:', error);
-
-                tbody.innerHTML = `
-            <tr>
-                <td colspan="6">
-                    Error al cargar los clientes: ${escapeHtml(error.message)}
-                </td>
-            </tr>
-        `;
+                tbodyClientes.innerHTML = `<tr><td colspan="6">Error al cargar los clientes: ${escapeHtml(error.message)}</td></tr>`;
             }
         }
 
-        // Event listeners para los links del sidebar
+        async function cargarProductos() {
+            const tablaProductos = document.getElementById('tabla-productos-body');
+            if (!tablaProductos) return;
+
+            tablaProductos.innerHTML = '<tr><td colspan="4">Cargando productos...</td></tr>';
+
+            try {
+                const response = await fetch('php/admin_products.php', {
+                    method: 'GET',
+                    credentials: 'same-origin'
+                });
+
+                const data = await response.json();
+                if (!response.ok || !data.success) {
+                    throw new Error(data.error || 'No se pudieron cargar los productos');
+                }
+
+                productos = (data.productos || []).map(producto => ({
+                    id: Number(producto.id),
+                    nombre: producto.name,
+                    precio: Number(producto.price),
+                    active: !!producto.active
+                }));
+
+                nextId = productos.reduce((max, p) => Math.max(max, p.id), 0) + 1;
+                renderizarProductos();
+            } catch (error) {
+                console.error('Error al cargar productos:', error);
+                tablaProductos.innerHTML = `<tr><td colspan="4">Error al cargar los productos: ${escapeHtml(error.message)}</td></tr>`;
+            }
+        }
+
         sidebarLinks.forEach(link => {
-            link.addEventListener('click', (e) => {
+            link.addEventListener('click', () => {
                 const vista = link.dataset.vista;
                 mostrarVista(vista);
             });
         });
 
-        // Renderizar tabla de productos
         function renderizarProductos() {
+            if (!tbody) return;
+
             tbody.innerHTML = '';
             productos.forEach(p => {
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
                     <td>${p.id}</td>
-                    <td>${p.nombre}</td>
-                    <td>$${p.precio.toFixed(2)}</td>
+                    <td>${escapeHtml(p.nombre)}</td>
+                    <td>${formatCurrency(p.precio)}</td>
                     <td class="acciones">
                         <button class="btn-accion btn-editar" data-id="${p.id}"><i class="fas fa-edit"></i> Editar</button>
                         <button class="btn-accion btn-eliminar" data-id="${p.id}"><i class="fas fa-trash"></i> Eliminar</button>
@@ -649,31 +756,30 @@
                 tbody.appendChild(tr);
             });
 
-            // Asignar eventos a los botones de editar y eliminar
             document.querySelectorAll('.btn-editar').forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    const id = parseInt(btn.dataset.id);
+                btn.addEventListener('click', () => {
+                    const id = parseInt(btn.dataset.id, 10);
                     editarProducto(id);
                 });
             });
 
             document.querySelectorAll('.btn-eliminar').forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    const id = parseInt(btn.dataset.id);
+                btn.addEventListener('click', () => {
+                    const id = parseInt(btn.dataset.id, 10);
                     eliminarProducto(id);
                 });
             });
 
-            // Actualizar contador en resumen
             actualizarResumen();
         }
 
-        // Actualizar tarjeta de resumen
         function actualizarResumen() {
-            totalProductosSpan.textContent = productos.length;
+            if (totalProductosSpan) totalProductosSpan.textContent = String(productos.length || 0);
+            if (totalClientesSpan && !totalClientesSpan.dataset.manual) {
+                totalClientesSpan.textContent = totalClientesSpan.textContent || '0';
+            }
         }
 
-        // Abrir modal para agregar
         function abrirModalAgregar() {
             modalTitulo.textContent = 'Agregar Producto';
             productoId.value = '';
@@ -682,7 +788,6 @@
             modal.classList.add('activo');
         }
 
-        // Abrir modal para editar (cargar datos)
         function editarProducto(id) {
             const producto = productos.find(p => p.id === id);
             if (!producto) return;
@@ -694,17 +799,33 @@
             modal.classList.add('activo');
         }
 
-        // Eliminar producto con confirmación
-        function eliminarProducto(id) {
+        async function eliminarProducto(id) {
             const confirmar = confirm('¿Seguro que deseas eliminar este producto?');
-            if (confirmar) {
-                productos = productos.filter(p => p.id !== id);
-                renderizarProductos();
+            if (!confirmar) return;
+
+            try {
+                const response = await fetch('php/admin_products.php', {
+                    method: 'DELETE',
+                    credentials: 'same-origin',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ id })
+                });
+
+                const data = await response.json();
+                if (!response.ok || !data.success) {
+                    throw new Error(data.error || 'No se pudo eliminar el producto');
+                }
+
+                await cargarProductos();
+                if (document.getElementById('resumen').classList.contains('activa')) {
+                    cargarDashboard();
+                }
+            } catch (error) {
+                alert(error.message);
             }
         }
 
-        // Guardar producto (agregar o editar)
-        function guardarProducto(e) {
+        async function guardarProducto(e) {
             e.preventDefault();
 
             const id = productoId.value;
@@ -716,47 +837,48 @@
                 return;
             }
 
-            if (id) {
-                // Editar existente
-                const index = productos.findIndex(p => p.id === parseInt(id));
-                if (index !== -1) {
-                    productos[index].nombre = nombre;
-                    productos[index].precio = precio;
-                }
-            } else {
-                // Agregar nuevo
-                const nuevoProducto = {
-                    id: nextId++,
-                    nombre: nombre,
-                    precio: precio
-                };
-                productos.push(nuevoProducto);
-            }
+            try {
+                const payload = { name: nombre, price: precio, category: 'general', description: 'Producto registrado desde panel administrador', active: true };
+                const method = id ? 'PUT' : 'POST';
+                if (id) payload.id = Number(id);
 
-            renderizarProductos();
-            cerrarModal();
+                const response = await fetch('php/admin_products.php', {
+                    method,
+                    credentials: 'same-origin',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                const data = await response.json();
+                if (!response.ok || !data.success) {
+                    throw new Error(data.error || 'No se pudo guardar el producto');
+                }
+
+                await cargarProductos();
+                if (document.getElementById('resumen').classList.contains('activa')) {
+                    cargarDashboard();
+                }
+                cerrarModal();
+            } catch (error) {
+                alert(error.message);
+            }
         }
 
-        // Cerrar modal
         function cerrarModal() {
             modal.classList.remove('activo');
         }
 
-        // Eventos
         btnAgregar.addEventListener('click', abrirModalAgregar);
         btnCancelar.addEventListener('click', cerrarModal);
         formProducto.addEventListener('submit', guardarProducto);
 
-        // Cerrar modal si se hace clic fuera del contenido
         window.addEventListener('click', (e) => {
             if (e.target === modal) {
                 cerrarModal();
             }
         });
 
-        // Inicializar
-        renderizarProductos();
-        mostrarVista('resumen'); // Por defecto
+        mostrarVista('resumen');
     </script>
 </body>
 
