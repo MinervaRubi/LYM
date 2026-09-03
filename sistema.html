@@ -63,6 +63,10 @@
                                 <i class="fas fa-id-card"></i> Mis publicaciones
                             </a>
 
+                            <a href="gestor.html" class="dropdown-item">
+                                <i class="fas fa-id-card"></i> Gestor
+                            </a>
+
                             <div class="dropdown-divider"></div>
 
                             <button type="button" class="dropdown-item logout-btn" onclick="logout()">
@@ -1107,7 +1111,7 @@
                 if (currentUser.role === "admin") {
 
                     setTimeout(() => {
-                        window.location.href = "intranet.html";
+                        window.location.href = "gestor.html";
                     }, 700);
 
                     return;
