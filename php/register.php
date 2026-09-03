@@ -21,7 +21,6 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit();
 }
 
-
 try {
 
     // =================================================
@@ -368,5 +367,4 @@ try {
         'error' => 'Error interno del servidor'
     ]);
 }
-
 ?>
