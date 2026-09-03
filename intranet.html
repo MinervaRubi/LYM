@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CRM Intranet - LYM</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Poppins', sans-serif; background: #f4f7fb; color: #1f2937; }
+        a { text-decoration: none; }
+        .header { background: #0f172a; color: white; padding: 16px 24px; display: flex; justify-content: space-between; align-items: center; }
+        .brand { display: flex; align-items: center; gap: 10px; }
+        .brand-badge { width: 36px; height: 36px; border-radius: 10px; display: grid; place-items: center; background: linear-gradient(135deg, #3b82f6, #8b5cf6); }
+        .header-actions { display: flex; align-items: center; gap: 12px; }
+        .btn { border: none; border-radius: 10px; padding: 10px 18px; cursor: pointer; font-weight: 600; }
+        .btn-primary { background: #2563eb; color: white; }
+        .btn-secondary { background: rgba(255,255,255,0.12); color: white; border: 1px solid rgba(255,255,255,0.18); }
+        .layout { display: flex; min-height: calc(100vh - 74px); }
+        .sidebar { width: 260px; background: #111827; color: white; padding: 24px 18px; }
+        .nav-title { font-size: 12px; text-transform: uppercase; letter-spacing: 0.10em; color: #93c5fd; margin-bottom: 16px; }
+        .nav-item { display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px; color: white; margin: 8px 0; cursor: pointer; }
+        .nav-item.active { background: rgba(59,130,246,0.2); border: 1px solid rgba(147,197,253,0.28); }
+        .content { flex: 1; padding: 24px; }
+        .view { display: none; }
+        .view.active { display: block; }
+        .panel { background: white; border-radius: 16px; box-shadow: 0 12px 32px rgba(15,23,42,0.06); padding: 22px; }
+        .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 18px; margin-bottom: 24px; }
+        .stat-card { background: white; border-radius: 16px; padding: 20px; box-shadow: 0 12px 32px rgba(15,23,42,0.06); }
+        .stat-icon { width: 46px; height: 46px; border-radius: 12px; display: grid; place-items: center; margin-bottom: 12px; color: #1d4ed8; background: rgba(37,99,235,0.12); }
+        .stat-label { color: #64748b; font-size: 13px; }
+        .stat-value { font-size: 2rem; font-weight: 700; margin-top: 8px; }
+        .table-wrap { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; margin-top: 18px; }
+        th, td { padding: 12px 14px; border-bottom: 1px solid #e5e7eb; text-align: left; }
+        th { background: #f8fafc; color: #334155; }
+        .status { display: inline-block; padding: 6px 10px; border-radius: 999px; font-size: 12px; font-weight: 700; }
+        .status.activo { background: rgba(34,197,94,0.12); color: #15803d; }
+        .status.prospecto { background: rgba(148,163,184,0.12); color: #475569; }
+        .status.inactivo { background: rgba(239,68,68,0.12); color: #b91c1c; }
+        .badge { display: inline-block; padding: 6px 10px; background: #eef2ff; color: #3730a3; border-radius: 999px; font-size: 12px; font-weight: 600; }
+        .muted { color: #64748b; }
+        .topbar { display: flex; justify-content: space-between; align-items: center; gap: 16px; margin-bottom: 20px; }
+        .table-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+        .btn-small { padding: 7px 10px; font-size: 12px; }
+        .btn-danger { background: #dc2626; color: white; }
+        .btn-warning { background: #f59e0b; color: white; }
+        .status.prospecto, .status.venta, .status.pendiente { background: rgba(148,163,184,0.12); color: #475569; }
+        .status.negociación, .status.pagado { background: rgba(34,197,94,0.12); color: #15803d; }
+        .status.contacto, .status.cancelado { background: rgba(239,68,68,0.12); color: #b91c1c; }
+        .status.cotizando { background: rgba(59,130,246,0.12); color: #1d4ed8; }
+        @media (max-width: 900px) { .layout { display: block; } .sidebar { width: 100%; } }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="brand">
+            <div class="brand-badge"><i class="fas fa-briefcase"></i></div>
+            <div>
+                <strong>LYM</strong><br>
+                <small>CRM / Intranet</small>
+            </div>
+        </div>
+        <div class="header-actions">
+            <button class="btn btn-secondary" onclick="window.location.href='sistema.html'">Volver a la tienda</button>
+            <button class="btn btn-primary" onclick="logout()">Cerrar sesión</button>
+        </div>
+    </header>
+
+    <div class="layout">
+        <aside class="sidebar">
+            <div class="nav-title">Navegación</div>
+            <div class="nav-item active" data-view="resumen"><i class="fas fa-chart-pie"></i> Resumen</div>
+            <div class="nav-item" data-view="clientes"><i class="fas fa-users"></i> Clientes</div>
+            <div class="nav-item" data-view="productos"><i class="fas fa-boxes"></i> Productos</div>
+            <div class="nav-item" data-view="pedidos"><i class="fas fa-shopping-cart"></i> Pedidos</div>
+        </aside>
+
+        <main class="content">
+            <section id="resumen" class="view active">
+                <div class="topbar">
+                    <div>
+                        <h2>Resumen del CRM</h2>
+                        <p class="muted">Clientes, ventas y seguimiento del negocio</p>
+                    </div>
+                </div>
+                <div class="stats">
+                    <div class="stat-card">
+                        <div class="stat-icon"><i class="fas fa-users"></i></div>
+                        <div class="stat-label">Clientes registrados</div>
+                        <div class="stat-value" id="totalClientes">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon"><i class="fas fa-box-open"></i></div>
+                        <div class="stat-label">Productos activos</div>
+                        <div class="stat-value" id="totalProductos">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon"><i class="fas fa-wallet"></i></div>
+                        <div class="stat-label">Pedidos</div>
+                        <div class="stat-value" id="totalPedidos">0</div>
+                    </div>
+                </div>
+                <div class="panel">
+                    <h3>Últimos clientes</h3>
+                    <div class="table-wrap">
+                        <table>
+                            <thead>
+                                <tr><th>Cliente</th><th>Correo</th><th>Etapa CRM</th><th>Estado</th></tr>
+                            </thead>
+                            <tbody id="resumenClientesBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <section id="clientes" class="view">
+                <div class="topbar">
+                    <div>
+                        <h2>Clientes</h2>
+                        <p class="muted">Todos los registros creados desde la página pública</p>
+                    </div>
+                </div>
+                <div class="panel">
+                    <div class="table-wrap">
+                        <table>
+                            <thead>
+                                <tr><th>ID</th><th>Nombre</th><th>Correo</th><th>Teléfono</th><th>Etapa</th><th>Estado</th></tr>
+                            </thead>
+                            <tbody id="clientesTableBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <section id="productos" class="view">
+                <div class="topbar">
+                    <div>
+                        <h2>Productos</h2>
+                        <p class="muted">Control del catálogo de la tienda</p>
+                    </div>
+                </div>
+                <div class="panel">
+                    <div class="table-wrap">
+                        <table>
+                            <thead>
+                                <tr><th>ID</th><th>Nombre</th><th>Categoría</th><th>Precio</th><th>Estado</th></tr>
+                            </thead>
+                            <tbody id="productosTableBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <section id="pedidos" class="view">
+                <div class="topbar">
+                    <div>
+                        <h2>Pedidos</h2>
+                        <p class="muted">Seguimiento de ventas y pagos</p>
+                    </div>
+                </div>
+                <div class="panel">
+                    <div class="table-wrap">
+                        <table>
+                            <thead>
+                                <tr><th>ID</th><th>Cliente</th><th>Total</th><th>Estado</th><th>Fecha</th></tr>
+                            </thead>
+                            <tbody id="pedidosTableBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        const state = { clientes: [], productos: [], pedidos: [], stats: {} };
+        let refreshTimer = null;
+
+        function showView(name) {
+            document.querySelectorAll('.view').forEach(v => v.classList.toggle('active', v.id === name));
+            document.querySelectorAll('.nav-item').forEach(item => item.classList.toggle('active', item.dataset.view === name));
+        }
+
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.addEventListener('click', () => showView(item.dataset.view));
+        });
+
+        function escapeHtml(value) {
+            return String(value ?? '').replace(/[&<>"']/g, function (char) {
+                const map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' };
+                return map[char];
+            });
+        }
+
+        function formatMoney(value) {
+            return '$' + Number(value || 0).toFixed(2);
+        }
+
+        function badgeClass(value) {
+            const normalized = String(value || '').trim().toLowerCase();
+            if (normalized === 'activo' || normalized === 'pagado' || normalized === 'cliente') return 'activo';
+            if (normalized === 'prospecto' || normalized === 'pendiente') return 'prospecto';
+            if (normalized === 'inactivo' || normalized === 'cancelado') return 'inactivo';
+            if (normalized === 'cotizando') return 'cotizando';
+            if (normalized === 'contacto') return 'contacto';
+            if (normalized === 'negociación' || normalized === 'negociacion') return 'negociación';
+            return 'prospecto';
+        }
+
+        function renderResumen() {
+            document.getElementById('totalClientes').textContent = Number(state.stats.totalClientes || state.clientes.length || 0);
+            document.getElementById('totalProductos').textContent = Number(state.stats.productosActivos || state.productos.filter(p => Number(p.active) === 1).length || 0);
+            document.getElementById('totalPedidos').textContent = Number(state.stats.totalPedidos || state.pedidos.length || 0);
+
+            const rows = state.clientes.slice(0, 5).map(cliente => `
+                <tr>
+                    <td>${escapeHtml(cliente.nombre || cliente.username || 'Sin nombre')}</td>
+                    <td>${escapeHtml(cliente.correo || cliente.email || 'Sin correo')}</td>
+                    <td><span class="badge">${escapeHtml(cliente.etapa_crm || 'Prospecto')}</span></td>
+                    <td><span class="status ${badgeClass(cliente.estado || 'activo')}">${escapeHtml(cliente.estado || 'activo')}</span></td>
+                </tr>
+            `).join('');
+
+            document.getElementById('resumenClientesBody').innerHTML = rows || '<tr><td colspan="4" class="muted">Sin clientes registrados.</td></tr>';
+        }
+
+        function renderClientes() {
+            const rows = state.clientes.map(cliente => `
+                <tr>
+                    <td>${escapeHtml(cliente.id)}</td>
+                    <td>${escapeHtml(cliente.nombre || cliente.username || 'Sin nombre')}</td>
+                    <td>${escapeHtml(cliente.correo || cliente.email || 'Sin correo')}</td>
+                    <td>${escapeHtml(cliente.telefono || '—')}</td>
+                    <td>
+                        <select data-client-id="${escapeHtml(cliente.id)}" class="client-stage-select" style="padding:8px 10px;border-radius:8px;border:1px solid #dbe3f0;min-width:130px;">
+                            ${['Prospecto','Contacto','Cotizando','Negociación','Cliente'].map(stage => `
+                                <option value="${stage}" ${stage === (cliente.etapa_crm || 'Prospecto') ? 'selected' : ''}>${stage}</option>
+                            `).join('')}
+                        </select>
+                    </td>
+                    <td>
+                        <div class="table-actions">
+                            <span class="status ${badgeClass(cliente.estado || 'activo')}">${escapeHtml(cliente.estado || 'activo')}</span>
+                            <button class="btn btn-small btn-danger" data-delete-client="${escapeHtml(cliente.id)}">Eliminar</button>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+
+            document.getElementById('clientesTableBody').innerHTML = rows || '<tr><td colspan="6" class="muted">No hay clientes registrados.</td></tr>';
+
+            document.querySelectorAll('.client-stage-select').forEach(select => {
+                select.addEventListener('change', async (event) => {
+                    const id = Number(event.target.dataset.clientId);
+                    const etapaCrm = event.target.value;
+                    await updateCliente(id, { etapa_crm: etapaCrm });
+                });
+            });
+
+            document.querySelectorAll('[data-delete-client]').forEach(button => {
+                button.addEventListener('click', async () => {
+                    const id = Number(button.dataset.deleteClient);
+                    await deleteCliente(id);
+                });
+            });
+        }
+
+        function renderProductos() {
+            const rows = state.productos.map(producto => `
+                <tr>
+                    <td>${escapeHtml(producto.id)}</td>
+                    <td>${escapeHtml(producto.name || producto.nombre || 'Sin nombre')}</td>
+                    <td>${escapeHtml(producto.category || 'Sin categoría')}</td>
+                    <td>${formatMoney(producto.price)}</td>
+                    <td>
+                        <div class="table-actions">
+                            <span class="status ${Number(producto.active) === 1 ? 'activo' : 'inactivo'}">${Number(producto.active) === 1 ? 'Activo' : 'Inactivo'}</span>
+                            <button class="btn btn-small btn-danger" data-delete-product="${escapeHtml(producto.id)}">Eliminar</button>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+
+            document.getElementById('productosTableBody').innerHTML = rows || '<tr><td colspan="5" class="muted">No hay productos.</td></tr>';
+
+            document.querySelectorAll('[data-delete-product]').forEach(button => {
+                button.addEventListener('click', async () => {
+                    const id = Number(button.dataset.deleteProduct);
+                    await deleteProducto(id);
+                });
+            });
+        }
+
+        function renderPedidos() {
+            const rows = (state.pedidos || []).map(pedido => `
+                <tr>
+                    <td>${escapeHtml(pedido.id)}</td>
+                    <td>${escapeHtml(pedido.cliente || 'Sin cliente')}</td>
+                    <td>${formatMoney(pedido.total)}</td>
+                    <td><span class="status ${badgeClass(pedido.estado || 'pendiente')}">${escapeHtml(pedido.estado || 'pendiente')}</span></td>
+                    <td>${escapeHtml(pedido.created_at ? new Date(pedido.created_at).toLocaleString() : '—')}</td>
+                </tr>
+            `).join('');
+
+            document.getElementById('pedidosTableBody').innerHTML = rows || '<tr><td colspan="5" class="muted">No hay pedidos registrados.</td></tr>';
+        }
+
+        async function fetchJson(url, options = {}) {
+            const response = await fetch(url, {
+                cache: 'no-store',
+                credentials: 'same-origin',
+                ...options
+            });
+            const text = await response.text();
+            let data = null;
+
+            try {
+                data = JSON.parse(text);
+            } catch (error) {
+                throw new Error(text || 'Respuesta inválida del servidor');
+            }
+
+            if (!response.ok || (data && data.success === false)) {
+                throw new Error(data?.error || 'No se pudo completar la solicitud');
+            }
+
+            return data;
+        }
+
+        async function checkAccess() {
+            try {
+                const data = await fetchJson('php/check_session.php');
+                if (!data.authenticated || !data.user || data.user.role !== 'admin') {
+                    window.location.href = 'sistema.html';
+                    return false;
+                }
+                return true;
+            } catch (error) {
+                console.error(error);
+                window.location.href = 'sistema.html';
+                return false;
+            }
+        }
+
+        async function updateCliente(id, payload) {
+            try {
+                await fetchJson('php/clientes.php', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+                    body: JSON.stringify({ id, ...payload })
+                });
+                await loadData();
+            } catch (error) {
+                console.error('Error actualizando cliente:', error);
+                alert(error.message || 'No se pudo actualizar el cliente');
+            }
+        }
+
+        async function deleteCliente(id) {
+            const confirmar = confirm('¿Deseas eliminar este registro de cliente?');
+            if (!confirmar) return;
+
+            try {
+                await fetchJson('php/clientes.php', {
+                    method: 'DELETE',
+                    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+                    body: JSON.stringify({ id })
+                });
+                await loadData();
+            } catch (error) {
+                console.error('Error eliminando cliente:', error);
+                alert(error.message || 'No se pudo eliminar el cliente');
+            }
+        }
+
+        async function deleteProducto(id) {
+            const confirmar = confirm('¿Deseas eliminar este producto del catálogo?');
+            if (!confirmar) return;
+
+            try {
+                await fetchJson('php/admin_products.php', {
+                    method: 'DELETE',
+                    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+                    body: JSON.stringify({ id })
+                });
+                await loadData();
+            } catch (error) {
+                console.error('Error eliminando producto:', error);
+                alert(error.message || 'No se pudo eliminar el producto');
+            }
+        }
+
+        async function loadData() {
+            const ok = await checkAccess();
+            if (!ok) return;
+
+            try {
+                const [dashboard, productosData] = await Promise.all([
+                    fetchJson('php/crm_dashboard.php'),
+                    fetchJson('php/admin_products.php')
+                ]);
+
+                state.stats = dashboard.stats || {};
+                state.clientes = dashboard.clientes || [];
+                state.pedidos = dashboard.pedidos || [];
+                state.productos = productosData.productos || [];
+
+                renderResumen();
+                renderClientes();
+                renderProductos();
+                renderPedidos();
+            } catch (error) {
+                console.error('Error cargando datos del CRM:', error);
+                alert(error.message || 'No se pudieron cargar los datos del CRM.');
+            }
+        }
+
+        async function logout() {
+            try {
+                await fetch('php/logout.php', { method: 'POST', credentials: 'same-origin' });
+            } catch (error) {
+                console.error(error);
+            }
+            window.location.href = 'sistema.html';
+        }
+
+        function startLiveRefresh() {
+            if (refreshTimer) clearInterval(refreshTimer);
+            refreshTimer = setInterval(() => {
+                loadData();
+            }, 5000);
+        }
+
+        loadData();
+        startLiveRefresh();
+    </script>
+</body>
+</html>

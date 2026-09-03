@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Comunidad | LMY</title>
+    <title>Comunidad | LYM</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
         rel="stylesheet">
     <style>
@@ -320,7 +320,7 @@
 
     <header>
         <nav class="nav">
-            <a href="sistema.html" class="logo">LMY <span>MX</span></a>
+            <a href="sistema.html" class="logo">LYM <span>MX</span></a>
 
             <div class="nav-links">
                 <a href="sistema.html">Inicio</a>
@@ -339,7 +339,7 @@
     <main>
         <section class="hero">
             <h1>Comunidad</h1>
-            <p>Comparte tu experiencia con la comunidad de LMY Diseño e Impresión.</p>
+            <p>Comparte tu experiencia con la comunidad de LYM Diseño e Impresión.</p>
         </section>
 
         <section class="card">
@@ -373,7 +373,7 @@
             <a href="foro.html">Comunidad</a>
             <a href="contacto.html">Contacto</a>
         </div>
-        <p>LMY Diseño e Impresión · Foro funcional sin base de datos</p>
+        <p>LYM Diseño e Impresión · Foro funcional sin base de datos</p>
     </footer>
 
     <script>
@@ -394,11 +394,11 @@
             }
         ];
 
-        let comentariosGuardados = JSON.parse(localStorage.getItem('foroComentariosLMY'));
+        let comentariosGuardados = JSON.parse(localStorage.getItem('foroComentariosLYM'));
 
         if (!comentariosGuardados || !Array.isArray(comentariosGuardados)) {
             comentariosGuardados = comentariosBase;
-            localStorage.setItem('foroComentariosLMY', JSON.stringify(comentariosGuardados));
+            localStorage.setItem('foroComentariosLYM', JSON.stringify(comentariosGuardados));
         }
 
         const listaComentarios = document.getElementById('listaComentarios');
@@ -437,7 +437,7 @@
         }
 
         function guardarComentarios() {
-            localStorage.setItem('foroComentariosLMY', JSON.stringify(comentariosGuardados));
+            localStorage.setItem('foroComentariosLYM', JSON.stringify(comentariosGuardados));
         }
 
         function renderizarComentarios() {

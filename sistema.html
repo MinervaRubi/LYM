@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>LMY Diseño e Impresión - Personaliza tus regalos y promocionales</title>
+    <title>LYM Diseño e Impresión - Personaliza tus regalos y promocionales</title>
 
     <link rel="stylesheet" href="Proyecto.css" />
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
@@ -21,7 +21,7 @@
         <nav class="nav">
             <div class="nav-container">
                 <div class="logo">
-                    <h1>LMY</h1>
+                    <h1>LYM</h1>
                     <span>diseño e impresión</span>
                 </div>
 
@@ -40,7 +40,6 @@
                     <div id="guestButtons">
                         <button type="button" class="btn btn-outline" onclick="showLoginModal()">Iniciar Sesión</button>
                         <button type="button" class="btn btn-primary" onclick="showRegisterModal()">Registrarse</button>
-                        <button type="button" class="btn btn-outline" onclick="showAdminModal()">Intranet</button>
                     </div>
 
                     <!-- MENÚ USUARIO -->
@@ -1108,7 +1107,7 @@
                 if (currentUser.role === "admin") {
 
                     setTimeout(() => {
-                        window.location.href = "admin.html";
+                        window.location.href = "intranet.html";
                     }, 700);
 
                     return;
@@ -1511,7 +1510,7 @@
                 setTimeout(() => {
 
                     window.location.href =
-                        "admin.html";
+                        "intranet.html";
 
                 }, 700);
 

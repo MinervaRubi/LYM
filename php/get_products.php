@@ -2,6 +2,8 @@
 require_once '../includes/config.php';
 
 header('Content-Type: application/json');
+header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
+header('Pragma: no-cache');
 
 if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
     http_response_code(405);
@@ -45,4 +47,3 @@ try {
     echo json_encode(['error' => 'Error interno del servidor: ' . $e->getMessage()]);
 }
 ?>
-

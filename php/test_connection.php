@@ -9,7 +9,7 @@ try {
 
     echo "<h1>✅ Conexión exitosa</h1>";
 
-    echo "<p><strong>Base de datos:</strong> LYM</p>";
+    echo "<p><strong>Base de datos activa:</strong> " . htmlspecialchars(getActiveDatabaseName(), ENT_QUOTES, 'UTF-8') . "</p>";
 
     // =====================================================
     // TABLAS DE LA BASE DE DATOS
@@ -87,9 +87,9 @@ try {
     echo "<ul>";
     echo "<li>Apache esté iniciado en XAMPP</li>";
     echo "<li>MySQL esté iniciado en XAMPP</li>";
-    echo "<li>La base de datos se llame exactamente <strong>LYM</strong></li>";
-    echo "<li>Las tablas de la BD hayan sido creadas</li>";
-    echo "<li>includes/config.php esté apuntando a LYM</li>";
+    echo "<li>La base de datos configurada exista y tenga permisos de lectura y escritura</li>";
+    echo "<li>Las tablas requeridas hayan sido creadas</li>";
+    echo "<li>Las variables DB_HOST, DB_USER, DB_PASS y DB_NAME sean correctas si usas variables de entorno</li>";
     echo "</ul>";
 }
 ?>
