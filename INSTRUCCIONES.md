@@ -68,7 +68,7 @@ Sistema web completo con registro y login de dos tipos de usuario (cliente y adm
 
 #### Para Administradores:
 - Todas las funcionalidades de cliente
-- Acceso al panel de administración (`admin.html`)
+- Acceso al CRM / intranet administrativa (`intranet.html`)
 - Gestión completa de productos (CRUD):
   - Crear nuevos productos
   - Editar productos existentes
