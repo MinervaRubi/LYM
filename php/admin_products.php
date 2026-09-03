@@ -2,6 +2,8 @@
 require_once '../includes/config.php';
 
 header('Content-Type: application/json');
+header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
+header('Pragma: no-cache');
 
 // Verificar que el usuario esté logueado y sea administrador
 if (!isLoggedIn() || !isAdmin()) {
@@ -197,4 +199,3 @@ try {
     echo json_encode(['error' => 'Error interno del servidor: ' . $e->getMessage()]);
 }
 ?>
-
