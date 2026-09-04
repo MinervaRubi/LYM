@@ -1,7 +1,10 @@
 <!-- ==============================================================
-     VISTA 5: HISTORIAL DE INTERACCIONES (crm-interacciones.html)
+     VISTA 5: HISTORIAL DE INTERACCIONES
+     ARCHIVO: crm-interacciones.html
 ============================================================== -->
+
 <style>
+
     .crm-timeline-wrapper {
         display: flex;
         flex-direction: column;
@@ -10,11 +13,24 @@
     }
 
     @keyframes fadeInTimeline {
-        from { opacity: 0; transform: translateY(6px); }
-        to { opacity: 1; transform: translateY(0); }
+
+        from {
+            opacity: 0;
+            transform: translateY(6px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
     }
 
-    /* BOTÓN VOLVER */
+
+    /* =========================================================
+       BOTÓN VOLVER
+    ========================================================= */
+
     .crm-btn-back {
         background: none;
         border: none;
@@ -34,7 +50,11 @@
         color: #6B46C1;
     }
 
-    /* CABECERA */
+
+    /* =========================================================
+       CABECERA
+    ========================================================= */
+
     .crm-timeline-header {
         display: flex;
         justify-content: space-between;
@@ -50,6 +70,11 @@
         margin: 0;
     }
 
+
+    /* =========================================================
+       BOTÓN NUEVA INTERACCIÓN
+    ========================================================= */
+
     .btn-nueva-interaccion {
         background-color: #6B46C1;
         color: #ffffff;
@@ -62,14 +87,21 @@
         display: inline-flex;
         align-items: center;
         gap: 8px;
-        transition: background-color 0.2s ease;
+        transition:
+            background-color 0.2s ease,
+            transform 0.2s ease;
     }
 
     .btn-nueva-interaccion:hover {
         background-color: #553C9A;
+        transform: translateY(-1px);
     }
 
-    /* CONTENEDOR DE LA LÍNEA DE TIEMPO */
+
+    /* =========================================================
+       CONTENEDOR TIMELINE
+    ========================================================= */
+
     .crm-timeline-container {
         position: relative;
         padding: 10px 0 10px 30px;
@@ -78,7 +110,9 @@
         gap: 1.25rem;
     }
 
-    /* LÍNEA VERTICAL CONECTORA */
+
+    /* Línea vertical */
+
     .crm-timeline-container::before {
         content: '';
         position: absolute;
@@ -90,7 +124,11 @@
         z-index: 1;
     }
 
-    /* FILA DE CADA EVENTO */
+
+    /* =========================================================
+       CADA INTERACCIÓN
+    ========================================================= */
+
     .crm-timeline-item {
         display: flex;
         align-items: flex-start;
@@ -99,7 +137,9 @@
         z-index: 2;
     }
 
-    /* ICONO CIRCULAR */
+
+    /* Icono */
+
     .crm-timeline-icon {
         width: 48px;
         height: 48px;
@@ -113,6 +153,7 @@
         box-shadow: 0 0 0 4px #f8fafc;
     }
 
+
     .icon-llamada {
         background-color: #10b981;
     }
@@ -125,37 +166,57 @@
         background-color: #8b5cf6;
     }
 
-    /* TARJETA DE CONTENIDO */
+    .icon-otro {
+        background-color: #F59E0B;
+    }
+
+
+    /* =========================================================
+       TARJETA
+    ========================================================= */
+
     .crm-timeline-card {
         flex: 1;
         background: #ffffff;
         border: 1px solid #e2e8f0;
         border-radius: 12px;
         padding: 1.25rem 1.5rem;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+
+        box-shadow:
+            0 2px 8px
+            rgba(0, 0, 0, 0.03);
+
         display: flex;
         justify-content: space-between;
         align-items: flex-start;
+
         gap: 1.2rem;
+
         position: relative;
     }
 
-    /* PEQUEÑA LÍNEA CONECTOR HORIZONTAL */
+
     .crm-timeline-card::before {
         content: '';
+
         position: absolute;
+
         left: -10px;
         top: 22px;
+
         width: 10px;
         height: 2px;
+
         background-color: #e2e8f0;
     }
+
 
     .crm-timeline-info {
         display: flex;
         flex-direction: column;
         gap: 0.35rem;
     }
+
 
     .crm-timeline-info h4 {
         font-size: 1rem;
@@ -164,12 +225,14 @@
         margin: 0;
     }
 
+
     .crm-timeline-desc {
         font-size: 0.88rem;
         color: #334155;
-        line-height: 1.4;
+        line-height: 1.5;
         margin: 0;
     }
+
 
     .crm-timeline-user {
         font-size: 0.8rem;
@@ -177,6 +240,7 @@
         margin-top: 4px;
         font-weight: 500;
     }
+
 
     .crm-timeline-date {
         font-size: 0.82rem;
@@ -186,116 +250,952 @@
         text-align: right;
     }
 
+
+    /* =========================================================
+       CARGANDO / VACÍO / ERROR
+    ========================================================= */
+
+    .crm-timeline-message {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 30px;
+        text-align: center;
+        color: #64748b;
+    }
+
+
+    .crm-timeline-message i {
+        display: block;
+        font-size: 1.6rem;
+        color: #6B46C1;
+        margin-bottom: 10px;
+    }
+
+
+    .crm-timeline-error {
+        color: #b91c1c;
+        background: #fef2f2;
+        border-color: #fecaca;
+    }
+
+
+    /* =========================================================
+       RESPONSIVE
+    ========================================================= */
+
     @media (max-width: 650px) {
+
         .crm-timeline-container {
             padding-left: 0;
         }
+
+
         .crm-timeline-container::before {
             left: 24px;
         }
+
+
         .crm-timeline-card {
             flex-direction: column;
         }
+
+
         .crm-timeline-date {
             text-align: left;
         }
+
+
+        .crm-timeline-header {
+            align-items: flex-start;
+        }
+
     }
+
 </style>
 
+
+
+<!-- =========================================================
+     CONTENIDO VISTA 5
+========================================================= -->
+
 <div class="crm-timeline-wrapper">
-    <!-- BOTÓN VOLVER -->
-    <button class="crm-btn-back" onclick="volverADetalleCliente()">
-        <i class="fas fa-chevron-left"></i> Volver a cliente
+
+
+    <!-- VOLVER -->
+
+    <button
+        class="crm-btn-back"
+        onclick="volverADetalleCliente()"
+    >
+
+        <i class="fas fa-chevron-left"></i>
+
+        Volver a cliente
+
     </button>
 
+
+
     <!-- CABECERA -->
+
     <div class="crm-timeline-header">
-        <h2 id="timelineTituloCliente">Historial de interacciones – María López</h2>
-        <button class="btn-nueva-interaccion" onclick="abrirModalRegistrarInteraccion()">
-            <i class="fas fa-plus"></i> + Nueva interacción
+
+
+        <h2 id="timelineTituloCliente">
+
+            Historial de interacciones
+
+        </h2>
+
+
+        <button
+            class="btn-nueva-interaccion"
+            onclick="abrirRegistrarInteraccion()"
+        >
+
+            <i class="fas fa-plus"></i>
+
+            Nueva interacción
+
         </button>
+
+
     </div>
 
-    <!-- CONTENEDOR TIMELINE -->
-    <div class="crm-timeline-container" id="timelineListContainer">
-        <!-- Render dinámico desde JS -->
+
+
+    <!-- HISTORIAL -->
+
+    <div
+        class="crm-timeline-container"
+        id="timelineListContainer"
+    >
+
+        <div class="crm-timeline-message">
+
+            <i class="fas fa-spinner fa-spin"></i>
+
+            Cargando interacciones...
+
+        </div>
+
     </div>
+
+
 </div>
 
+
+
 <script>
-    (function initTimelineInteracciones() {
-        // Tomar cliente seleccionado global o valor por defecto
-        const cliente = window.clienteSeleccionadoCRM || {
-            id: 1,
-            nombre: "María López"
-        };
 
-        document.getElementById("timelineTituloCliente").textContent = `Historial de interacciones – ${cliente.nombre}`;
+(function initTimelineInteracciones() {
 
-        // Datos de ejemplo para la línea de tiempo
-        const listaInteracciones = [
-            {
-                tipo: "Llamada",
-                icono: "fa-phone",
-                claseColor: "icon-llamada",
-                descripcion: "Se discutieron nuevos diseños para la próxima temporada.",
-                usuario: "Admin",
-                fecha: "15/05/2025 10:30"
-            },
-            {
-                tipo: "Correo",
-                icono: "fa-envelope",
-                claseColor: "icon-correo",
-                descripcion: "Envío de catálogo de nuevos productos.",
-                usuario: "Admin",
-                fecha: "10/05/2025 14:20"
-            },
-            {
-                tipo: "Reunión",
-                icono: "fa-users",
-                claseColor: "icon-reunion",
-                descripcion: "Reunión en tienda para ver muestras de talavera.",
-                usuario: "Juan Pérez",
-                fecha: "02/05/2025 11:00"
+
+    /* =========================================================
+       API
+    ========================================================= */
+
+    const API =
+        "php/crm_api.php";
+
+
+
+    /* =========================================================
+       OBTENER CLIENTE ACTUAL
+    ========================================================= */
+
+    function obtenerClienteSeleccionado() {
+
+
+        /*
+         * Primera opción:
+         * cliente guardado globalmente por el CRM.
+         */
+
+        if (
+            window.clienteSeleccionadoCRM
+            &&
+            window.clienteSeleccionadoCRM.id
+        ) {
+
+            return window.clienteSeleccionadoCRM;
+
+        }
+
+
+        /*
+         * Segunda opción:
+         * buscar cliente guardado en sessionStorage.
+         */
+
+        const guardado =
+            sessionStorage.getItem(
+                "clienteSeleccionadoCRM"
+            );
+
+
+        if (guardado) {
+
+            try {
+
+                const cliente =
+                    JSON.parse(
+                        guardado
+                    );
+
+
+                if (cliente && cliente.id) {
+
+                    window.clienteSeleccionadoCRM =
+                        cliente;
+
+
+                    return cliente;
+
+                }
+
+            } catch (error) {
+
+                console.error(
+                    "No se pudo leer el cliente guardado:",
+                    error
+                );
+
             }
-        ];
 
-        // Renderizado
-        const container = document.getElementById("timelineListContainer");
-        container.innerHTML = listaInteracciones.map(item => `
-            <div class="crm-timeline-item">
-                <div class="crm-timeline-icon ${item.claseColor}">
-                    <i class="fas ${item.icono}"></i>
-                </div>
-                <div class="crm-timeline-card">
-                    <div class="crm-timeline-info">
-                        <h4>${item.tipo}</h4>
-                        <p class="crm-timeline-desc">${item.descripcion}</p>
-                        <span class="crm-timeline-user">Usuario: ${item.usuario}</span>
-                    </div>
-                    <div class="crm-timeline-date">${item.fecha}</div>
-                </div>
+        }
+
+
+        /*
+         * Tercera opción:
+         * obtener el id desde la URL.
+         *
+         * Ejemplo:
+         * crm-interacciones.html?id=3
+         */
+
+        const parametros =
+            new URLSearchParams(
+                window.location.search
+            );
+
+
+        const id =
+            parametros.get("id")
+            ||
+            parametros.get("cliente_id");
+
+
+        if (id) {
+
+            return {
+
+                id: id,
+
+                nombre:
+                    "Cliente"
+
+            };
+
+        }
+
+
+        return null;
+
+    }
+
+
+
+    const cliente =
+        obtenerClienteSeleccionado();
+
+
+
+    /* =========================================================
+       ELEMENTOS
+    ========================================================= */
+
+    const titulo =
+        document.getElementById(
+            "timelineTituloCliente"
+        );
+
+
+    const container =
+        document.getElementById(
+            "timelineListContainer"
+        );
+
+
+
+    /* =========================================================
+       VALIDAR CLIENTE
+    ========================================================= */
+
+    if (!cliente || !cliente.id) {
+
+
+        titulo.textContent =
+            "Historial de interacciones";
+
+
+        container.innerHTML = `
+
+            <div class="
+                crm-timeline-message
+                crm-timeline-error
+            ">
+
+                <i class="fas fa-circle-exclamation"></i>
+
+                No se seleccionó un cliente.
+
+                <br><br>
+
+                Regresa a la lista de clientes y selecciona uno.
+
             </div>
-        `).join("");
 
-        // Navegación de regreso
-        window.volverADetalleCliente = function() {
-            if (typeof loadExternalView === "function") {
-                loadExternalView("crm-detalle-cliente.html", null);
-            } else {
-                alert("Regresando a detalle de cliente...");
+        `;
+
+
+        return;
+
+    }
+
+
+
+    /* =========================================================
+       MOSTRAR NOMBRE
+    ========================================================= */
+
+    titulo.textContent =
+        cliente.nombre
+        &&
+        cliente.nombre !== "Cliente"
+        ?
+        `Historial de interacciones – ${cliente.nombre}`
+        :
+        "Historial de interacciones";
+
+
+
+    /* =========================================================
+       CARGAR INTERACCIONES DE MYSQL
+    ========================================================= */
+
+    async function cargarInteracciones() {
+
+
+        container.innerHTML = `
+
+            <div class="crm-timeline-message">
+
+                <i class="fas fa-spinner fa-spin"></i>
+
+                Cargando interacciones...
+
+            </div>
+
+        `;
+
+
+        try {
+
+
+            const respuesta =
+                await fetch(
+
+                    API
+                    +
+                    "?resource=interacciones"
+                    +
+                    "&cliente_id="
+                    +
+                    encodeURIComponent(
+                        cliente.id
+                    ),
+
+                    {
+                        credentials:
+                            "same-origin"
+                    }
+
+                );
+
+
+
+            const datos =
+                await respuesta.json();
+
+
+
+            if (!respuesta.ok) {
+
+                throw new Error(
+
+                    datos.error
+                    ||
+                    "No se pudieron cargar las interacciones."
+
+                );
+
             }
+
+
+
+            const interacciones =
+                Array.isArray(
+                    datos.interacciones
+                )
+                ?
+                datos.interacciones
+                :
+                [];
+
+
+
+            /*
+             * Si la API devolvió nombre del cliente,
+             * actualizamos el título.
+             */
+
+            if (
+                interacciones.length > 0
+                &&
+                interacciones[0].cliente
+            ) {
+
+                cliente.nombre =
+                    interacciones[0].cliente;
+
+
+                window.clienteSeleccionadoCRM =
+                    cliente;
+
+
+                sessionStorage.setItem(
+
+                    "clienteSeleccionadoCRM",
+
+                    JSON.stringify(
+                        cliente
+                    )
+
+                );
+
+
+                titulo.textContent =
+                    `Historial de interacciones – ${cliente.nombre}`;
+
+            }
+
+
+
+            /* =================================================
+               SIN INTERACCIONES
+            ================================================= */
+
+            if (
+                interacciones.length === 0
+            ) {
+
+
+                container.innerHTML = `
+
+                    <div class="crm-timeline-message">
+
+                        <i class="fas fa-comments"></i>
+
+                        Este cliente todavía no tiene
+                        interacciones registradas.
+
+                        <br><br>
+
+                        Usa el botón
+                        <strong>
+                            Nueva interacción
+                        </strong>
+                        para registrar la primera.
+
+                    </div>
+
+                `;
+
+
+                return;
+
+            }
+
+
+
+            /* =================================================
+               RENDERIZAR
+            ================================================= */
+
+            container.innerHTML =
+                interacciones
+                .map(
+                    item => {
+
+
+                        const visual =
+                            obtenerVisualInteraccion(
+                                item.tipo
+                            );
+
+
+                        return `
+
+                            <div class="crm-timeline-item">
+
+
+                                <div
+                                    class="
+                                        crm-timeline-icon
+                                        ${visual.clase}
+                                    "
+                                >
+
+                                    <i
+                                        class="
+                                            fas
+                                            ${visual.icono}
+                                        "
+                                    ></i>
+
+                                </div>
+
+
+
+                                <div class="crm-timeline-card">
+
+
+                                    <div class="crm-timeline-info">
+
+
+                                        <h4>
+
+                                            ${escaparHTML(
+                                                item.tipo
+                                            )}
+
+                                        </h4>
+
+
+                                        <p class="crm-timeline-desc">
+
+                                            ${escaparHTML(
+                                                item.descripcion
+                                            )}
+
+                                        </p>
+
+
+                                        <span class="crm-timeline-user">
+
+                                            Usuario:
+                                            ${escaparHTML(
+                                                item.responsable
+                                                ||
+                                                "Sin asignar"
+                                            )}
+
+                                        </span>
+
+
+                                    </div>
+
+
+
+                                    <div class="crm-timeline-date">
+
+                                        ${formatearFecha(
+                                            item.fecha
+                                        )}
+
+                                    </div>
+
+
+                                </div>
+
+
+                            </div>
+
+                        `;
+
+                    }
+                )
+                .join("");
+
+
+        } catch (error) {
+
+
+            console.error(
+                "Error cargando interacciones:",
+                error
+            );
+
+
+            container.innerHTML = `
+
+                <div class="
+                    crm-timeline-message
+                    crm-timeline-error
+                ">
+
+                    <i class="fas fa-triangle-exclamation"></i>
+
+                    ${escaparHTML(
+                        error.message
+                    )}
+
+                </div>
+
+            `;
+
+        }
+
+    }
+
+
+
+    /* =========================================================
+       ICONO SEGÚN TIPO
+    ========================================================= */
+
+    function obtenerVisualInteraccion(
+        tipo
+    ) {
+
+
+        const valor =
+            String(
+                tipo || ""
+            )
+            .toLowerCase();
+
+
+        if (
+            valor === "llamada"
+        ) {
+
+            return {
+
+                icono:
+                    "fa-phone",
+
+                clase:
+                    "icon-llamada"
+
+            };
+
+        }
+
+
+        if (
+            valor === "correo"
+        ) {
+
+            return {
+
+                icono:
+                    "fa-envelope",
+
+                clase:
+                    "icon-correo"
+
+            };
+
+        }
+
+
+        if (
+            valor === "reunión"
+            ||
+            valor === "reunion"
+        ) {
+
+            return {
+
+                icono:
+                    "fa-users",
+
+                clase:
+                    "icon-reunion"
+
+            };
+
+        }
+
+
+        return {
+
+            icono:
+                "fa-comment",
+
+            clase:
+                "icon-otro"
+
         };
 
-        // Disparador para la siguiente vista (6. Registrar Interacción)
-        window.abrirModalRegistrarInteraccion = function() {
-            if (typeof loadExternalView === "function") {
-                loadExternalView("crm-registrar-interaccion.html", null);
-            } else if (window.showNotification) {
-                showNotification("Abriendo formulario para registrar interacción");
-            } else {
-                alert("Registrar nueva interacción");
+    }
+
+
+
+    /* =========================================================
+       FORMATEAR FECHA
+    ========================================================= */
+
+    function formatearFecha(
+        fecha
+    ) {
+
+
+        if (!fecha) {
+
+            return "";
+
+        }
+
+
+        /*
+         * Convierte:
+         * 2026-09-04 13:30:00
+         *
+         * a:
+         * 04/09/2026 13:30
+         */
+
+        const segura =
+            String(fecha)
+            .replace(
+                " ",
+                "T"
+            );
+
+
+        const objeto =
+            new Date(
+                segura
+            );
+
+
+        if (
+            Number.isNaN(
+                objeto.getTime()
+            )
+        ) {
+
+            return escaparHTML(
+                fecha
+            );
+
+        }
+
+
+        return objeto.toLocaleString(
+            "es-MX",
+            {
+
+                day:
+                    "2-digit",
+
+                month:
+                    "2-digit",
+
+                year:
+                    "numeric",
+
+                hour:
+                    "2-digit",
+
+                minute:
+                    "2-digit"
+
             }
+        );
+
+    }
+
+
+
+    /* =========================================================
+       ESCAPAR TEXTO
+    ========================================================= */
+
+    function escaparHTML(
+        valor
+    ) {
+
+
+        return String(
+            valor ?? ""
+        )
+
+        .replaceAll(
+            "&",
+            "&amp;"
+        )
+
+        .replaceAll(
+            "<",
+            "&lt;"
+        )
+
+        .replaceAll(
+            ">",
+            "&gt;"
+        )
+
+        .replaceAll(
+            '"',
+            "&quot;"
+        )
+
+        .replaceAll(
+            "'",
+            "&#039;"
+        );
+
+    }
+
+
+
+    /* =========================================================
+       VOLVER A DETALLE
+    ========================================================= */
+
+    window.volverADetalleCliente =
+        function () {
+
+
+            /*
+             * Conservamos el cliente seleccionado.
+             */
+
+            window.clienteSeleccionadoCRM =
+                cliente;
+
+
+            sessionStorage.setItem(
+
+                "clienteSeleccionadoCRM",
+
+                JSON.stringify(
+                    cliente
+                )
+
+            );
+
+
+            if (
+                typeof loadExternalView
+                === "function"
+            ) {
+
+
+                loadExternalView(
+                    "crm-detalle-cliente.html",
+                    null
+                );
+
+
+                return;
+
+            }
+
+
+            /*
+             * Respaldo en caso de abrir
+             * esta plantilla directamente.
+             */
+
+            window.location.href =
+
+                "crm-detalle-cliente.html?id="
+                +
+                encodeURIComponent(
+                    cliente.id
+                );
+
         };
-    })();
-</script>
+
+
+
+    /* =========================================================
+       IR A VISTA 6
+    ========================================================= */
+
+    window.abrirRegistrarInteraccion =
+        function () {
+
+
+            /*
+             * Guardamos el cliente.
+             *
+             * De esta manera la Vista 6 sabe
+             * para qué cliente registrar la interacción.
+             */
+
+            window.clienteSeleccionadoCRM =
+                cliente;
+
+
+            sessionStorage.setItem(
+
+                "clienteSeleccionadoCRM",
+
+                JSON.stringify(
+                    cliente
+                )
+
+            );
+
+
+            if (
+                typeof loadExternalView
+                === "function"
+            ) {
+
+
+                loadExternalView(
+                    "crm-registrar-interaccion.html",
+                    null
+                );
+
+
+                return;
+
+            }
+
+
+            /*
+             * Respaldo.
+             */
+
+            window.location.href =
+
+                "crm-registrar-interaccion.html?cliente_id="
+                +
+                encodeURIComponent(
+                    cliente.id
+                );
+
+        };
+
+
+
+    /* =========================================================
+       INICIAR
+    ========================================================= */
+
+    cargarInteracciones();
+
+
+})();
+
+</script>s
