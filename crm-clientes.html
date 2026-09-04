@@ -1,0 +1,432 @@
+<!-- ==========================================
+     VISTA 3: CLIENTES (crm-clientes.html)
+========================================== -->
+<style>
+    .crm-header-flex {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin-bottom: 1.5rem;
+    }
+
+    .crm-view-title h2 {
+        font-size: 1.7rem;
+        font-weight: 700;
+        color: #0f172a;
+        margin: 0;
+    }
+
+    .crm-view-title p {
+        font-size: 0.88rem;
+        color: #64748b;
+        margin-top: 4px;
+    }
+
+    .crm-header-buttons {
+        display: flex;
+        gap: 10px;
+    }
+
+    .crm-btn-primary {
+        background-color: #6B46C1;
+        color: #ffffff;
+        border: none;
+        padding: 9px 18px;
+        font-size: 0.88rem;
+        font-weight: 600;
+        border-radius: 8px;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        transition: background-color 0.2s ease;
+    }
+
+    .crm-btn-primary:hover {
+        background-color: #553C9A;
+    }
+
+    .crm-btn-light {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        color: #334155;
+        padding: 9px 18px;
+        font-size: 0.88rem;
+        font-weight: 600;
+        border-radius: 8px;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        transition: all 0.2s;
+    }
+
+    .crm-btn-light:hover {
+        background: #f1f5f9;
+    }
+
+    .crm-main-panel {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 20px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);
+    }
+
+    .crm-toolbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 20px;
+        flex-wrap: wrap;
+        margin-bottom: 20px;
+    }
+
+    .crm-search-wrapper {
+        position: relative;
+        flex: 1;
+        min-width: 280px;
+        max-width: 480px;
+    }
+
+    .crm-search-wrapper .search-icon {
+        position: absolute;
+        left: 14px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #94a3b8;
+        font-size: 0.9rem;
+    }
+
+    .crm-search-wrapper input {
+        width: 100%;
+        padding: 10px 14px 10px 38px;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        font-size: 0.88rem;
+        outline: none;
+        background: #f8fafc;
+        transition: all 0.2s ease;
+    }
+
+    .crm-search-wrapper input:focus {
+        border-color: #6B46C1;
+        background: #ffffff;
+        box-shadow: 0 0 0 3px rgba(107, 70, 193, 0.1);
+    }
+
+    .crm-filter-wrapper {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .crm-filter-wrapper label {
+        font-size: 0.85rem;
+        font-weight: 500;
+        color: #64748b;
+    }
+
+    .crm-filter-wrapper select {
+        padding: 9px 16px;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        font-size: 0.88rem;
+        outline: none;
+        background: #ffffff;
+        cursor: pointer;
+        color: #334155;
+    }
+
+    .crm-filter-wrapper select:focus {
+        border-color: #6B46C1;
+    }
+
+    .crm-table-wrapper {
+        width: 100%;
+        overflow-x: auto;
+    }
+
+    .crm-table-custom {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.88rem;
+    }
+
+    .crm-table-custom th {
+        background-color: #f8fafc;
+        color: #475569;
+        font-weight: 600;
+        padding: 12px 14px;
+        border-bottom: 1px solid #e2e8f0;
+        text-align: left;
+    }
+
+    .crm-table-custom td {
+        padding: 14px;
+        border-bottom: 1px solid #f1f5f9;
+        vertical-align: middle;
+        color: #334155;
+    }
+
+    .crm-table-custom tbody tr:hover {
+        background-color: #faf7ff;
+    }
+
+    .crm-actions-cell {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+    }
+
+    .crm-action-icon {
+        background: none;
+        border: none;
+        color: #94a3b8;
+        cursor: pointer;
+        font-size: 0.95rem;
+        padding: 5px;
+        border-radius: 4px;
+        transition: all 0.2s ease;
+    }
+
+    .crm-action-icon:hover {
+        color: #6B46C1;
+        background: #f4efff;
+    }
+
+    .crm-action-delete:hover {
+        color: #ef4444;
+        background: #fee2e2;
+    }
+
+    .crm-pagination-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding-top: 18px;
+        flex-wrap: wrap;
+        gap: 12px;
+    }
+
+    .crm-pagination-info {
+        font-size: 0.82rem;
+        color: #64748b;
+    }
+
+    .crm-pagination-controls {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+
+    .crm-page-btn {
+        min-width: 32px;
+        height: 32px;
+        padding: 0 6px;
+        border: 1px solid #e2e8f0;
+        background: #ffffff;
+        border-radius: 6px;
+        font-size: 0.82rem;
+        font-weight: 500;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        color: #334155;
+        transition: all 0.2s;
+    }
+
+    .crm-page-btn:hover:not(:disabled) {
+        border-color: #6B46C1;
+        color: #6B46C1;
+    }
+
+    .crm-page-btn.active {
+        background: #6B46C1;
+        border-color: #6B46C1;
+        color: #ffffff;
+        font-weight: 600;
+    }
+
+    .crm-page-btn:disabled {
+        opacity: 0.4;
+        cursor: not-allowed;
+    }
+
+    .crm-page-dots {
+        color: #94a3b8;
+        padding: 0 4px;
+    }
+</style>
+
+<!-- ENCABEZADO -->
+<div class="crm-header-flex">
+    <div class="crm-view-title">
+        <h2>Clientes</h2>
+        <p>Listado, búsqueda y filtro de clientes</p>
+    </div>
+
+    <div class="crm-header-buttons">
+        <button class="crm-btn-light" onclick="crmFiltrarClientes()">
+            <i class="fas fa-sync-alt"></i> Actualizar
+        </button>
+        <button class="crm-btn-primary" onclick="crmNuevoCliente()">
+            <i class="fas fa-plus"></i> Nuevo cliente
+        </button>
+    </div>
+</div>
+
+<!-- PANEL Y TABLA -->
+<div class="crm-main-panel">
+    <div class="crm-toolbar">
+        <div class="crm-search-wrapper">
+            <i class="fas fa-search search-icon"></i>
+            <input type="text" id="crmInputBuscar" placeholder="Buscar por nombre, correo o empresa..." oninput="crmFiltrarClientes()">
+        </div>
+
+        <div class="crm-filter-wrapper">
+            <label for="crmSelectEstado">Filtrar por estado</label>
+            <select id="crmSelectEstado" onchange="crmFiltrarClientes()">
+                <option value="Todos">Todos</option>
+                <option value="Activo">Activo</option>
+                <option value="Inactivo">Inactivo</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="crm-table-wrapper">
+        <table class="crm-table-custom">
+            <thead>
+                <tr>
+                    <th style="width: 50px;">ID</th>
+                    <th>Nombre</th>
+                    <th>Empresa</th>
+                    <th>Correo</th>
+                    <th>Teléfono</th>
+                    <th>Etapa CRM</th>
+                    <th>Estado</th>
+                    <th style="text-align: center; width: 110px;">Acciones</th>
+                </tr>
+            </thead>
+            <tbody id="crmTablaClientesBody">
+                <!-- Se llena dinámicamente con JavaScript -->
+            </tbody>
+        </table>
+    </div>
+
+    <div class="crm-pagination-footer">
+        <span class="crm-pagination-info" id="crmPaginacionInfo">Mostrando 1 a 5 de 128 clientes</span>
+        <div class="crm-pagination-controls">
+            <button class="crm-page-btn" disabled><i class="fas fa-chevron-left"></i></button>
+            <button class="crm-page-btn active">1</button>
+            <button class="crm-page-btn">2</button>
+            <button class="crm-page-btn">3</button>
+            <span class="crm-page-dots">...</span>
+            <button class="crm-page-btn">26</button>
+            <button class="crm-page-btn"><i class="fas fa-chevron-right"></i></button>
+        </div>
+    </div>
+</div>
+
+<script>
+    (function initVistaClientes() {
+        // Datos base de clientes
+        const clientesData = [
+            { id: 1, nombre: "María López", empresa: "Talavera Artesanal", correo: "maria@talavera.com", telefono: "555-123-4567", etapa: "Activo", fechaRegistro: "12/04/2024", estado: "Activo" },
+            { id: 2, nombre: "Juan Pérez", empresa: "Textiles del Sur", correo: "juan@textiles.com", telefono: "555-987-6543", etapa: "Prospecto", fechaRegistro: "15/05/2024", estado: "Activo" },
+            { id: 3, nombre: "Ana García", empresa: "Alebrijes MX", correo: "ana@alebrijes.mx", telefono: "555-456-7890", etapa: "Frecuente", fechaRegistro: "02/02/2024", estado: "Activo" },
+            { id: 4, nombre: "Carlos Ruiz", empresa: "Barro y Fuego", correo: "carlos@barroyfuego.com", telefono: "555-321-6547", etapa: "Inactivo", fechaRegistro: "10/01/2024", estado: "Inactivo" },
+            { id: 5, nombre: "Luisa Morales", empresa: "Arte en Papel", correo: "luisa@papelarte.com", telefono: "555-654-3210", etapa: "Activo", fechaRegistro: "20/06/2024", estado: "Activo" }
+        ];
+
+        // Renderizado de tabla
+        window.crmRenderTabla = function(lista) {
+            const tbody = document.getElementById("crmTablaClientesBody");
+            if (!tbody) return;
+
+            if (lista.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="8" style="text-align: center; padding: 24px; color: #94a3b8;">No se encontraron clientes coincidentes.</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = lista.map(c => `
+                <tr>
+                    <td>${c.id}</td>
+                    <td style="font-weight: 500; color: #0f172a;">${c.nombre}</td>
+                    <td>${c.empresa}</td>
+                    <td>${c.correo}</td>
+                    <td>${c.telefono}</td>
+                    <td>${c.etapa}</td>
+                    <td>${c.estado}</td>
+                    <td class="crm-actions-cell">
+                        <button class="crm-action-icon" title="Ver Detalle" onclick="verDetalleCliente(${c.id})">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                        <button class="crm-action-icon" title="Editar" onclick="if(window.showNotification) showNotification('Editar cliente #${c.id}'); else alert('Editar #${c.id}')">
+                            <i class="fas fa-pencil-alt"></i>
+                        </button>
+                        <button class="crm-action-icon crm-action-delete" title="Eliminar" onclick="crmEliminarCliente(${c.id})">
+                            <i class="fas fa-trash-alt"></i>
+                        </button>
+                    </td>
+                </tr>
+            `).join("");
+        };
+
+        // CONEXIÓN DIRECTA CON VISTA 4: DETALLE DE CLIENTE
+        window.verDetalleCliente = function(id) {
+            const cliente = clientesData.find(c => c.id === id);
+            if (cliente) {
+                window.clienteSeleccionadoCRM = cliente;
+                if (typeof loadExternalView === "function") {
+                    loadExternalView('crm-detalle-cliente.html', null);
+                } else {
+                    alert("Cargando detalle de: " + cliente.nombre);
+                }
+            }
+        };
+
+        // Filtrado por buscador y select
+        window.crmFiltrarClientes = function() {
+            const query = (document.getElementById("crmInputBuscar")?.value || "").toLowerCase().trim();
+            const estado = document.getElementById("crmSelectEstado")?.value || "Todos";
+
+            const filtrados = clientesData.filter(c => {
+                const matchTexto = c.nombre.toLowerCase().includes(query) ||
+                                   c.correo.toLowerCase().includes(query) ||
+                                   c.empresa.toLowerCase().includes(query);
+                const matchEstado = (estado === "Todos") || (c.estado === estado);
+                return matchTexto && matchEstado;
+            });
+
+            window.crmRenderTabla(filtrados);
+            const info = document.getElementById("crmPaginacionInfo");
+            if (info) {
+                info.textContent = `Mostrando 1 a ${filtrados.length} de ${clientesData.length} clientes`;
+            }
+        };
+
+        window.crmNuevoCliente = function() {
+            if (window.showNotification) showNotification("Formulario de nuevo cliente");
+            else alert("Formulario de nuevo cliente");
+        };
+
+        window.crmEliminarCliente = function(id) {
+            if (confirm("¿Deseas eliminar al cliente #" + id + "?")) {
+                const idx = clientesData.findIndex(item => item.id === id);
+                if (idx !== -1) {
+                    clientesData.splice(idx, 1);
+                    window.crmFiltrarClientes();
+                    if (window.showNotification) showNotification("Cliente eliminado");
+                }
+            }
+        };
+
+        // Carga inicial
+        window.crmRenderTabla(clientesData);
+    })();
+</script>

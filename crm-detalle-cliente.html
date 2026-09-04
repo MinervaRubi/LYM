@@ -1,0 +1,378 @@
+<!-- ==========================================
+     VISTA 4: DETALLE DE CLIENTE (crm-detalle-cliente.html)
+========================================== -->
+<style>
+    .crm-det-wrapper {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+        animation: fadeInDetalle 0.25s ease-in-out;
+    }
+
+    @keyframes fadeInDetalle {
+        from { opacity: 0; transform: translateY(6px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* BOTÓN DE RETORNO */
+    .crm-btn-volver {
+        background: none;
+        border: none;
+        color: #64748b;
+        font-size: 0.9rem;
+        font-weight: 600;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 4px 0;
+        width: fit-content;
+        transition: color 0.2s ease;
+    }
+
+    .crm-btn-volver:hover {
+        color: #6B46C1;
+    }
+
+    /* TARJETA PRINCIPAL DEL CLIENTE */
+    .crm-det-card {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 14px;
+        padding: 2rem 2.2rem;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);
+        display: flex;
+        flex-direction: column;
+        gap: 1.8rem;
+    }
+
+    /* CABECERA (AVATAR, NOMBRE Y BADGE) */
+    .crm-det-header {
+        display: flex;
+        align-items: center;
+        gap: 1.25rem;
+    }
+
+    .crm-det-avatar {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        background-color: #fce7f3;
+        color: #db2777;
+        font-size: 1.35rem;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+
+    .crm-det-name-group {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        flex-wrap: wrap;
+    }
+
+    .crm-det-name-group h2 {
+        font-size: 1.75rem;
+        font-weight: 700;
+        color: #0f172a;
+        margin: 0;
+    }
+
+    /* PILL DE ESTADO */
+    .badge-pill-soft {
+        display: inline-block;
+        padding: 3px 12px;
+        border-radius: 9999px;
+        font-size: 0.8rem;
+        font-weight: 600;
+    }
+
+    .badge-pill-soft.activo {
+        background-color: #dcfce7;
+        color: #15803d;
+    }
+
+    .badge-pill-soft.inactivo {
+        background-color: #f1f5f9;
+        color: #64748b;
+    }
+
+    /* GRILLA DE INFORMACIÓN DE DOS COLUMNAS */
+    .crm-det-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        column-gap: 3rem;
+        row-gap: 1rem;
+    }
+
+    .crm-det-field {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 6px 0;
+    }
+
+    .crm-det-label {
+        font-size: 0.9rem;
+        color: #64748b;
+        font-weight: 500;
+    }
+
+    .crm-det-value {
+        font-size: 0.92rem;
+        color: #1e293b;
+        font-weight: 600;
+        text-align: right;
+    }
+
+    /* BOTONES DE ACCIÓN */
+    .crm-det-actions {
+        display: flex;
+        gap: 12px;
+        margin-top: 0.5rem;
+        flex-wrap: wrap;
+    }
+
+    .btn-det-outline {
+        background: #ffffff;
+        border: 1.5px solid #cbd5e1;
+        color: #334155;
+        padding: 9px 22px;
+        border-radius: 8px;
+        font-size: 0.88rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .btn-det-outline:hover {
+        background: #f8fafc;
+        border-color: #94a3b8;
+    }
+
+    .btn-det-primary {
+        background: #6B46C1;
+        border: 1px solid #6B46C1;
+        color: #ffffff;
+        padding: 9px 22px;
+        border-radius: 8px;
+        font-size: 0.88rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .btn-det-primary:hover {
+        background: #553C9A;
+        border-color: #553C9A;
+    }
+
+    /* BARRA INFERIOR DE PESTAÑAS */
+    .crm-tabs-bar {
+        display: flex;
+        align-items: center;
+        gap: 2rem;
+        border-bottom: 2px solid #e2e8f0;
+        padding: 0 0.5rem;
+        margin-top: 0.5rem;
+    }
+
+    .crm-tab-btn {
+        background: none;
+        border: none;
+        padding: 10px 4px 12px 4px;
+        font-size: 0.92rem;
+        font-weight: 600;
+        color: #64748b;
+        cursor: pointer;
+        position: relative;
+        transition: color 0.2s ease;
+    }
+
+    .crm-tab-btn:hover {
+        color: #6B46C1;
+    }
+
+    .crm-tab-btn.active {
+        color: #6B46C1;
+    }
+
+    .crm-tab-btn.active::after {
+        content: '';
+        position: absolute;
+        bottom: -2px;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background-color: #6B46C1;
+        border-radius: 2px;
+    }
+
+    .crm-tab-content-area {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 1.5rem;
+        color: #64748b;
+        font-size: 0.9rem;
+    }
+
+    @media (max-width: 768px) {
+        .crm-det-grid {
+            grid-template-columns: 1fr;
+            gap: 0.75rem;
+        }
+    }
+</style>
+
+<div class="crm-det-wrapper">
+    <!-- RETORNAR AL LISTADO DE CLIENTES -->
+    <button class="crm-btn-volver" onclick="volverAListadoClientes()">
+        <i class="fas fa-chevron-left"></i> Volver a clientes
+    </button>
+
+    <!-- TARJETA PRINCIPAL DEL CLIENTE -->
+    <div class="crm-det-card">
+        <!-- AVATAR Y NOMBRE -->
+        <div class="crm-det-header">
+            <div class="crm-det-avatar" id="detAvatar">ML</div>
+            <div class="crm-det-name-group">
+                <h2 id="detNombre">María López</h2>
+                <span class="badge-pill-soft activo" id="detBadgeEstadoSuperior">Activo</span>
+            </div>
+        </div>
+
+        <!-- GRILLA DE INFORMACIÓN DE DOS COLUMNAS -->
+        <div class="crm-det-grid">
+            <!-- COLUMNA IZQUIERDA -->
+            <div class="crm-det-field">
+                <span class="crm-det-label">Empresa</span>
+                <span class="crm-det-value" id="detEmpresa">Talavera Artesanal</span>
+            </div>
+            <!-- COLUMNA DERECHA -->
+            <div class="crm-det-field">
+                <span class="crm-det-label">Etapa CRM</span>
+                <span class="badge-pill-soft activo" id="detEtapa">Activo</span>
+            </div>
+
+            <!-- COLUMNA IZQUIERDA -->
+            <div class="crm-det-field">
+                <span class="crm-det-label">Correo</span>
+                <span class="crm-det-value" id="detCorreo">maria@talavera.com</span>
+            </div>
+            <!-- COLUMNA DERECHA -->
+            <div class="crm-det-field">
+                <span class="crm-det-label">Fecha de registro</span>
+                <span class="crm-det-value" id="detFecha">12/04/2024</span>
+            </div>
+
+            <!-- COLUMNA IZQUIERDA -->
+            <div class="crm-det-field">
+                <span class="crm-det-label">Teléfono</span>
+                <span class="crm-det-value" id="detTelefono">555-123-4567</span>
+            </div>
+            <!-- COLUMNA DERECHA -->
+            <div class="crm-det-field">
+                <span class="crm-det-label">Estado</span>
+                <span class="badge-pill-soft activo" id="detEstado">Activo</span>
+            </div>
+        </div>
+
+        <!-- ACCIONES -->
+        <div class="crm-det-actions">
+            <button class="btn-det-outline" onclick="abrirEditarCliente()">Editar cliente</button>
+            <button class="btn-det-primary" onclick="abrirCambiarEtapa()">Cambiar etapa</button>
+        </div>
+    </div>
+
+    <!-- PESTAÑAS INFERIORES -->
+    <div class="crm-tabs-bar">
+        <button class="crm-tab-btn" onclick="cambiarTabDetalle('info', this)">Información</button>
+        <button class="crm-tab-btn active" onclick="cambiarTabDetalle('interacciones', this)">Interacciones</button>
+        <button class="crm-tab-btn" onclick="cambiarTabDetalle('evaluaciones', this)">Evaluaciones</button>
+    </div>
+
+    <!-- CONTENEDOR DE LA PESTAÑA -->
+    <div class="crm-tab-content-area" id="tabContentDetalle">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <span>Línea de tiempo de interacciones con el cliente.</span>
+            <button class="btn-det-primary" style="padding: 7px 16px; font-size: 0.82rem;" onclick="abrirNuevaInteraccion()">+ Nueva interacción</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    (function initDetalleCliente() {
+        // Cargar datos pasados por variable global o por defecto
+        const clienteActual = window.clienteSeleccionadoCRM || {
+            nombre: "María López",
+            empresa: "Talavera Artesanal",
+            correo: "maria@talavera.com",
+            telefono: "555-123-4567",
+            etapa: "Activo",
+            fechaRegistro: "12/04/2024",
+            estado: "Activo"
+        };
+
+        // Pintar en pantalla
+        const iniciales = (clienteActual.nombre || "CL").split(" ").map(n => n[0]).slice(0, 2).join("").toUpperCase();
+        document.getElementById("detAvatar").textContent = iniciales;
+        document.getElementById("detNombre").textContent = clienteActual.nombre;
+        document.getElementById("detEmpresa").textContent = clienteActual.empresa;
+        document.getElementById("detCorreo").textContent = clienteActual.correo;
+        document.getElementById("detTelefono").textContent = clienteActual.telefono;
+        document.getElementById("detFecha").textContent = clienteActual.fechaRegistro || "12/04/2024";
+
+        const badgeSup = document.getElementById("detBadgeEstadoSuperior");
+        badgeSup.textContent = clienteActual.estado;
+        badgeSup.className = "badge-pill-soft " + clienteActual.estado.toLowerCase();
+
+        const badgeEtapa = document.getElementById("detEtapa");
+        badgeEtapa.textContent = clienteActual.etapa;
+        badgeEtapa.className = "badge-pill-soft " + (clienteActual.etapa === "Activo" ? "activo" : "inactivo");
+
+        const badgeEstado = document.getElementById("detEstado");
+        badgeEstado.textContent = clienteActual.estado;
+        badgeEstado.className = "badge-pill-soft " + clienteActual.estado.toLowerCase();
+
+        // Funciones de control
+        window.volverAListadoClientes = function() {
+            if (typeof loadExternalView === "function") {
+                const btnClientes = document.querySelector(".crm-submenu button:first-child");
+                loadExternalView("crm-clientes.html", btnClientes);
+            } else {
+                alert("Regresando a listado de clientes");
+            }
+        };
+
+        window.abrirEditarCliente = function() {
+            if (window.showNotification) showNotification("Abriendo editor de " + clienteActual.nombre);
+            else alert("Editar cliente");
+        };
+
+        window.abrirCambiarEtapa = function() {
+            if (window.showNotification) showNotification("Abriendo pantalla 7: Clasificación y Seguimiento");
+            else alert("Cambiar etapa CRM");
+        };
+
+        window.abrirNuevaInteraccion = function() {
+            if (window.showNotification) showNotification("Abriendo pantalla 6: Registrar interacción");
+            else alert("Nueva interacción");
+        };
+
+window.cambiarTabDetalle = function(tab, btn) {
+    document.querySelectorAll(".crm-tab-btn").forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+    
+    if (tab === "interacciones") {
+        // Carga la vista del historial de interacciones
+        if (typeof loadExternalView === "function") {
+            loadExternalView("crm-interacciones.html", null);
+        }
+    }
+};
+    })();
+</script>

@@ -1,0 +1,301 @@
+<!-- ==============================================================
+     VISTA 5: HISTORIAL DE INTERACCIONES (crm-interacciones.html)
+============================================================== -->
+<style>
+    .crm-timeline-wrapper {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+        animation: fadeInTimeline 0.25s ease-in-out;
+    }
+
+    @keyframes fadeInTimeline {
+        from { opacity: 0; transform: translateY(6px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* BOTÓN VOLVER */
+    .crm-btn-back {
+        background: none;
+        border: none;
+        color: #64748b;
+        font-size: 0.9rem;
+        font-weight: 600;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 4px 0;
+        width: fit-content;
+        transition: color 0.2s ease;
+    }
+
+    .crm-btn-back:hover {
+        color: #6B46C1;
+    }
+
+    /* CABECERA */
+    .crm-timeline-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+
+    .crm-timeline-header h2 {
+        font-size: 1.65rem;
+        font-weight: 700;
+        color: #0f172a;
+        margin: 0;
+    }
+
+    .btn-nueva-interaccion {
+        background-color: #6B46C1;
+        color: #ffffff;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 8px;
+        font-size: 0.88rem;
+        font-weight: 600;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        transition: background-color 0.2s ease;
+    }
+
+    .btn-nueva-interaccion:hover {
+        background-color: #553C9A;
+    }
+
+    /* CONTENEDOR DE LA LÍNEA DE TIEMPO */
+    .crm-timeline-container {
+        position: relative;
+        padding: 10px 0 10px 30px;
+        display: flex;
+        flex-direction: column;
+        gap: 1.25rem;
+    }
+
+    /* LÍNEA VERTICAL CONECTORA */
+    .crm-timeline-container::before {
+        content: '';
+        position: absolute;
+        left: 54px;
+        top: 25px;
+        bottom: 25px;
+        width: 2px;
+        background-color: #e2e8f0;
+        z-index: 1;
+    }
+
+    /* FILA DE CADA EVENTO */
+    .crm-timeline-item {
+        display: flex;
+        align-items: flex-start;
+        gap: 1.5rem;
+        position: relative;
+        z-index: 2;
+    }
+
+    /* ICONO CIRCULAR */
+    .crm-timeline-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.15rem;
+        color: #ffffff;
+        flex-shrink: 0;
+        box-shadow: 0 0 0 4px #f8fafc;
+    }
+
+    .icon-llamada {
+        background-color: #10b981;
+    }
+
+    .icon-correo {
+        background-color: #3b82f6;
+    }
+
+    .icon-reunion {
+        background-color: #8b5cf6;
+    }
+
+    /* TARJETA DE CONTENIDO */
+    .crm-timeline-card {
+        flex: 1;
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 1.25rem 1.5rem;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 1.2rem;
+        position: relative;
+    }
+
+    /* PEQUEÑA LÍNEA CONECTOR HORIZONTAL */
+    .crm-timeline-card::before {
+        content: '';
+        position: absolute;
+        left: -10px;
+        top: 22px;
+        width: 10px;
+        height: 2px;
+        background-color: #e2e8f0;
+    }
+
+    .crm-timeline-info {
+        display: flex;
+        flex-direction: column;
+        gap: 0.35rem;
+    }
+
+    .crm-timeline-info h4 {
+        font-size: 1rem;
+        font-weight: 700;
+        color: #0f172a;
+        margin: 0;
+    }
+
+    .crm-timeline-desc {
+        font-size: 0.88rem;
+        color: #334155;
+        line-height: 1.4;
+        margin: 0;
+    }
+
+    .crm-timeline-user {
+        font-size: 0.8rem;
+        color: #64748b;
+        margin-top: 4px;
+        font-weight: 500;
+    }
+
+    .crm-timeline-date {
+        font-size: 0.82rem;
+        color: #64748b;
+        font-weight: 500;
+        white-space: nowrap;
+        text-align: right;
+    }
+
+    @media (max-width: 650px) {
+        .crm-timeline-container {
+            padding-left: 0;
+        }
+        .crm-timeline-container::before {
+            left: 24px;
+        }
+        .crm-timeline-card {
+            flex-direction: column;
+        }
+        .crm-timeline-date {
+            text-align: left;
+        }
+    }
+</style>
+
+<div class="crm-timeline-wrapper">
+    <!-- BOTÓN VOLVER -->
+    <button class="crm-btn-back" onclick="volverADetalleCliente()">
+        <i class="fas fa-chevron-left"></i> Volver a cliente
+    </button>
+
+    <!-- CABECERA -->
+    <div class="crm-timeline-header">
+        <h2 id="timelineTituloCliente">Historial de interacciones – María López</h2>
+        <button class="btn-nueva-interaccion" onclick="abrirModalRegistrarInteraccion()">
+            <i class="fas fa-plus"></i> + Nueva interacción
+        </button>
+    </div>
+
+    <!-- CONTENEDOR TIMELINE -->
+    <div class="crm-timeline-container" id="timelineListContainer">
+        <!-- Render dinámico desde JS -->
+    </div>
+</div>
+
+<script>
+    (function initTimelineInteracciones() {
+        // Tomar cliente seleccionado global o valor por defecto
+        const cliente = window.clienteSeleccionadoCRM || {
+            id: 1,
+            nombre: "María López"
+        };
+
+        document.getElementById("timelineTituloCliente").textContent = `Historial de interacciones – ${cliente.nombre}`;
+
+        // Datos de ejemplo para la línea de tiempo
+        const listaInteracciones = [
+            {
+                tipo: "Llamada",
+                icono: "fa-phone",
+                claseColor: "icon-llamada",
+                descripcion: "Se discutieron nuevos diseños para la próxima temporada.",
+                usuario: "Admin",
+                fecha: "15/05/2025 10:30"
+            },
+            {
+                tipo: "Correo",
+                icono: "fa-envelope",
+                claseColor: "icon-correo",
+                descripcion: "Envío de catálogo de nuevos productos.",
+                usuario: "Admin",
+                fecha: "10/05/2025 14:20"
+            },
+            {
+                tipo: "Reunión",
+                icono: "fa-users",
+                claseColor: "icon-reunion",
+                descripcion: "Reunión en tienda para ver muestras de talavera.",
+                usuario: "Juan Pérez",
+                fecha: "02/05/2025 11:00"
+            }
+        ];
+
+        // Renderizado
+        const container = document.getElementById("timelineListContainer");
+        container.innerHTML = listaInteracciones.map(item => `
+            <div class="crm-timeline-item">
+                <div class="crm-timeline-icon ${item.claseColor}">
+                    <i class="fas ${item.icono}"></i>
+                </div>
+                <div class="crm-timeline-card">
+                    <div class="crm-timeline-info">
+                        <h4>${item.tipo}</h4>
+                        <p class="crm-timeline-desc">${item.descripcion}</p>
+                        <span class="crm-timeline-user">Usuario: ${item.usuario}</span>
+                    </div>
+                    <div class="crm-timeline-date">${item.fecha}</div>
+                </div>
+            </div>
+        `).join("");
+
+        // Navegación de regreso
+        window.volverADetalleCliente = function() {
+            if (typeof loadExternalView === "function") {
+                loadExternalView("crm-detalle-cliente.html", null);
+            } else {
+                alert("Regresando a detalle de cliente...");
+            }
+        };
+
+        // Disparador para la siguiente vista (6. Registrar Interacción)
+        window.abrirModalRegistrarInteraccion = function() {
+            if (typeof loadExternalView === "function") {
+                loadExternalView("crm-registrar-interaccion.html", null);
+            } else if (window.showNotification) {
+                showNotification("Abriendo formulario para registrar interacción");
+            } else {
+                alert("Registrar nueva interacción");
+            }
+        };
+    })();
+</script>
