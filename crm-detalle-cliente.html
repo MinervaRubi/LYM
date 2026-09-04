@@ -368,6 +368,7 @@ window.cambiarTabDetalle = function(tab, btn) {
     btn.classList.add("active");
     
     if (tab === "interacciones") {
+        
         // Carga la vista del historial de interacciones
         if (typeof loadExternalView === "function") {
             loadExternalView("crm-interacciones.html", null);
