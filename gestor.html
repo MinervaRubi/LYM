@@ -191,6 +191,9 @@
                         </button>
                     </nav>
                 </div>
+                <a href="sistema.html" class="gestor-nav-link">
+                    <i class="fas fa-home"></i> Regresar al inicio
+                </a>
             </aside>
 
 
@@ -207,7 +210,8 @@
                             <h2>Dashboard</h2>
                             <p>Resumen general de LYM Diseño e Impresión</p>
                         </div>
-                        <button class="gestor-btn gestor-btn-primary" onclick="showNotification('Información actualizada')">
+                        <button class="gestor-btn gestor-btn-primary"
+                            onclick="showNotification('Información actualizada')">
                             <i class="fas fa-sync"></i> Actualizar
                         </button>
                     </div>
@@ -260,7 +264,8 @@
                             <button class="quick-action" onclick="showViewByName('promociones')">
                                 <i class="fas fa-tag"></i> <span>Nueva promoción</span>
                             </button>
-                            <button class="quick-action" onclick="clickBotonCRM(event, document.querySelector('.crm-toggle-btn'))">
+                            <button class="quick-action"
+                                onclick="clickBotonCRM(event, document.querySelector('.crm-toggle-btn'))">
                                 <i class="fas fa-user-plus"></i> <span>Ver clientes CRM</span>
                             </button>
                         </div>
@@ -269,7 +274,8 @@
                     <div class="gestor-panel">
                         <div class="panel-header">
                             <h3>Pedidos recientes</h3>
-                            <button class="gestor-btn gestor-btn-light" onclick="showViewByName('pedidos')">Ver todos</button>
+                            <button class="gestor-btn gestor-btn-light" onclick="showViewByName('pedidos')">Ver
+                                todos</button>
                         </div>
                         <div class="gestor-table-wrapper">
                             <table class="gestor-table">
@@ -317,7 +323,8 @@
                             <h2>Productos</h2>
                             <p>Administra el catálogo de LYM</p>
                         </div>
-                        <button class="gestor-btn gestor-btn-primary" onclick="showNotification('Formulario de producto')">
+                        <button class="gestor-btn gestor-btn-primary"
+                            onclick="showNotification('Formulario de producto')">
                             <i class="fas fa-plus"></i> Nuevo producto
                         </button>
                     </div>
@@ -334,8 +341,10 @@
                                 <p>Personalizadas con diseño del cliente.</p>
                                 <span class="product-price">Desde $85</span>
                                 <div class="product-actions">
-                                    <button class="gestor-btn gestor-btn-warning"><i class="fas fa-edit"></i> Editar</button>
-                                    <button class="gestor-btn gestor-btn-danger" onclick="deleteProduct(this)"><i class="fas fa-trash"></i> Eliminar</button>
+                                    <button class="gestor-btn gestor-btn-warning"><i class="fas fa-edit"></i>
+                                        Editar</button>
+                                    <button class="gestor-btn gestor-btn-danger" onclick="deleteProduct(this)"><i
+                                            class="fas fa-trash"></i> Eliminar</button>
                                 </div>
                             </div>
                         </div>
@@ -347,8 +356,10 @@
                                 <p>Tapetes personalizados.</p>
                                 <span class="product-price">$300</span>
                                 <div class="product-actions">
-                                    <button class="gestor-btn gestor-btn-warning"><i class="fas fa-edit"></i> Editar</button>
-                                    <button class="gestor-btn gestor-btn-danger" onclick="deleteProduct(this)"><i class="fas fa-trash"></i> Eliminar</button>
+                                    <button class="gestor-btn gestor-btn-warning"><i class="fas fa-edit"></i>
+                                        Editar</button>
+                                    <button class="gestor-btn gestor-btn-danger" onclick="deleteProduct(this)"><i
+                                            class="fas fa-trash"></i> Eliminar</button>
                                 </div>
                             </div>
                         </div>
@@ -454,7 +465,7 @@
         /* FUNCIÓN PRINCIPAL DEL BOTÓN CRM */
         function clickBotonCRM(event, button) {
             if (event) event.stopPropagation();
-            
+
             const dropdown = document.getElementById("crmDropdown");
             // Alternar el desplegable
             dropdown.classList.toggle("open");
