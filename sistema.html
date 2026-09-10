@@ -63,8 +63,14 @@
                                 <i class="fas fa-id-card"></i> Mis publicaciones
                             </a>
 
+<<<<<<< HEAD
                             <a href="admin.php" class="dropdown-item" id="gestorLinkItem" style="display:none;">
                                 <i class="fas fa-chart-line"></i> Gestor CRM
+=======
+                            <!-- Gestor: SOLO visible para administradores -->
+                            <a href="gestor.html" id="adminGestorLink" class="dropdown-item" style="display:none;">
+                                <i class="fas fa-id-card"></i> Gestor
+>>>>>>> d2a2b45113bea8a8eb1f0e2391d36b292bc1032c
                             </a>
 
                             <div class="dropdown-divider"></div>
@@ -805,32 +811,6 @@
         </div>
     </div>
 
-    <!-- Modal de Admin / Intranet -->
-    <div id="adminModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2>Intranet</h2>
-                <span class="close" onclick="closeModal('adminModal')">&times;</span>
-            </div>
-
-            <form onsubmit="adminLogin(event)">
-                <div class="form-group">
-                    <label for="adminUsername">Usuario o Email:</label>
-                    <input type="text" id="adminUsername" required>
-                </div>
-
-                <div class="form-group">
-                    <label for="adminPassword">Contraseña:</label>
-                    <input type="password" id="adminPassword" required>
-                </div>
-
-                <div class="form-actions">
-                    <button type="submit" class="btn btn-primary">Iniciar Sesión</button>
-                    <button type="button" class="btn btn-secondary" onclick="closeModal('adminModal')">Cancelar</button>
-                </div>
-            </form>
-        </div>
-    </div>
 
     <script>
         // ========= Banner =========
@@ -909,7 +889,6 @@
         // ========= Modales =========
         function showLoginModal() { document.getElementById('loginModal').style.display = 'flex'; }
         function showRegisterModal() { document.getElementById('registerModal').style.display = 'flex'; }
-        function showAdminModal() { document.getElementById('adminModal').style.display = 'flex'; }
 
         function closeModal(modalId) {
             const m = document.getElementById(modalId);
@@ -937,7 +916,11 @@
             const guestButtons = document.getElementById('guestButtons');
             const userMenu = document.getElementById('userMenu');
             const userGreeting = document.getElementById('userGreeting');
+<<<<<<< HEAD
             const gestorLink = document.getElementById('gestorLinkItem');
+=======
+            const adminGestorLink = document.getElementById('adminGestorLink');
+>>>>>>> d2a2b45113bea8a8eb1f0e2391d36b292bc1032c
 
             if (guestButtons) {
                 guestButtons.style.display = 'none';
@@ -952,6 +935,7 @@
                     currentUser?.username || "Usuario";
             }
 
+<<<<<<< HEAD
             if (gestorLink) {
                 if (currentUser && (currentUser.role === 'admin' || currentUser.username?.toLowerCase() === 'juanlalo')) {
                     gestorLink.style.display = 'flex';
@@ -966,6 +950,12 @@
                 const inputEmail = document.getElementById('email');
                 if (inputNombre && !inputNombre.value) inputNombre.value = currentUser.username || '';
                 if (inputEmail && !inputEmail.value) inputEmail.value = currentUser.email || '';
+=======
+            // El enlace Gestor SOLO se muestra a usuarios con role = admin.
+            if (adminGestorLink) {
+                adminGestorLink.style.display =
+                    currentUser?.role === "admin" ? "flex" : "none";
+>>>>>>> d2a2b45113bea8a8eb1f0e2391d36b292bc1032c
             }
         }
 
@@ -978,6 +968,7 @@
 
             const guestButtons = document.getElementById('guestButtons');
             const userMenu = document.getElementById('userMenu');
+            const adminGestorLink = document.getElementById('adminGestorLink');
 
             if (guestButtons) {
                 guestButtons.style.display = 'flex';
@@ -985,6 +976,10 @@
 
             if (userMenu) {
                 userMenu.style.display = 'none';
+            }
+
+            if (adminGestorLink) {
+                adminGestorLink.style.display = 'none';
             }
 
             currentUser = null;
@@ -1129,7 +1124,7 @@
 
                 showSuccessBanner("Inicio de sesión exitoso");
 
-                // Si es administrador
+                // SOLO administradores pueden entrar al Gestor
                 if (currentUser.role === "admin") {
 
                     setTimeout(() => {
@@ -1139,7 +1134,7 @@
                     return;
                 }
 
-                // Usuario normal
+                // Usuario normal: permanece en la página principal
                 document.getElementById("loginUsername").value = "";
                 document.getElementById("loginPassword").value = "";
 
@@ -1423,6 +1418,7 @@
         }
 
 
+<<<<<<< HEAD
         // =====================================================
         // LOGIN DE ADMINISTRADOR REAL
         // =====================================================
@@ -1578,6 +1574,8 @@
             }
         }
 
+=======
+>>>>>>> d2a2b45113bea8a8eb1f0e2391d36b292bc1032c
         // ========= Dropdown usuario =========
         function toggleUserMenu(e) {
             e.stopPropagation();
