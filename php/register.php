@@ -1,6 +1,6 @@
 <?php
 
-require_once '../includes/config.php';
+require_once __DIR__ . '/../includes/config.php';
 
 header('Content-Type: application/json; charset=utf-8');
 
@@ -273,14 +273,23 @@ try {
 
 
     // Obtener ID del cliente
-
     $cliente_id = $pdo->lastInsertId();
 
+    // =================================================
+    // INSERTAR TAREA PENDIENTE PARA ADMINISTRADOR
+    // =================================================
+    $stmtTask = $pdo->prepare("
+        INSERT INTO interacciones (cliente_id, usuario_id, tipo, descripcion, estado, prioridad, fecha)
+        VALUES (?, 1, 'llamada', ?, 'pendiente', 'media', NOW())
+    ");
+    $stmtTask->execute([
+        $cliente_id,
+        "👤 NUEVO REGISTRO DE CLIENTE: " . $username . " (" . $email . "). Programar llamada de bienvenida o seguimiento de bienvenida."
+    ]);
 
     // =================================================
     // CONFIRMAR TRANSACCIÓN
     // =================================================
-
     $pdo->commit();
 
 

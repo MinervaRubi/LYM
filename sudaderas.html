@@ -76,6 +76,10 @@
                         </a>
                     </div>
 
+                    <div data-eval-producto="Sudaderas"></div>
+
+                    <div id="resenasProductoDetalle" style="margin-top: 20px;"></div>
+
                     <p id="mensajeAgregado" class="success-mini" style="display:none;">
                         ✔ Producto agregado al carrito
                     </p>
@@ -144,6 +148,16 @@
 
             cantidadInput.value = 1;
         }
+    </script>
+
+    <!-- EVALUACIONES LYM -->
+    <script src="evaluaciones.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            if (typeof renderEvaluacionesProductoDetalle === 'function') {
+                renderEvaluacionesProductoDetalle('Sudaderas', 'resenasProductoDetalle');
+            }
+        });
     </script>
 
 </body>

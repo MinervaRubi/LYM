@@ -77,6 +77,10 @@
                         </a>
                     </div>
 
+                    <div data-eval-producto="Camisas Uniforme"></div>
+
+                    <div id="resenasProductoDetalle" style="margin-top: 20px;"></div>
+
                     <p id="mensajeAgregado" class="success-mini" style="display:none;">
                         ✔ Producto agregado al carrito
                     </p>
@@ -128,6 +132,16 @@
                 msg.style.display = "none";
             }, 2000);
         }
+    </script>
+
+    <!-- EVALUACIONES LYM -->
+    <script src="evaluaciones.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            if (typeof renderEvaluacionesProductoDetalle === 'function') {
+                renderEvaluacionesProductoDetalle('Camisas Uniforme', 'resenasProductoDetalle');
+            }
+        });
     </script>
 </body>
 

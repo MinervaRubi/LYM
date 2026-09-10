@@ -1,0 +1,208 @@
+<!-- ==============================================================
+     PANTALLA 7: CLASIFICACIÓN Y SEGUIMIENTO (ETAPA CRM) (LYM)
+     ARCHIVO: crm-editar-etapa.html
+============================================================== -->
+
+<style>
+    .etapa-card {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 14px;
+        padding: 2.2rem;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+        max-width: 580px;
+        margin: 0 auto;
+        animation: fadeInEtapa 0.25s ease-in-out;
+    }
+
+    @keyframes fadeInEtapa {
+        from { opacity: 0; transform: translateY(8px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .etapa-header {
+        margin-bottom: 1.5rem;
+    }
+
+    .etapa-header h2 {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #0f172a;
+        margin: 0 0 6px 0;
+    }
+
+    .etapa-client-name {
+        font-size: 1.05rem;
+        font-weight: 600;
+        color: #6B46C1;
+    }
+
+    .etapa-form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        margin-bottom: 1.4rem;
+    }
+
+    .etapa-form-group label {
+        font-size: 0.88rem;
+        font-weight: 600;
+        color: #334155;
+    }
+
+    .etapa-select {
+        width: 100%;
+        padding: 12px 16px;
+        border: 1px solid #cbd5e1;
+        border-radius: 10px;
+        font-size: 0.92rem;
+        outline: none;
+        background: #ffffff;
+        color: #0f172a;
+    }
+
+    .etapa-select:focus {
+        border-color: #6B46C1;
+        box-shadow: 0 0 0 3px rgba(107, 70, 193, 0.15);
+    }
+
+    .etapa-note-box {
+        background: #fefce8;
+        border: 1px solid #fef08a;
+        border-radius: 10px;
+        padding: 1rem 1.2rem;
+        color: #854d0e;
+        font-size: 0.86rem;
+        line-height: 1.4;
+        margin-bottom: 1.8rem;
+    }
+
+    .etapa-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 12px;
+    }
+
+    .btn-etapa-cancel {
+        background: #f1f5f9;
+        color: #475569;
+        border: none;
+        padding: 11px 22px;
+        border-radius: 9px;
+        font-size: 0.9rem;
+        font-weight: 600;
+        cursor: pointer;
+    }
+
+    .btn-etapa-save {
+        background: #10b981;
+        color: #ffffff;
+        border: none;
+        padding: 11px 26px;
+        border-radius: 9px;
+        font-size: 0.9rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background 0.2s ease;
+    }
+
+    .btn-etapa-save:hover {
+        background: #059669;
+    }
+</style>
+
+<div class="etapa-card">
+    <div class="etapa-header">
+        <h2>Editar etapa CRM</h2>
+        <span class="etapa-client-name" id="etapaNombreCliente">Cargando cliente...</span>
+    </div>
+
+    <form onsubmit="guardarEtapaCRM(event)">
+        <div class="etapa-form-group">
+            <label for="selectNuevaEtapa">Nueva etapa:</label>
+            <select id="selectNuevaEtapa" class="etapa-select">
+                <option value="Prospecto">Prospecto</option>
+                <option value="Activo">Activo</option>
+                <option value="Frecuente">Frecuente</option>
+                <option value="Inactivo">Inactivo</option>
+            </select>
+        </div>
+
+        <div class="etapa-note-box">
+            <i class="fas fa-info-circle"></i> Los cambios en la etapa ayudan a dar mejor seguimiento y priorizar a tus clientes.
+        </div>
+
+        <div class="etapa-actions">
+            <button type="button" class="btn-etapa-cancel" onclick="cancelarEdicionEtapa()">Cancelar</button>
+            <button type="submit" class="btn-etapa-save" id="btnGuardarEtapa">Guardar cambios</button>
+        </div>
+    </form>
+</div>
+
+<script>
+(function initEditarEtapa() {
+    const clienteObj = window.clienteSeleccionadoCRM || JSON.parse(sessionStorage.getItem('clienteSeleccionadoCRM') || '{}');
+
+    if (clienteObj && clienteObj.nombre) {
+        document.getElementById('etapaNombreCliente').textContent = clienteObj.nombre;
+    }
+
+    if (clienteObj && clienteObj.etapa_crm) {
+        const select = document.getElementById('selectNuevaEtapa');
+        for (let i = 0; i < select.options.length; i++) {
+            if (select.options[i].value.toLowerCase() === String(clienteObj.etapa_crm).toLowerCase()) {
+                select.options[i].selected = true;
+                break;
+            }
+        }
+    }
+
+    window.guardarEtapaCRM = async function(e) {
+        e.preventDefault();
+        const nuevaEtapa = document.getElementById('selectNuevaEtapa').value;
+
+        if (!clienteObj || !clienteObj.id) {
+            alert('No se identificó el cliente a modificar.');
+            return;
+        }
+
+        const btn = document.getElementById('btnGuardarEtapa');
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...';
+
+        try {
+            const resp = await fetch('php/crm_api.php?resource=editar_etapa', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id: clienteObj.id, etapa_crm: nuevaEtapa })
+            });
+
+            const resData = await resp.json();
+            if (resData.success) {
+                if (typeof showNotification === 'function') showNotification('¡Etapa CRM actualizada!');
+                clienteObj.etapa_crm = nuevaEtapa;
+                window.clienteSeleccionadoCRM = clienteObj;
+                sessionStorage.setItem('clienteSeleccionadoCRM', JSON.stringify(clienteObj));
+                
+                cancelarEdicionEtapa();
+            } else {
+                alert('Error: ' + resData.error);
+                btn.disabled = false;
+                btn.textContent = 'Guardar cambios';
+            }
+        } catch (err) {
+            alert('Error al conectar con la base de datos: ' + err.message);
+            btn.disabled = false;
+            btn.textContent = 'Guardar cambios';
+        }
+    };
+
+    window.cancelarEdicionEtapa = function() {
+        if (typeof loadExternalView === 'function') {
+            loadExternalView('crm-detalle-cliente.html', null);
+        } else {
+            window.location.href = 'crm-detalle-cliente.html';
+        }
+    };
+})();
+</script>

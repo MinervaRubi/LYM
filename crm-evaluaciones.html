@@ -1,0 +1,203 @@
+<!-- ==============================================================
+     PANTALLA DE EVALUACIONES CRM (LYM CRM)
+     ARCHIVO: crm-evaluaciones.html
+============================================================== -->
+
+<div style="display: flex; flex-direction: column; gap: 1.5rem;">
+    <!-- HEADER -->
+    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+        <div>
+            <h2 style="font-size: 1.6rem; font-weight: 800; color: var(--text-heading); margin: 0;">Evaluaciones de Clientes por Producto</h2>
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 2px;">Calificaciones y comentarios emitidos por clientes desde la tienda pública</p>
+        </div>
+        <button class="crm-btn crm-btn-secondary crm-btn-sm" onclick="cargarEvaluacionesCRM()">
+            <i class="fas fa-sync-alt"></i> <span>Actualizar</span>
+        </button>
+    </div>
+
+    <!-- TARJETAS DE MÉTRICAS -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem;">
+        <div class="crm-card" style="display: flex; align-items: center; gap: 1rem;">
+            <div style="width: 48px; height: 48px; border-radius: 12px; background: rgba(99, 102, 241, 0.1); color: var(--primary); display: flex; align-items: center; justify-content: center; font-size: 1.4rem;">
+                <i class="fas fa-star"></i>
+            </div>
+            <div>
+                <div style="font-size: 0.8rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase;">Promedio General</div>
+                <div style="font-size: 1.6rem; font-weight: 800; color: var(--text-heading);" id="metricPromedio">-- / 5.0</div>
+            </div>
+        </div>
+
+        <div class="crm-card" style="display: flex; align-items: center; gap: 1rem;">
+            <div style="width: 48px; height: 48px; border-radius: 12px; background: rgba(16, 185, 129, 0.1); color: var(--success); display: flex; align-items: center; justify-content: center; font-size: 1.4rem;">
+                <i class="fas fa-comment-dots"></i>
+            </div>
+            <div>
+                <div style="font-size: 0.8rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase;">Total Evaluaciones</div>
+                <div style="font-size: 1.6rem; font-weight: 800; color: var(--text-heading);" id="metricTotal">0</div>
+            </div>
+        </div>
+
+        <div class="crm-card" style="display: flex; align-items: center; gap: 1rem;">
+            <div style="width: 48px; height: 48px; border-radius: 12px; background: rgba(245, 158, 11, 0.1); color: var(--warning); display: flex; align-items: center; justify-content: center; font-size: 1.4rem;">
+                <i class="fas fa-box"></i>
+            </div>
+            <div>
+                <div style="font-size: 0.8rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase;">Con Comentario</div>
+                <div style="font-size: 1.6rem; font-weight: 800; color: var(--text-heading);" id="metricConComentario">0</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- FILTROS Y BÚSQUEDA -->
+    <div class="crm-card" style="padding: 1rem; display: flex; gap: 1rem; flex-wrap: wrap; align-items: center; justify-content: space-between;">
+        <div style="display: flex; gap: 0.75rem; flex-wrap: wrap; flex: 1; max-width: 600px;">
+            <input type="text" id="evalSearchInput" class="crm-input" placeholder="🔍 Buscar por cliente o producto..." oninput="filtrarEvaluaciones()" style="flex: 2; min-width: 200px;">
+            <select id="evalStarsFilter" class="crm-input" onchange="filtrarEvaluaciones()" style="flex: 1; min-width: 150px;">
+                <option value="todas">Todas las estrellas</option>
+                <option value="5">⭐⭐⭐⭐⭐ (5 estrellas)</option>
+                <option value="4">⭐⭐⭐⭐ (4 estrellas)</option>
+                <option value="3">⭐⭐⭐ (3 estrellas)</option>
+                <option value="2">⭐⭐ (2 estrellas)</option>
+                <option value="1">⭐ (1 estrella)</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- LISTA DE EVALUACIONES DETALLADA -->
+    <div class="crm-card" id="evaluacionesListContainer">
+        <div style="text-align: center; color: var(--text-muted); padding: 2.5rem;">
+            <i class="fas fa-spinner fa-spin fa-2x" style="color:var(--primary); margin-bottom:8px;"></i>
+            <div>Cargando evaluaciones de la base de datos MySQL...</div>
+        </div>
+    </div>
+</div>
+
+<script>
+(function initEvaluacionesView() {
+    let todasLasEvaluaciones = [];
+
+    window.cargarEvaluacionesCRM = async function() {
+        const container = document.getElementById('evaluacionesListContainer');
+        try {
+            const resp = await fetch('php/crm_api.php?resource=evaluaciones');
+            const data = await resp.json();
+
+            if (data.success && Array.isArray(data.evaluaciones)) {
+                todasLasEvaluaciones = data.evaluaciones;
+                
+                // Actualizar Métricas
+                document.getElementById('metricPromedio').innerText = (data.promedio_general || 5.0) + ' / 5.0';
+                document.getElementById('metricTotal').innerText = data.total || todasLasEvaluaciones.length;
+                const conCom = todasLasEvaluaciones.filter(e => e.comentarios && e.comentarios.trim().length > 0).length;
+                document.getElementById('metricConComentario').innerText = conCom;
+
+                renderListaEvaluaciones(todasLasEvaluaciones);
+            } else {
+                container.innerHTML = `<div style="color: var(--danger); padding: 1.5rem;">Error: ${data.error || 'No se pudieron obtener las evaluaciones'}</div>`;
+            }
+        } catch (e) {
+            container.innerHTML = `<div style="color: var(--danger); padding: 1.5rem;">Error al conectar con la base de datos: ${e.message}</div>`;
+        }
+    };
+
+    window.filtrarEvaluaciones = function() {
+        const search = (document.getElementById('evalSearchInput').value || '').toLowerCase().trim();
+        const stars = document.getElementById('evalStarsFilter').value;
+
+        const filtradas = todasLasEvaluaciones.filter(ev => {
+            const matchSearch = (ev.cliente || '').toLowerCase().includes(search) || 
+                                (ev.producto_nombre || '').toLowerCase().includes(search) || 
+                                (ev.comentarios || '').toLowerCase().includes(search);
+            const matchStars = stars === 'todas' || String(ev.puntuacion_satisfaccion) === stars;
+
+            return matchSearch && matchStars;
+        });
+
+        renderListaEvaluaciones(filtradas);
+    };
+
+    function renderListaEvaluaciones(lista) {
+        const container = document.getElementById('evaluacionesListContainer');
+
+        if (!lista || lista.length === 0) {
+            container.innerHTML = `
+                <div style="text-align: center; color: var(--text-muted); padding: 3rem;">
+                    <i class="fas fa-star-half-alt fa-3x" style="color:var(--border-color); margin-bottom:12px; display:block;"></i>
+                    <strong style="font-size:1.1rem; color:var(--text-heading);">No hay evaluaciones encontradas</strong>
+                    <p style="margin-top:4px;">No existen registros que coincidan con la búsqueda o filtro seleccionado.</p>
+                </div>
+            `;
+            return;
+        }
+
+        container.innerHTML = `
+            <div style="display:flex; flex-direction:column; gap:14px;">
+                ${lista.map(ev => `
+                    <div style="padding: 16px 20px; background: #ffffff; border-radius: var(--radius-sm); border: 1px solid var(--border-color); box-shadow: 0 1px 3px rgba(0,0,0,0.02); display: flex; flex-direction: column; gap: 10px;">
+                        
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 10px;">
+                            <div style="display: flex; align-items: center; gap: 12px;">
+                                <div style="width: 42px; height: 42px; border-radius: 50%; background: var(--primary-light); color: var(--primary); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 1rem;">
+                                    ${(ev.cliente || 'C').charAt(0).toUpperCase()}
+                                </div>
+                                <div>
+                                    <div style="font-size: 1rem; font-weight: 700; color: var(--text-heading);">
+                                        ${escapeHtml(ev.cliente)}
+                                    </div>
+                                    <div style="font-size: 0.8rem; color: var(--text-muted);">
+                                        ${escapeHtml(ev.cliente_correo || 'Cliente Registrado')}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div style="text-align: right;">
+                                <div style="display: flex; align-items: center; justify-content: flex-end; gap: 4px; color: #f59e0b; font-size: 1.1rem; font-weight: 800;">
+                                    ${renderStars(ev.puntuacion_satisfaccion || 5)}
+                                    <span style="color: var(--text-heading); margin-left: 6px; font-size: 0.95rem;">${ev.puntuacion_satisfaccion || 5}/5</span>
+                                </div>
+                                <div style="font-size: 0.78rem; color: var(--text-muted); margin-top: 4px;">
+                                    <i class="far fa-clock"></i> ${formatearFechaEval(ev.fecha_evaluacion)}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div style="padding: 10px 14px; background: #f8fafc; border-radius: 8px; border-left: 4px solid var(--primary); margin-top: 4px;">
+                            <div style="font-size: 0.78rem; font-weight: 700; color: var(--primary); text-transform: uppercase; margin-bottom: 2px;">
+                                <i class="fas fa-tag"></i> Producto Evaluado: <span style="color: var(--text-heading); text-transform: none; font-size: 0.9rem;">${escapeHtml(ev.producto_nombre)}</span>
+                            </div>
+                            <div style="font-size: 0.92rem; color: var(--text-body); margin-top: 6px; font-style: ${ev.comentarios ? 'normal' : 'italic'};">
+                                "${escapeHtml(ev.comentarios || 'El cliente no dejó comentario opcional.')}"
+                            </div>
+                        </div>
+
+                    </div>
+                `).join('')}
+            </div>
+        `;
+    }
+
+    function renderStars(val) {
+        let starsHtml = '';
+        for (let i = 1; i <= 5; i++) {
+            if (i <= val) {
+                starsHtml += '<i class="fas fa-star" style="color: #f59e0b;"></i>';
+            } else {
+                starsHtml += '<i class="far fa-star" style="color: #cbd5e1;"></i>';
+            }
+        }
+        return starsHtml;
+    }
+
+    function formatearFechaEval(f) {
+        if (!f) return '';
+        const d = new Date(String(f).replace(' ', 'T'));
+        return isNaN(d) ? f : d.toLocaleDateString('es-MX', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+    }
+
+    function escapeHtml(str) {
+        return String(str || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+
+    cargarEvaluacionesCRM();
+})();
+</script>

@@ -1,0 +1,83 @@
+<!-- ==============================================================
+     PANTALLA DE USUARIOS (LYM CRM)
+     ARCHIVO: crm-usuarios.html
+============================================================== -->
+
+<div style="display: flex; flex-direction: column; gap: 1.5rem;">
+    <!-- HEADER -->
+    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+        <div>
+            <h2 style="font-size: 1.6rem; font-weight: 800; color: var(--text-heading); margin: 0;">Gestión de Usuarios</h2>
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 2px;">Cuentas registradas en la tabla <code>usuarios</code> de MariaDB/MySQL</p>
+        </div>
+        <button class="crm-btn crm-btn-secondary crm-btn-sm" onclick="cargarUsuarios()">
+            <i class="fas fa-sync-alt"></i> <span>Actualizar</span>
+        </button>
+    </div>
+
+    <!-- TABLA DE USUARIOS -->
+    <div class="crm-table-container">
+        <table class="crm-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Nombre de Usuario</th>
+                    <th>Correo Electrónico</th>
+                    <th>Rol</th>
+                    <th>Fecha de Registro</th>
+                </tr>
+            </thead>
+            <tbody id="tbodyUsuarios">
+                <tr>
+                    <td colspan="5" style="text-align: center; padding: 2.5rem; color: var(--text-muted);">
+                        <i class="fas fa-spinner fa-spin fa-2x" style="color:var(--primary); margin-bottom:8px;"></i>
+                        <div>Cargando usuarios del sistema...</div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+(function initUsuariosView() {
+    window.cargarUsuarios = async function() {
+        const tbody = document.getElementById('tbodyUsuarios');
+        try {
+            const resp = await fetch('php/crm_api.php?resource=usuarios');
+            const data = await resp.json();
+
+            if (data.success && Array.isArray(data.usuarios)) {
+                tbody.innerHTML = data.usuarios.map(u => {
+                    const isAdmin = String(u.role).toLowerCase() === 'admin';
+                    return `
+                        <tr>
+                            <td><strong style="color:var(--text-muted);">#${u.id}</strong></td>
+                            <td><strong style="color:var(--text-heading); font-size:0.92rem;">${escapeHtml(u.username)}</strong></td>
+                            <td>${escapeHtml(u.email)}</td>
+                            <td><span class="badge ${isAdmin ? 'badge-activo' : 'badge-prospecto'}"><span class="badge-dot"></span>${escapeHtml(u.role)}</span></td>
+                            <td>${formatearFechaUser(u.created_at)}</td>
+                        </tr>
+                    `;
+                }).join('');
+            } else {
+                tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:var(--danger); padding:1.5rem;">${data.error || 'Acceso restringido a administradores'}</td></tr>`;
+            }
+        } catch (e) {
+            tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:var(--danger); padding:1.5rem;">Error al cargar usuarios: ${e.message}</td></tr>`;
+        }
+    };
+
+    function formatearFechaUser(f) {
+        if (!f) return '';
+        const d = new Date(String(f).replace(' ', 'T'));
+        return isNaN(d) ? f : d.toLocaleDateString('es-MX', { day: '2-digit', month: '2-digit', year: 'numeric' });
+    }
+
+    function escapeHtml(str) {
+        return String(str || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+
+    cargarUsuarios();
+})();
+</script>

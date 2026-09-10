@@ -1,0 +1,928 @@
+<!-- ==============================================================
+     PANTALLA DE MI ACTIVIDAD Y CALENDARIO DINÁMICO (LYM CRM)
+     ARCHIVO: crm-actividad.html
+============================================================== -->
+
+<div style="display: flex; flex-direction: column; gap: 1.5rem;">
+    <!-- HEADER -->
+    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+        <div>
+            <h2 style="font-size: 1.6rem; font-weight: 800; color: var(--text-heading); margin: 0;" id="actividadTitle">Mi Actividad, Agenda y Calendario</h2>
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 2px;">Gestión de tareas pendientes, reuniones programadas e historial en tiempo real</p>
+        </div>
+        <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+            <button class="crm-btn crm-btn-secondary crm-btn-sm" onclick="cargarMiActividadCRM()">
+                <i class="fas fa-sync-alt"></i> <span>Actualizar</span>
+            </button>
+            <button class="crm-btn crm-btn-primary crm-btn-sm" onclick="abrirModalQuickActividad()" style="background: linear-gradient(135deg, #6B46C1, #8B5CF6); color: #fff; font-weight: 700;">
+                <i class="fas fa-plus-circle"></i> <span>+ Registrar / Agendar</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- PESTAÑAS DE ALCANCE: MI ACTIVIDAD VS TODO EL EQUIPO -->
+    <div style="display: flex; gap: 8px; border-bottom: 2px solid var(--border-color); padding-bottom: 2px;">
+        <button type="button" id="btnScopeMi" class="crm-btn crm-btn-secondary crm-btn-sm active" onclick="setActividadScope('mi')" style="font-weight: 700; border-radius: 8px 8px 0 0;">
+            <i class="fas fa-user-check"></i> Mi Agenda Personal
+        </button>
+        <button type="button" id="btnScopeAll" class="crm-btn crm-btn-secondary crm-btn-sm" onclick="setActividadScope('all')" style="font-weight: 600; border-radius: 8px 8px 0 0; color: var(--text-muted);">
+            <i class="fas fa-globe"></i> Actividad de Todo el Equipo
+        </button>
+    </div>
+
+    <!-- TARJETAS DE MÉTRICAS DINÁMICAS -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+        <div class="crm-card" style="display: flex; align-items: center; gap: 1rem; border-left: 4px solid var(--primary);">
+            <div style="width: 44px; height: 44px; border-radius: 12px; background: rgba(99, 102, 241, 0.1); color: var(--primary); display: flex; align-items: center; justify-content: center; font-size: 1.3rem;">
+                <i class="fas fa-tasks"></i>
+            </div>
+            <div>
+                <div style="font-size: 0.75rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">Total Registros</div>
+                <div style="font-size: 1.5rem; font-weight: 800; color: var(--text-heading);" id="actMetricTotal">0</div>
+            </div>
+        </div>
+
+        <div class="crm-card" style="display: flex; align-items: center; gap: 1rem; border-left: 4px solid #ef4444;">
+            <div style="width: 44px; height: 44px; border-radius: 12px; background: rgba(239, 68, 68, 0.1); color: #ef4444; display: flex; align-items: center; justify-content: center; font-size: 1.3rem;">
+                <i class="fas fa-clock"></i>
+            </div>
+            <div>
+                <div style="font-size: 0.75rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">Tareas Pendientes</div>
+                <div style="font-size: 1.5rem; font-weight: 800; color: #ef4444;" id="actMetricPendientes">0</div>
+            </div>
+        </div>
+
+        <div class="crm-card" style="display: flex; align-items: center; gap: 1rem; border-left: 4px solid #10b981;">
+            <div style="width: 44px; height: 44px; border-radius: 12px; background: rgba(16, 185, 129, 0.1); color: #10b981; display: flex; align-items: center; justify-content: center; font-size: 1.3rem;">
+                <i class="fas fa-users"></i>
+            </div>
+            <div>
+                <div style="font-size: 0.75rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">Clientes Atendidos</div>
+                <div style="font-size: 1.5rem; font-weight: 800; color: var(--text-heading);" id="actMetricClientes">0</div>
+            </div>
+        </div>
+
+        <div class="crm-card" style="display: flex; align-items: center; gap: 1rem; border-left: 4px solid #06b6d4;">
+            <div style="width: 44px; height: 44px; border-radius: 12px; background: rgba(6, 182, 212, 0.1); color: #06b6d4; display: flex; align-items: center; justify-content: center; font-size: 1.3rem;">
+                <i class="fas fa-calendar-day"></i>
+            </div>
+            <div>
+                <div style="font-size: 0.75rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">Agendado Hoy</div>
+                <div style="font-size: 1.5rem; font-weight: 800; color: var(--text-heading);" id="actMetricHoy">0</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- CONTROLES, BÚSQUEDA Y SELECCIÓN DE VISTA -->
+    <div class="crm-card" style="padding: 1rem; display: flex; gap: 1rem; flex-wrap: wrap; align-items: center; justify-content: space-between;">
+        <div style="display: flex; gap: 0.75rem; flex-wrap: wrap; flex: 1; max-width: 650px;">
+            <input type="text" id="actSearchInput" class="crm-input" placeholder="🔍 Buscar cliente, descripción o responsable..." oninput="filtrarActividades()" style="flex: 2; min-width: 200px;">
+            
+            <select id="actTypeFilter" class="crm-input" onchange="filtrarActividades()" style="flex: 1; min-width: 150px;">
+                <option value="todos">Todos los tipos</option>
+                <option value="llamada">📞 Llamadas</option>
+                <option value="correo">✉️ Correos / Email</option>
+                <option value="reunion">🤝 Reuniones / Visitas</option>
+                <option value="nota">📝 Notas / General</option>
+            </select>
+        </div>
+
+        <div style="display: flex; gap: 4px; background: #f1f5f9; padding: 4px; border-radius: 8px;">
+            <button type="button" id="btnViewCalendar" class="crm-btn crm-btn-sm" onclick="setActividadViewMode('calendar')" style="background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,0.1); font-weight:700;">
+                <i class="fas fa-calendar-alt"></i> Calendario
+            </button>
+            <button type="button" id="btnViewTimeline" class="crm-btn crm-btn-sm" onclick="setActividadViewMode('timeline')" style="background: transparent; color: var(--text-muted);">
+                <i class="fas fa-stream"></i> Línea de Tiempo
+            </button>
+            <button type="button" id="btnViewTable" class="crm-btn crm-btn-sm" onclick="setActividadViewMode('tabla')" style="background: transparent; color: var(--text-muted);">
+                <i class="fas fa-table"></i> Tabla
+            </button>
+        </div>
+    </div>
+
+    <!-- CONTENEDOR DINÁMICO DE ACTIVIDAD Y CALENDARIO -->
+    <div id="actividadContainer">
+        <div style="text-align: center; color: var(--text-muted); padding: 3rem;">
+            <i class="fas fa-spinner fa-spin fa-2x" style="color:var(--primary); margin-bottom:10px;"></i>
+            <div>Cargando agenda y actividades desde MySQL...</div>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL REGISTRO / AGENDAR ACTIVIDAD -->
+<div id="modalQuickActividad" class="eval-modal-overlay">
+    <div class="eval-modal-card" style="max-width: 540px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #f1f5f9; padding-bottom: 14px; margin-bottom: 16px;">
+            <div>
+                <h3 style="margin: 0; font-size: 1.25rem; font-weight: 800; color: #0f172a;" id="modalQuickTitle">Registrar / Agendar Actividad</h3>
+                <p style="margin: 2px 0 0 0; font-size: 0.84rem; color: #64748b;">Guarda una llamada, reunión o nota pendiente en el calendario</p>
+            </div>
+            <button type="button" onclick="cerrarModalQuickActividad()" style="background: none; border: none; font-size: 1.4rem; color: #94a3b8; cursor: pointer;">&times;</button>
+        </div>
+
+        <form id="formQuickActividad" onsubmit="guardarQuickActividad(event)">
+            <div style="display: flex; flex-direction: column; gap: 14px;">
+                <div>
+                    <label style="font-size: 0.82rem; font-weight: 700; color: #475569; display: block; margin-bottom: 4px;">Selecciona el Cliente</label>
+                    <select id="quickClienteId" class="crm-input" required style="width:100%; padding:9px 12px; border-radius:8px; border:1px solid #cbd5e1;">
+                        <option value="">-- Selecciona un cliente --</option>
+                    </select>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                    <div>
+                        <label style="font-size: 0.82rem; font-weight: 700; color: #475569; display: block; margin-bottom: 4px;">Tipo de Interacción</label>
+                        <select id="quickTipo" class="crm-input" required style="width:100%; padding:9px 12px; border-radius:8px; border:1px solid #cbd5e1;">
+                            <option value="Llamada">📞 Llamada telefónica</option>
+                            <option value="Reunión">🤝 Reunión / Cita</option>
+                            <option value="Correo">✉️ Correo electrónico</option>
+                            <option value="Nota">📝 Nota / Seguimiento</option>
+                            <option value="Cotización">📄 Cotización</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label style="font-size: 0.82rem; font-weight: 700; color: #475569; display: block; margin-bottom: 4px;">Estado Inicial</label>
+                        <select id="quickEstado" class="crm-input" required style="width:100%; padding:9px 12px; border-radius:8px; border:1px solid #cbd5e1;">
+                            <option value="pendiente">⏳ Pendiente / Programado</option>
+                            <option value="completada">✓ Ya Realizada / Completada</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                    <div>
+                        <label style="font-size: 0.82rem; font-weight: 700; color: #475569; display: block; margin-bottom: 4px;">Fecha y Hora Programada</label>
+                        <input type="datetime-local" id="quickFecha" class="crm-input" required style="width:100%; box-sizing:border-box; padding:9px 12px; border-radius:8px; border:1px solid #cbd5e1;">
+                    </div>
+
+                    <div>
+                        <label style="font-size: 0.82rem; font-weight: 700; color: #475569; display: block; margin-bottom: 4px;">Prioridad</label>
+                        <select id="quickPrioridad" class="crm-input" style="width:100%; padding:9px 12px; border-radius:8px; border:1px solid #cbd5e1;">
+                            <option value="alta">🔴 Alta Prioridad</option>
+                            <option value="media" selected>🟡 Prioridad Normal</option>
+                            <option value="baja">🔵 Prioridad Baja</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div>
+                    <label style="font-size: 0.82rem; font-weight: 700; color: #475569; display: block; margin-bottom: 4px;">Descripción de la Actividad / Tarea</label>
+                    <textarea id="quickDescripcion" rows="3" required class="crm-input" style="width:100%; box-sizing:border-box; padding:9px 12px; border-radius:8px; border:1px solid #cbd5e1; resize:vertical;" placeholder="Escribe los detalles, pendientes o acuerdos con el cliente..."></textarea>
+                </div>
+            </div>
+
+            <div id="quickActMsg" style="display: none; padding: 10px; border-radius: 8px; font-size: 0.88rem; margin-top: 12px; text-align: center;"></div>
+
+            <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; border-top: 1px solid #f1f5f9; padding-top: 14px;">
+                <button type="button" onclick="cerrarModalQuickActividad()" class="btn btn-outline" style="padding: 8px 16px;">Cancelar</button>
+                <button type="submit" id="btnSubmitQuick" class="btn btn-primary" style="padding: 8px 20px; background: linear-gradient(135deg, #6B46C1, #8B5CF6); border: none;">Guardar en Agenda</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+(function initMiActividadView() {
+    let todasLasActividades = [];
+    let actividadesFiltradas = [];
+    let currentViewMode = 'calendar'; // Por defecto la vista de Calendario
+    let currentScope = 'mi';
+
+    // Estado del Calendario
+    const hoyDate = new Date();
+    let calYear = hoyDate.getFullYear();
+    let calMonth = hoyDate.getMonth(); // 0-indexed
+    let calSelectedDayStr = hoyDate.toISOString().substring(0, 10);
+
+    const nombresMeses = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
+
+    window.setActividadScope = function(scope) {
+        currentScope = scope;
+        const btnMi = document.getElementById('btnScopeMi');
+        const btnAll = document.getElementById('btnScopeAll');
+
+        if (scope === 'mi') {
+            btnMi.classList.add('active');
+            btnMi.style.cssText = 'font-weight: 700; border-radius: 8px 8px 0 0; color: var(--primary);';
+            btnAll.classList.remove('active');
+            btnAll.style.cssText = 'font-weight: 600; border-radius: 8px 8px 0 0; color: var(--text-muted);';
+        } else {
+            btnAll.classList.add('active');
+            btnAll.style.cssText = 'font-weight: 700; border-radius: 8px 8px 0 0; color: var(--primary);';
+            btnMi.classList.remove('active');
+            btnMi.style.cssText = 'font-weight: 600; border-radius: 8px 8px 0 0; color: var(--text-muted);';
+        }
+
+        cargarMiActividadCRM();
+    };
+
+    window.cargarMiActividadCRM = async function() {
+        const container = document.getElementById('actividadContainer');
+        try {
+            const resp = await fetch(`php/crm_api.php?resource=mi_actividad&scope=${currentScope}`);
+            const data = await resp.json();
+
+            if (data.success && Array.isArray(data.actividades)) {
+                todasLasActividades = data.actividades;
+
+                // Cargar métricas
+                if (data.metrics) {
+                    document.getElementById('actMetricTotal').innerText = data.metrics.total || 0;
+                    document.getElementById('actMetricClientes').innerText = data.metrics.clientes_unicos || 0;
+                    document.getElementById('actMetricPendientes').innerText = data.metrics.pendientes || 0;
+                    document.getElementById('actMetricHoy').innerText = data.metrics.hoy || 0;
+                }
+
+                filtrarActividades();
+            } else {
+                container.innerHTML = `<div style="color: var(--danger); padding: 1.5rem;">Error: ${data.error || 'No se pudo cargar la actividad'}</div>`;
+            }
+        } catch (e) {
+            container.innerHTML = `<div style="color: var(--danger); padding: 1.5rem;">Error de conexión: ${e.message}</div>`;
+        }
+    };
+
+    window.filtrarActividades = function() {
+        const search = (document.getElementById('actSearchInput').value || '').toLowerCase().trim();
+        const type = document.getElementById('actTypeFilter').value;
+
+        actividadesFiltradas = todasLasActividades.filter(act => {
+            const matchSearch = (act.cliente || '').toLowerCase().includes(search) || 
+                                (act.cliente_empresa || '').toLowerCase().includes(search) || 
+                                (act.responsable || '').toLowerCase().includes(search) || 
+                                (act.descripcion || '').toLowerCase().includes(search);
+            
+            const t = (act.tipo || '').toLowerCase();
+            let matchType = type === 'todos';
+            if (type === 'llamada') matchType = t.includes('llamada');
+            else if (type === 'correo') matchType = t.includes('correo') || t.includes('email');
+            else if (type === 'reunion') matchType = t.includes('reun') || t.includes('visita');
+            else if (type === 'nota') matchType = t.includes('nota');
+
+            return matchSearch && matchType;
+        });
+
+        renderActividades(actividadesFiltradas);
+    };
+
+    window.setActividadViewMode = function(mode) {
+        currentViewMode = mode;
+        const btnC = document.getElementById('btnViewCalendar');
+        const btnT = document.getElementById('btnViewTimeline');
+        const btnTb = document.getElementById('btnViewTable');
+
+        [btnC, btnT, btnTb].forEach(b => {
+            if (b) {
+                b.style.cssText = 'background: transparent; color: var(--text-muted); font-weight: 500;';
+            }
+        });
+
+        if (mode === 'calendar' && btnC) {
+            btnC.style.cssText = 'background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,0.1); font-weight:700; color:var(--text-heading);';
+        } else if (mode === 'timeline' && btnT) {
+            btnT.style.cssText = 'background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,0.1); font-weight:700; color:var(--text-heading);';
+        } else if (btnTb) {
+            btnTb.style.cssText = 'background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,0.1); font-weight:700; color:var(--text-heading);';
+        }
+
+        filtrarActividades();
+    };
+
+    function renderActividades(lista) {
+        const container = document.getElementById('actividadContainer');
+
+        if (currentViewMode === 'calendar') {
+            renderCalendarView(lista, container);
+        } else if (currentViewMode === 'timeline') {
+            if (!lista || lista.length === 0) {
+                container.innerHTML = getEmptyStateHTML();
+                return;
+            }
+            renderTimelineView(lista, container);
+        } else {
+            if (!lista || lista.length === 0) {
+                container.innerHTML = getEmptyStateHTML();
+                return;
+            }
+            renderTableView(lista, container);
+        }
+    }
+
+    function getEmptyStateHTML() {
+        return `
+            <div class="crm-card" style="text-align: center; color: var(--text-muted); padding: 3rem;">
+                <i class="fas fa-calendar-times fa-3x" style="color:var(--border-color); margin-bottom:12px; display:block;"></i>
+                <strong style="font-size:1.1rem; color:var(--text-heading);">No hay actividades registradas con estos filtros</strong>
+                <p style="margin-top:4px;">Haz clic en "+ Registrar / Agendar" para añadir un pendiente en el calendario o limpia tu búsqueda.</p>
+            </div>
+        `;
+    }
+
+    // ==============================================================
+    // VISTA DE CALENDARIO INTERACTIVO DINÁMICO
+    // ==============================================================
+    function renderCalendarView(lista, container) {
+        const totalDaysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
+        const firstDayOfWeek = new Date(calYear, calMonth, 1).getDay(); // 0 = Domingo
+
+        // Agrupar actividades por fecha (YYYY-MM-DD)
+        const actByDate = {};
+        lista.forEach(act => {
+            if (!act.fecha) return;
+            const fStr = act.fecha.substring(0, 10);
+            if (!actByDate[fStr]) actByDate[fStr] = [];
+            actByDate[fStr].push(act);
+        });
+
+        const todayStrFormatted = hoyDate.toISOString().substring(0, 10);
+
+        let calendarGridHTML = '';
+        
+        // Celdas vacías del mes anterior
+        for (let i = 0; i < firstDayOfWeek; i++) {
+            calendarGridHTML += `<div style="background: #f8fafc; border-radius: 8px; min-height: 90px; opacity: 0.4;"></div>`;
+        }
+
+        // Celdas de días del mes actual
+        for (let day = 1; day <= totalDaysInMonth; day++) {
+            const dayTwoDigit = String(day).padStart(2, '0');
+            const monthTwoDigit = String(calMonth + 1).padStart(2, '0');
+            const dateStr = `${calYear}-${monthTwoDigit}-${dayTwoDigit}`;
+
+            const isToday = dateStr === todayStrFormatted;
+            const isSelected = dateStr === calSelectedDayStr;
+            const items = actByDate[dateStr] || [];
+
+            const pendientesCount = items.filter(a => String(a.estado).toLowerCase() === 'pendiente').length;
+            const completadasCount = items.filter(a => String(a.estado).toLowerCase() !== 'pendiente').length;
+
+            calendarGridHTML += `
+                <div onclick="selectCalendarDay('${dateStr}')" style="
+                    background: ${isSelected ? 'rgba(99, 102, 241, 0.08)' : '#ffffff'};
+                    border: 2px solid ${isSelected ? 'var(--primary)' : (isToday ? '#8b5cf6' : '#e2e8f0')};
+                    border-radius: 10px;
+                    padding: 8px;
+                    min-height: 100px;
+                    display: flex;
+                    flex-direction: column;
+                    justify-content: space-between;
+                    cursor: pointer;
+                    transition: all 0.2s ease;
+                    box-shadow: ${isSelected ? '0 4px 12px rgba(99,102,241,0.15)' : 'none'};
+                " onmouseover="this.style.borderColor='var(--primary)'" onmouseout="if('${dateStr}' !== '${calSelectedDayStr}') this.style.borderColor='${isToday ? '#8b5cf6' : '#e2e8f0'}'">
+                    
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <span style="
+                            font-size: 0.9rem; 
+                            font-weight: 800; 
+                            width: 26px; 
+                            height: 26px; 
+                            display: flex; 
+                            align-items: center; 
+                            justify-content: center; 
+                            border-radius: 50%;
+                            background: ${isToday ? 'linear-gradient(135deg, #6B46C1, #8B5CF6)' : 'transparent'};
+                            color: ${isToday ? '#ffffff' : 'var(--text-heading)'};
+                        ">
+                            ${day}
+                        </span>
+                        
+                        ${items.length > 0 ? `
+                            <span style="font-size: 0.7rem; font-weight: 700; padding: 1px 6px; border-radius: 10px; background: #e0e7ff; color: #4338ca;">
+                                ${items.length} ${items.length === 1 ? 'act.' : 'acts.'}
+                            </span>
+                        ` : ''}
+                    </div>
+
+                    <div style="display: flex; flex-direction: column; gap: 3px; margin-top: 4px;">
+                        ${items.slice(0, 2).map(act => {
+                            const isPend = String(act.estado).toLowerCase() === 'pendiente';
+                            return `
+                                <div style="
+                                    font-size: 0.72rem; 
+                                    padding: 2px 5px; 
+                                    border-radius: 4px; 
+                                    white-space: nowrap; 
+                                    overflow: hidden; 
+                                    text-overflow: ellipsis;
+                                    background: ${isPend ? '#fee2e2' : '#dcfce7'};
+                                    color: ${isPend ? '#991b1b' : '#166534'};
+                                    font-weight: 600;
+                                    border-left: 3px solid ${isPend ? '#ef4444' : '#10b981'};
+                                " title="${escapeHtml(act.tipo)}: ${escapeHtml(act.descripcion)}">
+                                    ${isPend ? '⏳' : '✓'} ${escapeHtml(act.cliente)}
+                                </div>
+                            `;
+                        }).join('')}
+
+                        ${items.length > 2 ? `
+                            <div style="font-size: 0.68rem; color: var(--text-muted); font-weight: 700; text-align: center;">
+                                +${items.length - 2} más...
+                            </div>
+                        ` : ''}
+                    </div>
+
+                    ${pendientesCount > 0 ? `
+                        <div style="margin-top: 4px; text-align: right;">
+                            <span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #ef4444; box-shadow: 0 0 6px rgba(239,68,68,0.6);" title="${pendientesCount} pendiente(s)"></span>
+                        </div>
+                    ` : ''}
+                </div>
+            `;
+        }
+
+        // Tareas del día seleccionado
+        const daySelectedItems = actByDate[calSelectedDayStr] || [];
+
+        container.innerHTML = `
+            <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+                <!-- CABECERA NAVEGACIÓN MES -->
+                <div class="crm-card" style="padding: 1rem 1.5rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <button type="button" class="crm-btn crm-btn-secondary crm-btn-sm" onclick="navCalendarMonth(-1)">
+                            <i class="fas fa-chevron-left"></i> Anterior
+                        </button>
+                        <h3 style="margin: 0; font-size: 1.3rem; font-weight: 800; color: var(--text-heading);">
+                            <i class="far fa-calendar-alt" style="color:var(--primary); margin-right:6px;"></i>
+                            ${nombresMeses[calMonth]} ${calYear}
+                        </h3>
+                        <button type="button" class="crm-btn crm-btn-secondary crm-btn-sm" onclick="navCalendarMonth(1)">
+                            Siguiente <i class="fas fa-chevron-right"></i>
+                        </button>
+                    </div>
+
+                    <div style="display: flex; gap: 10px; align-items: center;">
+                        <button type="button" class="crm-btn crm-btn-secondary crm-btn-sm" onclick="goCalendarToday()">
+                            <i class="fas fa-crosshairs"></i> Ir a Hoy
+                        </button>
+                        <button type="button" class="crm-btn crm-btn-primary crm-btn-sm" onclick="abrirModalQuickActividad(null, '${calSelectedDayStr}')" style="background: linear-gradient(135deg, #6B46C1, #8B5CF6); border:none;">
+                            <i class="fas fa-plus"></i> Agendar en ${calSelectedDayStr}
+                        </button>
+                    </div>
+                </div>
+
+                <!-- GRID DE DÍAS DEL CALENDARIO -->
+                <div class="crm-card" style="padding: 1.25rem;">
+                    <!-- ENCABEZADOS DÍAS DE LA SEMANA -->
+                    <div style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; text-align: center; font-weight: 800; font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; margin-bottom: 8px; border-bottom: 1px solid var(--border-color); padding-bottom: 8px;">
+                        <div>Dom</div><div>Lun</div><div>Mar</div><div>Mié</div><div>Jue</div><div>Vie</div><div>Sáb</div>
+                    </div>
+
+                    <!-- REJILLA -->
+                    <div style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px;">
+                        ${calendarGridHTML}
+                    </div>
+                </div>
+
+                <!-- PANEL DETALLE DEL DÍA SELECCIONADO -->
+                <div class="crm-card" style="padding: 1.5rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; border-bottom: 1px solid var(--border-color); padding-bottom: 10px; flex-wrap: wrap; gap: 10px;">
+                        <div>
+                            <h4 style="margin: 0; font-size: 1.15rem; font-weight: 800; color: var(--text-heading);">
+                                📅 Agenda y Pendientes del Día: <span style="color:var(--primary);">${formatearFechaLarga(calSelectedDayStr)}</span>
+                            </h4>
+                            <p style="margin: 2px 0 0 0; font-size: 0.82rem; color: var(--text-muted);">
+                                ${daySelectedItems.length} actividad(es) o tarea(s) agendadas para esta fecha
+                            </p>
+                        </div>
+
+                        <button type="button" class="crm-btn crm-btn-primary crm-btn-sm" onclick="abrirModalQuickActividad(null, '${calSelectedDayStr}')" style="background: linear-gradient(135deg, #6B46C1, #8B5CF6); border:none;">
+                            <i class="fas fa-plus-circle"></i> + Nueva Tarea para este Día
+                        </button>
+                    </div>
+
+                    ${daySelectedItems.length === 0 ? `
+                        <div style="text-align: center; padding: 2rem; color: var(--text-muted);">
+                            <i class="far fa-calendar-check fa-2x" style="color: #cbd5e1; margin-bottom: 8px; display:block;"></i>
+                            No hay pendientes ni actividades agendadas para la fecha <strong>${calSelectedDayStr}</strong>.
+                            <div style="margin-top: 8px;">
+                                <button type="button" class="crm-btn crm-btn-secondary crm-btn-sm" onclick="abrirModalQuickActividad(null, '${calSelectedDayStr}')">
+                                    <i class="fas fa-plus"></i> Agendar Tarea Ahora
+                                </button>
+                            </div>
+                        </div>
+                    ` : `
+                        <div style="display: flex; flex-direction: column; gap: 12px;">
+                            ${daySelectedItems.map(act => {
+                                const isPend = String(act.estado).toLowerCase() === 'pendiente';
+                                const style = getTypeBadgeStyle(act.tipo);
+                                return `
+                                    <div style="
+                                        background: #ffffff; 
+                                        border: 1px solid var(--border-color); 
+                                        border-left: 5px solid ${isPend ? '#ef4444' : '#10b981'}; 
+                                        border-radius: var(--radius-sm); 
+                                        padding: 14px 18px; 
+                                        display: flex; 
+                                        justify-content: space-between; 
+                                        align-items: center; 
+                                        flex-wrap: wrap; 
+                                        gap: 12px;
+                                    ">
+                                        <div style="flex: 1; min-width: 260px;">
+                                            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px; flex-wrap: wrap;">
+                                                <span style="background: ${style.bg}; color: ${style.color}; padding: 2px 8px; border-radius: 12px; font-size: 0.73rem; font-weight: 700; text-transform: uppercase;">
+                                                    <i class="${style.icon}"></i> ${escapeHtml(act.tipo)}
+                                                </span>
+                                                <span style="background: ${isPend ? '#fee2e2' : '#dcfce7'}; color: ${isPend ? '#991b1b' : '#166534'}; padding: 2px 8px; border-radius: 12px; font-size: 0.73rem; font-weight: 700;">
+                                                    ${isPend ? '⏳ Pendiente' : '✓ Completada'}
+                                                </span>
+                                                <a style="font-size: 0.98rem; font-weight: 800; color: var(--primary); text-decoration: none; cursor: pointer;" onclick="verDetalleClienteActividad(${act.cliente_id}, '${escapeHtml(act.cliente)}')">
+                                                    ${escapeHtml(act.cliente)}
+                                                </a>
+                                                <span style="font-size: 0.8rem; color: var(--text-muted);">(${escapeHtml(act.cliente_empresa)})</span>
+                                            </div>
+
+                                            <div style="font-size: 0.9rem; color: var(--text-body); line-height: 1.4;">
+                                                ${escapeHtml(act.descripcion)}
+                                            </div>
+
+                                            <div style="font-size: 0.76rem; color: var(--text-muted); margin-top: 6px;">
+                                                👤 Responsable: <strong>${escapeHtml(act.responsable)}</strong> &bull; <i class="far fa-clock"></i> ${formatearFechaAct(act.fecha)}
+                                            </div>
+                                        </div>
+
+                                        <div style="display: flex; gap: 8px; align-items: center;">
+                                            ${isPend ? `
+                                                <button type="button" class="crm-btn crm-btn-sm" style="background: #10b981; color: #fff; border:none; font-weight:700;" onclick="cambiarEstadoActividad(${act.id}, 'completada')">
+                                                    <i class="fas fa-check-circle"></i> Marcar Completada
+                                                </button>
+                                            ` : `
+                                                <button type="button" class="crm-btn crm-btn-secondary crm-btn-sm" onclick="cambiarEstadoActividad(${act.id}, 'pendiente')">
+                                                    <i class="fas fa-undo"></i> Marcar Pendiente
+                                                </button>
+                                            `}
+                                            <button type="button" class="crm-btn crm-btn-secondary crm-btn-sm" onclick="verDetalleClienteActividad(${act.cliente_id}, '${escapeHtml(act.cliente)}')">
+                                                <i class="fas fa-user"></i> Ver Cliente
+                                            </button>
+                                        </div>
+                                    </div>
+                                `;
+                            }).join('')}
+                        </div>
+                    `}
+                </div>
+            </div>
+        `;
+    }
+
+    window.navCalendarMonth = function(dir) {
+        calMonth += dir;
+        if (calMonth < 0) {
+            calMonth = 11;
+            calYear--;
+        } else if (calMonth > 11) {
+            calMonth = 0;
+            calYear++;
+        }
+        renderCalendarView(actividadesFiltradas, document.getElementById('actividadContainer'));
+    };
+
+    window.goCalendarToday = function() {
+        calYear = hoyDate.getFullYear();
+        calMonth = hoyDate.getMonth();
+        calSelectedDayStr = hoyDate.toISOString().substring(0, 10);
+        renderCalendarView(actividadesFiltradas, document.getElementById('actividadContainer'));
+    };
+
+    window.selectCalendarDay = function(dateStr) {
+        calSelectedDayStr = dateStr;
+        renderCalendarView(actividadesFiltradas, document.getElementById('actividadContainer'));
+    };
+
+    window.cambiarEstadoActividad = async function(id, nuevoEstado) {
+        try {
+            const resp = await fetch('php/crm_api.php?resource=cambiar_estado_interaccion', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id: id, estado: nuevoEstado })
+            });
+
+            const data = await resp.json();
+            if (data.success) {
+                cargarMiActividadCRM();
+            } else {
+                alert(data.error || 'No se pudo cambiar el estado');
+            }
+        } catch (e) {
+            alert('Error de conexión: ' + e.message);
+        }
+    };
+
+    window.verDetalleClienteActividad = function(id, nombre) {
+        if (!id) return;
+        window.clienteSeleccionadoCRM = { id: id, nombre: nombre };
+        sessionStorage.setItem("clienteSeleccionadoCRM", JSON.stringify(window.clienteSeleccionadoCRM));
+        if (typeof loadExternalView === 'function') {
+            loadExternalView('crm-detalle-cliente.html', null);
+        } else {
+            window.location.href = 'gestor.html';
+        }
+    };
+
+    function renderTimelineView(lista, container) {
+        container.innerHTML = `
+            <div class="crm-card" style="padding: 24px;">
+                <div style="position: relative; padding-left: 28px; border-left: 2px dashed #cbd5e1; display: flex; flex-direction: column; gap: 24px;">
+                    ${lista.map(act => {
+                        const style = getTypeBadgeStyle(act.tipo);
+                        const isPend = String(act.estado).toLowerCase() === 'pendiente';
+                        return `
+                            <div style="position: relative;">
+                                <div style="position: absolute; left: -42px; top: 0; width: 28px; height: 28px; border-radius: 50%; background: ${isPend ? '#fee2e2' : style.bg}; color: ${isPend ? '#ef4444' : style.color}; display: flex; align-items: center; justify-content: center; font-size: 0.85rem; border: 2px solid #fff; box-shadow: 0 2px 5px rgba(0,0,0,0.08);">
+                                    <i class="${style.icon}"></i>
+                                </div>
+                                <div style="background: #ffffff; border: 1px solid var(--border-color); border-left: 4px solid ${isPend ? '#ef4444' : '#10b981'}; border-radius: var(--radius-sm); padding: 14px 18px; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
+                                    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; margin-bottom: 6px;">
+                                        <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                                            <span style="background: ${style.bg}; color: ${style.color}; padding: 3px 10px; border-radius: 12px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase;">
+                                                <i class="${style.icon}"></i> ${escapeHtml(act.tipo)}
+                                            </span>
+                                            <span style="background: ${isPend ? '#fee2e2' : '#dcfce7'}; color: ${isPend ? '#991b1b' : '#166534'}; padding: 3px 10px; border-radius: 12px; font-size: 0.75rem; font-weight: 700;">
+                                                ${isPend ? '⏳ Pendiente' : '✓ Completada'}
+                                            </span>
+                                            <a style="font-size: 0.98rem; font-weight: 800; color: var(--primary); text-decoration: none; cursor: pointer;" onclick="verDetalleClienteActividad(${act.cliente_id}, '${escapeHtml(act.cliente)}')">
+                                                ${escapeHtml(act.cliente)} <i class="fas fa-external-link-alt" style="font-size:0.75rem; opacity:0.7;"></i>
+                                            </a>
+                                            <span style="font-size: 0.8rem; color: var(--text-muted);">(${escapeHtml(act.cliente_empresa)})</span>
+                                        </div>
+                                        <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                                            <span style="font-size: 0.78rem; font-weight: 600; color: var(--text-muted);">
+                                                👤 ${escapeHtml(act.responsable || 'Admin')} &bull; <i class="far fa-clock"></i> ${formatearFechaAct(act.fecha)}
+                                            </span>
+                                            ${isPend ? `
+                                                <button class="crm-btn crm-btn-sm" style="background:#10b981; color:#fff; border:none; padding: 2px 8px; font-size: 0.75rem;" onclick="cambiarEstadoActividad(${act.id}, 'completada')">
+                                                    <i class="fas fa-check"></i> Completar
+                                                </button>
+                                            ` : ''}
+                                            <button class="crm-btn crm-btn-secondary crm-btn-sm" style="padding: 2px 8px; font-size: 0.75rem;" onclick="verDetalleClienteActividad(${act.cliente_id}, '${escapeHtml(act.cliente)}')">
+                                                <i class="fas fa-eye"></i> Perfil
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div style="font-size: 0.92rem; color: var(--text-body); line-height: 1.4; white-space: pre-line;">
+                                        ${escapeHtml(act.descripcion)}
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    }).join('')}
+                </div>
+            </div>
+        `;
+    }
+
+    function renderTableView(lista, container) {
+        container.innerHTML = `
+            <div class="crm-table-container">
+                <table class="crm-table">
+                    <thead>
+                        <tr>
+                            <th>Fecha y Hora</th>
+                            <th>Estado</th>
+                            <th>Tipo</th>
+                            <th>Cliente</th>
+                            <th>Empresa</th>
+                            <th>Responsable</th>
+                            <th>Descripción / Tarea</th>
+                            <th style="text-align:center;">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${lista.map(act => {
+                            const style = getTypeBadgeStyle(act.tipo);
+                            const isPend = String(act.estado).toLowerCase() === 'pendiente';
+                            return `
+                                <tr>
+                                    <td style="white-space: nowrap; font-weight: 600; color: var(--text-muted);">${formatearFechaAct(act.fecha)}</td>
+                                    <td>
+                                        <span style="background: ${isPend ? '#fee2e2' : '#dcfce7'}; color: ${isPend ? '#991b1b' : '#166534'}; padding: 4px 10px; border-radius: 12px; font-size: 0.76rem; font-weight: 700; display: inline-flex; align-items: center; gap: 4px;">
+                                            ${isPend ? '⏳ Pendiente' : '✓ Completada'}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span style="background: ${style.bg}; color: ${style.color}; padding: 4px 10px; border-radius: 12px; font-size: 0.76rem; font-weight: 700; text-transform: uppercase; display: inline-flex; align-items: center; gap: 4px;">
+                                            <i class="${style.icon}"></i> ${escapeHtml(act.tipo)}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <a style="font-weight:700; color:var(--primary); text-decoration:none; cursor:pointer;" onclick="verDetalleClienteActividad(${act.cliente_id}, '${escapeHtml(act.cliente)}')">
+                                            ${escapeHtml(act.cliente)}
+                                        </a>
+                                    </td>
+                                    <td style="color:var(--text-muted);">${escapeHtml(act.cliente_empresa)}</td>
+                                    <td><strong style="color:var(--primary); font-size:0.85rem;">${escapeHtml(act.responsable || 'Admin')}</strong></td>
+                                    <td style="color:var(--text-body); font-size:0.88rem;">${escapeHtml(act.descripcion)}</td>
+                                    <td style="text-align:center; white-space:nowrap;">
+                                        ${isPend ? `
+                                            <button class="crm-btn crm-btn-sm" style="background:#10b981; color:#fff; border:none; padding:4px 8px; font-size:0.75rem;" title="Marcar completada" onclick="cambiarEstadoActividad(${act.id}, 'completada')">
+                                                <i class="fas fa-check"></i>
+                                            </button>
+                                        ` : ''}
+                                        <button class="crm-btn crm-btn-secondary crm-btn-sm" style="padding:4px 8px; font-size:0.75rem;" title="Ver perfil del cliente" onclick="verDetalleClienteActividad(${act.cliente_id}, '${escapeHtml(act.cliente)}')">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                            `;
+                        }).join('')}
+                    </tbody>
+                </table>
+            </div>
+        `;
+    }
+
+    function getTypeBadgeStyle(tipo) {
+        const t = (tipo || '').toLowerCase();
+        if (t.includes('llamada')) return { bg: '#e0e7ff', color: '#4338ca', icon: 'fas fa-phone-alt' };
+        if (t.includes('correo') || t.includes('email')) return { bg: '#dcfce7', color: '#15803d', icon: 'fas fa-envelope' };
+        if (t.includes('reun') || t.includes('visita')) return { bg: '#fef3c7', color: '#b45309', icon: 'fas fa-user-friends' };
+        if (t.includes('coti')) return { bg: '#fae8ff', color: '#86198f', icon: 'fas fa-file-invoice' };
+        return { bg: '#f1f5f9', color: '#475569', icon: 'fas fa-sticky-note' };
+    }
+
+    // Modal Quick Actividad
+    window.cacheClientesCRM = window.cacheClientesCRM || [];
+
+    window.cargarClientesModalQuick = async function(presetClienteId = null) {
+        const select = document.getElementById('quickClienteId');
+        if (!select) return;
+
+        // Renderizar de inmediato si hay datos en caché
+        if (Array.isArray(window.cacheClientesCRM) && window.cacheClientesCRM.length > 0) {
+            renderOptionsClientes(select, window.cacheClientesCRM, presetClienteId);
+        } else {
+            select.innerHTML = '<option value="">Cargando clientes de MySQL...</option>';
+        }
+
+        try {
+            let lista = [];
+
+            // 1. Probar crm_api.php?resource=clientes
+            const r1 = await fetch('php/crm_api.php?resource=clientes', { credentials: 'same-origin' });
+            if (r1.ok) {
+                const d1 = await r1.json();
+                if (d1.success && Array.isArray(d1.clientes)) {
+                    lista = d1.clientes;
+                }
+            }
+
+            // 2. Si falló o dio 403, probar api_clientes_dropdown.php
+            if (lista.length === 0) {
+                const rDrop = await fetch('php/api_clientes_dropdown.php', { credentials: 'same-origin' });
+                if (rDrop.ok) {
+                    const dDrop = await rDrop.json();
+                    if (dDrop.success && Array.isArray(dDrop.clientes)) {
+                        lista = dDrop.clientes;
+                    }
+                }
+            }
+
+            // 3. Fallback adicional
+            if (lista.length === 0) {
+                const r2 = await fetch('php/clientes.php', { credentials: 'same-origin' });
+                if (r2.ok) {
+                    const d2 = await r2.json();
+                    if (d2.success && Array.isArray(d2.clientes)) {
+                        lista = d2.clientes;
+                    }
+                }
+            }
+
+            if (lista.length > 0) {
+                window.cacheClientesCRM = lista;
+                renderOptionsClientes(select, lista, presetClienteId);
+            } else if (!window.cacheClientesCRM || window.cacheClientesCRM.length === 0) {
+                select.innerHTML = '<option value="">No hay clientes registrados en MySQL</option>';
+            }
+        } catch (e) {
+            if (!window.cacheClientesCRM || window.cacheClientesCRM.length === 0) {
+                select.innerHTML = '<option value="">Error al cargar la lista de clientes</option>';
+            }
+        }
+    };
+
+    function renderOptionsClientes(select, lista, presetId) {
+        let html = '<option value="">-- Selecciona un cliente --</option>';
+        lista.forEach(c => {
+            const nom = escapeHtml(c.nombre || c.username || 'Cliente');
+            const emp = c.empresa && c.empresa !== 'Sin Empresa' ? ` (${escapeHtml(c.empresa)})` : '';
+            const mail = c.correo ? ` - ${escapeHtml(c.correo)}` : '';
+            html += `<option value="${c.id}">${nom}${emp}${mail}</option>`;
+        });
+        select.innerHTML = html;
+
+        if (presetId) {
+            select.value = presetId;
+        }
+    }
+
+    window.abrirModalQuickActividad = async function(presetClienteId = null, presetFechaStr = null) {
+        const modal = document.getElementById('modalQuickActividad');
+        const inputFecha = document.getElementById('quickFecha');
+        const descInput = document.getElementById('quickDescripcion');
+        const msgDiv = document.getElementById('quickActMsg');
+        
+        if (descInput) descInput.value = '';
+        if (msgDiv) msgDiv.style.display = 'none';
+
+        // Pre-establecer fecha en picker local ISO (YYYY-MM-DDTHH:MM)
+        const now = new Date();
+        if (presetFechaStr) {
+            inputFecha.value = `${presetFechaStr}T09:00`;
+        } else {
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const day = String(now.getDate()).padStart(2, '0');
+            const hours = String(now.getHours()).padStart(2, '0');
+            const mins = String(now.getMinutes()).padStart(2, '0');
+            inputFecha.value = `${year}-${month}-${day}T${hours}:${mins}`;
+        }
+
+        modal.style.display = 'flex';
+        await cargarClientesModalQuick(presetClienteId);
+    };
+
+    window.cerrarModalQuickActividad = function() {
+        document.getElementById('modalQuickActividad').style.display = 'none';
+    };
+
+    window.guardarQuickActividad = async function(e) {
+        e.preventDefault();
+        const btn = document.getElementById('btnSubmitQuick');
+        const msg = document.getElementById('quickActMsg');
+        btn.disabled = true;
+        btn.innerText = 'Guardando...';
+
+        const clienteId = document.getElementById('quickClienteId').value;
+        const tipo = document.getElementById('quickTipo').value;
+        const estado = document.getElementById('quickEstado').value;
+        const prioridad = document.getElementById('quickPrioridad').value;
+        const fechaVal = document.getElementById('quickFecha').value;
+        const descripcion = document.getElementById('quickDescripcion').value.trim();
+
+        // Convertir formato T a espacio para MySQL datetime
+        const fechaSql = fechaVal ? fechaVal.replace('T', ' ') + ':00' : '';
+
+        try {
+            const resp = await fetch('php/crm_api.php?resource=interacciones', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    cliente_id: clienteId,
+                    tipo: tipo,
+                    estado: estado,
+                    prioridad: prioridad,
+                    fecha: fechaSql,
+                    descripcion: descripcion
+                })
+            });
+
+            const data = await resp.json();
+
+            if (data.success) {
+                msg.style.cssText = 'display: block; background: #d1fae5; color: #065f46; border: 1px solid #a7f3d0;';
+                msg.innerText = '✔ Actividad agendada con éxito en la base de datos';
+
+                setTimeout(() => {
+                    cerrarModalQuickActividad();
+                    cargarMiActividadCRM();
+                }, 1200);
+            } else {
+                msg.style.cssText = 'display: block; background: #fee2e2; color: #991b1b; border: 1px solid #fca5a5;';
+                msg.innerText = '❌ Error: ' + (data.error || 'No se pudo agendar la actividad');
+            }
+        } catch (err) {
+            msg.style.cssText = 'display: block; background: #fee2e2; color: #991b1b; border: 1px solid #fca5a5;';
+            msg.innerText = '❌ Error de conexión: ' + err.message;
+        } finally {
+            btn.disabled = false;
+            btn.innerText = 'Guardar en Agenda';
+        }
+    };
+
+    function formatearFechaAct(f) {
+        if (!f) return '';
+        const d = new Date(String(f).replace(' ', 'T'));
+        return isNaN(d) ? f : d.toLocaleString('es-MX', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+    }
+
+    function formatearFechaLarga(fStr) {
+        if (!fStr) return '';
+        const parts = fStr.split('-');
+        if (parts.length < 3) return fStr;
+        const d = new Date(parts[0], parts[1] - 1, parts[2]);
+        return d.toLocaleDateString('es-MX', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+    }
+
+    function escapeHtml(str) {
+        return String(str || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+
+    cargarMiActividadCRM();
+    cargarClientesModalQuick();
+})();
+</script>
+
+

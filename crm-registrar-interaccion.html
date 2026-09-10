@@ -1,0 +1,265 @@
+<!-- ==============================================================
+     VISTA DE REGISTRO DE INTERACCIÓN
+     ARCHIVO: crm-registrar-interaccion.html
+============================================================== -->
+
+<style>
+    .crm-form-card {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 14px;
+        padding: 2.2rem;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+        max-width: 680px;
+        margin: 0 auto;
+        animation: fadeInForm 0.25s ease-in-out;
+    }
+
+    @keyframes fadeInForm {
+        from { opacity: 0; transform: translateY(8px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .crm-form-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 1.8rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid #f1f5f9;
+    }
+
+    .crm-form-header h2 {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #0f172a;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .crm-form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        margin-bottom: 1.4rem;
+    }
+
+    .crm-form-group label {
+        font-size: 0.88rem;
+        font-weight: 600;
+        color: #334155;
+    }
+
+    .crm-form-control {
+        width: 100%;
+        padding: 12px 16px;
+        border: 1px solid #cbd5e1;
+        border-radius: 10px;
+        font-size: 0.92rem;
+        background: #f8fafc;
+        color: #0f172a;
+        outline: none;
+        transition: all 0.2s ease;
+        box-sizing: border-box;
+    }
+
+    .crm-form-control:focus {
+        border-color: #6B46C1;
+        background: #ffffff;
+        box-shadow: 0 0 0 3px rgba(107, 70, 193, 0.15);
+    }
+
+    textarea.crm-form-control {
+        resize: vertical;
+        min-height: 110px;
+    }
+
+    .crm-form-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 12px;
+        margin-top: 2rem;
+        padding-top: 1.2rem;
+        border-top: 1px solid #f1f5f9;
+    }
+
+    .btn-crm-cancel {
+        background: #f1f5f9;
+        color: #475569;
+        border: none;
+        padding: 11px 22px;
+        border-radius: 9px;
+        font-size: 0.9rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background 0.2s;
+    }
+
+    .btn-crm-cancel:hover {
+        background: #e2e8f0;
+    }
+
+    .btn-crm-submit {
+        background: linear-gradient(135deg, #6B46C1, #8B5CF6);
+        color: #ffffff;
+        border: none;
+        padding: 11px 26px;
+        border-radius: 9px;
+        font-size: 0.9rem;
+        font-weight: 600;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        box-shadow: 0 4px 12px rgba(107, 70, 193, 0.25);
+        transition: all 0.2s ease;
+    }
+
+    .btn-crm-submit:hover {
+        opacity: 0.95;
+        transform: translateY(-1px);
+    }
+</style>
+
+<div class="crm-form-card">
+    <div class="crm-form-header">
+        <h2><i class="fas fa-plus-circle" style="color: #6B46C1;"></i> Registrar Nueva Interacción</h2>
+        <button class="crm-btn-back" onclick="cancelarInteraccionForm()">
+            <i class="fas fa-times"></i>
+        </button>
+    </div>
+
+    <form id="formNuevaInteraccion" onsubmit="guardarInteraccionForm(event)">
+        <!-- SELECTOR DE CLIENTE -->
+        <div class="crm-form-group">
+            <label for="selectClienteInteraccion"><i class="fas fa-user"></i> Cliente:</label>
+            <select id="selectClienteInteraccion" class="crm-form-control" required>
+                <option value="">Cargando lista de clientes...</option>
+            </select>
+        </div>
+
+        <!-- TIPO DE INTERACCIÓN -->
+        <div class="crm-form-group">
+            <label for="selectTipoInteraccion"><i class="fas fa-tag"></i> Tipo de Interacción:</label>
+            <select id="selectTipoInteraccion" class="crm-form-control" required>
+                <option value="llamada">📞 Llamada telefónica</option>
+                <option value="correo">✉️ Correo electrónico</option>
+                <option value="whatsapp">💬 WhatsApp</option>
+                <option value="reunion">🤝 Reunión / Cita</option>
+                <option value="nota">📝 Nota interna / Seguimiento</option>
+            </select>
+        </div>
+
+        <!-- DESCRIPCIÓN DETALLADA -->
+        <div class="crm-form-group">
+            <label for="txtDescripcionInteraccion"><i class="fas fa-align-left"></i> Resumen / Comentarios:</label>
+            <textarea id="txtDescripcionInteraccion" class="crm-form-control" placeholder="Escribe los detalles de la conversación, acuerdos o estado actual con el cliente..." required></textarea>
+        </div>
+
+        <!-- BOTONES -->
+        <div class="crm-form-actions">
+            <button type="button" class="btn-crm-cancel" onclick="cancelarInteraccionForm()">Cancelar</button>
+            <button type="submit" class="btn-crm-submit" id="btnGuardarInteraccion">
+                <i class="fas fa-save"></i> Guardar Interacción
+            </button>
+        </div>
+    </form>
+</div>
+
+<script>
+(function initRegistrarInteraccion() {
+    const selectCliente = document.getElementById('selectClienteInteraccion');
+
+    // Cargar clientes desde php/crm_api.php
+    async function cargarClientesDropdown() {
+        try {
+            const resp = await fetch('php/crm_api.php?resource=clientes');
+            const data = await resp.json();
+            
+            if (data.success && Array.isArray(data.clientes)) {
+                selectCliente.innerHTML = '<option value="">-- Selecciona un cliente --</option>';
+                
+                let selectedId = null;
+                if (window.clienteSeleccionadoCRM && window.clienteSeleccionadoCRM.id) {
+                    selectedId = String(window.clienteSeleccionadoCRM.id);
+                }
+
+                data.clientes.forEach(c => {
+                    const opt = document.createElement('option');
+                    opt.value = c.id;
+                    opt.textContent = `${c.nombre} (${c.correo})`;
+                    if (selectedId && String(c.id) === selectedId) {
+                        opt.selected = true;
+                    }
+                    selectCliente.appendChild(opt);
+                });
+            } else {
+                selectCliente.innerHTML = '<option value="">No hay clientes registrados</option>';
+            }
+        } catch (e) {
+            console.error("Error al cargar clientes:", e);
+            selectCliente.innerHTML = '<option value="">Error al cargar clientes</option>';
+        }
+    }
+
+    window.guardarInteraccionForm = async function(e) {
+        e.preventDefault();
+        const cliente_id = selectCliente.value;
+        const tipo = document.getElementById('selectTipoInteraccion').value;
+        const descripcion = document.getElementById('txtDescripcionInteraccion').value;
+
+        if (!cliente_id) {
+            alert('Por favor selecciona un cliente de la lista.');
+            return;
+        }
+
+        const btn = document.getElementById('btnGuardarInteraccion');
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...';
+
+        try {
+            const resp = await fetch('php/crm_api.php?resource=interacciones', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ cliente_id, tipo, descripcion })
+            });
+
+            const resData = await resp.json();
+
+            if (resData.success) {
+                if (typeof showNotification === 'function') {
+                    showNotification('¡Interacción registrada exitosamente!');
+                } else {
+                    alert('Interacción registrada con éxito');
+                }
+
+                // Disparar evento para actualización en tiempo real
+                window.dispatchEvent(new CustomEvent('crm-interaction-updated'));
+
+                // Volver a la vista de interacciones
+                cancelarInteraccionForm();
+            } else {
+                alert('Error: ' + (resData.error || 'No se pudo guardar la interacción'));
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-save"></i> Guardar Interacción';
+            }
+        } catch (err) {
+            alert('Error de conexión al servidor: ' + err.message);
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-save"></i> Guardar Interacción';
+        }
+    };
+
+    window.cancelarInteraccionForm = function() {
+        if (typeof loadExternalView === 'function') {
+            loadExternalView('crm-interacciones.html', null);
+        } else {
+            window.location.href = 'crm-interacciones.html';
+        }
+    };
+
+    cargarClientesDropdown();
+})();
+</script>

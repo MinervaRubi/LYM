@@ -4,490 +4,418 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LYM CRM - Gestor Principal</title>
 
-    <title>LYM - Panel de Gestión</title>
-
-    <link rel="stylesheet" href="Proyecto.css">
-
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
-        rel="stylesheet">
-
+    <!-- FUENTE GOOGLE PLUS JAKARTA SANS -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- FONT AWESOME ICONS -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
-    <style>
-        /* ESTILOS DEL SUBMENÚ CRM EN SIDEBAR */
-        .crm-dropdown-container {
-            display: flex;
-            flex-direction: column;
-            width: 100%;
-        }
+    <!-- HOJA DE ESTILOS MODERNA MINIMALISTA DEL CRM -->
+    <link rel="stylesheet" href="crm-style.css">
 
-        .crm-toggle-btn {
-            display: flex !important;
-            align-items: center;
-            justify-content: space-between;
-            width: 100%;
-            cursor: pointer;
-        }
-
-        .crm-toggle-left {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .crm-arrow {
-            font-size: 0.75rem;
-            transition: transform 0.25s ease;
-        }
-
-        .crm-dropdown-container.open .crm-arrow {
-            transform: rotate(180deg);
-        }
-
-        .crm-submenu {
-            display: none;
-            flex-direction: column;
-            gap: 4px;
-            padding: 6px 0 6px 18px;
-            background: rgba(0, 0, 0, 0.12);
-            border-radius: 8px;
-            margin: 4px 0;
-        }
-
-        .crm-dropdown-container.open .crm-submenu {
-            display: flex;
-        }
-
-        .crm-submenu button {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            width: 100%;
-            padding: 8px 12px;
-            font-size: 0.82rem;
-            color: rgba(255, 255, 255, 0.85);
-            background: transparent;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            text-align: left;
-            transition: all 0.2s;
-        }
-
-        .crm-submenu button:hover {
-            background: rgba(255, 255, 255, 0.18);
-            color: #ffffff;
-        }
-
-        .crm-submenu button.active {
-            background: rgba(255, 255, 255, 0.28);
-            color: #ffffff;
-            font-weight: 600;
-        }
-
-        .crm-submenu button i {
-            font-size: 0.85rem;
-            width: 16px;
-            text-align: center;
-        }
-    </style>
+    <!-- CHART.JS PARA GRÁFICAS DEL CRM -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 
 <body>
 
-    <!-- TOPBAR -->
-    <header class="gestor-topbar">
-        <div class="gestor-logo">
-            <h1>LYM</h1>
-            <span>Panel de Gestión</span>
-        </div>
-
-        <div class="gestor-user">
-            <div class="gestor-user-info">
-                <strong id="gestorName">Gestor</strong>
-                <span>Gestor del sistema</span>
+    <div class="crm-layout">
+        <!-- SIDEBAR ELEGANTE Y SLIM -->
+        <aside class="crm-sidebar">
+            <div class="crm-sidebar-brand">
+                <div class="crm-brand-logo">L</div>
+                <div class="crm-brand-text">LYM <span class="crm-brand-tag">CRM</span></div>
             </div>
-            <div class="gestor-avatar">
-                <i class="fas fa-user"></i>
+
+            <div class="crm-nav-group">
+                <div class="crm-nav-label">Navegación CRM</div>
+                
+                <button class="crm-nav-item active" onclick="loadExternalView('crm-dashboard.html', this)">
+                    <i class="fas fa-chart-pie"></i> <span>Dashboard</span>
+                </button>
+
+                <button class="crm-nav-item" onclick="loadExternalView('crm-clientes.html', this)">
+                    <i class="fas fa-users"></i> <span>Clientes</span>
+                </button>
+
+                <button class="crm-nav-item" onclick="loadExternalView('crm-interacciones.html', this)">
+                    <i class="fas fa-comments"></i> <span>Interacciones</span>
+                </button>
+
+                <button class="crm-nav-item" onclick="loadExternalView('crm-evaluaciones.html', this)">
+                    <i class="fas fa-star"></i> <span>Evaluaciones</span>
+                </button>
+
+                <button class="crm-nav-item" id="navItemUsuarios" onclick="loadExternalView('crm-usuarios.html', this)">
+                    <i class="fas fa-user-shield"></i> <span>Usuarios</span>
+                </button>
+
+                <button class="crm-nav-item" id="navItemTrabajadores" onclick="abrirModalGestionTrabajadores()" style="display:none;">
+                    <i class="fas fa-id-badge"></i> <span>Trabajadores</span>
+                </button>
+
+                <button class="crm-nav-item" id="navItemActividad" onclick="loadExternalView('crm-actividad.html', this)">
+                    <i class="fas fa-clipboard-list"></i> <span>Mi Actividad</span>
+                </button>
+
+                <button class="crm-nav-item" id="navItemReportes" onclick="loadExternalView('crm-reportes.html', this)">
+                    <i class="fas fa-chart-bar"></i> <span>Reportes y Métricas</span>
+                </button>
             </div>
-        </div>
-    </header>
 
+            <div class="crm-nav-group" style="margin-top: auto;">
+                <div class="crm-nav-label">Cuenta</div>
+                <button class="crm-nav-item" onclick="abrirModalCambiarPassCRM()">
+                    <i class="fas fa-key"></i> <span>Cambiar Contraseña</span>
+                </button>
+                <button class="crm-nav-item" onclick="logoutGestor()">
+                    <i class="fas fa-sign-out-alt"></i> <span>Cerrar Sesión</span>
+                </button>
+            </div>
+        </aside>
 
-    <div class="gestor-page">
-        <div class="gestor-wrapper">
-
-            <!-- SIDEBAR -->
-            <aside class="gestor-sidebar">
-                <div class="sidebar-section-title">Principal</div>
-                <nav class="gestor-nav">
-                    <button class="active" onclick="showView('dashboard', this)">
-                        <i class="fas fa-chart-line"></i> Dashboard
-                    </button>
-
-                    <button onclick="showView('productos', this)">
-                        <i class="fas fa-box"></i> Productos
-                    </button>
-
-                    <button onclick="showView('pedidos', this)">
-                        <i class="fas fa-shopping-cart"></i> Pedidos
-                    </button>
-
-                    <!-- BOTÓN PRINCIPAL CRM (AL HACER CLIC CARGA EL DASHBOARD CRM Y DESPLIEGA) -->
-                    <div class="crm-dropdown-container" id="crmDropdown">
-                        <button class="crm-toggle-btn" onclick="clickBotonCRM(event, this)">
-                            <div class="crm-toggle-left">
-                                <i class="fas fa-users"></i> CRM
-                            </div>
-                            <i class="fas fa-chevron-down crm-arrow"></i>
-                        </button>
-
-                        <!-- SUBVISTAS (SIN DASHBOARD EN LA LISTA) -->
-                        <div class="crm-submenu">
-                            <button onclick="loadExternalView('crm-clientes.html', this)">
-                                <i class="fas fa-user-friends"></i> Clientes (Listado)
-                            </button>
-                            <button onclick="showNotification('Historial de Interacciones próximamente')">
-                                <i class="fas fa-comments"></i> Interacciones
-                            </button>
-                            <button onclick="showNotification('Mi Actividad próximamente')">
-                                <i class="fas fa-clipboard-list"></i> Mi Actividad
-                            </button>
-                            <button onclick="showNotification('Reportes y Métricas próximamente')">
-                                <i class="fas fa-chart-pie"></i> Reportes
-                            </button>
-                        </div>
-                    </div>
-                </nav>
-
-                <div class="sidebar-section-title">Gestión</div>
-                <nav class="gestor-nav">
-                    <button onclick="showView('ventas', this)">
-                        <i class="fas fa-dollar-sign"></i> Ventas
-                    </button>
-                    <button onclick="showView('publicaciones', this)">
-                        <i class="fas fa-images"></i> Publicaciones
-                    </button>
-                    <button onclick="showView('promociones', this)">
-                        <i class="fas fa-tags"></i> Promociones
-                    </button>
-                    <button onclick="showView('facturacion', this)">
-                        <i class="fas fa-file-invoice"></i> Facturación
-                    </button>
-                </nav>
-
-                <div class="sidebar-section-title">Sistema</div>
-                <nav class="gestor-nav">
-                    <button onclick="showView('configuracion', this)">
-                        <i class="fas fa-cog"></i> Configuración
-                    </button>
-                </nav>
-
-                <div class="logout-gestor">
-                    <nav class="gestor-nav">
-                        <button onclick="logoutGestor()">
-                            <i class="fas fa-sign-out-alt"></i> Cerrar sesión
-                        </button>
-                    </nav>
+        <!-- CONTENIDO PRINCIPAL -->
+        <main class="crm-main">
+            <!-- TOPBAR MINIMALISTA -->
+            <header class="crm-topbar">
+                <div class="crm-breadcrumb">
+                    <span>LYM CRM</span>
+                    <i class="fas fa-chevron-right" style="font-size:0.7rem;"></i>
+                    <span class="current" id="topbarCurrentView">Dashboard</span>
                 </div>
-            </aside>
 
-
-            <!-- CONTENIDO -->
-            <main class="gestor-content">
-
-                <!-- CONTENEDOR DINÁMICO PARA LAS VISTAS DE CRM -->
-                <section id="contenedor-vistas-crm" class="gestor-view"></section>
-
-                <!-- DASHBOARD GENERAL DE LYM -->
-                <section id="dashboard" class="gestor-view active">
-                    <div class="view-header">
-                        <div class="view-title">
-                            <h2>Dashboard</h2>
-                            <p>Resumen general de LYM Diseño e Impresión</p>
+                <div class="crm-user-profile">
+                    <button class="crm-btn crm-btn-primary crm-btn-sm" onclick="abrirModalGlobalInteraccion()">
+                        <i class="fas fa-plus"></i> <span>+ Interacción</span>
+                    </button>
+                    
+                    <div style="display:flex; align-items:center; gap:10px; margin-left:15px; padding-left:15px; border-left:1px solid #e2e8f0;">
+                        <div class="crm-avatar" id="topbarAvatar">A</div>
+                        <div style="display:flex; flex-direction:column;">
+                            <span style="font-weight:700; font-size:0.85rem; color:#0f172a;" id="gestorName">Juan Lalo</span>
+                            <span style="font-size:0.72rem; color:#64748b;" id="gestorRole">Administrador</span>
                         </div>
-                        <button class="gestor-btn gestor-btn-primary" onclick="showNotification('Información actualizada')">
-                            <i class="fas fa-sync"></i> Actualizar
+                        <button class="crm-btn crm-btn-secondary crm-btn-sm" onclick="abrirModalCambiarPassCRM()" title="Cambiar Contraseña" style="margin-left:6px; padding:5px 9px;">
+                            <i class="fas fa-key"></i>
                         </button>
                     </div>
+                </div>
+            </header>
 
-                    <div class="dashboard-cards">
-                        <div class="dashboard-card">
-                            <div class="dashboard-card-info">
-                                <span>Ventas del mes</span>
-                                <h3>$18,450</h3>
-                            </div>
-                            <div class="dashboard-icon"><i class="fas fa-dollar-sign"></i></div>
-                        </div>
+            <!-- VISTA DINÁMICA DEL CRM -->
+            <div class="crm-content">
+                <div id="contenedor-vistas-crm"></div>
+            </div>
+        </main>
+    </div>
 
-                        <div class="dashboard-card">
-                            <div class="dashboard-card-info">
-                                <span>Pedidos</span>
-                                <h3>42</h3>
-                            </div>
-                            <div class="dashboard-icon"><i class="fas fa-shopping-bag"></i></div>
-                        </div>
+    <!-- ==============================================================
+         GLOBAL FLOATING MODAL 1: REGISTRAR INTERACCIÓN
+         ============================================================== -->
+    <div class="crm-modal-overlay" id="modalGlobalInteraccion">
+        <div class="crm-modal-dialog">
+            <div class="crm-modal-header">
+                <div class="crm-modal-title">
+                    <i class="fas fa-comments" style="color:var(--primary);"></i>
+                    <span>Nueva Interacción</span>
+                </div>
+                <button class="crm-modal-close" onclick="cerrarModalGlobalInteraccion()">&times;</button>
+            </div>
 
-                        <div class="dashboard-card">
-                            <div class="dashboard-card-info">
-                                <span>Clientes</span>
-                                <h3>128</h3>
-                            </div>
-                            <div class="dashboard-icon"><i class="fas fa-users"></i></div>
-                        </div>
+            <form onsubmit="guardarInteraccionGlobal(event)">
+                <div class="crm-form-group">
+                    <label class="crm-form-label">Cliente:</label>
+                    <select class="crm-form-select" id="mGlobalInteraccionCliente" required>
+                        <option value="">-- Selecciona un cliente --</option>
+                    </select>
+                </div>
 
-                        <div class="dashboard-card">
-                            <div class="dashboard-card-info">
-                                <span>Productos</span>
-                                <h3>24</h3>
-                            </div>
-                            <div class="dashboard-icon"><i class="fas fa-box-open"></i></div>
-                        </div>
-                    </div>
+                <div class="crm-form-group">
+                    <label class="crm-form-label">Tipo de Interacción:</label>
+                    <select class="crm-form-select" id="mGlobalInteraccionTipo" required>
+                        <option value="llamada">📞 Llamada telefónica</option>
+                        <option value="correo">✉️ Correo electrónico</option>
+                        <option value="whatsapp">💬 WhatsApp</option>
+                        <option value="reunion">🤝 Reunión / Cita</option>
+                        <option value="nota">📝 Nota interna</option>
+                    </select>
+                </div>
 
-                    <div class="gestor-panel">
-                        <div class="panel-header">
-                            <h3>Acciones rápidas</h3>
-                        </div>
-                        <div class="quick-actions">
-                            <button class="quick-action" onclick="showViewByName('productos')">
-                                <i class="fas fa-plus-circle"></i> <span>Agregar producto</span>
-                            </button>
-                            <button class="quick-action" onclick="showViewByName('pedidos')">
-                                <i class="fas fa-shopping-cart"></i> <span>Ver pedidos</span>
-                            </button>
-                            <button class="quick-action" onclick="showViewByName('promociones')">
-                                <i class="fas fa-tag"></i> <span>Nueva promoción</span>
-                            </button>
-                            <button class="quick-action" onclick="clickBotonCRM(event, document.querySelector('.crm-toggle-btn'))">
-                                <i class="fas fa-user-plus"></i> <span>Ver clientes CRM</span>
-                            </button>
-                        </div>
-                    </div>
+                <div class="crm-form-group">
+                    <label class="crm-form-label">Resumen / Detalles:</label>
+                    <textarea class="crm-form-textarea" id="mGlobalInteraccionDesc" rows="4" placeholder="Describe los acuerdos, comentarios o seguimiento..." required></textarea>
+                </div>
 
-                    <div class="gestor-panel">
-                        <div class="panel-header">
-                            <h3>Pedidos recientes</h3>
-                            <button class="gestor-btn gestor-btn-light" onclick="showViewByName('pedidos')">Ver todos</button>
-                        </div>
-                        <div class="gestor-table-wrapper">
-                            <table class="gestor-table">
-                                <thead>
-                                    <tr>
-                                        <th>Pedido</th>
-                                        <th>Cliente</th>
-                                        <th>Producto</th>
-                                        <th>Total</th>
-                                        <th>Estado</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <td>#LYM-00125</td>
-                                        <td>María López</td>
-                                        <td>Taza personalizada</td>
-                                        <td>$120</td>
-                                        <td><span class="status status-success">Entregado</span></td>
-                                    </tr>
-                                    <tr>
-                                        <td>#LYM-00124</td>
-                                        <td>Carlos Ramírez</td>
-                                        <td>Sudadera</td>
-                                        <td>$425</td>
-                                        <td><span class="status status-warning">Pendiente</span></td>
-                                    </tr>
-                                    <tr>
-                                        <td>#LYM-00123</td>
-                                        <td>Fernanda Torres</td>
-                                        <td>Paquete estudiante</td>
-                                        <td>$520</td>
-                                        <td><span class="status status-info">En preparación</span></td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </section>
-
-                <!-- PRODUCTOS -->
-                <section id="productos" class="gestor-view">
-                    <div class="view-header">
-                        <div class="view-title">
-                            <h2>Productos</h2>
-                            <p>Administra el catálogo de LYM</p>
-                        </div>
-                        <button class="gestor-btn gestor-btn-primary" onclick="showNotification('Formulario de producto')">
-                            <i class="fas fa-plus"></i> Nuevo producto
-                        </button>
-                    </div>
-
-                    <div class="gestor-search">
-                        <input type="text" placeholder="Buscar producto..." onkeyup="searchProducts(this.value)">
-                    </div>
-
-                    <div class="gestor-products" id="productsContainer">
-                        <div class="gestor-product" data-name="Tazas Personalizadas">
-                            <div class="gestor-product-image"><i class="fas fa-mug-hot"></i></div>
-                            <div class="gestor-product-body">
-                                <h3>Tazas Personalizadas</h3>
-                                <p>Personalizadas con diseño del cliente.</p>
-                                <span class="product-price">Desde $85</span>
-                                <div class="product-actions">
-                                    <button class="gestor-btn gestor-btn-warning"><i class="fas fa-edit"></i> Editar</button>
-                                    <button class="gestor-btn gestor-btn-danger" onclick="deleteProduct(this)"><i class="fas fa-trash"></i> Eliminar</button>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="gestor-product" data-name="Tapete Afelpado">
-                            <div class="gestor-product-image"><i class="fas fa-home"></i></div>
-                            <div class="gestor-product-body">
-                                <h3>Tapete Afelpado</h3>
-                                <p>Tapetes personalizados.</p>
-                                <span class="product-price">$300</span>
-                                <div class="product-actions">
-                                    <button class="gestor-btn gestor-btn-warning"><i class="fas fa-edit"></i> Editar</button>
-                                    <button class="gestor-btn gestor-btn-danger" onclick="deleteProduct(this)"><i class="fas fa-trash"></i> Eliminar</button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </section>
-
-                <!-- PEDIDOS -->
-                <section id="pedidos" class="gestor-view">
-                    <div class="view-header">
-                        <div class="view-title">
-                            <h2>Pedidos</h2>
-                            <p>Consulta y administra los pedidos realizados</p>
-                        </div>
-                    </div>
-
-                    <div class="gestor-panel">
-                        <div class="gestor-table-wrapper">
-                            <table class="gestor-table">
-                                <thead>
-                                    <tr>
-                                        <th>ID</th>
-                                        <th>Cliente</th>
-                                        <th>Fecha</th>
-                                        <th>Producto</th>
-                                        <th>Total</th>
-                                        <th>Estado</th>
-                                        <th>Acciones</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <td>#125</td>
-                                        <td>María López</td>
-                                        <td>28/08/2026</td>
-                                        <td>Taza personalizada</td>
-                                        <td>$120</td>
-                                        <td><span class="status status-success">Entregado</span></td>
-                                        <td><button class="gestor-btn gestor-btn-light">Ver</button></td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </section>
-
-                <!-- VENTAS -->
-                <section id="ventas" class="gestor-view">
-                    <div class="view-header">
-                        <div class="view-title">
-                            <h2>Ventas</h2>
-                            <p>Resumen de ingresos y ventas</p>
-                        </div>
-                    </div>
-                </section>
-
-                <!-- PUBLICACIONES -->
-                <section id="publicaciones" class="gestor-view">
-                    <div class="view-header">
-                        <div class="view-title">
-                            <h2>Publicaciones</h2>
-                            <p>Administra las publicaciones de LYM</p>
-                        </div>
-                    </div>
-                </section>
-
-                <!-- PROMOCIONES -->
-                <section id="promociones" class="gestor-view">
-                    <div class="view-header">
-                        <div class="view-title">
-                            <h2>Promociones</h2>
-                            <p>Administra descuentos y campañas</p>
-                        </div>
-                    </div>
-                </section>
-
-                <!-- FACTURACIÓN -->
-                <section id="facturacion" class="gestor-view">
-                    <div class="view-header">
-                        <div class="view-title">
-                            <h2>Facturación</h2>
-                            <p>Solicitudes de facturación de clientes</p>
-                        </div>
-                    </div>
-                </section>
-
-                <!-- CONFIGURACIÓN -->
-                <section id="configuracion" class="gestor-view">
-                    <div class="view-header">
-                        <div class="view-title">
-                            <h2>Configuración</h2>
-                            <p>Configuración general del sistema</p>
-                        </div>
-                    </div>
-                </section>
-
-            </main>
+                <div class="crm-modal-footer">
+                    <button type="button" class="crm-btn crm-btn-secondary" onclick="cerrarModalGlobalInteraccion()">Cancelar</button>
+                    <button type="submit" class="crm-btn crm-btn-primary" id="btnGuardarInteraccionGlobal">
+                        <i class="fas fa-save"></i> Guardar Interacción
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
 
+    <!-- ==============================================================
+         GLOBAL FLOATING MODAL 2: NUEVO CLIENTE
+         ============================================================== -->
+    <div class="crm-modal-overlay" id="modalGlobalCliente">
+        <div class="crm-modal-dialog">
+            <div class="crm-modal-header">
+                <div class="crm-modal-title">
+                    <i class="fas fa-user-plus" style="color:var(--success);"></i>
+                    <span>Registrar Nuevo Cliente</span>
+                </div>
+                <button class="crm-modal-close" onclick="cerrarModalGlobalCliente()">&times;</button>
+            </div>
 
-    <!-- JAVASCRIPT -->
+            <form onsubmit="guardarClienteGlobal(event)">
+                <div class="crm-form-group">
+                    <label class="crm-form-label">Nombre completo:</label>
+                    <input type="text" class="crm-form-input" id="mGlobalClienteNombre" placeholder="Ej. María López" required>
+                </div>
+
+                <div class="crm-form-group">
+                    <label class="crm-form-label">Empresa / Negocio:</label>
+                    <input type="text" class="crm-form-input" id="mGlobalClienteEmpresa" placeholder="Particular / Empresa">
+                </div>
+
+                <div class="crm-form-group">
+                    <label class="crm-form-label">Correo electrónico:</label>
+                    <input type="email" class="crm-form-input" id="mGlobalClienteCorreo" placeholder="correo@ejemplo.com" required>
+                </div>
+
+                <div class="crm-form-group">
+                    <label class="crm-form-label">Teléfono:</label>
+                    <input type="text" class="crm-form-input" id="mGlobalClienteTelefono" placeholder="555-123-4567">
+                </div>
+
+                <div class="crm-form-group">
+                    <label class="crm-form-label">Etapa inicial CRM:</label>
+                    <select class="crm-form-select" id="mGlobalClienteEtapa">
+                        <option value="Prospecto">Prospecto</option>
+                        <option value="Activo">Activo</option>
+                        <option value="Frecuente">Frecuente</option>
+                    </select>
+                </div>
+
+                <div class="crm-modal-footer">
+                    <button type="button" class="crm-btn crm-btn-secondary" onclick="cerrarModalGlobalCliente()">Cancelar</button>
+                    <button type="submit" class="crm-btn crm-btn-primary" style="background:linear-gradient(135deg, #10b981, #059669);">
+                        <i class="fas fa-check"></i> Guardar Cliente
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ==============================================================
+         GLOBAL FLOATING MODAL 3: EDITAR ETAPA CRM
+         ============================================================== -->
+    <div class="crm-modal-overlay" id="modalGlobalEtapa">
+        <div class="crm-modal-dialog">
+            <div class="crm-modal-header">
+                <div class="crm-modal-title">
+                    <i class="fas fa-tags" style="color:var(--warning);"></i>
+                    <span id="mGlobalEtapaTitulo">Cambiar Etapa CRM</span>
+                </div>
+                <button class="crm-modal-close" onclick="cerrarModalGlobalEtapa()">&times;</button>
+            </div>
+
+            <form onsubmit="guardarEtapaGlobal(event)">
+                <input type="hidden" id="mGlobalEtapaClienteId">
+
+                <div class="crm-form-group">
+                    <label class="crm-form-label">Selecciona la nueva etapa:</label>
+                    <select class="crm-form-select" id="mGlobalEtapaSelect">
+                        <option value="Prospecto">Prospecto</option>
+                        <option value="Activo">Activo</option>
+                        <option value="Frecuente">Frecuente</option>
+                        <option value="Inactivo">Inactivo</option>
+                    </select>
+                </div>
+
+                <div style="background:#fffbeb; border:1px solid #fde68a; color:#b45309; padding:12px; border-radius:8px; font-size:0.8rem; margin-top:10px;">
+                    <i class="fas fa-info-circle"></i> Los cambios en la etapa ayudan a clasificar y dar seguimiento prioritario a tus clientes.
+                </div>
+
+                <div class="crm-modal-footer">
+                    <button type="button" class="crm-btn crm-btn-secondary" onclick="cerrarModalGlobalEtapa()">Cancelar</button>
+                    <button type="submit" class="crm-btn crm-btn-primary">
+                        <i class="fas fa-sync"></i> Actualizar Etapa
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ==============================================================
+         GLOBAL FLOATING MODAL 4: EDITAR DATOS CLIENTE
+         ============================================================== -->
+    <div class="crm-modal-overlay" id="modalGlobalEditarCliente">
+        <div class="crm-modal-dialog">
+            <div class="crm-modal-header">
+                <div class="crm-modal-title">
+                    <i class="fas fa-edit" style="color:var(--primary);"></i>
+                    <span>Editar Información del Cliente</span>
+                </div>
+                <button class="crm-modal-close" onclick="cerrarModalGlobalEditarCliente()">&times;</button>
+            </div>
+
+            <form onsubmit="guardarEditarClienteGlobal(event)">
+                <input type="hidden" id="mGlobalEditClienteId">
+
+                <div class="crm-form-group">
+                    <label class="crm-form-label">Nombre completo:</label>
+                    <input type="text" class="crm-form-input" id="mGlobalEditClienteNombre" required>
+                </div>
+
+                <div class="crm-form-group">
+                    <label class="crm-form-label">Empresa / Negocio:</label>
+                    <input type="text" class="crm-form-input" id="mGlobalEditClienteEmpresa">
+                </div>
+
+                <div class="crm-form-group">
+                    <label class="crm-form-label">Correo electrónico:</label>
+                    <input type="email" class="crm-form-input" id="mGlobalEditClienteCorreo" required>
+                </div>
+
+                <div class="crm-form-group">
+                    <label class="crm-form-label">Teléfono:</label>
+                    <input type="text" class="crm-form-input" id="mGlobalEditClienteTelefono">
+                </div>
+
+                <div class="crm-form-group">
+                    <label class="crm-form-label">Estado del cliente:</label>
+                    <select class="crm-form-select" id="mGlobalEditClienteEstado">
+                        <option value="activo">Activo</option>
+                        <option value="inactivo">Inactivo</option>
+                    </select>
+                </div>
+
+                <div class="crm-modal-footer">
+                    <button type="button" class="crm-btn crm-btn-secondary" onclick="cerrarModalGlobalEditarCliente()">Cancelar</button>
+                    <button type="submit" class="crm-btn crm-btn-primary">
+                        <i class="fas fa-save"></i> Guardar Cambios
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL 3: GESTIÓN DE TRABAJADORES (ADMIN) -->
+    <div class="crm-modal-overlay" id="modalGestionTrabajadores">
+        <div class="crm-modal-dialog" style="max-width: 640px;">
+            <div class="crm-modal-header">
+                <div class="crm-modal-title">
+                    <i class="fas fa-id-badge" style="color:var(--primary);"></i>
+                    <span>Gestión de Trabajadores (Juanlalo)</span>
+                </div>
+                <button class="crm-modal-close" onclick="cerrarModalGestionTrabajadores()">&times;</button>
+            </div>
+
+            <div style="padding: 1rem 0;">
+                <!-- FORMULARIO NUEVO TRABAJADOR -->
+                <form onsubmit="crearNuevoTrabajador(event)" style="background:#f8fafc; padding:16px; border-radius:12px; border:1px solid #e2e8f0; margin-bottom:20px;">
+                    <h4 style="margin:0 0 12px 0; font-size:0.95rem; color:#0f172a;"><i class="fas fa-user-plus"></i> Registrar Nuevo Trabajador</h4>
+                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+                        <div class="crm-form-group" style="margin:0;">
+                            <label class="crm-form-label">Usuario:</label>
+                            <input type="text" class="crm-form-input" id="mTrabajadorUsername" placeholder="Ej. carlos_trabajador" required>
+                        </div>
+                        <div class="crm-form-group" style="margin:0;">
+                            <label class="crm-form-label">Correo:</label>
+                            <input type="email" class="crm-form-input" id="mTrabajadorEmail" placeholder="correo@lym.com" required>
+                        </div>
+                    </div>
+                    <div class="crm-form-group" style="margin-top:10px;">
+                        <label class="crm-form-label">Contraseña de acceso:</label>
+                        <input type="password" class="crm-form-input" id="mTrabajadorPassword" placeholder="••••••••" minlength="6" required>
+                    </div>
+                    <button type="submit" class="crm-btn crm-btn-primary" id="btnCrearTrabajador" style="margin-top:12px; width:100%;">
+                        <i class="fas fa-plus-circle"></i> Crear Cuenta de Trabajador
+                    </button>
+                </form>
+
+                <!-- LISTADO DE TRABAJADORES REGISTRADOS -->
+                <h4 style="margin:0 0 10px 0; font-size:0.95rem; color:#0f172a;"><i class="fas fa-users-cog"></i> Trabajadores Actuales</h4>
+                <div id="tablaTrabajadoresContainer" style="max-height:220px; overflow-y:auto; border:1px solid #e2e8f0; border-radius:8px;">
+                    <div style="padding:20px; text-align:center; color:#94a3b8;">Cargando lista de trabajadores...</div>
+                </div>
+            </div>
+
+            <div class="crm-modal-footer">
+                <button type="button" class="crm-btn crm-btn-secondary" onclick="cerrarModalGestionTrabajadores()">Cerrar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL 4: CAMBIAR CONTRASEÑA EN CRM -->
+    <div class="crm-modal-overlay" id="modalCambiarPassCRM">
+        <div class="crm-modal-dialog" style="max-width: 440px;">
+            <div class="crm-modal-header">
+                <div class="crm-modal-title">
+                    <i class="fas fa-key" style="color:var(--primary);"></i>
+                    <span>Cambiar mi Contraseña</span>
+                </div>
+                <button class="crm-modal-close" onclick="cerrarModalCambiarPassCRM()">&times;</button>
+            </div>
+
+            <form onsubmit="guardarPassCRM(event)">
+                <div class="crm-form-group">
+                    <label class="crm-form-label">Contraseña Actual:</label>
+                    <input type="password" class="crm-form-input" id="mPassActualCRM" placeholder="••••••••" required>
+                </div>
+
+                <div class="crm-form-group">
+                    <label class="crm-form-label">Nueva Contraseña:</label>
+                    <input type="password" class="crm-form-input" id="mPassNuevaCRM" placeholder="••••••••" minlength="6" required>
+                </div>
+
+                <div id="mPassCRMMsg" style="display:none; padding:10px; border-radius:8px; font-size:0.88rem; font-weight:600; margin-top:10px;"></div>
+
+                <div class="crm-modal-footer">
+                    <button type="button" class="crm-btn crm-btn-secondary" onclick="cerrarModalCambiarPassCRM()">Cancelar</button>
+                    <button type="submit" class="crm-btn crm-btn-primary" id="btnGuardarPassCRM">
+                        <i class="fas fa-save"></i> Actualizar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- NOTIFICACIÓN TOAST GLOBAL -->
+    <div id="crmToastNotification" style="position:fixed; bottom:24px; right:24px; background:#0f172a; color:#ffffff; padding:12px 20px; border-radius:10px; font-weight:600; font-size:0.88rem; box-shadow:0 10px 25px rgba(0,0,0,0.2); z-index:9999; display:flex; align-items:center; gap:10px; opacity:0; pointer-events:none; transition:opacity 0.3s ease;">
+        <i class="fas fa-check-circle" style="color:#10b981;"></i>
+        <span id="crmToastText">Notificación</span>
+    </div>
+
+    <!-- JAVASCRIPT PRINCIPAL -->
     <script>
-        /* FUNCIÓN PRINCIPAL DEL BOTÓN CRM */
-        function clickBotonCRM(event, button) {
-            if (event) event.stopPropagation();
-            
-            const dropdown = document.getElementById("crmDropdown");
-            // Alternar el desplegable
-            dropdown.classList.toggle("open");
+        let currentLoadedView = 'crm-dashboard.html';
 
-            // Cargar inmediatamente el Dashboard de CRM en pantalla
-            loadExternalView('crm-dashboard.html', button);
-        }
-
-        /* CARGADOR DE VISTAS EXTERNAS (crm-dashboard.html, crm-clientes.html, etc.) */
+        /* NAVEGACIÓN ENTRE VISTAS */
         function loadExternalView(viewUrl, button) {
             const container = document.getElementById("contenedor-vistas-crm");
+            currentLoadedView = viewUrl;
 
-            // Ocultar vistas fijas del gestor
-            document.querySelectorAll(".gestor-view").forEach(view => {
-                view.classList.remove("active");
-            });
-
-            // Quitar clase activa previa a todos los botones
-            document.querySelectorAll(".gestor-nav button, .crm-submenu button").forEach(btn => {
-                btn.classList.remove("active");
-            });
-
-            // Activar botón pulsado
+            // Actualizar botones del sidebar
             if (button) {
+                document.querySelectorAll(".crm-nav-item").forEach(btn => btn.classList.remove("active"));
                 button.classList.add("active");
-                // Si el botón pulsado pertenece al submenú, mantener activa la barra principal de CRM
-                if (button.closest(".crm-submenu")) {
-                    document.querySelector(".crm-toggle-btn")?.classList.add("active");
-                }
+                
+                const label = button.querySelector("span")?.textContent || "Dashboard";
+                document.getElementById("topbarCurrentView").textContent = label;
             }
 
-            container.innerHTML = '<div style="padding: 2rem; color: #64748b;">Cargando vista...</div>';
-            container.classList.add("active");
+            container.innerHTML = `
+                <div style="padding: 3rem; text-align: center; color: #94a3b8;">
+                    <i class="fas fa-spinner fa-spin fa-2x" style="color:var(--primary); margin-bottom:12px;"></i>
+                    <div>Cargando módulo CRM...</div>
+                </div>
+            `;
 
             fetch(viewUrl)
                 .then(response => {
@@ -497,7 +425,7 @@
                 .then(html => {
                     container.innerHTML = html;
 
-                    // Ejecutar scripts que contenga la vista cargada
+                    // Ejecutar scripts internos de la vista cargada
                     const scripts = container.querySelectorAll("script");
                     scripts.forEach(oldScript => {
                         const newScript = document.createElement("script");
@@ -507,91 +435,481 @@
                     });
                 })
                 .catch(err => {
-                    container.innerHTML = `<div style="color: #ef4444; padding: 2rem;">Error al cargar la vista (${err.message}). Revisa que el archivo exista en la misma carpeta.</div>`;
+                    container.innerHTML = `<div style="color: #ef4444; padding: 2rem; background:#fee2e2; border-radius:12px;">Error al cargar la vista (${err.message}). Revisa la ruta de conexión.</div>`;
                 });
         }
 
-        /* CAMBIAR VISTAS INTERNAS DEL GESTOR */
-        function showView(viewId, button) {
-            document.querySelectorAll(".gestor-view").forEach(view => {
-                view.classList.remove("active");
-            });
+        /* MODAL GLOBAL 1: REGISTRAR INTERACCIÓN */
+        async function abrirModalGlobalInteraccion(preselectedClienteId) {
+            const modal = document.getElementById("modalGlobalInteraccion");
+            const selectCliente = document.getElementById("mGlobalInteraccionCliente");
+            modal.classList.add("active");
 
-            const selectedView = document.getElementById(viewId);
-            if (selectedView) {
-                selectedView.classList.add("active");
+            try {
+                selectCliente.innerHTML = '<option value="">Cargando clientes de MySQL...</option>';
+                let clientes = [];
+
+                const resp = await fetch("php/crm_api.php?resource=clientes", { credentials: "same-origin" });
+                if (resp.ok) {
+                    const data = await resp.json();
+                    if (data.success && Array.isArray(data.clientes)) {
+                        clientes = data.clientes;
+                    }
+                }
+
+                if (clientes.length === 0) {
+                    const respDrop = await fetch("php/api_clientes_dropdown.php", { credentials: "same-origin" });
+                    if (respDrop.ok) {
+                        const dataDrop = await respDrop.json();
+                        if (dataDrop.success && Array.isArray(dataDrop.clientes)) {
+                            clientes = dataDrop.clientes;
+                        }
+                    }
+                }
+
+                if (clientes.length === 0) {
+                    const resp2 = await fetch("php/clientes.php", { credentials: "same-origin" });
+                    if (resp2.ok) {
+                        const data2 = await resp2.json();
+                        if (data2.success && Array.isArray(data2.clientes)) {
+                            clientes = data2.clientes;
+                        }
+                    }
+                }
+
+                if (clientes.length > 0) {
+                    selectCliente.innerHTML = '<option value="">-- Selecciona un cliente --</option>';
+                    clientes.forEach(c => {
+                        const opt = document.createElement("option");
+                        opt.value = c.id;
+                        opt.textContent = `${c.nombre || c.username || 'Cliente'} (${c.empresa && c.empresa !== 'Sin Empresa' ? c.empresa : 'Particular'}) - ${c.correo || ''}`;
+                        if (preselectedClienteId && String(c.id) === String(preselectedClienteId)) {
+                            opt.selected = true;
+                        }
+                        selectCliente.appendChild(opt);
+                    });
+                } else {
+                    selectCliente.innerHTML = '<option value="">No hay clientes en MySQL</option>';
+                }
+            } catch (e) {
+                selectCliente.innerHTML = '<option value="">Error al cargar clientes</option>';
+            }
+        }
+
+        function cerrarModalGlobalInteraccion() {
+            document.getElementById("modalGlobalInteraccion").classList.remove("active");
+        }
+
+        async function guardarInteraccionGlobal(e) {
+            e.preventDefault();
+            const cliente_id = document.getElementById("mGlobalInteraccionCliente").value;
+            const tipo = document.getElementById("mGlobalInteraccionTipo").value;
+            const descripcion = document.getElementById("mGlobalInteraccionDesc").value;
+            const btn = document.getElementById("btnGuardarInteraccionGlobal");
+
+            if (!cliente_id) {
+                alert("Selecciona un cliente de la lista.");
+                return;
             }
 
-            document.querySelectorAll(".gestor-nav button, .crm-submenu button").forEach(btn => {
-                btn.classList.remove("active");
-            });
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...';
 
-            if (button) {
-                button.classList.add("active");
+            try {
+                const resp = await fetch("php/crm_api.php?resource=interacciones", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ cliente_id, tipo, descripcion })
+                });
+
+                const data = await resp.json();
+                if (data.success) {
+                    showNotification("¡Interacción registrada con éxito!");
+                    cerrarModalGlobalInteraccion();
+                    document.getElementById("mGlobalInteraccionDesc").value = "";
+                    
+                    window.dispatchEvent(new CustomEvent("crm-interaction-updated"));
+                    if (typeof loadExternalView === "function" && currentLoadedView) {
+                        loadExternalView(currentLoadedView, null);
+                    }
+                } else {
+                    alert("Error: " + (data.error || "No se pudo guardar"));
+                }
+            } catch (err) {
+                alert("Error de conexión: " + err.message);
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-save"></i> Guardar Interacción';
             }
         }
 
-        function showViewByName(viewId) {
-            const buttons = document.querySelectorAll(".gestor-nav button");
-            let targetButton = null;
-
-            buttons.forEach(button => {
-                const text = button.innerText.toLowerCase();
-                if (viewId === "productos" && text.includes("productos")) targetButton = button;
-                if (viewId === "pedidos" && text.includes("pedidos")) targetButton = button;
-                if (viewId === "promociones" && text.includes("promociones")) targetButton = button;
-            });
-
-            showView(viewId, targetButton);
+        /* MODAL GLOBAL 2: NUEVO CLIENTE */
+        function abrirModalGlobalCliente() {
+            document.getElementById("modalGlobalCliente").classList.add("active");
         }
 
-        function searchProducts(text) {
-            const products = document.querySelectorAll(".gestor-product");
-            const search = text.toLowerCase();
-            products.forEach(product => {
-                const name = product.dataset.name || "";
-                product.style.display = name.toLowerCase().includes(search) ? "" : "none";
-            });
+        function cerrarModalGlobalCliente() {
+            document.getElementById("modalGlobalCliente").classList.remove("active");
         }
 
-        function deleteProduct(button) {
-            if (!confirm("¿Seguro que deseas eliminar este producto?")) return;
-            button.closest(".gestor-product").remove();
-            showNotification("Producto eliminado correctamente");
+        async function guardarClienteGlobal(e) {
+            e.preventDefault();
+            const nombre = document.getElementById("mGlobalClienteNombre").value;
+            const empresa = document.getElementById("mGlobalClienteEmpresa").value;
+            const correo = document.getElementById("mGlobalClienteCorreo").value;
+            const telefono = document.getElementById("mGlobalClienteTelefono").value;
+            const etapa_crm = document.getElementById("mGlobalClienteEtapa").value;
+
+            try {
+                const resp = await fetch("php/crm_api.php?resource=crear_cliente", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ nombre, empresa, correo, telefono, etapa_crm })
+                });
+
+                const data = await resp.json();
+                if (data.success) {
+                    showNotification("¡Cliente guardado exitosamente en MySQL!");
+                    cerrarModalGlobalCliente();
+                    
+                    if (currentLoadedView.includes("crm-clientes")) {
+                        loadExternalView(currentLoadedView, null);
+                    }
+                } else {
+                    alert("Error: " + data.error);
+                }
+            } catch (err) {
+                alert("Error de conexión: " + err.message);
+            }
         }
 
+        /* MODAL GLOBAL 3: EDITAR ETAPA CRM */
+        function abrirModalGlobalEtapa(clienteId, clienteNombre, etapaActual) {
+            document.getElementById("mGlobalEtapaClienteId").value = clienteId;
+            document.getElementById("mGlobalEtapaTitulo").textContent = `Cambiar Etapa - ${clienteNombre}`;
+            document.getElementById("mGlobalEtapaSelect").value = etapaActual || 'Prospecto';
+            document.getElementById("modalGlobalEtapa").classList.add("active");
+        }
+
+        function cerrarModalGlobalEtapa() {
+            document.getElementById("modalGlobalEtapa").classList.remove("active");
+        }
+
+        async function guardarEtapaGlobal(e) {
+            e.preventDefault();
+            const id = document.getElementById("mGlobalEtapaClienteId").value;
+            const etapa_crm = document.getElementById("mGlobalEtapaSelect").value;
+
+            try {
+                const resp = await fetch("php/crm_api.php?resource=editar_etapa", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ id, etapa_crm })
+                });
+
+                const data = await resp.json();
+                if (data.success) {
+                    showNotification("Etapa CRM actualizada");
+                    cerrarModalGlobalEtapa();
+                    loadExternalView(currentLoadedView, null);
+                } else {
+                    alert(data.error || "Error al actualizar etapa");
+                }
+            } catch (err) {
+                alert("Error de conexión: " + err.message);
+            }
+        }
+
+        /* MODAL GLOBAL 4: EDITAR DATOS CLIENTE */
+        function abrirModalGlobalEditarCliente(id, nombre, correo, telefono, empresa, estado) {
+            document.getElementById("mGlobalEditClienteId").value = id;
+            document.getElementById("mGlobalEditClienteNombre").value = nombre || '';
+            document.getElementById("mGlobalEditClienteCorreo").value = correo || '';
+            document.getElementById("mGlobalEditClienteTelefono").value = telefono || '';
+            document.getElementById("mGlobalEditClienteEmpresa").value = empresa || '';
+            document.getElementById("mGlobalEditClienteEstado").value = estado || 'activo';
+            document.getElementById("modalGlobalEditarCliente").classList.add("active");
+        }
+
+        function cerrarModalGlobalEditarCliente() {
+            document.getElementById("modalGlobalEditarCliente").classList.remove("active");
+        }
+
+        async function guardarEditarClienteGlobal(e) {
+            e.preventDefault();
+            const id = document.getElementById("mGlobalEditClienteId").value;
+            const nombre = document.getElementById("mGlobalEditClienteNombre").value;
+            const correo = document.getElementById("mGlobalEditClienteCorreo").value;
+            const telefono = document.getElementById("mGlobalEditClienteTelefono").value;
+            const empresa = document.getElementById("mGlobalEditClienteEmpresa").value;
+            const estado = document.getElementById("mGlobalEditClienteEstado").value;
+
+            try {
+                const resp = await fetch("php/crm_api.php?resource=editar_cliente", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ id, nombre, correo, telefono, empresa, estado })
+                });
+
+                const data = await resp.json();
+                if (data.success) {
+                    showNotification("¡Datos del cliente actualizados!");
+                    cerrarModalGlobalEditarCliente();
+                    loadExternalView(currentLoadedView, null);
+                } else {
+                    alert(data.error || "No se pudo actualizar los datos del cliente");
+                }
+            } catch (err) {
+                alert("Error de conexión: " + err.message);
+            }
+        }
+
+        /* TOAST NOTIFICATION */
         function showNotification(message) {
-            let notification = document.getElementById("gestorNotification");
-            if (!notification) {
-                notification = document.createElement("div");
-                notification.id = "gestorNotification";
-                notification.style.position = "fixed";
-                notification.style.top = "100px";
-                notification.style.right = "25px";
-                notification.style.background = "linear-gradient(135deg,#6B46C1,#EC4899)";
-                notification.style.color = "white";
-                notification.style.padding = "15px 22px";
-                notification.style.borderRadius = "12px";
-                notification.style.fontWeight = "600";
-                notification.style.boxShadow = "0 10px 30px rgba(0,0,0,.2)";
-                notification.style.zIndex = "9999";
-                notification.style.transition = ".3s";
-                document.body.appendChild(notification);
-            }
-            notification.innerHTML = "✔ " + message;
-            notification.style.opacity = "1";
-            setTimeout(() => { notification.style.opacity = "0"; }, 2500);
+            const toast = document.getElementById("crmToastNotification");
+            const text = document.getElementById("crmToastText");
+            text.textContent = message;
+            toast.style.opacity = "1";
+            setTimeout(() => { toast.style.opacity = "0"; }, 3000);
         }
 
         function logoutGestor() {
-            if (confirm("¿Deseas cerrar sesión?")) window.location.href = "index.html";
+            if (confirm("¿Seguro que deseas cerrar sesión en LYM CRM?")) {
+                window.location.href = "php/logout.php";
+            }
         }
 
-        document.addEventListener("DOMContentLoaded", function () {
-            const storedUser = localStorage.getItem("gestorUser");
-            if (storedUser) {
-                document.getElementById("gestorName").textContent = storedUser;
+        let currentUserCRM = null;
+
+        async function verificarPermisosAdminGestor() {
+            try {
+                const resp = await fetch("php/check_session.php", { credentials: "same-origin" });
+                const data = await resp.json();
+
+                if (!data.authenticated || !data.user) {
+                    bloquearAccesoCRM("Debes iniciar sesión para acceder al CRM.");
+                    return false;
+                }
+
+                const role = String(data.user.role || '').toLowerCase();
+                if (role !== 'admin' && role !== 'trabajador') {
+                    bloquearAccesoCRM("El panel de gestión CRM es de uso exclusivo para Administradores y Trabajadores.");
+                    return false;
+                }
+
+                currentUserCRM = data.user;
+                document.getElementById("gestorName").textContent = data.user.username;
+                document.getElementById("gestorRole").textContent = role === 'admin' ? 'Administrador' : 'Trabajador';
+                document.getElementById("topbarAvatar").textContent = data.user.username.charAt(0).toUpperCase();
+
+                // PERMISOS SEGÚN ROL:
+                if (role === 'trabajador') {
+                    // Los trabajadores solo pueden ver Clientes e Interacciones/Solicitudes
+                    const btnDashboard = document.querySelector("button[onclick*='crm-dashboard.html']");
+                    const btnUsuarios = document.getElementById("navItemUsuarios");
+                    const btnActividad = document.getElementById("navItemActividad");
+                    const btnReportes = document.getElementById("navItemReportes");
+                    const btnTrabajadores = document.getElementById("navItemTrabajadores");
+
+                    if (btnDashboard) btnDashboard.style.display = 'none';
+                    if (btnUsuarios) btnUsuarios.style.display = 'none';
+                    if (btnActividad) btnActividad.style.display = 'none';
+                    if (btnReportes) btnReportes.style.display = 'none';
+                    if (btnTrabajadores) btnTrabajadores.style.display = 'none';
+
+                    // Cargar vista inicial de Clientes para trabajador
+                    loadExternalView("crm-clientes.html", document.querySelector("button[onclick*='crm-clientes.html']"));
+                } else {
+                    // Administrador (Juanlalo): Mostrar botón de Gestión de Trabajadores
+                    const btnTrabajadores = document.getElementById("navItemTrabajadores");
+                    if (btnTrabajadores) btnTrabajadores.style.display = 'flex';
+
+                    // Cargar Dashboard por defecto
+                    loadExternalView("crm-dashboard.html", document.querySelector(".crm-nav-item.active"));
+                }
+
+                return true;
+            } catch (e) {
+                window.location.href = "index.php";
+                return false;
             }
+        }
+
+        function bloquearAccesoCRM(mensaje) {
+            document.body.innerHTML = `
+                <div style="min-height:100vh; display:flex; align-items:center; justify-content:center; background:#f8fafc; font-family:'Plus Jakarta Sans', sans-serif;">
+                    <div style="background:#ffffff; padding:3rem; border-radius:16px; border:1px solid #e2e8f0; text-align:center; max-width:480px; box-shadow:0 10px 30px rgba(0,0,0,0.08);">
+                        <div style="width:64px; height:64px; background:#fee2e2; color:#ef4444; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:1.8rem; margin:0 auto 1.25rem;">
+                            <i class="fas fa-lock"></i>
+                        </div>
+                        <h2 style="color:#0f172a; margin-bottom:8px; font-weight:800;">Acceso Restringido</h2>
+                        <p style="color:#64748b; font-size:0.92rem; margin-bottom:1.5rem; line-height:1.5;">${escapeHtml(mensaje)}</p>
+                        <a href="index.php" style="display:inline-block; background:linear-gradient(135deg, #6B46C1, #8B5CF6); color:#ffffff; padding:10px 24px; border-radius:10px; font-weight:600; text-decoration:none;">
+                            <i class="fas fa-arrow-left"></i> Volver al Inicio
+                        </a>
+                    </div>
+                </div>
+            `;
+            setTimeout(() => { window.location.href = "index.php"; }, 2500);
+        }
+
+        /* GESTIÓN DE TRABAJADORES (ADMIN) */
+        async function abrirModalGestionTrabajadores() {
+            document.getElementById("modalGestionTrabajadores").classList.add("active");
+            await cargarTrabajadoresLista();
+        }
+
+        function cerrarModalGestionTrabajadores() {
+            document.getElementById("modalGestionTrabajadores").classList.remove("active");
+        }
+
+        async function cargarTrabajadoresLista() {
+            const container = document.getElementById("tablaTrabajadoresContainer");
+            try {
+                const resp = await fetch("php/api_trabajadores.php");
+                const data = await resp.json();
+
+                if (!data.success || !Array.isArray(data.trabajadores) || data.trabajadores.length === 0) {
+                    container.innerHTML = '<div style="padding:20px; text-align:center; color:#94a3b8;">No hay trabajadores registrados aún.</div>';
+                    return;
+                }
+
+                let html = '<table style="width:100%; border-collapse:collapse; font-size:0.88rem;">';
+                html += '<tr style="background:#f1f5f9; text-align:left; color:#475569;"><th style="padding:8px 12px;">Usuario</th><th style="padding:8px 12px;">Correo</th><th style="padding:8px 12px; text-align:right;">Acción</th></tr>';
+                data.trabajadores.forEach(t => {
+                    html += `
+                        <tr style="border-bottom:1px solid #f1f5f9;">
+                            <td style="padding:8px 12px; font-weight:600; color:#0f172a;"><i class="fas fa-user-check" style="color:#10b981; margin-right:6px;"></i>${escapeHtml(t.username)}</td>
+                            <td style="padding:8px 12px; color:#475569;">${escapeHtml(t.email)}</td>
+                            <td style="padding:8px 12px; text-align:right;">
+                                <button onclick="eliminarTrabajador(${t.id}, '${escapeHtml(t.username)}')" class="crm-btn crm-btn-secondary crm-btn-sm" style="color:#ef4444; padding:3px 8px;">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    `;
+                });
+                html += '</table>';
+                container.innerHTML = html;
+            } catch (e) {
+                container.innerHTML = '<div style="padding:20px; text-align:center; color:#ef4444;">Error al cargar trabajadores.</div>';
+            }
+        }
+
+        async function crearNuevoTrabajador(e) {
+            e.preventDefault();
+            const username = document.getElementById("mTrabajadorUsername").value.trim();
+            const email = document.getElementById("mTrabajadorEmail").value.trim();
+            const password = document.getElementById("mTrabajadorPassword").value;
+            const btn = document.getElementById("btnCrearTrabajador");
+
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creando...';
+
+            try {
+                const resp = await fetch("php/api_trabajadores.php", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ username, email, password })
+                });
+                const data = await resp.json();
+
+                if (data.success) {
+                    showNotification("¡Cuenta de trabajador creada exitosamente!");
+                    document.getElementById("mTrabajadorUsername").value = '';
+                    document.getElementById("mTrabajadorEmail").value = '';
+                    document.getElementById("mTrabajadorPassword").value = '';
+                    await cargarTrabajadoresLista();
+                } else {
+                    alert(data.error || "No se pudo registrar al trabajador");
+                }
+            } catch (err) {
+                alert("Error de red: " + err.message);
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-plus-circle"></i> Crear Cuenta de Trabajador';
+            }
+        }
+
+        async function eliminarTrabajador(id, username) {
+            if (!confirm(`¿Seguro que deseas eliminar al trabajador "${username}"?`)) return;
+
+            try {
+                const resp = await fetch("php/api_trabajadores.php", {
+                    method: "DELETE",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ id })
+                });
+                const data = await resp.json();
+                if (data.success) {
+                    showNotification("Trabajador eliminado correctamente.");
+                    await cargarTrabajadoresLista();
+                } else {
+                    alert(data.error || "Error al eliminar");
+                }
+            } catch (e) {
+                alert("Error: " + e.message);
+            }
+        }
+
+        /* CAMBIAR CONTRASEÑA EN CRM */
+        function abrirModalCambiarPassCRM() {
+            document.getElementById("modalCambiarPassCRM").classList.add("active");
+            document.getElementById("mPassCRMMsg").style.display = "none";
+        }
+
+        function cerrarModalCambiarPassCRM() {
+            document.getElementById("modalCambiarPassCRM").classList.remove("active");
+        }
+
+        async function guardarPassCRM(e) {
+            e.preventDefault();
+            const passActual = document.getElementById("mPassActualCRM").value;
+            const passNueva = document.getElementById("mPassNuevaCRM").value;
+            const btn = document.getElementById("btnGuardarPassCRM");
+            const msg = document.getElementById("mPassCRMMsg");
+
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...';
+
+            try {
+                const resp = await fetch("php/api_cambiar_password.php", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        password_actual: passActual,
+                        password_nueva: passNueva
+                    })
+                });
+
+                const data = await resp.json();
+                msg.style.display = "block";
+
+                if (data.success) {
+                    msg.style.background = "#dcfce7";
+                    msg.style.color = "#15803d";
+                    msg.textContent = "✔ " + data.message;
+                    document.getElementById("mPassActualCRM").value = '';
+                    document.getElementById("mPassNuevaCRM").value = '';
+                    setTimeout(() => cerrarModalCambiarPassCRM(), 1500);
+                } else {
+                    msg.style.background = "#fee2e2";
+                    msg.style.color = "#b91c1c";
+                    msg.textContent = "✖ " + (data.error || "Error al cambiar contraseña");
+                }
+            } catch (err) {
+                msg.style.display = "block";
+                msg.style.background = "#fee2e2";
+                msg.style.color = "#b91c1c";
+                msg.textContent = "✖ Error de servidor";
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-save"></i> Actualizar';
+            }
+        }
+
+        document.addEventListener("DOMContentLoaded", async function () {
+            await verificarPermisosAdminGestor();
         });
     </script>
 </body>

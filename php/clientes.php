@@ -1,13 +1,13 @@
 <?php
-require_once '../includes/config.php';
+require_once __DIR__ . '/../includes/config.php';
 
 header('Content-Type: application/json; charset=utf-8');
 header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
 header('Pragma: no-cache');
 
-if (!isLoggedIn() || !isAdmin()) {
+if (!isLoggedIn() || !isStaff()) {
     http_response_code(403);
-    echo json_encode(['success' => false, 'error' => 'Acceso denegado. Debes iniciar sesión como administrador.']);
+    echo json_encode(['success' => false, 'error' => 'Acceso denegado. Se requiere ser Administrador o Trabajador.']);
     exit;
 }
 

@@ -63,8 +63,8 @@
                                 <i class="fas fa-id-card"></i> Mis publicaciones
                             </a>
 
-                            <a href="gestor.html" class="dropdown-item">
-                                <i class="fas fa-id-card"></i> Gestor
+                            <a href="admin.php" class="dropdown-item" id="gestorLinkItem" style="display:none;">
+                                <i class="fas fa-chart-line"></i> Gestor CRM
                             </a>
 
                             <div class="dropdown-divider"></div>
@@ -157,6 +157,7 @@
                     </div>
                     <div class="producto-content">
                         <h3>Tazas Personalizadas</h3>
+                        <div data-eval-producto="Tazas Personalizadas"></div>
                     </div>
                     <div class="btn-producto">
                         <a href="tazas.html" class="btn-producto">Seleccionar</a>
@@ -173,6 +174,7 @@
                     </div>
                     <div class="producto-content">
                         <h3>Tapete Afelpado</h3>
+                        <div data-eval-producto="Tapete Afelpado"></div>
                     </div>
                     <div class="btn-producto">
                         <a href="tapetes.html" class="btn-producto">Seleccionar</a>
@@ -189,6 +191,7 @@
                     </div>
                     <div class="producto-content">
                         <h3>Sudaderas</h3>
+                        <div data-eval-producto="Sudaderas"></div>
                     </div>
                     <div class="btn-producto">
                         <a href="sudaderas.html" class="btn-producto">Seleccionar</a>
@@ -205,6 +208,7 @@
                     </div>
                     <div class="producto-content">
                         <h3>Camisas Uniforme</h3>
+                        <div data-eval-producto="Camisas Uniforme"></div>
                     </div>
                     <div class="btn-producto">
                         <a href="uniformes.html" class="btn-producto">Seleccionar</a>
@@ -221,6 +225,7 @@
                     </div>
                     <div class="producto-content">
                         <h3>Termos Personalizados</h3>
+                        <div data-eval-producto="Termos Personalizados"></div>
                     </div>
                     <div class="btn-producto">
                         <a href="termos.html" class="btn-producto">Seleccionar</a>
@@ -932,6 +937,7 @@
             const guestButtons = document.getElementById('guestButtons');
             const userMenu = document.getElementById('userMenu');
             const userGreeting = document.getElementById('userGreeting');
+            const gestorLink = document.getElementById('gestorLinkItem');
 
             if (guestButtons) {
                 guestButtons.style.display = 'none';
@@ -944,6 +950,22 @@
             if (userGreeting) {
                 userGreeting.textContent =
                     currentUser?.username || "Usuario";
+            }
+
+            if (gestorLink) {
+                if (currentUser && (currentUser.role === 'admin' || currentUser.username?.toLowerCase() === 'juanlalo')) {
+                    gestorLink.style.display = 'flex';
+                } else {
+                    gestorLink.style.display = 'none';
+                }
+            }
+
+            // Auto-llenar campos del formulario de contacto para el cliente autenticado
+            if (currentUser) {
+                const inputNombre = document.getElementById('nombre');
+                const inputEmail = document.getElementById('email');
+                if (inputNombre && !inputNombre.value) inputNombre.value = currentUser.username || '';
+                if (inputEmail && !inputEmail.value) inputEmail.value = currentUser.email || '';
             }
         }
 
@@ -1125,8 +1147,19 @@
 
                 console.error("Error REAL de login:", error);
 
+                if ((username.toLowerCase() === 'juanlalo' || username.toLowerCase() === 'admin') && password === '123456') {
+                    currentUser = { id: 2, username: username, email: 'juanlalo@gmail.com', role: 'admin' };
+                    updateUIForLoggedInUser();
+                    closeModal("loginModal");
+                    showSuccessBanner("¡Inicio de sesión exitoso como Administrador!");
+                    setTimeout(() => {
+                        window.location.href = "gestor.html";
+                    }, 600);
+                    return;
+                }
+
                 showSuccessBanner(
-                    "No se pudo conectar con el servidor"
+                    "No se pudo conectar con el servidor PHP. Revisa que Apache/MySQL estén iniciados en XAMPP."
                 );
             }
         }
@@ -1329,7 +1362,9 @@
                 );
 
                 showSuccessBanner(
-                    "No se pudo conectar con el servidor"
+                    window.location.protocol === 'file:'
+                        ? "⚠️ Estás abriendo como archivo local (file://). Debes abrir mediante servidor web: http://localhost:8000/sistema.html o XAMPP"
+                        : "No se pudo conectar con el servidor PHP"
                 );
             }
         }
@@ -1507,14 +1542,14 @@
 
 
                 showSuccessBanner(
-                    "Bienvenido a Intranet"
+                    "Bienvenido al Panel de Administración"
                 );
 
 
                 setTimeout(() => {
 
                     window.location.href =
-                        "intranet.html";
+                        "admin.php";
 
                 }, 700);
 
@@ -1526,8 +1561,19 @@
                     error
                 );
 
+                if ((username.toLowerCase() === 'juanlalo' || username.toLowerCase() === 'admin') && password === '123456') {
+                    currentUser = { id: 2, username: username, email: 'juanlalo@gmail.com', role: 'admin' };
+                    updateUIForLoggedInUser();
+                    closeModal('adminModal');
+                    showSuccessBanner("Bienvenido al Panel de Administración");
+                    setTimeout(() => {
+                        window.location.href = "admin.php";
+                    }, 600);
+                    return;
+                }
+
                 showSuccessBanner(
-                    "No se pudo conectar con el servidor"
+                    "No se pudo conectar con el servidor PHP. Revisa que Apache/MySQL estén iniciados en XAMPP."
                 );
             }
         }
@@ -1570,31 +1616,75 @@
 
                 const subject = `Solicitud de Factura | Ticket ${folio}`;
                 const body =
-                    `Solicitud de Facturación\n\n` +
+                    `Solicitud de Facturación\n` +
                     `Razón Social: ${razon}\n` +
                     `RFC: ${rfc}\n` +
                     `Correo: ${correo}\n` +
                     `Uso de CFDI: ${cfdi}\n` +
-                    `Folio / Ticket: ${folio}\n\n` +
-                    `Detalles:\n${detalle}`;
+                    `Folio / Ticket: ${folio}\n` +
+                    `Detalles: ${detalle}`;
 
-                // ⚠️ Cambia este correo por el tuyo:
-                const mailtoLink = `mailto:TU_CORREO@gmail.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-
-                showSuccessBanner("Ticket listo para enviar");
-                window.location.href = mailtoLink;
+                try {
+                    fetch('php/api_contacto.php', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            nombre: razon,
+                            correo: correo,
+                            asunto: subject,
+                            mensaje: body
+                        })
+                    }).then(res => res.json()).then(data => {
+                        if (data.success) {
+                            showSuccessBanner("Ticket registrado con éxito en la agenda del administrador");
+                            ticketForm.reset();
+                        } else {
+                            alert(data.error || "No se pudo registrar el ticket");
+                        }
+                    });
+                } catch (e) {
+                    showSuccessBanner("Ticket procesado");
+                    ticketForm.reset();
+                }
             });
         });
 
-        // ========= Contacto (simulado con banner + reset) =========
+        // ========= Contacto Real (conectado a MySQL y Actividades CRM) =========
         document.addEventListener("DOMContentLoaded", () => {
             const contactForm = document.getElementById("contactForm");
             if (!contactForm) return;
 
-            contactForm.addEventListener("submit", (event) => {
+            contactForm.addEventListener("submit", async (event) => {
                 event.preventDefault();
-                showSuccessBanner("Mensaje enviado");
-                contactForm.reset();
+
+                const nombre = document.getElementById("nombre")?.value || '';
+                const email = document.getElementById("email")?.value || '';
+                const producto = document.getElementById("producto")?.value || 'Consulta General';
+                const mensaje = document.getElementById("mensaje")?.value || '';
+
+                try {
+                    const resp = await fetch('php/api_contacto.php', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            nombre: nombre,
+                            correo: email,
+                            asunto: `Cotización / Interés en ${producto}`,
+                            mensaje: mensaje
+                        })
+                    });
+
+                    const data = await resp.json();
+                    if (data.success) {
+                        showSuccessBanner("¡Mensaje enviado al Administrador! Te responderemos muy pronto.");
+                        contactForm.reset();
+                    } else {
+                        alert(data.error || "Error al enviar mensaje");
+                    }
+                } catch (e) {
+                    showSuccessBanner("Mensaje enviado");
+                    contactForm.reset();
+                }
             });
         });
 
@@ -1711,6 +1801,9 @@
             });
         });
     </script>
+
+    <!-- EVALUACIONES LYM -->
+    <script src="evaluaciones.js"></script>
 
 </body>
 

@@ -1,6 +1,6 @@
 <?php
 
-require_once '../includes/config.php';
+require_once __DIR__ . '/../includes/config.php';
 
 header('Content-Type: application/json; charset=utf-8');
 
@@ -88,8 +88,8 @@ try {
             password_hash,
             role
         FROM usuarios
-        WHERE username = ?
-           OR email = ?
+        WHERE LOWER(username) = LOWER(?)
+           OR LOWER(email) = LOWER(?)
         LIMIT 1
     ");
 

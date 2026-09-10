@@ -71,6 +71,10 @@
                         </a>
                     </div>
 
+                    <div data-eval-producto="Tapete Afelpado"></div>
+
+                    <div id="resenasProductoDetalle" style="margin-top: 20px;"></div>
+
                     <p id="mensajeAgregado" class="success-mini" style="display:none;">
                         ✔ Producto agregado al carrito
                     </p>
@@ -125,6 +129,15 @@
         }
     </script>
 
+    <!-- EVALUACIONES LYM -->
+    <script src="evaluaciones.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            if (typeof renderEvaluacionesProductoDetalle === 'function') {
+                renderEvaluacionesProductoDetalle('Tapete Afelpado', 'resenasProductoDetalle');
+            }
+        });
+    </script>
 
 </body>
 

@@ -74,6 +74,10 @@
                         </a>
                     </div>
 
+                    <div data-eval-producto="Tazas Personalizadas"></div>
+
+                    <div id="resenasProductoDetalle" style="margin-top: 20px;"></div>
+
                     <p id="mensajeAgregado" class="success-mini" style="display:none;">
                         ✔ Producto agregado al carrito
                     </p>
@@ -142,6 +146,16 @@
 
             cantidadInput.value = 1;
         }
+    </script>
+
+    <!-- EVALUACIONES LYM -->
+    <script src="evaluaciones.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            if (typeof renderEvaluacionesProductoDetalle === 'function') {
+                renderEvaluacionesProductoDetalle('Tazas Personalizadas', 'resenasProductoDetalle');
+            }
+        });
     </script>
 
 </body>

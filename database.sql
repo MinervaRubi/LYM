@@ -1,5 +1,5 @@
-﻿CREATE DATABASE IF NOT EXISTS `nikenza_store` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-USE `nikenza_store`;
+CREATE DATABASE IF NOT EXISTS `lym` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+USE `lym`;
 
 CREATE TABLE IF NOT EXISTS `usuarios` (
     `id` BIGINT NOT NULL AUTO_INCREMENT,

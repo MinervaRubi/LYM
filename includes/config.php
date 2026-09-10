@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 
 // =====================================================
 // CONFIGURACIÓN DE LA BASE DE DATOS
@@ -14,16 +14,17 @@ define('DB_NAME', 'lym');
 // CONFIGURACIÓN DE SESIONES
 // =====================================================
 
-ini_set('session.cookie_httponly', 1);
-ini_set('session.use_only_cookies', 1);
-ini_set('session.cookie_secure', 0);
-
+if (!headers_sent()) {
+    ini_set('session.cookie_httponly', 1);
+    ini_set('session.use_only_cookies', 1);
+    ini_set('session.cookie_secure', 0);
+}
 
 // =====================================================
 // INICIAR SESIÓN
 // =====================================================
 
-if (session_status() === PHP_SESSION_NONE) {
+if (session_status() === PHP_SESSION_NONE && !headers_sent()) {
     session_start();
 }
 
@@ -84,7 +85,57 @@ function isAdmin()
 {
     return isLoggedIn()
         && isset($_SESSION['user_role'])
-        && $_SESSION['user_role'] === 'admin';
+        && strtolower($_SESSION['user_role']) === 'admin';
+}
+
+
+// =====================================================
+// VERIFICAR TRABAJADOR
+// =====================================================
+
+function isWorker()
+{
+    return isLoggedIn()
+        && isset($_SESSION['user_role'])
+        && strtolower($_SESSION['user_role']) === 'trabajador';
+}
+
+
+// =====================================================
+// VERIFICAR PERSONAL (ADMIN O TRABAJADOR)
+// =====================================================
+
+function isStaff()
+{
+    return isAdmin() || isWorker();
+}
+
+
+// =====================================================
+// HELPER PARA CREAR NOTIFICACIÓN A CLIENTE
+// =====================================================
+
+function crearNotificacionCliente($clienteId, $titulo, $mensaje, $tipo = 'actividad_agendada')
+{
+    try {
+        $pdo = getDBConnection();
+        // Obtener usuario_id asociado a este cliente_id
+        $stmt = $pdo->prepare("SELECT usuario_id FROM clientes WHERE id = ? LIMIT 1");
+        $stmt->execute([$clienteId]);
+        $usuarioId = $stmt->fetchColumn();
+
+        if ($usuarioId) {
+            $stmtIns = $pdo->prepare("
+                INSERT INTO notificaciones (usuario_id, cliente_id, titulo, mensaje, tipo, leido, fecha)
+                VALUES (?, ?, ?, ?, ?, 0, NOW())
+            ");
+            $stmtIns->execute([$usuarioId, $clienteId, $titulo, $mensaje, $tipo]);
+            return true;
+        }
+    } catch (Exception $e) {
+        error_log("Error al crear notificación: " . $e->getMessage());
+    }
+    return false;
 }
 
 

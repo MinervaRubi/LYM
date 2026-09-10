@@ -120,99 +120,71 @@
     <main class="page">
         <div class="container">
 
+            <!-- PANEL DE NOTIFICACIONES Y ACTIVIDADES AGENDADAS -->
+            <div class="panel" id="notificaciones" style="margin-bottom: 24px; border-left: 4px solid var(--primary, #4f46e5);">
+                <div class="panel-header" style="align-items: center;">
+                    <div>
+                        <h1 style="font-size: 1.4rem;"><i class="fas fa-bell" style="color:#4f46e5;"></i> Mis Notificaciones y Actividades Agendadas</h1>
+                        <p style="margin: 4px 0 0 0;">Consulta las llamadas, reuniones o avisos agendados para ti por nuestro equipo.</p>
+                    </div>
+                    <span id="notifBadgePerfil" style="background:#ef4444; color:#fff; font-weight:700; font-size:0.85rem; padding:4px 12px; border-radius:20px; display:none;">0 sin leer</span>
+                </div>
+
+                <div id="listaNotificacionesContainer" style="margin-top: 14px;">
+                    <div style="text-align: center; color: #94a3b8; padding: 20px;">
+                        <i class="fas fa-spinner fa-spin fa-2x"></i>
+                        <div style="margin-top: 8px;">Cargando notificaciones...</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PANEL DE INFORMACIÓN DE CUENTA -->
             <div class="panel">
                 <div class="panel-header">
                     <div>
-                        <h1><i class="fas fa-id-card"></i> Mi información</h1>
-                        <p>Formulario simulado (campos vacíos). Más adelante lo conectamos a tu sistema de usuarios.</p>
+                        <h1><i class="fas fa-id-card"></i> Mi Cuenta e Información</h1>
+                        <p>Gestiona los datos de tu perfil y actualiza tu contraseña de acceso.</p>
                     </div>
                 </div>
 
-                <form onsubmit="event.preventDefault();">
-                    <!-- Datos personales -->
-                    <h3 style="margin:0; color:var(--text-dark);">Datos personales</h3>
+                <div class="grid">
+                    <div class="form-group">
+                        <label>Nombre de Usuario</label>
+                        <input type="text" id="perfilUsername" readonly style="background:#f8fafc; font-weight:600;" value="Cargando...">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Correo Electrónico</label>
+                        <input type="email" id="perfilEmail" readonly style="background:#f8fafc; font-weight:600;" value="Cargando...">
+                    </div>
+                </div>
+
+                <hr style="margin: 24px 0; border: 0; border-top: 1px solid #e2e8f0;">
+
+                <!-- CAMBIAR CONTRASEÑA -->
+                <h3 style="margin:0 0 12px 0; color:var(--text-dark); font-size:1.1rem;"><i class="fas fa-key"></i> Cambiar Contraseña</h3>
+                <form id="formCambiarPass" onsubmit="guardarNuevaPassword(event)">
                     <div class="grid">
                         <div class="form-group">
-                            <label>Nombre(s)</label>
-                            <input type="text" placeholder="Ej. Juan" value="">
+                            <label>Contraseña Actual</label>
+                            <input type="password" id="passActual" required placeholder="••••••••">
                         </div>
 
                         <div class="form-group">
-                            <label>Apellidos</label>
-                            <input type="text" placeholder="Ej. Pérez López" value="">
-                        </div>
-
-                        <div class="form-group">
-                            <label>Teléfono</label>
-                            <input type="tel" placeholder="Ej. 4490000000" value="">
-                        </div>
-
-                        <div class="form-group">
-                            <label>Correo</label>
-                            <input type="email" placeholder="Ej. correo@ejemplo.com" value="">
+                            <label>Nueva Contraseña (mínimo 6 caracteres)</label>
+                            <input type="password" id="passNueva" required minlength="6" placeholder="••••••••">
                         </div>
                     </div>
 
-                    <!-- Dirección -->
-                    <h3 style="margin:10px 0 0; color:var(--text-dark);">Dirección</h3>
-                    <div class="grid">
-                        <div class="form-group">
-                            <label>Calle y número</label>
-                            <input type="text" placeholder="Ej. Av. Creativa #245" value="">
-                        </div>
-
-                        <div class="form-group">
-                            <label>Colonia</label>
-                            <input type="text" placeholder="Ej. Centro" value="">
-                        </div>
-
-                        <div class="form-group">
-                            <label>Ciudad</label>
-                            <input type="text" placeholder="Ej. Aguascalientes" value="">
-                        </div>
-
-                        <div class="form-group">
-                            <label>Código Postal</label>
-                            <input type="text" placeholder="Ej. 20000" value="">
-                        </div>
-
-                        <div class="form-group">
-                            <label>Estado</label>
-                            <input type="text" placeholder="Ej. Aguascalientes" value="">
-                        </div>
-
-                        <div class="form-group">
-                            <label>Referencias (opcional)</label>
-                            <input type="text" placeholder="Ej. Casa color blanco, cerca de..." value="">
-                        </div>
-                    </div>
-
-                    <!-- Cuenta -->
-                    <h3 style="margin:10px 0 0; color:var(--text-dark);">Cuenta</h3>
-                    <div class="grid grid-1">
-                        <div class="form-group">
-                            <label>Nombre de usuario</label>
-                            <input type="text" placeholder="Ej. edd123" value="">
-                        </div>
-
-                        <div class="form-group">
-                            <label>Contraseña</label>
-                            <input type="password" placeholder="••••••••" value="">
-                        </div>
-                    </div>
+                    <div id="msgPassStatus" style="margin-top:12px; display:none; padding:10px 14px; border-radius:8px; font-size:0.9rem; font-weight:600;"></div>
 
                     <div class="actions">
-                        <button type="button" class="btn btn-outline" onclick="window.location.href='index.html'">
-                            Cancelar
+                        <button type="button" class="btn btn-outline" onclick="window.location.href='sistema.html'">
+                            Volver al Inicio
                         </button>
-
-                        <button type="submit" class="btn btn-primary" onclick="mostrarAviso()">
-                            Guardar cambios
+                        <button type="submit" class="btn btn-primary" id="btnSubmitPass">
+                            <i class="fas fa-save"></i> Actualizar Contraseña
                         </button>
-                    </div>
-
-                    <div id="aviso" class="hint" style="display:none;">
-                        ✔ Guardado simulado. (Aún no está conectado a base de datos)
                     </div>
                 </form>
             </div>
@@ -221,10 +193,141 @@
     </main>
 
     <script>
-        function mostrarAviso() {
-            const aviso = document.getElementById("aviso");
-            aviso.style.display = "block";
-            setTimeout(() => aviso.style.display = "none", 2000);
+        document.addEventListener("DOMContentLoaded", () => {
+            cargarPerfilYSesion();
+            cargarNotificaciones();
+        });
+
+        async function cargarPerfilYSesion() {
+            try {
+                const resp = await fetch('php/check_session.php');
+                const data = await resp.json();
+                if (data.authenticated && data.user) {
+                    document.getElementById('perfilUsername').value = data.user.username || '';
+                    document.getElementById('perfilEmail').value = data.user.email || '';
+                } else {
+                    document.getElementById('perfilUsername').value = 'Invitado';
+                    document.getElementById('perfilEmail').value = 'No has iniciado sesión';
+                }
+            } catch (e) {
+                console.error("Error al cargar sesión:", e);
+            }
+        }
+
+        async function cargarNotificaciones() {
+            const container = document.getElementById('listaNotificacionesContainer');
+            const badge = document.getElementById('notifBadgePerfil');
+            
+            try {
+                const resp = await fetch('php/api_notificaciones.php');
+                if (!resp.ok) {
+                    container.innerHTML = '<div style="color:#64748b; padding:14px; text-align:center;">Inicia sesión para ver tus notificaciones y actividades agendadas.</div>';
+                    return;
+                }
+
+                const data = await resp.json();
+                if (!data.success || !Array.isArray(data.notificaciones) || data.notificaciones.length === 0) {
+                    container.innerHTML = '<div style="color:#64748b; padding:16px; text-align:center; background:#f8fafc; border-radius:8px;">🔔 No tienes notificaciones ni actividades pendientes por el momento.</div>';
+                    badge.style.display = 'none';
+                    return;
+                }
+
+                if (data.no_leidas > 0) {
+                    badge.textContent = `${data.no_leidas} sin leer`;
+                    badge.style.display = 'inline-block';
+                } else {
+                    badge.style.display = 'none';
+                }
+
+                let html = '<div style="display:flex; flex-direction:column; gap:10px;">';
+                data.notificaciones.forEach(n => {
+                    const bg = n.leido == 0 ? '#f0f9ff' : '#f8fafc';
+                    const border = n.leido == 0 ? '#0284c7' : '#cbd5e1';
+                    const fechaFmt = new Date(n.fecha).toLocaleString('es-MX', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+
+                    html += `
+                        <div style="background:${bg}; border-left:4px solid ${border}; padding:12px 16px; border-radius:8px; display:flex; justify-content:space-between; align-items:flex-start; gap:12px;">
+                            <div>
+                                <strong style="color:#0f172a; font-size:0.95rem;">${escapeHtml(n.titulo)}</strong>
+                                <p style="margin:4px 0 0 0; color:#334155; font-size:0.88rem; line-height:1.4;">${escapeHtml(n.mensaje)}</p>
+                                <span style="font-size:0.75rem; color:#64748b; margin-top:6px; display:inline-block;"><i class="far fa-clock"></i> ${fechaFmt}</span>
+                            </div>
+                            ${n.leido == 0 ? `
+                                <button onclick="marcarNotifLeida(${n.id})" class="btn btn-outline" style="padding:4px 10px; font-size:0.75rem; white-space:nowrap;">
+                                    ✓ Leída
+                                </button>
+                            ` : '<span style="font-size:0.75rem; color:#94a3b8;"><i class="fas fa-check-double"></i> Leída</span>'}
+                        </div>
+                    `;
+                });
+                html += '</div>';
+                container.innerHTML = html;
+
+            } catch (e) {
+                container.innerHTML = '<div style="color:#ef4444; padding:14px; text-align:center;">Error al obtener notificaciones.</div>';
+            }
+        }
+
+        async function marcarNotifLeida(id) {
+            try {
+                await fetch('php/api_notificaciones.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ id: id })
+                });
+                cargarNotificaciones();
+            } catch (e) {
+                console.error(e);
+            }
+        }
+
+        async function guardarNuevaPassword(e) {
+            e.preventDefault();
+            const passActual = document.getElementById('passActual').value;
+            const passNueva = document.getElementById('passNueva').value;
+            const btn = document.getElementById('btnSubmitPass');
+            const msg = document.getElementById('msgPassStatus');
+
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...';
+            msg.style.display = 'none';
+
+            try {
+                const resp = await fetch('php/api_cambiar_password.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        password_actual: passActual,
+                        password_nueva: passNueva
+                    })
+                });
+
+                const data = await resp.json();
+
+                msg.style.display = 'block';
+                if (data.success) {
+                    msg.style.background = '#dcfce7';
+                    msg.style.color = '#15803d';
+                    msg.textContent = '✔ ' + data.message;
+                    document.getElementById('formCambiarPass').reset();
+                } else {
+                    msg.style.background = '#fee2e2';
+                    msg.style.color = '#b91c1c';
+                    msg.textContent = '✖ ' + (data.error || 'Error al cambiar contraseña');
+                }
+            } catch (err) {
+                msg.style.display = 'block';
+                msg.style.background = '#fee2e2';
+                msg.style.color = '#b91c1c';
+                msg.textContent = '✖ Error de servidor al intentar cambiar contraseña.';
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-save"></i> Actualizar Contraseña';
+            }
+        }
+
+        function escapeHtml(str) {
+            return String(str || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
         }
     </script>
 

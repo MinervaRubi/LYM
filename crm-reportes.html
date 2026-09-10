@@ -1,0 +1,181 @@
+<!-- ==============================================================
+     PANTALLA 9: REPORTES Y MÉTRICAS (LYM CRM)
+     ARCHIVO: crm-reportes.html
+============================================================== -->
+
+<div style="display: flex; flex-direction: column; gap: 1.75rem;">
+    <!-- HEADER -->
+    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+        <div>
+            <h2 style="font-size: 1.6rem; font-weight: 800; color: var(--text-heading); margin: 0;">Reportes y Métricas</h2>
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 2px;">Análisis detallado de rendimiento e interacciones comerciales</p>
+        </div>
+        <button class="crm-btn crm-btn-secondary crm-btn-sm" onclick="cargarReportesMétricas()">
+            <i class="fas fa-sync-alt"></i> <span>Actualizar Datos</span>
+        </button>
+    </div>
+
+    <!-- TARJETAS SUPERIORES -->
+    <div class="crm-grid-4">
+        <div class="crm-card crm-metric-card">
+            <div>
+                <div class="crm-metric-label">Total de Clientes</div>
+                <div class="crm-metric-value" id="repTotalClientes">-</div>
+                <div class="crm-metric-subtext">Base de datos MySQL</div>
+            </div>
+            <div class="crm-icon-box crm-icon-purple">
+                <i class="fas fa-users"></i>
+            </div>
+        </div>
+
+        <div class="crm-card crm-metric-card">
+            <div>
+                <div class="crm-metric-label">Clientes Activos</div>
+                <div class="crm-metric-value" id="repClientesActivos" style="color: var(--success);">-</div>
+                <div class="crm-metric-subtext positive" id="repPctActivos">-</div>
+            </div>
+            <div class="crm-icon-box crm-icon-emerald">
+                <i class="fas fa-user-check"></i>
+            </div>
+        </div>
+
+        <div class="crm-card crm-metric-card">
+            <div>
+                <div class="crm-metric-label">Interacciones (este mes)</div>
+                <div class="crm-metric-value" id="repInteraccionesMes" style="color: var(--primary);">-</div>
+                <div class="crm-metric-subtext positive"><i class="fas fa-chart-line"></i> Actividad constante</div>
+            </div>
+            <div class="crm-icon-box crm-icon-pink">
+                <i class="fas fa-comments"></i>
+            </div>
+        </div>
+
+        <div class="crm-card crm-metric-card">
+            <div>
+                <div class="crm-metric-label">Sin Interacción</div>
+                <div class="crm-metric-value" id="repClientesSinInteraccion" style="color: var(--warning);">-</div>
+                <div class="crm-metric-subtext warning">Últimos 30 días</div>
+            </div>
+            <div class="crm-icon-box crm-icon-amber">
+                <i class="fas fa-exclamation-circle"></i>
+            </div>
+        </div>
+    </div>
+
+    <!-- GRÁFICAS DEL SISTEMA -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 1.5rem;">
+        <!-- BARRAS: INTERACCIONES POR TIPO -->
+        <div class="crm-card">
+            <h3 style="font-size: 1.1rem; font-weight: 700; color: var(--text-heading); margin-bottom: 1rem;">Interacciones por Tipo</h3>
+            <div style="position: relative; height: 260px; width: 100%; display: flex; align-items: center; justify-content: center;">
+                <canvas id="chartInteraccionesTipo"></canvas>
+            </div>
+        </div>
+
+        <!-- PIE / DONA: CLIENTES POR ETAPA CRM -->
+        <div class="crm-card">
+            <h3 style="font-size: 1.1rem; font-weight: 700; color: var(--text-heading); margin-bottom: 1rem;">Clientes por Etapa CRM</h3>
+            <div style="position: relative; height: 260px; width: 100%; display: flex; align-items: center; justify-content: center;">
+                <canvas id="chartClientesEtapa"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+(function initReportesCRMView() {
+    let barChartInstance = null;
+    let pieChartInstance = null;
+
+    window.cargarReportesMétricas = async function() {
+        try {
+            const resp = await fetch('php/crm_api.php?resource=reportes');
+            const data = await resp.json();
+
+            if (data.success) {
+                const m = data.metrics || {};
+                document.getElementById('repTotalClientes').textContent = m.totalClientes || 0;
+                document.getElementById('repClientesActivos').textContent = m.clientesActivos || 0;
+                
+                const pct = m.totalClientes > 0 ? Math.round((m.clientesActivos / m.totalClientes) * 100) : 0;
+                document.getElementById('repPctActivos').textContent = `${pct}% del total`;
+                
+                document.getElementById('repInteraccionesMes').textContent = m.interaccionesMes || 0;
+                document.getElementById('repClientesSinInteraccion').textContent = m.sinInteraccionCount || 0;
+
+                renderBarChart(data.interaccionesPorTipo || []);
+                renderPieChart(data.clientesPorEtapa || []);
+            }
+        } catch (e) {
+            console.error("Error al cargar reportes CRM:", e);
+        }
+    };
+
+    function renderBarChart(datos) {
+        const ctx = document.getElementById('chartInteraccionesTipo');
+        if (!ctx) return;
+
+        if (barChartInstance) barChartInstance.destroy();
+
+        const labels = datos.map(d => capitalize(d.tipo));
+        const values = datos.map(d => parseInt(d.cantidad));
+
+        barChartInstance = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: labels.length > 0 ? labels : ['Llamada', 'Correo', 'Reunión', 'WhatsApp', 'Nota'],
+                datasets: [{
+                    label: 'Cantidad de Interacciones',
+                    data: values.length > 0 ? values : [0, 0, 0, 0, 0],
+                    backgroundColor: ['#10b981', '#3b82f6', '#8b5cf6', '#059669', '#f59e0b'],
+                    borderRadius: 8
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    y: { beginAtZero: true, ticks: { stepSize: 1 } }
+                }
+            }
+        });
+    }
+
+    function renderPieChart(datos) {
+        const ctx = document.getElementById('chartClientesEtapa');
+        if (!ctx) return;
+
+        if (pieChartInstance) pieChartInstance.destroy();
+
+        const labels = datos.map(d => `${d.etapa_crm} (${d.cantidad})`);
+        const values = datos.map(d => parseInt(d.cantidad));
+
+        pieChartInstance = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: labels.length > 0 ? labels : ['Prospecto', 'Activo', 'Frecuente', 'Inactivo'],
+                datasets: [{
+                    data: values.length > 0 ? values : [0, 0, 0, 0],
+                    backgroundColor: ['#6366f1', '#10b981', '#6B46C1', '#f59e0b'],
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'right', labels: { font: { family: 'Plus Jakarta Sans', size: 12 }, usePointStyle: true } }
+                },
+                cutout: '65%'
+            }
+        });
+    }
+
+    function capitalize(s) {
+        return String(s || '').charAt(0).toUpperCase() + String(s || '').slice(1);
+    }
+
+    cargarReportesMétricas();
+})();
+</script>
