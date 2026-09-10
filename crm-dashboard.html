@@ -113,25 +113,10 @@
         }
     };
 
-<<<<<<< HEAD
+    
     function renderChartActivosInactivos(activos, inactivos) {
         const ctx = document.getElementById('chartActivosInactivos');
         if (!ctx) return;
-=======
-            tbody.innerHTML = lista.map(c => `
-                <tr>
-                    <td style="font-weight: 600; color: #0f172a;">${c.nombre}</td>
-                    <td>${c.email}</td>
-                    <td>${c.pedidos}</td>
-                    <td style="font-weight: 500;">${c.total}</td>
-                    <td>
-                        <span class="status-badge ${c.estado.toLowerCase()}">${c.estado}</span>
-                    </td>
-                </tr>
-            `).join("");
-        }
-        ;
->>>>>>> d2a2b45113bea8a8eb1f0e2391d36b292bc1032c
 
         if (donutChartInstance) {
             donutChartInstance.destroy();

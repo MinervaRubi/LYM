@@ -37,7 +37,7 @@
 
                 <div class="auth-buttons">
                     <!-- BOTONES INVITADO -->
-                    <div id="guestButtons">
+                    <div id="guestButtons" style="display: flex; gap: 8px; align-items: center;">
                         <button type="button" class="btn btn-outline" onclick="showLoginModal()">Iniciar Sesión</button>
                         <button type="button" class="btn btn-primary" onclick="showRegisterModal()">Registrarse</button>
                     </div>
@@ -63,14 +63,9 @@
                                 <i class="fas fa-id-card"></i> Mis publicaciones
                             </a>
 
-<<<<<<< HEAD
-                            <a href="admin.php" class="dropdown-item" id="gestorLinkItem" style="display:none;">
+                            <!-- Gestor CRM: visible para administradores -->
+                            <a href="gestor.html" class="dropdown-item" id="gestorLinkItem" style="display:none;">
                                 <i class="fas fa-chart-line"></i> Gestor CRM
-=======
-                            <!-- Gestor: SOLO visible para administradores -->
-                            <a href="gestor.html" id="adminGestorLink" class="dropdown-item" style="display:none;">
-                                <i class="fas fa-id-card"></i> Gestor
->>>>>>> d2a2b45113bea8a8eb1f0e2391d36b292bc1032c
                             </a>
 
                             <div class="dropdown-divider"></div>
@@ -916,11 +911,7 @@
             const guestButtons = document.getElementById('guestButtons');
             const userMenu = document.getElementById('userMenu');
             const userGreeting = document.getElementById('userGreeting');
-<<<<<<< HEAD
-            const gestorLink = document.getElementById('gestorLinkItem');
-=======
-            const adminGestorLink = document.getElementById('adminGestorLink');
->>>>>>> d2a2b45113bea8a8eb1f0e2391d36b292bc1032c
+            const gestorLink = document.getElementById('gestorLinkItem') || document.getElementById('adminGestorLink');
 
             if (guestButtons) {
                 guestButtons.style.display = 'none';
@@ -935,9 +926,8 @@
                     currentUser?.username || "Usuario";
             }
 
-<<<<<<< HEAD
             if (gestorLink) {
-                if (currentUser && (currentUser.role === 'admin' || currentUser.username?.toLowerCase() === 'juanlalo')) {
+                if (currentUser && (currentUser.role === 'admin' || currentUser.role === 'trabajador' || currentUser.username?.toLowerCase() === 'juanlalo')) {
                     gestorLink.style.display = 'flex';
                 } else {
                     gestorLink.style.display = 'none';
@@ -950,12 +940,6 @@
                 const inputEmail = document.getElementById('email');
                 if (inputNombre && !inputNombre.value) inputNombre.value = currentUser.username || '';
                 if (inputEmail && !inputEmail.value) inputEmail.value = currentUser.email || '';
-=======
-            // El enlace Gestor SOLO se muestra a usuarios con role = admin.
-            if (adminGestorLink) {
-                adminGestorLink.style.display =
-                    currentUser?.role === "admin" ? "flex" : "none";
->>>>>>> d2a2b45113bea8a8eb1f0e2391d36b292bc1032c
             }
         }
 
@@ -1418,164 +1402,6 @@
         }
 
 
-<<<<<<< HEAD
-        // =====================================================
-        // LOGIN DE ADMINISTRADOR REAL
-        // =====================================================
-
-        async function adminLogin(event) {
-
-            event.preventDefault();
-
-
-            const username =
-                document
-                    .getElementById('adminUsername')
-                    .value
-                    .trim();
-
-            const password =
-                document
-                    .getElementById('adminPassword')
-                    .value;
-
-
-            if (!username || !password) {
-
-                showSuccessBanner(
-                    "Completa usuario y contraseña"
-                );
-
-                return;
-            }
-
-
-            try {
-
-                const response = await fetch(
-                    "php/login.php",
-                    {
-                        method: "POST",
-
-                        headers: {
-                            "Content-Type": "application/json",
-                            "Accept": "application/json"
-                        },
-
-                        credentials: "same-origin",
-
-                        body: JSON.stringify({
-
-                            username: username,
-                            password: password
-
-                        })
-                    }
-                );
-
-
-                const text = await response.text();
-
-                let data;
-
-
-                try {
-
-                    data = JSON.parse(text);
-
-                } catch (error) {
-
-                    console.error(
-                        "Respuesta inválida de login.php:",
-                        text
-                    );
-
-                    showSuccessBanner(
-                        "El servidor devolvió una respuesta inválida"
-                    );
-
-                    return;
-                }
-
-
-                if (
-                    !response.ok ||
-                    !data.success
-                ) {
-
-                    showSuccessBanner(
-                        data.error ||
-                        "Usuario o contraseña incorrectos"
-                    );
-
-                    return;
-                }
-
-
-                // Verificar que realmente sea administrador
-
-                if (
-                    data.user.role !== "admin"
-                ) {
-
-                    showSuccessBanner(
-                        "Este usuario no tiene permisos de administrador"
-                    );
-
-                    return;
-                }
-
-
-                currentUser = data.user;
-
-
-                updateUIForLoggedInUser();
-
-
-                closeModal(
-                    'adminModal'
-                );
-
-
-                showSuccessBanner(
-                    "Bienvenido al Panel de Administración"
-                );
-
-
-                setTimeout(() => {
-
-                    window.location.href =
-                        "admin.php";
-
-                }, 700);
-
-
-            } catch (error) {
-
-                console.error(
-                    "Error en acceso de administrador:",
-                    error
-                );
-
-                if ((username.toLowerCase() === 'juanlalo' || username.toLowerCase() === 'admin') && password === '123456') {
-                    currentUser = { id: 2, username: username, email: 'juanlalo@gmail.com', role: 'admin' };
-                    updateUIForLoggedInUser();
-                    closeModal('adminModal');
-                    showSuccessBanner("Bienvenido al Panel de Administración");
-                    setTimeout(() => {
-                        window.location.href = "admin.php";
-                    }, 600);
-                    return;
-                }
-
-                showSuccessBanner(
-                    "No se pudo conectar con el servidor PHP. Revisa que Apache/MySQL estén iniciados en XAMPP."
-                );
-            }
-        }
-
-=======
->>>>>>> d2a2b45113bea8a8eb1f0e2391d36b292bc1032c
         // ========= Dropdown usuario =========
         function toggleUserMenu(e) {
             e.stopPropagation();

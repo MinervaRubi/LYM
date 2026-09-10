@@ -85,13 +85,6 @@
                     <i class="fas fa-chevron-right" style="font-size:0.7rem;"></i>
                     <span class="current" id="topbarCurrentView">Dashboard</span>
                 </div>
-<<<<<<< HEAD
-=======
-                <a href="sistema.html" class="gestor-nav-link">
-                    <i class="fas fa-home"></i> Regresar al inicio
-                </a>
-            </aside>
->>>>>>> d2a2b45113bea8a8eb1f0e2391d36b292bc1032c
 
                 <div class="crm-user-profile">
                     <button class="crm-btn crm-btn-primary crm-btn-sm" onclick="abrirModalGlobalInteraccion()">
@@ -104,14 +97,8 @@
                             <span style="font-weight:700; font-size:0.85rem; color:#0f172a;" id="gestorName">Juan Lalo</span>
                             <span style="font-size:0.72rem; color:#64748b;" id="gestorRole">Administrador</span>
                         </div>
-<<<<<<< HEAD
                         <button class="crm-btn crm-btn-secondary crm-btn-sm" onclick="abrirModalCambiarPassCRM()" title="Cambiar Contraseña" style="margin-left:6px; padding:5px 9px;">
                             <i class="fas fa-key"></i>
-=======
-                        <button class="gestor-btn gestor-btn-primary"
-                            onclick="showNotification('Información actualizada')">
-                            <i class="fas fa-sync"></i> Actualizar
->>>>>>> d2a2b45113bea8a8eb1f0e2391d36b292bc1032c
                         </button>
                     </div>
                 </div>
@@ -156,7 +143,6 @@
                     </select>
                 </div>
 
-<<<<<<< HEAD
                 <div class="crm-form-group">
                     <label class="crm-form-label">Resumen / Detalles:</label>
                     <textarea class="crm-form-textarea" id="mGlobalInteraccionDesc" rows="4" placeholder="Describe los acuerdos, comentarios o seguimiento..." required></textarea>
@@ -169,214 +155,6 @@
                     </button>
                 </div>
             </form>
-=======
-                    <div class="gestor-panel">
-                        <div class="panel-header">
-                            <h3>Acciones rápidas</h3>
-                        </div>
-                        <div class="quick-actions">
-                            <button class="quick-action" onclick="showViewByName('productos')">
-                                <i class="fas fa-plus-circle"></i> <span>Agregar producto</span>
-                            </button>
-                            <button class="quick-action" onclick="showViewByName('pedidos')">
-                                <i class="fas fa-shopping-cart"></i> <span>Ver pedidos</span>
-                            </button>
-                            <button class="quick-action" onclick="showViewByName('promociones')">
-                                <i class="fas fa-tag"></i> <span>Nueva promoción</span>
-                            </button>
-                            <button class="quick-action"
-                                onclick="clickBotonCRM(event, document.querySelector('.crm-toggle-btn'))">
-                                <i class="fas fa-user-plus"></i> <span>Ver clientes CRM</span>
-                            </button>
-                        </div>
-                    </div>
-
-                    <div class="gestor-panel">
-                        <div class="panel-header">
-                            <h3>Pedidos recientes</h3>
-                            <button class="gestor-btn gestor-btn-light" onclick="showViewByName('pedidos')">Ver
-                                todos</button>
-                        </div>
-                        <div class="gestor-table-wrapper">
-                            <table class="gestor-table">
-                                <thead>
-                                    <tr>
-                                        <th>Pedido</th>
-                                        <th>Cliente</th>
-                                        <th>Producto</th>
-                                        <th>Total</th>
-                                        <th>Estado</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <td>#LYM-00125</td>
-                                        <td>María López</td>
-                                        <td>Taza personalizada</td>
-                                        <td>$120</td>
-                                        <td><span class="status status-success">Entregado</span></td>
-                                    </tr>
-                                    <tr>
-                                        <td>#LYM-00124</td>
-                                        <td>Carlos Ramírez</td>
-                                        <td>Sudadera</td>
-                                        <td>$425</td>
-                                        <td><span class="status status-warning">Pendiente</span></td>
-                                    </tr>
-                                    <tr>
-                                        <td>#LYM-00123</td>
-                                        <td>Fernanda Torres</td>
-                                        <td>Paquete estudiante</td>
-                                        <td>$520</td>
-                                        <td><span class="status status-info">En preparación</span></td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </section>
-
-                <!-- PRODUCTOS -->
-                <section id="productos" class="gestor-view">
-                    <div class="view-header">
-                        <div class="view-title">
-                            <h2>Productos</h2>
-                            <p>Administra el catálogo de LYM</p>
-                        </div>
-                        <button class="gestor-btn gestor-btn-primary"
-                            onclick="showNotification('Formulario de producto')">
-                            <i class="fas fa-plus"></i> Nuevo producto
-                        </button>
-                    </div>
-
-                    <div class="gestor-search">
-                        <input type="text" placeholder="Buscar producto..." onkeyup="searchProducts(this.value)">
-                    </div>
-
-                    <div class="gestor-products" id="productsContainer">
-                        <div class="gestor-product" data-name="Tazas Personalizadas">
-                            <div class="gestor-product-image"><i class="fas fa-mug-hot"></i></div>
-                            <div class="gestor-product-body">
-                                <h3>Tazas Personalizadas</h3>
-                                <p>Personalizadas con diseño del cliente.</p>
-                                <span class="product-price">Desde $85</span>
-                                <div class="product-actions">
-                                    <button class="gestor-btn gestor-btn-warning"><i class="fas fa-edit"></i>
-                                        Editar</button>
-                                    <button class="gestor-btn gestor-btn-danger" onclick="deleteProduct(this)"><i
-                                            class="fas fa-trash"></i> Eliminar</button>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="gestor-product" data-name="Tapete Afelpado">
-                            <div class="gestor-product-image"><i class="fas fa-home"></i></div>
-                            <div class="gestor-product-body">
-                                <h3>Tapete Afelpado</h3>
-                                <p>Tapetes personalizados.</p>
-                                <span class="product-price">$300</span>
-                                <div class="product-actions">
-                                    <button class="gestor-btn gestor-btn-warning"><i class="fas fa-edit"></i>
-                                        Editar</button>
-                                    <button class="gestor-btn gestor-btn-danger" onclick="deleteProduct(this)"><i
-                                            class="fas fa-trash"></i> Eliminar</button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </section>
-
-                <!-- PEDIDOS -->
-                <section id="pedidos" class="gestor-view">
-                    <div class="view-header">
-                        <div class="view-title">
-                            <h2>Pedidos</h2>
-                            <p>Consulta y administra los pedidos realizados</p>
-                        </div>
-                    </div>
-
-                    <div class="gestor-panel">
-                        <div class="gestor-table-wrapper">
-                            <table class="gestor-table">
-                                <thead>
-                                    <tr>
-                                        <th>ID</th>
-                                        <th>Cliente</th>
-                                        <th>Fecha</th>
-                                        <th>Producto</th>
-                                        <th>Total</th>
-                                        <th>Estado</th>
-                                        <th>Acciones</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <td>#125</td>
-                                        <td>María López</td>
-                                        <td>28/08/2026</td>
-                                        <td>Taza personalizada</td>
-                                        <td>$120</td>
-                                        <td><span class="status status-success">Entregado</span></td>
-                                        <td><button class="gestor-btn gestor-btn-light">Ver</button></td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </section>
-
-                <!-- VENTAS -->
-                <section id="ventas" class="gestor-view">
-                    <div class="view-header">
-                        <div class="view-title">
-                            <h2>Ventas</h2>
-                            <p>Resumen de ingresos y ventas</p>
-                        </div>
-                    </div>
-                </section>
-
-                <!-- PUBLICACIONES -->
-                <section id="publicaciones" class="gestor-view">
-                    <div class="view-header">
-                        <div class="view-title">
-                            <h2>Publicaciones</h2>
-                            <p>Administra las publicaciones de LYM</p>
-                        </div>
-                    </div>
-                </section>
-
-                <!-- PROMOCIONES -->
-                <section id="promociones" class="gestor-view">
-                    <div class="view-header">
-                        <div class="view-title">
-                            <h2>Promociones</h2>
-                            <p>Administra descuentos y campañas</p>
-                        </div>
-                    </div>
-                </section>
-
-                <!-- FACTURACIÓN -->
-                <section id="facturacion" class="gestor-view">
-                    <div class="view-header">
-                        <div class="view-title">
-                            <h2>Facturación</h2>
-                            <p>Solicitudes de facturación de clientes</p>
-                        </div>
-                    </div>
-                </section>
-
-                <!-- CONFIGURACIÓN -->
-                <section id="configuracion" class="gestor-view">
-                    <div class="view-header">
-                        <div class="view-title">
-                            <h2>Configuración</h2>
-                            <p>Configuración general del sistema</p>
-                        </div>
-                    </div>
-                </section>
-
-            </main>
->>>>>>> d2a2b45113bea8a8eb1f0e2391d36b292bc1032c
         </div>
     </div>
 
@@ -616,17 +394,7 @@
 
     <!-- JAVASCRIPT PRINCIPAL -->
     <script>
-<<<<<<< HEAD
         let currentLoadedView = 'crm-dashboard.html';
-=======
-        /* FUNCIÓN PRINCIPAL DEL BOTÓN CRM */
-        function clickBotonCRM(event, button) {
-            if (event) event.stopPropagation();
-
-            const dropdown = document.getElementById("crmDropdown");
-            // Alternar el desplegable
-            dropdown.classList.toggle("open");
->>>>>>> d2a2b45113bea8a8eb1f0e2391d36b292bc1032c
 
         /* NAVEGACIÓN ENTRE VISTAS */
         function loadExternalView(viewUrl, button) {

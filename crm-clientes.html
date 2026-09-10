@@ -1,12 +1,7 @@
-<<<<<<< HEAD
 <!-- ==============================================================
      PANTALLA 3: LISTADO DE CLIENTES (LYM CRM)
      ARCHIVO: crm-clientes.html
 ============================================================== -->
-=======
-<!-- ==========================================
-     CLIENTES (crm-clientes.html)
-========================================== -->
 <style>
     .crm-header-flex {
         display: flex;
@@ -16,7 +11,7 @@
         gap: 12px;
         margin-bottom: 1.5rem;
     }
->>>>>>> d2a2b45113bea8a8eb1f0e2391d36b292bc1032c
+</style>
 
 <div style="display: flex; flex-direction: column; gap: 1.5rem;">
     <!-- CABECERA -->
@@ -138,7 +133,6 @@
             tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; color:var(--danger); padding:1.5rem;">Error al conectar con MySQL: ${e.message}</td></tr>`;
         }
     };
-
     function getEtapaBadgeClass(etapa) {
         const e = String(etapa || '').toLowerCase();
         if (e === 'activo') return 'badge-activo';
@@ -146,7 +140,6 @@
         if (e === 'inactivo') return 'badge-inactivo';
         return 'badge-prospecto';
     }
-
     window.verDetalleCliente = function(id, nombre) {
         window.clienteSeleccionadoCRM = { id: id, nombre: nombre };
         sessionStorage.setItem("clienteSeleccionadoCRM", JSON.stringify(window.clienteSeleccionadoCRM));
