@@ -172,6 +172,31 @@ CREATE TABLE IF NOT EXISTS `evaluaciones_crm` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
+-- TABLA: solicitudes_descuento
+-- --------------------------------------------------------
+CREATE TABLE IF NOT EXISTS `solicitudes_descuento` (
+  `id` INT(11) NOT NULL AUTO_INCREMENT,
+  `cliente_id` INT(11) NOT NULL,
+  `trabajador_id` INT(11) NOT NULL,
+  `porcentaje` INT(11) NOT NULL,
+  `codigo_cupon` VARCHAR(50) DEFAULT NULL,
+  `motivo` TEXT NOT NULL,
+  `estado` ENUM('pendiente', 'aprobado', 'rechazado') NOT NULL DEFAULT 'pendiente',
+  `admin_id` INT(11) DEFAULT NULL,
+  `comentario_admin` TEXT DEFAULT NULL,
+  `fecha_solicitud` DATETIME DEFAULT CURRENT_TIMESTAMP(),
+  `fecha_resolucion` DATETIME DEFAULT NULL,
+  `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP(),
+  PRIMARY KEY (`id`),
+  KEY `fk_solicitud_cliente` (`cliente_id`),
+  KEY `fk_solicitud_trabajador` (`trabajador_id`),
+  KEY `fk_solicitud_admin` (`admin_id`),
+  CONSTRAINT `fk_solicitud_cliente` FOREIGN KEY (`cliente_id`) REFERENCES `clientes` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `fk_solicitud_trabajador` FOREIGN KEY (`trabajador_id`) REFERENCES `usuarios` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `fk_solicitud_admin` FOREIGN KEY (`admin_id`) REFERENCES `usuarios` (`id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
 -- DATOS INICIALES (DATOS DE SEMILLA)
 -- --------------------------------------------------------
 

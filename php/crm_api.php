@@ -83,7 +83,8 @@ try {
                     'clientesInactivos' => $clientesInactivos,
                     'pctActivos' => $totalClientes > 0 ? MathRound(($clientesActivos / $totalClientes) * 100) : 0,
                     'interaccionesMes' => $interaccionesMes,
-                    'sinInteraccionCount' => $sinInteraccionCount
+                    'sinInteraccionCount' => $sinInteraccionCount,
+                    'descuentosPendientes' => (int)$pdo->query("SELECT COUNT(*) FROM solicitudes_descuento WHERE estado = 'pendiente'")->fetchColumn()
                 ],
                 'clientesRiesgo' => array_map(function($r) {
                     return [
@@ -391,6 +392,57 @@ try {
             ]);
             exit();
         }
+
+        // 9. LISTAR SOLICITUDES DE DESCUENTO
+        if ($resource === 'descuentos') {
+            $estado = isset($_GET['estado']) ? cleanInput($_GET['estado']) : 'todos';
+
+            $sql = "
+                SELECT 
+                    d.id,
+                    d.cliente_id,
+                    c.nombre AS cliente_nombre,
+                    c.correo AS cliente_correo,
+                    COALESCE(c.empresa, 'Particular') AS cliente_empresa,
+                    d.trabajador_id,
+                    COALESCE(ut.username, 'Empleado') AS trabajador_nombre,
+                    d.porcentaje,
+                    d.codigo_cupon,
+                    d.motivo,
+                    d.estado,
+                    d.admin_id,
+                    COALESCE(ua.username, 'Administrador') AS admin_nombre,
+                    d.comentario_admin,
+                    d.fecha_solicitud,
+                    d.fecha_resolucion
+                FROM solicitudes_descuento d
+                JOIN clientes c ON c.id = d.cliente_id
+                LEFT JOIN usuarios ut ON ut.id = d.trabajador_id
+                LEFT JOIN usuarios ua ON ua.id = d.admin_id
+            ";
+
+            $params = [];
+            if ($estado !== 'todos' && in_array($estado, ['pendiente', 'aprobado', 'rechazado'])) {
+                $sql .= " WHERE d.estado = ?";
+                $params[] = $estado;
+            }
+
+            $sql .= " ORDER BY d.id DESC";
+
+            $stmt = $pdo->prepare($sql);
+            $stmt->execute($params);
+            $descuentos = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+            $pendientesCount = (int)$pdo->query("SELECT COUNT(*) FROM solicitudes_descuento WHERE estado = 'pendiente'")->fetchColumn();
+
+            echo json_encode([
+                'success' => true,
+                'descuentos' => $descuentos,
+                'pendientes_count' => $pendientesCount,
+                'currentUserRole' => $currentUserRole
+            ]);
+            exit();
+        }
     }
 
     // ----------------------------------------------------
@@ -551,6 +603,187 @@ try {
             $stmt->execute([$id]);
 
             echo json_encode(['success' => true, 'message' => 'Cliente eliminado']);
+            exit();
+        }
+
+        // ----------------------------------------------------
+        // DESCUENTOS: SUGERIR (TRABAJADOR / ADMIN)
+        // ----------------------------------------------------
+        if ($resource === 'sugerir_descuento') {
+            $cliente_id = isset($input['cliente_id']) ? (int)$input['cliente_id'] : 0;
+            $porcentaje = isset($input['porcentaje']) ? (int)$input['porcentaje'] : 0;
+            $motivo = isset($input['motivo']) ? trim(cleanInput($input['motivo'])) : '';
+
+            if ($cliente_id <= 0) {
+                http_response_code(400);
+                echo json_encode(['success' => false, 'error' => 'Debes seleccionar un cliente válido.']);
+                exit();
+            }
+
+            if ($porcentaje < 5 || $porcentaje > 90) {
+                http_response_code(400);
+                echo json_encode(['success' => false, 'error' => 'El porcentaje de descuento debe estar entre 5% y 90%.']);
+                exit();
+            }
+
+            if (empty($motivo)) {
+                http_response_code(400);
+                echo json_encode(['success' => false, 'error' => 'Debes ingresar un motivo o justificación para el descuento.']);
+                exit();
+            }
+
+            // Verificar que el cliente exista
+            $stmtCli = $pdo->prepare("SELECT id, nombre, correo FROM clientes WHERE id = ?");
+            $stmtCli->execute([$cliente_id]);
+            $cliente = $stmtCli->fetch();
+
+            if (!$cliente) {
+                http_response_code(404);
+                echo json_encode(['success' => false, 'error' => 'El cliente no existe en la base de datos.']);
+                exit();
+            }
+
+            $stmtIns = $pdo->prepare("
+                INSERT INTO solicitudes_descuento (cliente_id, trabajador_id, porcentaje, motivo, estado, fecha_solicitud)
+                VALUES (?, ?, ?, ?, 'pendiente', NOW())
+            ");
+            $stmtIns->execute([$cliente_id, $currentUserId, $porcentaje, $motivo]);
+            $solicitudId = (int)$pdo->lastInsertId();
+
+            // Registrar interacción informativa en el CRM para trazabilidad
+            try {
+                $stmtInt = $pdo->prepare("
+                    INSERT INTO interacciones (cliente_id, usuario_id, tipo, descripcion, estado, prioridad, fecha)
+                    VALUES (?, ?, 'nota', ?, 'completada', 'media', NOW())
+                ");
+                $stmtInt->execute([
+                    $cliente_id,
+                    $currentUserId,
+                    "💡 Descuento sugerido del {$porcentaje}% por {$currentUsername}. Motivo: {$motivo} (Pendiente de aprobación administrativa)"
+                ]);
+            } catch (Exception $e) {
+                // no crítico
+            }
+
+            echo json_encode([
+                'success' => true,
+                'message' => "Solicitud de descuento del {$porcentaje}% enviada al Administrador para su aprobación.",
+                'id' => $solicitudId
+            ]);
+            exit();
+        }
+
+        // ----------------------------------------------------
+        // DESCUENTOS: APROBAR (SOLO ADMIN) -> NOTIFICA AL CLIENTE
+        // ----------------------------------------------------
+        if ($resource === 'aprobar_descuento') {
+            if ($currentUserRole !== 'admin') {
+                http_response_code(403);
+                echo json_encode(['success' => false, 'error' => 'Solo los administradores pueden aprobar descuentos.']);
+                exit();
+            }
+
+            $id = isset($input['id']) ? (int)$input['id'] : 0;
+            $comentario = isset($input['comentario_admin']) ? trim(cleanInput($input['comentario_admin'])) : 'Aprobado por el Administrador';
+
+            if ($id <= 0) {
+                http_response_code(400);
+                echo json_encode(['success' => false, 'error' => 'ID de solicitud no válido.']);
+                exit();
+            }
+
+            $stmtSol = $pdo->prepare("
+                SELECT d.*, c.nombre AS cliente_nombre, c.correo AS cliente_correo, c.usuario_id
+                FROM solicitudes_descuento d
+                JOIN clientes c ON c.id = d.cliente_id
+                WHERE d.id = ?
+            ");
+            $stmtSol->execute([$id]);
+            $sol = $stmtSol->fetch();
+
+            if (!$sol) {
+                http_response_code(404);
+                echo json_encode(['success' => false, 'error' => 'Solicitud de descuento no encontrada.']);
+                exit();
+            }
+
+            if ($sol['estado'] === 'aprobado') {
+                echo json_encode(['success' => true, 'message' => 'Esta solicitud ya había sido aprobada previamente.']);
+                exit();
+            }
+
+            // Generar código de cupón único
+            $cleanName = strtoupper(substr(preg_replace('/[^a-zA-Z]/', '', $sol['cliente_nombre']), 0, 4));
+            if (empty($cleanName)) $cleanName = 'LYM';
+            $codigoCupon = 'DESC' . $sol['porcentaje'] . '-' . $cleanName . '-' . rand(100, 999);
+
+            // Actualizar estado en la base de datos
+            $stmtUpd = $pdo->prepare("
+                UPDATE solicitudes_descuento 
+                SET estado = 'aprobado', codigo_cupon = ?, admin_id = ?, comentario_admin = ?, fecha_resolucion = NOW()
+                WHERE id = ?
+            ");
+            $stmtUpd->execute([$codigoCupon, $currentUserId, $comentario, $id]);
+
+            // ENVIAR NOTIFICACIÓN AUTOMÁTICA AL CLIENTE
+            $tituloNotif = "🎉 ¡Felicidades! Tienes un descuento exclusivo del {$sol['porcentaje']}%";
+            $mensajeNotif = "El equipo de LYM ha aprobado para ti un descuento especial del {$sol['porcentaje']}% para tu próxima compra. Código de cupón: [{$codigoCupon}]. Motivo: {$sol['motivo']}. ¡Aprovéchalo en tu próxima compra!";
+            $notifEnviada = crearNotificacionCliente($sol['cliente_id'], $tituloNotif, $mensajeNotif, 'descuento');
+
+            // Registrar interacción en el CRM
+            try {
+                $stmtInt = $pdo->prepare("
+                    INSERT INTO interacciones (cliente_id, usuario_id, tipo, descripcion, estado, prioridad, fecha)
+                    VALUES (?, ?, 'correo', ?, 'completada', 'alta', NOW())
+                ");
+                $stmtInt->execute([
+                    $sol['cliente_id'],
+                    $currentUserId,
+                    "🎉 Descuento del {$sol['porcentaje']}% APROBADO por el Administrador. Código de cupón generado: {$codigoCupon}. Notificación enviada al cliente."
+                ]);
+            } catch (Exception $e) {
+                // silencioso
+            }
+
+            echo json_encode([
+                'success' => true,
+                'message' => "¡Descuento aprobado con éxito! Se ha notificado al cliente ({$sol['cliente_nombre']}) con el código: {$codigoCupon}",
+                'codigo_cupon' => $codigoCupon,
+                'notificacion_enviada' => $notifEnviada
+            ]);
+            exit();
+        }
+
+        // ----------------------------------------------------
+        // DESCUENTOS: RECHAZAR (SOLO ADMIN)
+        // ----------------------------------------------------
+        if ($resource === 'rechazar_descuento') {
+            if ($currentUserRole !== 'admin') {
+                http_response_code(403);
+                echo json_encode(['success' => false, 'error' => 'Solo los administradores pueden rechazar descuentos.']);
+                exit();
+            }
+
+            $id = isset($input['id']) ? (int)$input['id'] : 0;
+            $comentario = isset($input['comentario_admin']) ? trim(cleanInput($input['comentario_admin'])) : 'No autorizado por el momento';
+
+            if ($id <= 0) {
+                http_response_code(400);
+                echo json_encode(['success' => false, 'error' => 'ID de solicitud no válido.']);
+                exit();
+            }
+
+            $stmtUpd = $pdo->prepare("
+                UPDATE solicitudes_descuento 
+                SET estado = 'rechazado', admin_id = ?, comentario_admin = ?, fecha_resolucion = NOW()
+                WHERE id = ?
+            ");
+            $stmtUpd->execute([$currentUserId, $comentario, $id]);
+
+            echo json_encode([
+                'success' => true,
+                'message' => 'Solicitud de descuento rechazada.'
+            ]);
             exit();
         }
     }

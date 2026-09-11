@@ -120,9 +120,28 @@ function crearNotificacionCliente($clienteId, $titulo, $mensaje, $tipo = 'activi
     try {
         $pdo = getDBConnection();
         // Obtener usuario_id asociado a este cliente_id
-        $stmt = $pdo->prepare("SELECT usuario_id FROM clientes WHERE id = ? LIMIT 1");
+        $stmt = $pdo->prepare("SELECT usuario_id, correo FROM clientes WHERE id = ? LIMIT 1");
         $stmt->execute([$clienteId]);
-        $usuarioId = $stmt->fetchColumn();
+        $cli = $stmt->fetch();
+
+        if (!$cli) {
+            return false;
+        }
+
+        $usuarioId = $cli['usuario_id'];
+
+        // Si el cliente no tiene usuario_id enlazado, buscar usuario por correo
+        if (!$usuarioId && !empty($cli['correo'])) {
+            $stmtUser = $pdo->prepare("SELECT id FROM usuarios WHERE LOWER(email) = LOWER(?) LIMIT 1");
+            $stmtUser->execute([$cli['correo']]);
+            $foundUserId = $stmtUser->fetchColumn();
+            if ($foundUserId) {
+                $usuarioId = (int)$foundUserId;
+                // Vincular para futuras notificaciones
+                $stmtLink = $pdo->prepare("UPDATE clientes SET usuario_id = ? WHERE id = ?");
+                $stmtLink->execute([$usuarioId, $clienteId]);
+            }
+        }
 
         if ($usuarioId) {
             $stmtIns = $pdo->prepare("

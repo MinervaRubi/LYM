@@ -48,6 +48,11 @@
                     <i class="fas fa-star"></i> <span>Evaluaciones</span>
                 </button>
 
+                <button class="crm-nav-item" id="navItemDescuentos" onclick="loadExternalView('crm-descuentos.html', this)">
+                    <i class="fas fa-tags"></i> <span>Descuentos y Promos</span>
+                    <span id="badgeDescuentosSidebar" class="crm-badge" style="display:none; background:#ef4444; color:white; font-size:0.7rem; padding:2px 7px; border-radius:10px; margin-left:auto; font-weight:700;">0</span>
+                </button>
+
                 <button class="crm-nav-item" id="navItemUsuarios" onclick="loadExternalView('crm-usuarios.html', this)">
                     <i class="fas fa-user-shield"></i> <span>Usuarios</span>
                 </button>
@@ -299,6 +304,56 @@
                     <button type="button" class="crm-btn crm-btn-secondary" onclick="cerrarModalGlobalEditarCliente()">Cancelar</button>
                     <button type="submit" class="crm-btn crm-btn-primary">
                         <i class="fas fa-save"></i> Guardar Cambios
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ==============================================================
+         GLOBAL FLOATING MODAL: SUGERIR DESCUENTO PARA CLIENTE
+         ============================================================== -->
+    <div class="crm-modal-overlay" id="modalGlobalSugerirDescuento">
+        <div class="crm-modal-dialog" style="max-width: 520px;">
+            <div class="crm-modal-header">
+                <div class="crm-modal-title">
+                    <i class="fas fa-tags" style="color:var(--primary);"></i>
+                    <span>Sugerir Descuento para Cliente</span>
+                </div>
+                <button class="crm-modal-close" onclick="cerrarModalGlobalSugerirDescuento()">&times;</button>
+            </div>
+
+            <form onsubmit="guardarSugerirDescuentoGlobal(event)">
+                <div class="crm-form-group">
+                    <label class="crm-form-label">Cliente Seleccionado:</label>
+                    <select class="crm-form-select" id="mSugerirDescuentoClienteSelect" required>
+                        <option value="">-- Selecciona un cliente --</option>
+                    </select>
+                </div>
+
+                <div class="crm-form-group">
+                    <label class="crm-form-label">Porcentaje de Descuento (%):</label>
+                    <div style="display:flex; align-items:center; gap:10px;">
+                        <input type="number" class="crm-form-input" id="mSugerirDescuentoPorcentaje" min="1" max="90" step="1" placeholder="Ej. 10, 15, 20" required style="font-size:1.1rem; font-weight:700; color:#4338ca;">
+                        <span style="font-weight:800; font-size:1.1rem; color:#64748b;">%</span>
+                    </div>
+                    <small style="color:#64748b; font-size:0.75rem;">Sugerencias habituales: 5% (primera compra), 10% (frecuente), 15% (fidelización), 20% (compensación/VIP).</small>
+                </div>
+
+                <div class="crm-form-group">
+                    <label class="crm-form-label">Motivo o Justificación para el Administrador:</label>
+                    <textarea class="crm-form-textarea" id="mSugerirDescuentoMotivo" rows="3" placeholder="Ej: Cliente frecuente que ha realizado varias compras. Solicita descuento para su próximo pedido." required></textarea>
+                </div>
+
+                <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:10px 14px; margin-bottom:15px; font-size:0.8rem; color:#475569; display:flex; gap:8px;">
+                    <i class="fas fa-info-circle" style="color:#6366f1; margin-top:2px;"></i>
+                    <span>Al enviar esta sugerencia, el <strong>Administrador</strong> la evaluará. Si la aprueba, el sistema generará un cupón y enviará una <strong>notificación inmediata al cliente</strong>.</span>
+                </div>
+
+                <div class="crm-modal-footer">
+                    <button type="button" class="crm-btn crm-btn-secondary" onclick="cerrarModalGlobalSugerirDescuento()">Cancelar</button>
+                    <button type="submit" class="crm-btn crm-btn-primary" id="btnEnviarSugerenciaDescuento">
+                        <i class="fas fa-paper-plane"></i> Enviar al Administrador
                     </button>
                 </div>
             </form>
@@ -664,6 +719,126 @@
             }
         }
 
+        /* MODAL GLOBAL: SUGERIR DESCUENTO */
+        async function abrirModalGlobalSugerirDescuento(preselectedClienteId) {
+            const modal = document.getElementById("modalGlobalSugerirDescuento");
+            const selectCliente = document.getElementById("mSugerirDescuentoClienteSelect");
+            modal.classList.add("active");
+
+            try {
+                selectCliente.innerHTML = '<option value="">Cargando clientes de MySQL...</option>';
+                let clientes = [];
+
+                const resp = await fetch("php/crm_api.php?resource=clientes", { credentials: "same-origin" });
+                if (resp.ok) {
+                    const data = await resp.json();
+                    if (data.success && Array.isArray(data.clientes)) {
+                        clientes = data.clientes;
+                    }
+                }
+
+                if (clientes.length === 0) {
+                    const resp2 = await fetch("php/clientes.php", { credentials: "same-origin" });
+                    if (resp2.ok) {
+                        const data2 = await resp2.json();
+                        if (data2.success && Array.isArray(data2.clientes)) {
+                            clientes = data2.clientes;
+                        }
+                    }
+                }
+
+                if (clientes.length > 0) {
+                    selectCliente.innerHTML = '<option value="">-- Selecciona un cliente --</option>';
+                    clientes.forEach(c => {
+                        const opt = document.createElement("option");
+                        opt.value = c.id;
+                        opt.textContent = `${c.nombre || c.username || 'Cliente'} (${c.empresa && c.empresa !== 'Sin Empresa' ? c.empresa : 'Particular'}) - ${c.correo || ''}`;
+                        if (preselectedClienteId && String(c.id) === String(preselectedClienteId)) {
+                            opt.selected = true;
+                        }
+                        selectCliente.appendChild(opt);
+                    });
+                } else {
+                    selectCliente.innerHTML = '<option value="">No hay clientes en MySQL</option>';
+                }
+            } catch (e) {
+                selectCliente.innerHTML = '<option value="">Error al cargar clientes</option>';
+            }
+        }
+
+        function cerrarModalGlobalSugerirDescuento() {
+            document.getElementById("modalGlobalSugerirDescuento").classList.remove("active");
+            document.getElementById("mSugerirDescuentoPorcentaje").value = '';
+            document.getElementById("mSugerirDescuentoMotivo").value = '';
+        }
+
+        async function guardarSugerirDescuentoGlobal(e) {
+            e.preventDefault();
+            const cliente_id = document.getElementById("mSugerirDescuentoClienteSelect").value;
+            const porcentaje = document.getElementById("mSugerirDescuentoPorcentaje").value;
+            const motivo = document.getElementById("mSugerirDescuentoMotivo").value.trim();
+            const btn = document.getElementById("btnEnviarSugerenciaDescuento");
+
+            if (!cliente_id) {
+                alert("Por favor selecciona un cliente de la lista.");
+                return;
+            }
+            if (!porcentaje || porcentaje <= 0 || porcentaje > 90) {
+                alert("Introduce un porcentaje válido entre 1% y 90%.");
+                return;
+            }
+            if (!motivo) {
+                alert("Escribe el motivo o justificación de la sugerencia.");
+                return;
+            }
+
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Enviando...';
+
+            try {
+                const resp = await fetch("php/crm_api.php?resource=sugerir_descuento", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ cliente_id, porcentaje, motivo })
+                });
+
+                const data = await resp.json();
+                if (data.success) {
+                    showNotification("¡Sugerencia de descuento enviada al Administrador!");
+                    cerrarModalGlobalSugerirDescuento();
+                    refrescarContadorDescuentosPendientes();
+                    if (currentLoadedView && (currentLoadedView.includes("crm-descuentos") || currentLoadedView.includes("crm-detalle-cliente"))) {
+                        loadExternalView(currentLoadedView, null);
+                    }
+                } else {
+                    alert("Error: " + (data.error || "No se pudo registrar la sugerencia"));
+                }
+            } catch (err) {
+                alert("Error de red: " + err.message);
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-paper-plane"></i> Enviar al Administrador';
+            }
+        }
+
+        async function refrescarContadorDescuentosPendientes() {
+            try {
+                const resp = await fetch("php/crm_api.php?resource=descuentos&estado=pendiente");
+                const data = await resp.json();
+                const badge = document.getElementById("badgeDescuentosSidebar");
+                if (badge && data.success && typeof data.pendientes_count === "number") {
+                    if (data.pendientes_count > 0) {
+                        badge.textContent = data.pendientes_count;
+                        badge.style.display = "inline-block";
+                    } else {
+                        badge.style.display = "none";
+                    }
+                }
+            } catch (e) {
+                // Silencioso
+            }
+        }
+
         /* TOAST NOTIFICATION */
         function showNotification(message) {
             const toast = document.getElementById("crmToastNotification");
@@ -698,6 +873,7 @@
                 }
 
                 currentUserCRM = data.user;
+                window.currentUserCRM = data.user;
                 document.getElementById("gestorName").textContent = data.user.username;
                 document.getElementById("gestorRole").textContent = role === 'admin' ? 'Administrador' : 'Trabajador';
                 document.getElementById("topbarAvatar").textContent = data.user.username.charAt(0).toUpperCase();
@@ -910,6 +1086,8 @@
 
         document.addEventListener("DOMContentLoaded", async function () {
             await verificarPermisosAdminGestor();
+            await refrescarContadorDescuentosPendientes();
+            setInterval(refrescarContadorDescuentosPendientes, 60000);
         });
     </script>
 </body>

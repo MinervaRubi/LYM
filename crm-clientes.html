@@ -121,6 +121,7 @@
                                     <button class="crm-btn-icon" title="Ver Detalle" onclick="verDetalleCliente(${c.id}, '${escapeHtml(c.nombre)}')"><i class="fas fa-eye"></i></button>
                                     <button class="crm-btn-icon" title="Editar Cliente" onclick="abrirModalGlobalEditarCliente(${c.id}, '${escapeHtml(c.nombre)}', '${escapeHtml(c.correo)}', '${escapeHtml(c.telefono)}', '${escapeHtml(c.empresa)}', '${escapeHtml(c.estado)}')"><i class="fas fa-edit"></i></button>
                                     <button class="crm-btn-icon" title="Cambiar Etapa" onclick="abrirModalGlobalEtapa(${c.id}, '${escapeHtml(c.nombre)}', '${escapeHtml(c.etapa_crm)}')"><i class="fas fa-tags"></i></button>
+                                    <button class="crm-btn-icon" title="Sugerir Descuento" style="color:#6366f1;" onclick="abrirModalGlobalSugerirDescuento(${c.id})"><i class="fas fa-percent"></i></button>
                                     <button class="crm-btn-icon" title="Nueva Interacción" onclick="abrirModalGlobalInteraccion(${c.id})"><i class="fas fa-comment-plus"></i></button>
                                     <button class="crm-btn-icon" title="Eliminar Cliente" style="color:var(--danger);" onclick="eliminarClienteConfirm(${c.id})"><i class="fas fa-trash-alt"></i></button>
                                 </div>

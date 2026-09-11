@@ -75,6 +75,23 @@
                         <span id="subtotalTxt">$0</span>
                     </div>
 
+                    <!-- CUPÓN DE DESCUENTO -->
+                    <div style="margin: 14px 0; padding: 12px; background: #f8fafc; border-radius: 8px; border: 1px dashed #cbd5e1;">
+                        <label style="font-size: 0.8rem; font-weight: 700; color: #475569; display: flex; align-items: center; gap: 6px; margin-bottom: 6px;">
+                            <i class="fas fa-tags" style="color:#6366f1;"></i> ¿Tienes un cupón de descuento?
+                        </label>
+                        <div style="display:flex; gap:6px;">
+                            <input type="text" id="inputCodigoCupon" placeholder="Ej: DESC20-AILY-888" style="flex:1; padding:7px 10px; font-size:0.82rem; border:1px solid #cbd5e1; border-radius:6px; text-transform:uppercase;">
+                            <button type="button" id="btnAplicarCupon" class="btn btn-outline" style="padding:6px 10px; font-size:0.78rem; font-weight:700;">Aplicar</button>
+                        </div>
+                        <div id="cuponFeedback" style="display:none; font-size:0.78rem; margin-top:6px; font-weight:600;"></div>
+                    </div>
+
+                    <div class="summary-row" id="rowDescuentoCupon" style="display:none; color:#059669; font-weight:700;">
+                        <span>Descuento (<span id="txtPorcentajeCupon">0</span>%)</span>
+                        <span id="descuentoCuponTxt">-$0.00</span>
+                    </div>
+
                     <div class="summary-row">
                         <span>Envío <small>(demo)</small></span>
                         <span id="shippingTxt">$0</span>
@@ -189,7 +206,18 @@
 
                 // envio demo
                 let envio = subtotal >= 500 ? 0 : 80;
-                let total = subtotal + envio;
+                let descuento = 0;
+
+                if (cuponAplicado && cuponAplicado.porcentaje > 0 && subtotal > 0) {
+                    descuento = subtotal * (Number(cuponAplicado.porcentaje) / 100);
+                    rowDescuentoCupon.style.display = "flex";
+                    txtPorcentajeCupon.textContent = cuponAplicado.porcentaje;
+                    descuentoCuponTxt.textContent = "-$" + descuento.toFixed(2);
+                } else {
+                    rowDescuentoCupon.style.display = "none";
+                }
+
+                let total = Math.max(0, subtotal - descuento) + envio;
 
                 subtotalTxt.textContent = "$" + subtotal.toFixed(2);
                 shippingTxt.textContent = "$" + envio.toFixed(2);
@@ -200,6 +228,62 @@
                 console.log("CARRITO:", carrito);
                 carrito.forEach((it, i) => console.log(i, it.producto, "imagen=", it.imagen));
             }
+
+            // -------- CUPÓN DE DESCUENTO ----------
+            let cuponAplicado = JSON.parse(sessionStorage.getItem("cuponAplicado") || "null");
+            const inputCodigoCupon = document.getElementById("inputCodigoCupon");
+            const btnAplicarCupon = document.getElementById("btnAplicarCupon");
+            const cuponFeedback = document.getElementById("cuponFeedback");
+            const rowDescuentoCupon = document.getElementById("rowDescuentoCupon");
+            const txtPorcentajeCupon = document.getElementById("txtPorcentajeCupon");
+            const descuentoCuponTxt = document.getElementById("descuentoCuponTxt");
+
+            if (cuponAplicado && cuponAplicado.codigo) {
+                inputCodigoCupon.value = cuponAplicado.codigo;
+                cuponFeedback.style.display = "block";
+                cuponFeedback.style.color = "#059669";
+                cuponFeedback.textContent = `✓ ¡Descuento del ${cuponAplicado.porcentaje}% activo!`;
+            }
+
+            btnAplicarCupon.addEventListener("click", async () => {
+                const codigo = inputCodigoCupon.value.trim();
+                if (!codigo) {
+                    cuponFeedback.style.display = "block";
+                    cuponFeedback.style.color = "#ef4444";
+                    cuponFeedback.textContent = "Ingresa un código de cupón.";
+                    return;
+                }
+
+                btnAplicarCupon.disabled = true;
+                btnAplicarCupon.textContent = "...";
+
+                try {
+                    const resp = await fetch("php/api_cupones.php?codigo=" + encodeURIComponent(codigo));
+                    const data = await resp.json();
+
+                    cuponFeedback.style.display = "block";
+                    if (data.success && data.cupon) {
+                        cuponAplicado = data.cupon;
+                        sessionStorage.setItem("cuponAplicado", JSON.stringify(cuponAplicado));
+                        cuponFeedback.style.color = "#059669";
+                        cuponFeedback.textContent = `✓ ¡Descuento del ${data.cupon.porcentaje}% aplicado!`;
+                        renderCarrito();
+                    } else {
+                        cuponAplicado = null;
+                        sessionStorage.removeItem("cuponAplicado");
+                        cuponFeedback.style.color = "#ef4444";
+                        cuponFeedback.textContent = "✕ " + (data.error || "Cupón no válido.");
+                        renderCarrito();
+                    }
+                } catch (e) {
+                    cuponFeedback.style.display = "block";
+                    cuponFeedback.style.color = "#ef4444";
+                    cuponFeedback.textContent = "Error al verificar cupón.";
+                } finally {
+                    btnAplicarCupon.disabled = false;
+                    btnAplicarCupon.textContent = "Aplicar";
+                }
+            });
 
             // -------- CAMBIAR CANTIDAD ----------
             window.cambiarCantidad = function (index, cambio) {
