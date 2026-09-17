@@ -360,13 +360,13 @@
         </div>
     </div>
 
-    <!-- MODAL 3: GESTIÓN DE TRABAJADORES (ADMIN) -->
+    <!-- MODAL 3: GESTIÓN DE TRABAJADORES Y ADMINISTRADORES -->
     <div class="crm-modal-overlay" id="modalGestionTrabajadores">
-        <div class="crm-modal-dialog" style="max-width: 640px;">
+        <div class="crm-modal-dialog" style="max-width: 720px;">
             <div class="crm-modal-header">
                 <div class="crm-modal-title">
-                    <i class="fas fa-id-badge" style="color:var(--primary);"></i>
-                    <span>Gestión de Trabajadores (Juanlalo)</span>
+                    <i class="fas fa-users-cog" style="color:var(--primary);"></i>
+                    <span>Gestión de Trabajadores y Administradores</span>
                 </div>
                 <button class="crm-modal-close" onclick="cerrarModalGestionTrabajadores()">&times;</button>
             </div>
@@ -395,9 +395,15 @@
                 </form>
 
                 <!-- LISTADO DE TRABAJADORES REGISTRADOS -->
-                <h4 style="margin:0 0 10px 0; font-size:0.95rem; color:#0f172a;"><i class="fas fa-users-cog"></i> Trabajadores Actuales</h4>
-                <div id="tablaTrabajadoresContainer" style="max-height:220px; overflow-y:auto; border:1px solid #e2e8f0; border-radius:8px;">
+                <h4 style="margin:0 0 10px 0; font-size:0.95rem; color:#0f172a;"><i class="fas fa-id-badge" style="color:var(--primary);"></i> Trabajadores Actuales</h4>
+                <div id="tablaTrabajadoresContainer" style="max-height:220px; overflow-y:auto; border:1px solid #e2e8f0; border-radius:8px; margin-bottom:20px;">
                     <div style="padding:20px; text-align:center; color:#94a3b8;">Cargando lista de trabajadores...</div>
+                </div>
+
+                <!-- LISTADO DE ADMINISTRADORES -->
+                <h4 style="margin:0 0 10px 0; font-size:0.95rem; color:#0f172a;"><i class="fas fa-user-shield" style="color:#6B46C1;"></i> Administradores con Privilegios Completos</h4>
+                <div id="tablaAdministradoresContainer" style="max-height:200px; overflow-y:auto; border:1px solid #e2e8f0; border-radius:8px;">
+                    <div style="padding:20px; text-align:center; color:#94a3b8;">Cargando lista de administradores...</div>
                 </div>
             </div>
 
@@ -941,34 +947,143 @@
 
         async function cargarTrabajadoresLista() {
             const container = document.getElementById("tablaTrabajadoresContainer");
+            const containerAdmins = document.getElementById("tablaAdministradoresContainer");
             try {
                 const resp = await fetch("php/api_trabajadores.php");
                 const data = await resp.json();
 
-                if (!data.success || !Array.isArray(data.trabajadores) || data.trabajadores.length === 0) {
-                    container.innerHTML = '<div style="padding:20px; text-align:center; color:#94a3b8;">No hay trabajadores registrados aún.</div>';
+                if (!data.success) {
+                    container.innerHTML = `<div style="padding:20px; text-align:center; color:#ef4444;">${escapeHtml(data.error || 'Error al cargar lista')}</div>`;
+                    if (containerAdmins) containerAdmins.innerHTML = '';
                     return;
                 }
 
-                let html = '<table style="width:100%; border-collapse:collapse; font-size:0.88rem;">';
-                html += '<tr style="background:#f1f5f9; text-align:left; color:#475569;"><th style="padding:8px 12px;">Usuario</th><th style="padding:8px 12px;">Correo</th><th style="padding:8px 12px; text-align:right;">Acción</th></tr>';
-                data.trabajadores.forEach(t => {
-                    html += `
-                        <tr style="border-bottom:1px solid #f1f5f9;">
-                            <td style="padding:8px 12px; font-weight:600; color:#0f172a;"><i class="fas fa-user-check" style="color:#10b981; margin-right:6px;"></i>${escapeHtml(t.username)}</td>
-                            <td style="padding:8px 12px; color:#475569;">${escapeHtml(t.email)}</td>
-                            <td style="padding:8px 12px; text-align:right;">
-                                <button onclick="eliminarTrabajador(${t.id}, '${escapeHtml(t.username)}')" class="crm-btn crm-btn-secondary crm-btn-sm" style="color:#ef4444; padding:3px 8px;">
-                                    <i class="fas fa-trash"></i>
-                                </button>
-                            </td>
-                        </tr>
-                    `;
-                });
-                html += '</table>';
-                container.innerHTML = html;
+                // 1. LISTA DE TRABAJADORES
+                if (!Array.isArray(data.trabajadores) || data.trabajadores.length === 0) {
+                    container.innerHTML = '<div style="padding:20px; text-align:center; color:#94a3b8;"><i class="fas fa-info-circle"></i> No hay trabajadores con rol operativo actualmente.</div>';
+                } else {
+                    let html = '<table style="width:100%; border-collapse:collapse; font-size:0.88rem;">';
+                    html += '<tr style="background:#f1f5f9; text-align:left; color:#475569;"><th style="padding:10px 12px;">Usuario</th><th style="padding:10px 12px;">Correo</th><th style="padding:10px 12px; text-align:right;">Acciones</th></tr>';
+                    data.trabajadores.forEach(t => {
+                        html += `
+                            <tr style="border-bottom:1px solid #f1f5f9;">
+                                <td style="padding:10px 12px; font-weight:600; color:#0f172a;">
+                                    <i class="fas fa-id-badge" style="color:#64748b; margin-right:6px;"></i>${escapeHtml(t.username)}
+                                    <span class="badge badge-prospecto" style="font-size:0.68rem; margin-left:6px;"><span class="badge-dot"></span>Trabajador</span>
+                                </td>
+                                <td style="padding:10px 12px; color:#475569;">${escapeHtml(t.email)}</td>
+                                <td style="padding:10px 12px; text-align:right; white-space:nowrap;">
+                                    <button onclick="hacerTrabajadorAdmin(${t.id}, '${escapeHtml(t.username)}')" class="crm-btn crm-btn-sm" style="background:linear-gradient(135deg, #6B46C1, #8B5CF6); color:#ffffff; padding:5px 10px; margin-right:6px; font-weight:600; border-radius:6px;" title="Convertir a Administrador con todos los privilegios">
+                                        <i class="fas fa-user-shield"></i> Hacer Admin
+                                    </button>
+                                    <button onclick="eliminarTrabajador(${t.id}, '${escapeHtml(t.username)}')" class="crm-btn crm-btn-secondary crm-btn-sm" style="color:#ef4444; padding:5px 8px; border-radius:6px;" title="Eliminar cuenta de trabajador">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        `;
+                    });
+                    html += '</table>';
+                    container.innerHTML = html;
+                }
+
+                // 2. LISTA DE ADMINISTRADORES
+                if (containerAdmins) {
+                    if (!Array.isArray(data.administradores) || data.administradores.length === 0) {
+                        containerAdmins.innerHTML = '<div style="padding:20px; text-align:center; color:#94a3b8;">No se encontraron administradores.</div>';
+                    } else {
+                        let htmlAdm = '<table style="width:100%; border-collapse:collapse; font-size:0.88rem;">';
+                        htmlAdm += '<tr style="background:#f1f5f9; text-align:left; color:#475569;"><th style="padding:10px 12px;">Administrador</th><th style="padding:10px 12px;">Correo</th><th style="padding:10px 12px;">Privilegios</th><th style="padding:10px 12px; text-align:right;">Acción</th></tr>';
+                        const currentId = window.currentUserCRM ? Number(window.currentUserCRM.id) : 0;
+                        data.administradores.forEach(a => {
+                            const esPropio = (Number(a.id) === currentId);
+                            const esRoot = (Number(a.id) === 1 || String(a.username).toLowerCase() === 'admin');
+                            let btnAccion = '';
+                            if (!esPropio && !esRoot) {
+                                btnAccion = `
+                                    <button onclick="quitarAdminTrabajador(${a.id}, '${escapeHtml(a.username)}')" class="crm-btn crm-btn-secondary crm-btn-sm" style="color:#64748b; padding:3px 8px; font-size:0.75rem; border-radius:6px;" title="Regresar al rol de Trabajador">
+                                        <i class="fas fa-user-minus"></i> Quitar Admin
+                                    </button>
+                                `;
+                            } else {
+                                btnAccion = `<span style="color:#10b981; font-size:0.75rem; font-weight:700;"><i class="fas fa-check-circle"></i> Principal / Activo</span>`;
+                            }
+
+                            htmlAdm += `
+                                <tr style="border-bottom:1px solid #f1f5f9;">
+                                    <td style="padding:10px 12px; font-weight:700; color:#0f172a;">
+                                        <i class="fas fa-crown" style="color:#f59e0b; margin-right:6px;"></i>${escapeHtml(a.username)}
+                                    </td>
+                                    <td style="padding:10px 12px; color:#475569;">${escapeHtml(a.email)}</td>
+                                    <td style="padding:10px 12px;">
+                                        <span class="badge badge-activo" style="font-size:0.7rem;"><span class="badge-dot"></span>Acceso Total</span>
+                                    </td>
+                                    <td style="padding:10px 12px; text-align:right; white-space:nowrap;">
+                                        ${btnAccion}
+                                    </td>
+                                </tr>
+                            `;
+                        });
+                        htmlAdm += '</table>';
+                        containerAdmins.innerHTML = htmlAdm;
+                    }
+                }
             } catch (e) {
-                container.innerHTML = '<div style="padding:20px; text-align:center; color:#ef4444;">Error al cargar trabajadores.</div>';
+                container.innerHTML = '<div style="padding:20px; text-align:center; color:#ef4444;">Error al cargar trabajadores: ' + escapeHtml(e.message) + '</div>';
+            }
+        }
+
+        async function hacerTrabajadorAdmin(id, username) {
+            if (!confirm(`¿Estás seguro de hacer Administrador al trabajador "${username}"?\n\nAl confirmarlo, se le otorgarán de inmediato TODOS los privilegios de Administrador:\n• Acceso a métricas y reportes globales\n• Aprobación y rechazo de descuentos para clientes\n• Gestión de cuentas de usuarios y trabajadores\n• Eliminación de clientes y gestión de productos`)) {
+                return;
+            }
+
+            try {
+                const resp = await fetch("php/api_trabajadores.php", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ action: "hacer_admin", id: id })
+                });
+                const data = await resp.json();
+
+                if (data.success) {
+                    showNotification(data.message || `¡"${username}" ahora es Administrador y tiene acceso total!`);
+                    await cargarTrabajadoresLista();
+                    if (typeof cargarUsuarios === "function") {
+                        cargarUsuarios();
+                    }
+                } else {
+                    alert(data.error || "No se pudo otorgar el rol de Administrador");
+                }
+            } catch (err) {
+                alert("Error de red: " + err.message);
+            }
+        }
+
+        async function quitarAdminTrabajador(id, username) {
+            if (!confirm(`¿Deseas revocar los privilegios de Administrador al usuario "${username}" y regresarlo al rol de Trabajador?`)) {
+                return;
+            }
+
+            try {
+                const resp = await fetch("php/api_trabajadores.php", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ action: "hacer_trabajador", id: id })
+                });
+                const data = await resp.json();
+
+                if (data.success) {
+                    showNotification(data.message || `Privilegios revocados a "${username}". Ahora es Trabajador.`);
+                    await cargarTrabajadoresLista();
+                    if (typeof cargarUsuarios === "function") {
+                        cargarUsuarios();
+                    }
+                } else {
+                    alert(data.error || "No se pudo revocar el rol de Administrador");
+                }
+            } catch (err) {
+                alert("Error de red: " + err.message);
             }
         }
 

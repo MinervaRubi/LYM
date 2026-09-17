@@ -1,8 +1,8 @@
 <?php
 require_once __DIR__ . '/includes/config.php';
 
-// Control de acceso CRM: requiere permisos de administrador
-if (!isLoggedIn() || !isAdmin()) {
+// Control de acceso CRM: requiere permisos de administrador o trabajador
+if (!isLoggedIn() || !isStaff()) {
     redirect('index.php');
 }
 

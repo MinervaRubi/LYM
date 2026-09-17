@@ -28,8 +28,16 @@ try {
     }
 
     $currentUserId = (int)$_SESSION['user_id'];
-    $currentUsername = $_SESSION['username'];
-    $currentUserRole = $_SESSION['user_role'];
+    $currentUser = getCurrentUser();
+    if ($currentUser) {
+        $currentUsername = $currentUser['username'];
+        $currentUserRole = $currentUser['role'];
+        $_SESSION['user_role'] = $currentUserRole;
+        $_SESSION['username'] = $currentUsername;
+    } else {
+        $currentUsername = $_SESSION['username'] ?? 'Usuario';
+        $currentUserRole = $_SESSION['user_role'] ?? 'cliente';
+    }
 
     // ----------------------------------------------------
     // PETICIONES GET

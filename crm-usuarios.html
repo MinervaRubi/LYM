@@ -25,11 +25,12 @@
                     <th>Correo Electrónico</th>
                     <th>Rol</th>
                     <th>Fecha de Registro</th>
+                    <th style="text-align: right;">Acciones</th>
                 </tr>
             </thead>
             <tbody id="tbodyUsuarios">
                 <tr>
-                    <td colspan="5" style="text-align: center; padding: 2.5rem; color: var(--text-muted);">
+                    <td colspan="6" style="text-align: center; padding: 2.5rem; color: var(--text-muted);">
                         <i class="fas fa-spinner fa-spin fa-2x" style="color:var(--primary); margin-bottom:8px;"></i>
                         <div>Cargando usuarios del sistema...</div>
                     </td>
@@ -48,23 +49,107 @@
             const data = await resp.json();
 
             if (data.success && Array.isArray(data.usuarios)) {
+                const currentId = window.currentUserCRM ? Number(window.currentUserCRM.id) : 0;
                 tbody.innerHTML = data.usuarios.map(u => {
-                    const isAdmin = String(u.role).toLowerCase() === 'admin';
+                    const role = String(u.role).toLowerCase();
+                    const isAdmin = role === 'admin';
+                    const isTrabajador = role === 'trabajador';
+
+                    let accionHtml = '';
+                    if (isTrabajador) {
+                        accionHtml = `
+                            <button class="crm-btn crm-btn-sm" style="background:linear-gradient(135deg, #6B46C1, #8B5CF6); color:white; padding:4px 10px; font-size:0.78rem; font-weight:600; border-radius:6px;" onclick="promoverAdminDesdeUsuarios(${u.id}, '${escapeHtml(u.username)}')">
+                                <i class="fas fa-user-shield"></i> Hacer Admin
+                            </button>
+                        `;
+                    } else if (isAdmin) {
+                        const esPropio = (Number(u.id) === currentId);
+                        const esRoot = (Number(u.id) === 1 || String(u.username).toLowerCase() === 'admin');
+                        if (!esPropio && !esRoot) {
+                            accionHtml = `
+                                <button class="crm-btn crm-btn-secondary crm-btn-sm" style="color:#64748b; padding:3px 8px; font-size:0.75rem; border-radius:6px;" onclick="revocarAdminDesdeUsuarios(${u.id}, '${escapeHtml(u.username)}')" title="Regresar al rol de Trabajador">
+                                    <i class="fas fa-user-minus"></i> Quitar Admin
+                                </button>
+                            `;
+                        } else {
+                            accionHtml = `<span style="color:#10b981; font-weight:700; font-size:0.78rem;"><i class="fas fa-check-circle"></i> Principal</span>`;
+                        }
+                    } else {
+                        accionHtml = `<span style="color:var(--text-muted); font-size:0.8rem;">Cuenta Cliente</span>`;
+                    }
+
                     return `
                         <tr>
                             <td><strong style="color:var(--text-muted);">#${u.id}</strong></td>
                             <td><strong style="color:var(--text-heading); font-size:0.92rem;">${escapeHtml(u.username)}</strong></td>
                             <td>${escapeHtml(u.email)}</td>
-                            <td><span class="badge ${isAdmin ? 'badge-activo' : 'badge-prospecto'}"><span class="badge-dot"></span>${escapeHtml(u.role)}</span></td>
+                            <td><span class="badge ${isAdmin ? 'badge-activo' : (isTrabajador ? 'badge-prospecto' : 'badge-inactivo')}"><span class="badge-dot"></span>${escapeHtml(u.role)}</span></td>
                             <td>${formatearFechaUser(u.created_at)}</td>
+                            <td style="text-align: right; white-space: nowrap;">${accionHtml}</td>
                         </tr>
                     `;
                 }).join('');
             } else {
-                tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:var(--danger); padding:1.5rem;">${data.error || 'Acceso restringido a administradores'}</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:var(--danger); padding:1.5rem;">${data.error || 'Acceso restringido a administradores'}</td></tr>`;
             }
         } catch (e) {
-            tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:var(--danger); padding:1.5rem;">Error al cargar usuarios: ${e.message}</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:var(--danger); padding:1.5rem;">Error al cargar usuarios: ${e.message}</td></tr>`;
+        }
+    };
+
+    window.promoverAdminDesdeUsuarios = async function(id, username) {
+        if (!confirm(`¿Estás seguro de hacer Administrador al trabajador "${username}"?\n\nTendrá todos los privilegios administrativos en el CRM.`)) {
+            return;
+        }
+
+        try {
+            const resp = await fetch('php/api_trabajadores.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'hacer_admin', id: id })
+            });
+            const data = await resp.json();
+
+            if (data.success) {
+                if (typeof showNotification === 'function') {
+                    showNotification(data.message || `¡"${username}" ahora es Administrador!`);
+                } else {
+                    alert(data.message || 'Usuario promovido a Administrador con éxito.');
+                }
+                cargarUsuarios();
+            } else {
+                alert(data.error || 'No se pudo otorgar el rol de Administrador');
+            }
+        } catch (err) {
+            alert('Error de red: ' + err.message);
+        }
+    };
+
+    window.revocarAdminDesdeUsuarios = async function(id, username) {
+        if (!confirm(`¿Deseas revocar los privilegios de Administrador a "${username}" y regresarlo a Trabajador?`)) {
+            return;
+        }
+
+        try {
+            const resp = await fetch('php/api_trabajadores.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'hacer_trabajador', id: id })
+            });
+            const data = await resp.json();
+
+            if (data.success) {
+                if (typeof showNotification === 'function') {
+                    showNotification(data.message || `Privilegios revocados a "${username}".`);
+                } else {
+                    alert(data.message || 'Privilegios revocados correctamente.');
+                }
+                cargarUsuarios();
+            } else {
+                alert(data.error || 'No se pudo revocar el rol de Administrador');
+            }
+        } catch (err) {
+            alert('Error de red: ' + err.message);
         }
     };
 

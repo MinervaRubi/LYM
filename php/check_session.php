@@ -16,6 +16,8 @@ try {
         $user = getCurrentUser();
         
         if ($user) {
+            $_SESSION['user_role'] = $user['role'];
+            $_SESSION['username'] = $user['username'];
             echo json_encode([
                 'authenticated' => true,
                 'user' => [

@@ -185,7 +185,13 @@ function getCurrentUser()
         $_SESSION['user_id']
     ]);
 
-    return $stmt->fetch();
+    $user = $stmt->fetch();
+    if ($user && isset($user['role'])) {
+        $_SESSION['user_role'] = $user['role'];
+        $_SESSION['username'] = $user['username'];
+    }
+
+    return $user;
 }
 
 
