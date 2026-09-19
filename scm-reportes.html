@@ -1,0 +1,174 @@
+<!-- ==============================================================
+     MÓDULO SCM: REPORTES Y ANÁLISIS DE CADENA DE SUMINISTRO
+     ARCHIVO: scm-reportes.html
+============================================================== -->
+
+<div style="display: flex; flex-direction: column; gap: 1.5rem;">
+    <!-- CABECERA -->
+    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+        <div>
+            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+                <span class="badge" style="background: rgba(13,148,136,0.15); color: #0d9488; font-weight:700; font-size:0.75rem; padding: 2px 8px; border-radius: 6px;">SCM</span>
+                <span style="font-size: 0.85rem; color: var(--text-muted);">Cadena de Suministros</span>
+            </div>
+            <h2 style="font-size: 1.6rem; font-weight: 800; color: var(--text-heading); margin: 0;">Métricas y Reportes SCM</h2>
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 2px;">Análisis de rotación de existencias, eficiencia de proveedores y costos logísticos</p>
+        </div>
+        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+            <button class="crm-btn crm-btn-secondary crm-btn-sm" onclick="inicializarReportesSCM()">
+                <i class="fas fa-sync-alt"></i> <span>Actualizar</span>
+            </button>
+            <button class="crm-btn crm-btn-primary" style="background: linear-gradient(135deg, #0d9488, #059669); border:none; box-shadow: 0 4px 12px rgba(13, 148, 136, 0.25);" onclick="exportarReporteSCM()">
+                <i class="fas fa-file-arrow-down"></i> <span>Exportar Informe SCM</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- TARJETAS DE INDICADORES CLAVE (KPIs SCM) -->
+    <div class="crm-grid-4">
+        <div class="crm-card crm-metric-card">
+            <div>
+                <div class="crm-metric-label">Rotación de Inventario</div>
+                <div class="crm-metric-value" style="color: #0d9488;">4.2x</div>
+                <div class="crm-metric-subtext positive"><i class="fas fa-arrow-up"></i> +0.6x anual</div>
+            </div>
+            <div class="crm-icon-box" style="background: rgba(13,148,136,0.12); color: #0d9488;">
+                <i class="fas fa-repeat"></i>
+            </div>
+        </div>
+
+        <div class="crm-card crm-metric-card">
+            <div>
+                <div class="crm-metric-label">Cumplimiento OTIF</div>
+                <div class="crm-metric-value" style="color: var(--success);">96.4%</div>
+                <div class="crm-metric-subtext positive">A tiempo y completo</div>
+            </div>
+            <div class="crm-icon-box crm-icon-emerald">
+                <i class="fas fa-truck-ramp-box"></i>
+            </div>
+        </div>
+
+        <div class="crm-card crm-metric-card">
+            <div>
+                <div class="crm-metric-label">Tiempo Ciclo de Compra</div>
+                <div class="crm-metric-value" style="color: #2563eb;">3.8 días</div>
+                <div class="crm-metric-subtext">Desde orden a almacén</div>
+            </div>
+            <div class="crm-icon-box" style="background: rgba(37,99,235,0.12); color: #2563eb;">
+                <i class="fas fa-stopwatch"></i>
+            </div>
+        </div>
+
+        <div class="crm-card crm-metric-card">
+            <div>
+                <div class="crm-metric-label">Costo Logístico / Ventas</div>
+                <div class="crm-metric-value" style="color: #0f172a;">6.2%</div>
+                <div class="crm-metric-subtext positive"><i class="fas fa-arrow-down"></i> -1.1% optimizado</div>
+            </div>
+            <div class="crm-icon-box" style="background: rgba(15,23,42,0.08); color: #0f172a;">
+                <i class="fas fa-chart-pie"></i>
+            </div>
+        </div>
+    </div>
+
+    <!-- GRÁFICAS DE ANÁLISIS SCM -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 1.5rem;">
+        <!-- GRÁFICA 1: ROTACIÓN POR CATEGORÍA -->
+        <div class="crm-card" style="padding: 1.5rem;">
+            <div style="font-weight: 700; color: #0f172a; margin-bottom: 1rem; display: flex; align-items: center; justify-content: space-between;">
+                <span>Rotación de Inventario por Categoría</span>
+                <span style="font-size: 0.75rem; color: #64748b; font-weight: normal;">Último trimestre</span>
+            </div>
+            <div style="height: 250px; position: relative;">
+                <canvas id="chartScmRotacion"></canvas>
+            </div>
+        </div>
+
+        <!-- GRÁFICA 2: CUMPLIMIENTO POR PROVEEDOR -->
+        <div class="crm-card" style="padding: 1.5rem;">
+            <div style="font-weight: 700; color: #0f172a; margin-bottom: 1rem; display: flex; align-items: center; justify-content: space-between;">
+                <span>Cumplimiento en Tiempos de Proveedores (%)</span>
+                <span style="font-size: 0.75rem; color: #64748b; font-weight: normal;">OTIF Score</span>
+            </div>
+            <div style="height: 250px; position: relative;">
+                <canvas id="chartScmProveedores"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let scmChartInstance1 = null;
+    let scmChartInstance2 = null;
+
+    function inicializarReportesSCM() {
+        if (typeof Chart === 'undefined') return;
+
+        // Limpiar instancias previas para evitar memory leak o canvas duplicado
+        if (scmChartInstance1) scmChartInstance1.destroy();
+        if (scmChartInstance2) scmChartInstance2.destroy();
+
+        const ctx1 = document.getElementById("chartScmRotacion");
+        if (ctx1) {
+            scmChartInstance1 = new Chart(ctx1, {
+                type: 'bar',
+                data: {
+                    labels: ['Cerámica', 'Textil', 'Madera', 'Accesorios', 'Barro Negro'],
+                    datasets: [{
+                        label: 'Índice de Rotación (veces)',
+                        data: [4.8, 5.2, 3.1, 4.5, 3.9],
+                        backgroundColor: '#0d9488',
+                        borderRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: { beginAtZero: true, grid: { color: '#f1f5f9' } },
+                        x: { grid: { display: false } }
+                    }
+                }
+            });
+        }
+
+        const ctx2 = document.getElementById("chartScmProveedores");
+        if (ctx2) {
+            scmChartInstance2 = new Chart(ctx2, {
+                type: 'line',
+                data: {
+                    labels: ['Talavera Real', 'Tejedoras Valle', 'Lacas Michoacán', 'Barro Negro', 'Cueros Bajío'],
+                    datasets: [{
+                        label: 'Cumplimiento (%)',
+                        data: [98, 95, 92, 99, 88],
+                        borderColor: '#2563eb',
+                        backgroundColor: 'rgba(37, 99, 235, 0.1)',
+                        fill: true,
+                        tension: 0.35,
+                        pointRadius: 5
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: { min: 80, max: 100, grid: { color: '#f1f5f9' } },
+                        x: { grid: { display: false } }
+                    }
+                }
+            });
+        }
+    }
+
+    function exportarReporteSCM() {
+        if (typeof showNotification === 'function') {
+            showNotification("Generando informe consolidado SCM...");
+        } else {
+            alert("Generando informe consolidado SCM...");
+        }
+    }
+
+    setTimeout(inicializarReportesSCM, 150);
+</script>

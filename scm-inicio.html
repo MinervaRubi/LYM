@@ -1,0 +1,190 @@
+<!-- ==============================================================
+     SCM HUB PRINCIPAL - MENÚ INICIO SCM (LYM GESTOR)
+     ARCHIVO: scm-inicio.html
+============================================================== -->
+
+<style>
+    .scm-hub-wrapper {
+        max-width: 1000px;
+        margin: 0 auto;
+        display: flex;
+        flex-direction: column;
+        gap: 2rem;
+        padding-top: 0.5rem;
+    }
+
+    .scm-hub-header {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
+
+    .scm-hub-title {
+        font-size: 2.2rem;
+        font-weight: 800;
+        color: #0f172a;
+        margin: 0;
+        letter-spacing: -0.02em;
+    }
+
+    .scm-hub-subtitle {
+        font-size: 1.15rem;
+        font-weight: 500;
+        color: #475569;
+        margin: 0;
+    }
+
+    .scm-cards-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1.5rem;
+    }
+
+    @media (max-width: 768px) {
+        .scm-cards-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    .scm-card-tile {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 18px;
+        padding: 2.5rem 1.75rem;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        text-decoration: none;
+        cursor: pointer;
+        box-shadow: 0 4px 16px rgba(15, 23, 42, 0.04);
+        transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+        user-select: none;
+    }
+
+    .scm-card-tile:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 16px 32px rgba(15, 23, 42, 0.1);
+        border-color: #cbd5e1;
+    }
+
+    .scm-tile-icon {
+        width: 68px;
+        height: 68px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2.5rem;
+        margin-bottom: 1.25rem;
+        transition: transform 0.25s ease;
+    }
+
+    .scm-card-tile:hover .scm-tile-icon {
+        transform: scale(1.1);
+    }
+
+    .scm-icon-green {
+        color: #059669;
+    }
+
+    .scm-icon-blue {
+        color: #2563eb;
+    }
+
+    .scm-icon-orange {
+        color: #ea580c;
+    }
+
+    .scm-tile-title {
+        font-size: 1.45rem;
+        font-weight: 800;
+        color: #1e293b;
+        margin-bottom: 0.4rem;
+        letter-spacing: -0.01em;
+    }
+
+    .scm-tile-desc {
+        font-size: 0.95rem;
+        color: #64748b;
+        font-weight: 500;
+    }
+</style>
+
+<div class="scm-hub-wrapper">
+    <!-- ENCABEZADO PRINCIPAL SCM -->
+    <div class="scm-hub-header">
+        <h1 class="scm-hub-title">SCM</h1>
+        <div class="scm-hub-subtitle">Cadena de Suministros</div>
+    </div>
+
+    <!-- CUADRÍCULA DE 6 TARJETAS INTERACTIVAS -->
+    <div class="scm-cards-grid">
+        <!-- 1. PRODUCTOS -->
+        <div class="scm-card-tile" onclick="navegarDesdeHubSCM('scm-productos.html', 'scm-nav-productos')">
+            <div class="scm-tile-icon scm-icon-green">
+                <i class="fas fa-cube"></i>
+            </div>
+            <div class="scm-tile-title">Productos</div>
+            <div class="scm-tile-desc">Gestión de catálogo</div>
+        </div>
+
+        <!-- 2. PROVEEDORES -->
+        <div class="scm-card-tile" onclick="navegarDesdeHubSCM('scm-proveedores.html', 'scm-nav-proveedores')">
+            <div class="scm-tile-icon scm-icon-blue">
+                <i class="fas fa-user-group"></i>
+            </div>
+            <div class="scm-tile-title">Proveedores</div>
+            <div class="scm-tile-desc">Administrar proveedores</div>
+        </div>
+
+        <!-- 3. INVENTARIO -->
+        <div class="scm-card-tile" onclick="navegarDesdeHubSCM('scm-inventario.html', 'scm-nav-inventario')">
+            <div class="scm-tile-icon scm-icon-green">
+                <i class="fas fa-dice-d6"></i>
+            </div>
+            <div class="scm-tile-title">Inventario</div>
+            <div class="scm-tile-desc">Control de existencias</div>
+        </div>
+
+        <!-- 4. PEDIDOS -->
+        <div class="scm-card-tile" onclick="navegarDesdeHubSCM('scm-pedidos.html', 'scm-nav-pedidos')">
+            <div class="scm-tile-icon scm-icon-orange">
+                <i class="fas fa-file-invoice"></i>
+            </div>
+            <div class="scm-tile-title">Pedidos</div>
+            <div class="scm-tile-desc">Reposición y suministro</div>
+        </div>
+
+        <!-- 5. LOGÍSTICA -->
+        <div class="scm-card-tile" onclick="navegarDesdeHubSCM('scm-logistica.html', 'scm-nav-logistica')">
+            <div class="scm-tile-icon scm-icon-blue">
+                <i class="fas fa-arrows-rotate"></i>
+            </div>
+            <div class="scm-tile-title">Logística</div>
+            <div class="scm-tile-desc">Push / Pull</div>
+        </div>
+
+        <!-- 6. REPORTES -->
+        <div class="scm-card-tile" onclick="navegarDesdeHubSCM('scm-reportes.html', 'scm-nav-reportes')">
+            <div class="scm-tile-icon scm-icon-blue">
+                <i class="fas fa-chart-column"></i>
+            </div>
+            <div class="scm-tile-title">Reportes</div>
+            <div class="scm-tile-desc">Métricas y análisis</div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function navegarDesdeHubSCM(viewUrl, navItemId) {
+        if (typeof abrirAcordeonSCM === 'function') {
+            abrirAcordeonSCM();
+        }
+        
+        const navBtn = document.getElementById(navItemId);
+        if (typeof loadExternalView === 'function') {
+            loadExternalView(viewUrl, navBtn, 'SCM');
+        }
+    }
+</script>

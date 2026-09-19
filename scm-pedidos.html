@@ -1,0 +1,186 @@
+<!-- ==============================================================
+     MÓDULO SCM: PEDIDOS (REPOSICIÓN Y SUMINISTRO)
+     ARCHIVO: scm-pedidos.html
+============================================================== -->
+
+<div style="display: flex; flex-direction: column; gap: 1.5rem;">
+    <!-- CABECERA -->
+    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+        <div>
+            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+                <span class="badge" style="background: rgba(13,148,136,0.15); color: #0d9488; font-weight:700; font-size:0.75rem; padding: 2px 8px; border-radius: 6px;">SCM</span>
+                <span style="font-size: 0.85rem; color: var(--text-muted);">Cadena de Suministros</span>
+            </div>
+            <h2 style="font-size: 1.6rem; font-weight: 800; color: var(--text-heading); margin: 0;">Pedidos de Reposición</h2>
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 2px;">Órdenes de compra y suministro enviadas a talleres y artesanos</p>
+        </div>
+        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+            <button class="crm-btn crm-btn-secondary crm-btn-sm" onclick="cargarPedidosSCM()">
+                <i class="fas fa-sync-alt"></i> <span>Actualizar</span>
+            </button>
+            <button class="crm-btn crm-btn-primary" style="background: linear-gradient(135deg, #ea580c, #c2410c); border:none; box-shadow: 0 4px 12px rgba(234, 88, 12, 0.25);" onclick="abrirModalNuevoPedidoSCM()">
+                <i class="fas fa-file-circle-plus"></i> <span>+ Nueva Orden de Suministro</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- TARJETAS DE MÉTRICAS -->
+    <div class="crm-grid-4">
+        <div class="crm-card crm-metric-card">
+            <div>
+                <div class="crm-metric-label">Órdenes en Proceso</div>
+                <div class="crm-metric-value" style="color:#ea580c;">8 órdenes</div>
+                <div class="crm-metric-subtext">Activas con artesanos</div>
+            </div>
+            <div class="crm-icon-box" style="background: rgba(234,88,12,0.12); color: #ea580c;">
+                <i class="fas fa-file-invoice"></i>
+            </div>
+        </div>
+
+        <div class="crm-card crm-metric-card">
+            <div>
+                <div class="crm-metric-label">En Producción / Taller</div>
+                <div class="crm-metric-value" style="color: #6366f1;">5 pedidos</div>
+                <div class="crm-metric-subtext">Elaboración artesanal</div>
+            </div>
+            <div class="crm-icon-box" style="background: rgba(99,102,241,0.12); color: #6366f1;">
+                <i class="fas fa-hammer"></i>
+            </div>
+        </div>
+
+        <div class="crm-card crm-metric-card">
+            <div>
+                <div class="crm-metric-label">En Tránsito a Bodega</div>
+                <div class="crm-metric-value" style="color: #0284c7;">3 pedidos</div>
+                <div class="crm-metric-subtext positive"><i class="fas fa-truck-fast"></i> Entrega prevista hoy</div>
+            </div>
+            <div class="crm-icon-box" style="background: rgba(2,132,199,0.12); color: #0284c7;">
+                <i class="fas fa-truck"></i>
+            </div>
+        </div>
+
+        <div class="crm-card crm-metric-card">
+            <div>
+                <div class="crm-metric-label">Total Invertido (Mes)</div>
+                <div class="crm-metric-value" style="color: #0f172a;">$94,800</div>
+                <div class="crm-metric-subtext">Presupuesto compras</div>
+            </div>
+            <div class="crm-icon-box" style="background: rgba(16,185,129,0.12); color: #10b981;">
+                <i class="fas fa-wallet"></i>
+            </div>
+        </div>
+    </div>
+
+    <!-- FILTROS -->
+    <div class="crm-card" style="display: flex; align-items: center; justify-content: space-between; gap: 1.25rem; flex-wrap: wrap; padding: 1rem 1.25rem;">
+        <div class="crm-input-group" style="flex: 1; min-width: 260px;">
+            <i class="fas fa-search"></i>
+            <input type="text" class="crm-input" id="inputBuscarPedidoSCM" placeholder="Buscar por código de orden o proveedor..." oninput="filtrarPedidosSCM()">
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;">
+            <div style="display: flex; align-items: center; gap: 8px; font-size: 0.85rem; font-weight: 600; color: var(--text-heading);">
+                <label>Estado:</label>
+                <select class="crm-select" id="filtroEstadoPedidoSCM" onchange="filtrarPedidosSCM()">
+                    <option value="todos">Todos los estados</option>
+                    <option value="produccion">En Producción</option>
+                    <option value="transito">En Tránsito</option>
+                    <option value="completado">Recibido en Bodega</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <!-- TABLA DE PEDIDOS -->
+    <div class="crm-table-container">
+        <table class="crm-table">
+            <thead>
+                <tr>
+                    <th>Orden de Compra</th>
+                    <th>Proveedor / Taller</th>
+                    <th>Piezas</th>
+                    <th>Monto Total</th>
+                    <th>Fecha Estimada</th>
+                    <th>Estado de Suministro</th>
+                    <th style="text-align: right;">Acciones</th>
+                </tr>
+            </thead>
+            <tbody id="tbodyPedidosSCM">
+                <!-- Con JS -->
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    const pedidosSCMList = [
+        { id: "OC-2026-104", taller: "Taller Artesanal Talavera Real", piezas: "45 pzas", total: "$22,500 MXN", fecha: "24 Sept 2026", estado: "transito" },
+        { id: "OC-2026-103", taller: "Cooperativa de Tejedoras del Valle", piezas: "20 pzas", total: "$18,000 MXN", fecha: "26 Sept 2026", estado: "produccion" },
+        { id: "OC-2026-102", taller: "Artesanos de Barro Negro", piezas: "60 pzas", total: "$31,200 MXN", fecha: "21 Sept 2026", estado: "transito" },
+        { id: "OC-2026-101", taller: "Maderas y Lacas de Michoacán", piezas: "15 pzas", total: "$23,100 MXN", fecha: "18 Sept 2026", estado: "completado" }
+    ];
+
+    function cargarPedidosSCM() {
+        renderizarTablaPedidos(pedidosSCMList);
+    }
+
+    function renderizarTablaPedidos(items) {
+        const tbody = document.getElementById("tbodyPedidosSCM");
+        if (!items || items.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding:2rem; color:#64748b;">No se encontraron órdenes de suministro.</td></tr>`;
+            return;
+        }
+
+        tbody.innerHTML = items.map(ord => {
+            let badge = '';
+            if (ord.estado === 'produccion') {
+                badge = `<span class="badge" style="background:#fef3c7; color:#b45309; font-size:0.75rem;"><i class="fas fa-hammer"></i> En Taller</span>`;
+            } else if (ord.estado === 'transito') {
+                badge = `<span class="badge" style="background:#e0f2fe; color:#0369a1; font-size:0.75rem;"><i class="fas fa-truck"></i> En Tránsito</span>`;
+            } else {
+                badge = `<span class="badge badge-activo" style="font-size:0.75rem;"><span class="badge-dot"></span>Recibido</span>`;
+            }
+
+            return `
+                <tr>
+                    <td style="font-weight: 700; color: #0f172a;">${ord.id}</td>
+                    <td>
+                        <div style="font-weight:600; color:#1e293b;">${ord.taller}</div>
+                    </td>
+                    <td style="color:#475569; font-weight:600;">${ord.piezas}</td>
+                    <td style="font-weight:700; color:#0f172a;">${ord.total}</td>
+                    <td style="color:#64748b; font-size:0.85rem;"><i class="fas fa-calendar" style="margin-right:4px;"></i>${ord.fecha}</td>
+                    <td>${badge}</td>
+                    <td style="text-align: right;">
+                        <button class="crm-btn crm-btn-secondary crm-btn-sm" style="padding:4px 8px;">
+                            <i class="fas fa-receipt"></i>
+                        </button>
+                    </td>
+                </tr>
+            `;
+        }).join("");
+    }
+
+    function filtrarPedidosSCM() {
+        const query = document.getElementById("inputBuscarPedidoSCM").value.toLowerCase().trim();
+        const est = document.getElementById("filtroEstadoPedidoSCM").value;
+
+        const filtrados = pedidosSCMList.filter(o => {
+            const matchQ = !query || o.id.toLowerCase().includes(query) || o.taller.toLowerCase().includes(query);
+            const matchE = (est === "todos") || (o.estado === est);
+            return matchQ && matchE;
+        });
+
+        renderizarTablaPedidos(filtrados);
+    }
+
+    function abrirModalNuevoPedidoSCM() {
+        if (typeof showNotification === 'function') {
+            showNotification("Generación de orden de reposición preparada para la lógica SCM");
+        } else {
+            alert("Generación de orden de reposición preparada para la lógica SCM");
+        }
+    }
+
+    cargarPedidosSCM();
+</script>

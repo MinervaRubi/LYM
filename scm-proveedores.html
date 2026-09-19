@@ -1,0 +1,192 @@
+<!-- ==============================================================
+     MÓDULO SCM: PROVEEDORES (ADMINISTRAR PROVEEDORES)
+     ARCHIVO: scm-proveedores.html
+============================================================== -->
+
+<div style="display: flex; flex-direction: column; gap: 1.5rem;">
+    <!-- CABECERA -->
+    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+        <div>
+            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+                <span class="badge" style="background: rgba(13,148,136,0.15); color: #0d9488; font-weight:700; font-size:0.75rem; padding: 2px 8px; border-radius: 6px;">SCM</span>
+                <span style="font-size: 0.85rem; color: var(--text-muted);">Cadena de Suministros</span>
+            </div>
+            <h2 style="font-size: 1.6rem; font-weight: 800; color: var(--text-heading); margin: 0;">Proveedores</h2>
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 2px;">Directorio de talleres artesanales, fabricantes y proveedores de insumos</p>
+        </div>
+        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+            <button class="crm-btn crm-btn-secondary crm-btn-sm" onclick="cargarProveedoresSCM()">
+                <i class="fas fa-sync-alt"></i> <span>Actualizar</span>
+            </button>
+            <button class="crm-btn crm-btn-primary" style="background: linear-gradient(135deg, #2563eb, #1d4ed8); border:none; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);" onclick="abrirModalNuevoProveedorSCM()">
+                <i class="fas fa-user-plus"></i> <span>+ Nuevo Proveedor</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- TARJETAS DE RESUMEN RÁPIDO -->
+    <div class="crm-grid-4">
+        <div class="crm-card crm-metric-card">
+            <div>
+                <div class="crm-metric-label">Total Proveedores</div>
+                <div class="crm-metric-value" id="scmTotalProveedores">12</div>
+                <div class="crm-metric-subtext">Talleres registrados</div>
+            </div>
+            <div class="crm-icon-box" style="background: rgba(37,99,235,0.12); color: #2563eb;">
+                <i class="fas fa-user-group"></i>
+            </div>
+        </div>
+
+        <div class="crm-card crm-metric-card">
+            <div>
+                <div class="crm-metric-label">Proveedores Activos</div>
+                <div class="crm-metric-value" style="color: var(--success);" id="scmProveedoresActivos">10</div>
+                <div class="crm-metric-subtext positive">Con contrato vigente</div>
+            </div>
+            <div class="crm-icon-box crm-icon-emerald">
+                <i class="fas fa-handshake"></i>
+            </div>
+        </div>
+
+        <div class="crm-card crm-metric-card">
+            <div>
+                <div class="crm-metric-label">Tiempo Entrega Promedio</div>
+                <div class="crm-metric-value" style="color: #6366f1;">4.5 días</div>
+                <div class="crm-metric-subtext">Lead time promedio</div>
+            </div>
+            <div class="crm-icon-box" style="background: rgba(99,102,241,0.12); color: #6366f1;">
+                <i class="fas fa-clock"></i>
+            </div>
+        </div>
+
+        <div class="crm-card crm-metric-card">
+            <div>
+                <div class="crm-metric-label">Evaluación Calidad</div>
+                <div class="crm-metric-value" style="color: var(--warning);">4.8 / 5</div>
+                <div class="crm-metric-subtext positive"><i class="fas fa-star" style="color:#f59e0b;"></i> Alto estándar</div>
+            </div>
+            <div class="crm-icon-box crm-icon-amber">
+                <i class="fas fa-award"></i>
+            </div>
+        </div>
+    </div>
+
+    <!-- BARRA DE BÚSQUEDA Y FILTROS -->
+    <div class="crm-card" style="display: flex; align-items: center; justify-content: space-between; gap: 1.25rem; flex-wrap: wrap; padding: 1rem 1.25rem;">
+        <div class="crm-input-group" style="flex: 1; min-width: 260px;">
+            <i class="fas fa-search"></i>
+            <input type="text" class="crm-input" id="inputBuscarProveedorSCM" placeholder="Buscar por taller, contacto, estado o producto..." oninput="filtrarProveedoresSCM()">
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;">
+            <div style="display: flex; align-items: center; gap: 8px; font-size: 0.85rem; font-weight: 600; color: var(--text-heading);">
+                <label>Especialidad:</label>
+                <select class="crm-select" id="filtroEspecialidadSCM" onchange="filtrarProveedoresSCM()">
+                    <option value="todas">Todas</option>
+                    <option value="ceramica">Cerámica y Barro</option>
+                    <option value="textil">Textiles y Bordados</option>
+                    <option value="madera">Madera y Tallados</option>
+                    <option value="cuero">Cuero y Marroquinería</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <!-- TABLA DE PROVEEDORES -->
+    <div class="crm-table-container">
+        <table class="crm-table">
+            <thead>
+                <tr>
+                    <th>Proveedor / Taller</th>
+                    <th>Contacto Principal</th>
+                    <th>Ubicación</th>
+                    <th>Especialidad</th>
+                    <th>Calificación</th>
+                    <th>Estado</th>
+                    <th style="text-align: right;">Acciones</th>
+                </tr>
+            </thead>
+            <tbody id="tbodyProveedoresSCM">
+                <!-- Se llena dinámicamente -->
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    const proveedoresEjemplo = [
+        { id: 1, nombre: "Taller Artesanal Talavera Real", contacto: "Don Mateo Ramírez", tel: "222-491-0391", email: "talaverareal@correo.mx", estado: "Puebla", especialidad: "Cerámica y Barro", calif: "4.9", activo: true },
+        { id: 2, nombre: "Cooperativa de Tejedoras del Valle", contacto: "Elena Hernández", tel: "951-302-8812", email: "tejedorasvalle@correo.mx", estado: "Oaxaca", especialidad: "Textiles y Bordados", calif: "4.8", activo: true },
+        { id: 3, nombre: "Maderas y Lacas de Michoacán", contacto: "Rodrigo Solís", tel: "443-810-9284", email: "maderasur@correo.mx", estado: "Michoacán", especialidad: "Madera y Tallados", calif: "4.7", activo: true },
+        { id: 4, nombre: "Artesanos de Barro Negro", contacto: "Silvia Bautista", tel: "951-678-1122", email: "barronegro@correo.mx", estado: "Oaxaca", especialidad: "Cerámica y Barro", calif: "5.0", activo: true },
+        { id: 5, nombre: "Cueros y Grabados del Bajío", contacto: "Carlos Méndez", tel: "477-512-3409", email: "bajioartesanal@correo.mx", estado: "Guanajuato", especialidad: "Cuero y Marroquinería", calif: "4.6", activo: false }
+    ];
+
+    function cargarProveedoresSCM() {
+        renderizarTablaProveedoresSCM(proveedoresEjemplo);
+    }
+
+    function renderizarTablaProveedoresSCM(items) {
+        const tbody = document.getElementById("tbodyProveedoresSCM");
+        if (!items || items.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding:2rem; color:#64748b;">No se encontraron proveedores registrados.</td></tr>`;
+            return;
+        }
+
+        tbody.innerHTML = items.map(p => `
+            <tr>
+                <td style="font-weight: 700; color: #0f172a;">
+                    <div style="display:flex; align-items:center; gap:10px;">
+                        <div style="width:34px; height:34px; border-radius:8px; background:rgba(37,99,235,0.1); color:#2563eb; display:flex; align-items:center; justify-content:center; font-size:0.9rem;">
+                            <i class="fas fa-handshake"></i>
+                        </div>
+                        <div>
+                            <div>${p.nombre}</div>
+                            <div style="font-size:0.75rem; color:#94a3b8; font-weight:normal;">Cod: PRV-${String(p.id).padStart(3, '0')}</div>
+                        </div>
+                    </div>
+                </td>
+                <td>
+                    <div style="color:#0f172a; font-weight:600;">${p.contacto}</div>
+                    <div style="font-size:0.75rem; color:#64748b;">${p.tel}</div>
+                </td>
+                <td><i class="fas fa-location-dot" style="color:#ef4444; margin-right:4px;"></i>${p.estado}</td>
+                <td><span class="badge" style="background:#eff6ff; color:#1d4ed8; font-size:0.75rem;">${p.especialidad}</span></td>
+                <td style="font-weight:700; color:#f59e0b;"><i class="fas fa-star" style="font-size:0.75rem;"></i> ${p.calif}</td>
+                <td>
+                    <span class="badge ${p.activo ? 'badge-activo' : 'badge-inactivo'}" style="font-size:0.72rem;">
+                        <span class="badge-dot"></span>${p.activo ? 'Activo' : 'Pausado'}
+                    </span>
+                </td>
+                <td style="text-align: right;">
+                    <button class="crm-btn crm-btn-secondary crm-btn-sm" title="Contactar" style="padding:4px 8px;">
+                        <i class="fas fa-envelope"></i>
+                    </button>
+                </td>
+            </tr>
+        `).join("");
+    }
+
+    function filtrarProveedoresSCM() {
+        const query = document.getElementById("inputBuscarProveedorSCM").value.toLowerCase().trim();
+        const esp = document.getElementById("filtroEspecialidadSCM").value;
+
+        const filtrados = proveedoresEjemplo.filter(p => {
+            const matchQuery = !query || p.nombre.toLowerCase().includes(query) || p.contacto.toLowerCase().includes(query) || p.estado.toLowerCase().includes(query);
+            const matchEsp = (esp === "todas") || p.especialidad.toLowerCase().includes(esp.toLowerCase());
+            return matchQuery && matchEsp;
+        });
+
+        renderizarTablaProveedoresSCM(filtrados);
+    }
+
+    function abrirModalNuevoProveedorSCM() {
+        if (typeof showNotification === 'function') {
+            showNotification("Módulo de alta de proveedor preparado para lógica SCM");
+        } else {
+            alert("Módulo de alta de proveedor preparado para lógica SCM");
+        }
+    }
+
+    cargarProveedoresSCM();
+</script>

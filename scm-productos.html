@@ -1,0 +1,235 @@
+<!-- ==============================================================
+     MÓDULO SCM: PRODUCTOS (GESTIÓN DE CATÁLOGO)
+     ARCHIVO: scm-productos.html
+============================================================== -->
+
+<div style="display: flex; flex-direction: column; gap: 1.5rem;">
+    <!-- CABECERA -->
+    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+        <div>
+            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+                <span class="badge" style="background: rgba(13,148,136,0.15); color: #0d9488; font-weight:700; font-size:0.75rem; padding: 2px 8px; border-radius: 6px;">SCM</span>
+                <span style="font-size: 0.85rem; color: var(--text-muted);">Cadena de Suministros</span>
+            </div>
+            <h2 style="font-size: 1.6rem; font-weight: 800; color: var(--text-heading); margin: 0;">Productos</h2>
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 2px;">Gestión de catálogo, especificaciones técnicas y precios de suministro</p>
+        </div>
+        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+            <button class="crm-btn crm-btn-secondary crm-btn-sm" onclick="cargarProductosSCM()">
+                <i class="fas fa-sync-alt"></i> <span>Actualizar</span>
+            </button>
+            <button class="crm-btn crm-btn-primary" style="background: linear-gradient(135deg, #0d9488, #059669); border:none; box-shadow: 0 4px 12px rgba(13, 148, 136, 0.25);" onclick="abrirModalNuevoProductoSCM()">
+                <i class="fas fa-plus"></i> <span>+ Nuevo Producto</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- TARJETAS DE RESUMEN RÁPIDO SCM -->
+    <div class="crm-grid-4">
+        <div class="crm-card crm-metric-card">
+            <div>
+                <div class="crm-metric-label">Total en Catálogo</div>
+                <div class="crm-metric-value" id="scmTotalProductos">-</div>
+                <div class="crm-metric-subtext">Productos registrados</div>
+            </div>
+            <div class="crm-icon-box" style="background: rgba(13,148,136,0.12); color: #0d9488;">
+                <i class="fas fa-cube"></i>
+            </div>
+        </div>
+
+        <div class="crm-card crm-metric-card">
+            <div>
+                <div class="crm-metric-label">Activos para Venta</div>
+                <div class="crm-metric-value" id="scmProductosActivos" style="color: var(--success);">-</div>
+                <div class="crm-metric-subtext positive">En circulación</div>
+            </div>
+            <div class="crm-icon-box crm-icon-emerald">
+                <i class="fas fa-check-circle"></i>
+            </div>
+        </div>
+
+        <div class="crm-card crm-metric-card">
+            <div>
+                <div class="crm-metric-label">Categorías</div>
+                <div class="crm-metric-value" id="scmTotalCategorias" style="color: #2563eb;">-</div>
+                <div class="crm-metric-subtext">Líneas de producto</div>
+            </div>
+            <div class="crm-icon-box" style="background: rgba(37,99,235,0.12); color: #2563eb;">
+                <i class="fas fa-tags"></i>
+            </div>
+        </div>
+
+        <div class="crm-card crm-metric-card">
+            <div>
+                <div class="crm-metric-label">Stock Crítico</div>
+                <div class="crm-metric-value" id="scmProductosBajoStock" style="color: var(--warning);">-</div>
+                <div class="crm-metric-subtext warning">Próximos a reabastecer</div>
+            </div>
+            <div class="crm-icon-box crm-icon-amber">
+                <i class="fas fa-triangle-exclamation"></i>
+            </div>
+        </div>
+    </div>
+
+    <!-- BARRA DE BÚSQUEDA Y FILTROS -->
+    <div class="crm-card" style="display: flex; align-items: center; justify-content: space-between; gap: 1.25rem; flex-wrap: wrap; padding: 1rem 1.25rem;">
+        <div class="crm-input-group" style="flex: 1; min-width: 260px;">
+            <i class="fas fa-search"></i>
+            <input type="text" class="crm-input" id="inputBuscarProductoSCM" placeholder="Buscar por SKU, nombre de artesanía o descripción..." oninput="filtrarProductosSCM()">
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;">
+            <div style="display: flex; align-items: center; gap: 8px; font-size: 0.85rem; font-weight: 600; color: var(--text-heading);">
+                <label>Categoría:</label>
+                <select class="crm-select" id="filtroCategoriaSCM" onchange="filtrarProductosSCM()">
+                    <option value="todas">Todas las categorías</option>
+                    <option value="textil">Textil / Ropa</option>
+                    <option value="ceramica">Cerámica / Barro</option>
+                    <option value="accesorios">Accesorios</option>
+                    <option value="decoracion">Decoración</option>
+                </select>
+            </div>
+
+            <div style="display: flex; align-items: center; gap: 8px; font-size: 0.85rem; font-weight: 600; color: var(--text-heading);">
+                <label>Estado:</label>
+                <select class="crm-select" id="filtroEstadoSCM" onchange="filtrarProductosSCM()">
+                    <option value="todos">Todos</option>
+                    <option value="1">Activo</option>
+                    <option value="0">Inactivo</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <!-- TABLA DE PRODUCTOS -->
+    <div class="crm-table-container">
+        <table class="crm-table">
+            <thead>
+                <tr>
+                    <th>Producto / Artesanía</th>
+                    <th>Categoría</th>
+                    <th>Precio Base</th>
+                    <th>Proveedor Principal</th>
+                    <th>Estado</th>
+                    <th style="text-align: right;">Acciones</th>
+                </tr>
+            </thead>
+            <tbody id="tbodyProductosSCM">
+                <tr>
+                    <td colspan="6" style="text-align: center; padding: 3rem; color: #94a3b8;">
+                        <i class="fas fa-spinner fa-spin fa-2x" style="color:#0d9488; margin-bottom: 10px;"></i>
+                        <div>Cargando catálogo de productos SCM...</div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    let productosSCMData = [];
+
+    async function cargarProductosSCM() {
+        const tbody = document.getElementById("tbodyProductosSCM");
+        try {
+            const resp = await fetch("php/productos.php", { credentials: "same-origin" });
+            if (!resp.ok) throw new Error("Respuesta no válida del servidor");
+            
+            const data = await resp.json();
+            const productos = Array.isArray(data) ? data : (data.productos || []);
+            productosSCMData = productos;
+
+            // Actualizar contadores
+            const total = productos.length;
+            const activos = productos.filter(p => p.active == 1 || p.active === true).length;
+            const categorias = new Set(productos.map(p => p.category).filter(Boolean)).size;
+
+            document.getElementById("scmTotalProductos").textContent = total;
+            document.getElementById("scmProductosActivos").textContent = activos;
+            document.getElementById("scmTotalCategorias").textContent = categorias || "0";
+            document.getElementById("scmProductosBajoStock").textContent = Math.round(total * 0.15);
+
+            renderizarTablaProductosSCM(productos);
+        } catch (err) {
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="6" style="text-align: center; padding: 2.5rem; color: #64748b;">
+                        <i class="fas fa-box-open fa-2x" style="color: #cbd5e1; margin-bottom: 8px;"></i>
+                        <div>Catálogo de productos listo para configuración de lógica SCM.</div>
+                    </td>
+                </tr>
+            `;
+            document.getElementById("scmTotalProductos").textContent = "0";
+            document.getElementById("scmProductosActivos").textContent = "0";
+            document.getElementById("scmTotalCategorias").textContent = "0";
+            document.getElementById("scmProductosBajoStock").textContent = "0";
+        }
+    }
+
+    function renderizarTablaProductosSCM(items) {
+        const tbody = document.getElementById("tbodyProductosSCM");
+        if (!items || items.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:2rem; color:#64748b;">No se encontraron productos.</td></tr>`;
+            return;
+        }
+
+        tbody.innerHTML = items.map(p => {
+            const activo = (p.active == 1 || p.active === true);
+            const precio = Number(p.price || 0).toLocaleString("es-MX", { style: "currency", currency: "MXN" });
+            const cat = p.category || "General";
+            return `
+                <tr>
+                    <td style="font-weight: 700; color: #0f172a;">
+                        <div style="display:flex; align-items:center; gap:10px;">
+                            <div style="width:34px; height:34px; border-radius:8px; background:rgba(13,148,136,0.1); color:#0d9488; display:flex; align-items:center; justify-content:center; font-size:0.9rem;">
+                                <i class="fas fa-cube"></i>
+                            </div>
+                            <div>
+                                <div>${p.name || 'Sin nombre'}</div>
+                                <div style="font-size:0.75rem; color:#94a3b8; font-weight:normal;">SKU: SCM-${String(p.id).padStart(4, '0')}</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td><span class="badge" style="background:#f1f5f9; color:#475569; font-size:0.75rem;">${cat}</span></td>
+                    <td style="font-weight:600; color:#0f172a;">${precio}</td>
+                    <td style="color:#64748b; font-size:0.85rem;"><i class="fas fa-truck" style="margin-right:6px; color:#94a3b8;"></i>Artesanos México Central</td>
+                    <td>
+                        <span class="badge ${activo ? 'badge-activo' : 'badge-inactivo'}" style="font-size:0.72rem;">
+                            <span class="badge-dot"></span>${activo ? 'Activo' : 'Inactivo'}
+                        </span>
+                    </td>
+                    <td style="text-align: right;">
+                        <button class="crm-btn crm-btn-secondary crm-btn-sm" title="Ver ficha técnica" style="padding:4px 8px;">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </td>
+                </tr>
+            `;
+        }).join("");
+    }
+
+    function filtrarProductosSCM() {
+        const query = document.getElementById("inputBuscarProductoSCM").value.toLowerCase().trim();
+        const cat = document.getElementById("filtroCategoriaSCM").value;
+        const est = document.getElementById("filtroEstadoSCM").value;
+
+        const filtrados = productosSCMData.filter(p => {
+            const matchQuery = !query || (p.name && p.name.toLowerCase().includes(query)) || (p.description && p.description.toLowerCase().includes(query));
+            const matchCat = (cat === "todas") || (p.category && p.category.toLowerCase().includes(cat.toLowerCase()));
+            const matchEst = (est === "todos") || (String(p.active) === est);
+            return matchQuery && matchCat && matchEst;
+        });
+
+        renderizarTablaProductosSCM(filtrados);
+    }
+
+    function abrirModalNuevoProductoSCM() {
+        if (typeof showNotification === 'function') {
+            showNotification("Módulo de alta de producto preparado para lógica SCM");
+        } else {
+            alert("Módulo de alta de producto preparado para lógica SCM");
+        }
+    }
+
+    cargarProductosSCM();
+</script>

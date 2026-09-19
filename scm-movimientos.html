@@ -1,0 +1,190 @@
+<!-- ==============================================================
+     MÓDULO SCM: MOVIMIENTOS (ENTRADAS / SALIDAS / TRANSFERENCIAS)
+     ARCHIVO: scm-movimientos.html
+============================================================== -->
+
+<div style="display: flex; flex-direction: column; gap: 1.5rem;">
+    <!-- CABECERA -->
+    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+        <div>
+            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+                <span class="badge" style="background: rgba(13,148,136,0.15); color: #0d9488; font-weight:700; font-size:0.75rem; padding: 2px 8px; border-radius: 6px;">SCM</span>
+                <span style="font-size: 0.85rem; color: var(--text-muted);">Cadena de Suministros</span>
+            </div>
+            <h2 style="font-size: 1.6rem; font-weight: 800; color: var(--text-heading); margin: 0;">Movimientos</h2>
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 2px;">Trazabilidad completa de entradas por compras, salidas por pedidos y transferencias</p>
+        </div>
+        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+            <button class="crm-btn crm-btn-secondary crm-btn-sm" onclick="cargarMovimientosSCM()">
+                <i class="fas fa-sync-alt"></i> <span>Actualizar</span>
+            </button>
+            <button class="crm-btn crm-btn-primary" style="background: linear-gradient(135deg, #0d9488, #059669); border:none; box-shadow: 0 4px 12px rgba(13, 148, 136, 0.25);" onclick="abrirModalNuevoMovimiento()">
+                <i class="fas fa-arrow-right-arrow-left"></i> <span>+ Registrar Movimiento</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- METRICAS DE MOVIMIENTOS -->
+    <div class="crm-grid-4">
+        <div class="crm-card crm-metric-card">
+            <div>
+                <div class="crm-metric-label">Movimientos (Mes)</div>
+                <div class="crm-metric-value">138</div>
+                <div class="crm-metric-subtext">Total transacciones</div>
+            </div>
+            <div class="crm-icon-box" style="background: rgba(13,148,136,0.12); color: #0d9488;">
+                <i class="fas fa-list-check"></i>
+            </div>
+        </div>
+
+        <div class="crm-card crm-metric-card">
+            <div>
+                <div class="crm-metric-label">Entradas Recepción</div>
+                <div class="crm-metric-value" style="color: var(--success);">+420 pzas</div>
+                <div class="crm-metric-subtext positive"><i class="fas fa-arrow-down"></i> Ingresos de artesanos</div>
+            </div>
+            <div class="crm-icon-box crm-icon-emerald">
+                <i class="fas fa-arrow-down"></i>
+            </div>
+        </div>
+
+        <div class="crm-card crm-metric-card">
+            <div>
+                <div class="crm-metric-label">Salidas Despacho</div>
+                <div class="crm-metric-value" style="color: #ef4444;">-315 pzas</div>
+                <div class="crm-metric-subtext" style="color:#ef4444;"><i class="fas fa-arrow-up"></i> Envíos a clientes</div>
+            </div>
+            <div class="crm-icon-box" style="background: rgba(239,68,68,0.12); color: #ef4444;">
+                <i class="fas fa-arrow-up"></i>
+            </div>
+        </div>
+
+        <div class="crm-card crm-metric-card">
+            <div>
+                <div class="crm-metric-label">Transferencias</div>
+                <div class="crm-metric-value" style="color: #2563eb;">24 envíos</div>
+                <div class="crm-metric-subtext">Entre almacenes</div>
+            </div>
+            <div class="crm-icon-box" style="background: rgba(37,99,235,0.12); color: #2563eb;">
+                <i class="fas fa-right-left"></i>
+            </div>
+        </div>
+    </div>
+
+    <!-- FILTROS -->
+    <div class="crm-card" style="display: flex; align-items: center; justify-content: space-between; gap: 1.25rem; flex-wrap: wrap; padding: 1rem 1.25rem;">
+        <div class="crm-input-group" style="flex: 1; min-width: 260px;">
+            <i class="fas fa-search"></i>
+            <input type="text" class="crm-input" id="inputBuscarMovimiento" placeholder="Buscar por folio, artesano o producto..." oninput="filtrarMovimientosSCM()">
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;">
+            <div style="display: flex; align-items: center; gap: 8px; font-size: 0.85rem; font-weight: 600; color: var(--text-heading);">
+                <label>Tipo:</label>
+                <select class="crm-select" id="filtroTipoMovimiento" onchange="filtrarMovimientosSCM()">
+                    <option value="todos">Todos los tipos</option>
+                    <option value="entrada">Entrada (Recepción)</option>
+                    <option value="salida">Salida (Venta/Despacho)</option>
+                    <option value="transferencia">Transferencia Interna</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <!-- TABLA DE MOVIMIENTOS -->
+    <div class="crm-table-container">
+        <table class="crm-table">
+            <thead>
+                <tr>
+                    <th>Folio / Fecha</th>
+                    <th>Tipo</th>
+                    <th>Producto</th>
+                    <th>Cantidad</th>
+                    <th>Origen / Destino</th>
+                    <th>Responsable</th>
+                    <th style="text-align: right;">Detalle</th>
+                </tr>
+            </thead>
+            <tbody id="tbodyMovimientosSCM">
+                <!-- Se llena con JS -->
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    const movimientosEjemplo = [
+        { id: "MOV-891", fecha: "Hoy, 11:20 AM", tipo: "entrada", producto: "Platón Decorativo Talavera", cant: "+25 pzas", origen: "Taller Talavera Real", destino: "Bodega Puebla", user: "Juan Lalo" },
+        { id: "MOV-890", fecha: "Hoy, 09:45 AM", tipo: "salida", producto: "Jarrón de Barro Negro", cant: "-4 pzas", origen: "Almacén Central", destino: "Cliente Tienda Web", user: "Ailyn Gestor" },
+        { id: "MOV-889", fecha: "Ayer, 04:30 PM", tipo: "transferencia", producto: "Rebozo de Seda", cant: "10 pzas", origen: "Centro Oaxaca", destino: "Almacén Central CDMX", user: "Don Mateo" },
+        { id: "MOV-888", fecha: "Ayer, 01:15 PM", tipo: "entrada", producto: "Alebrije Monumental Dragón", cant: "+12 pzas", origen: "Cooperativa Oaxaca", destino: "Centro Oaxaca", user: "Elena Hdz." }
+    ];
+
+    function cargarMovimientosSCM() {
+        renderizarTablaMovimientos(movimientosEjemplo);
+    }
+
+    function renderizarTablaMovimientos(items) {
+        const tbody = document.getElementById("tbodyMovimientosSCM");
+        if (!items || items.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding:2rem; color:#64748b;">No hay movimientos registrados.</td></tr>`;
+            return;
+        }
+
+        tbody.innerHTML = items.map(m => {
+            let badgeTipo = '';
+            if (m.tipo === 'entrada') {
+                badgeTipo = `<span class="badge" style="background:#dcfce7; color:#15803d; font-size:0.75rem;"><i class="fas fa-arrow-down"></i> Entrada</span>`;
+            } else if (m.tipo === 'salida') {
+                badgeTipo = `<span class="badge" style="background:#fee2e2; color:#b91c1c; font-size:0.75rem;"><i class="fas fa-arrow-up"></i> Salida</span>`;
+            } else {
+                badgeTipo = `<span class="badge" style="background:#eff6ff; color:#1d4ed8; font-size:0.75rem;"><i class="fas fa-right-left"></i> Transferencia</span>`;
+            }
+
+            return `
+                <tr>
+                    <td style="font-weight:700; color:#0f172a;">
+                        <div>${m.id}</div>
+                        <div style="font-size:0.75rem; color:#94a3b8; font-weight:normal;">${m.fecha}</div>
+                    </td>
+                    <td>${badgeTipo}</td>
+                    <td style="font-weight:600; color:#1e293b;">${m.producto}</td>
+                    <td style="font-weight:700; color:${m.tipo === 'entrada' ? '#15803d' : (m.tipo === 'salida' ? '#b91c1c' : '#2563eb')};">${m.cant}</td>
+                    <td style="font-size:0.85rem; color:#475569;">
+                        <div>De: <strong>${m.origen}</strong></div>
+                        <div style="color:#64748b;">A: ${m.destino}</div>
+                    </td>
+                    <td style="color:#64748b; font-size:0.85rem;"><i class="fas fa-user-circle" style="margin-right:4px;"></i>${m.user}</td>
+                    <td style="text-align: right;">
+                        <button class="crm-btn crm-btn-secondary crm-btn-sm" style="padding:4px 8px;">
+                            <i class="fas fa-file-lines"></i>
+                        </button>
+                    </td>
+                </tr>
+            `;
+        }).join("");
+    }
+
+    function filtrarMovimientosSCM() {
+        const query = document.getElementById("inputBuscarMovimiento").value.toLowerCase().trim();
+        const tipo = document.getElementById("filtroTipoMovimiento").value;
+
+        const filtrados = movimientosEjemplo.filter(m => {
+            const matchQ = !query || m.id.toLowerCase().includes(query) || m.producto.toLowerCase().includes(query) || m.origen.toLowerCase().includes(query);
+            const matchT = (tipo === "todos") || (m.tipo === tipo);
+            return matchQ && matchT;
+        });
+
+        renderizarTablaMovimientos(filtrados);
+    }
+
+    function abrirModalNuevoMovimiento() {
+        if (typeof showNotification === 'function') {
+            showNotification("Registro de movimientos preparado para la lógica de inventario");
+        } else {
+            alert("Registro de movimientos preparado para la lógica de inventario");
+        }
+    }
+
+    cargarMovimientosSCM();
+</script>

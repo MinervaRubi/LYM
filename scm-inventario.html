@@ -1,0 +1,197 @@
+<!-- ==============================================================
+     MÓDULO SCM: INVENTARIO (CONTROL DE EXISTENCIAS)
+     ARCHIVO: scm-inventario.html
+============================================================== -->
+
+<div style="display: flex; flex-direction: column; gap: 1.5rem;">
+    <!-- CABECERA -->
+    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+        <div>
+            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+                <span class="badge" style="background: rgba(13,148,136,0.15); color: #0d9488; font-weight:700; font-size:0.75rem; padding: 2px 8px; border-radius: 6px;">SCM</span>
+                <span style="font-size: 0.85rem; color: var(--text-muted);">Cadena de Suministros</span>
+            </div>
+            <h2 style="font-size: 1.6rem; font-weight: 800; color: var(--text-heading); margin: 0;">Inventario</h2>
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 2px;">Control en tiempo real de existencias, almacenes y puntos de reorden</p>
+        </div>
+        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+            <button class="crm-btn crm-btn-secondary crm-btn-sm" onclick="cargarInventarioSCM()">
+                <i class="fas fa-sync-alt"></i> <span>Actualizar</span>
+            </button>
+            <button class="crm-btn crm-btn-primary" style="background: linear-gradient(135deg, #0d9488, #059669); border:none; box-shadow: 0 4px 12px rgba(13, 148, 136, 0.25);" onclick="abrirModalAjusteInventario()">
+                <i class="fas fa-sliders"></i> <span>Ajuste de Stock</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- TARJETAS DE RESUMEN RÁPIDO INVENTARIO -->
+    <div class="crm-grid-4">
+        <div class="crm-card crm-metric-card">
+            <div>
+                <div class="crm-metric-label">Unidades Totales</div>
+                <div class="crm-metric-value" id="invTotalUnidades">1,420</div>
+                <div class="crm-metric-subtext">Piezas en almacén</div>
+            </div>
+            <div class="crm-icon-box" style="background: rgba(13,148,136,0.12); color: #0d9488;">
+                <i class="fas fa-dice-d6"></i>
+            </div>
+        </div>
+
+        <div class="crm-card crm-metric-card">
+            <div>
+                <div class="crm-metric-label">En Nivel Óptimo</div>
+                <div class="crm-metric-value" style="color: var(--success);" id="invNivelOptimo">88%</div>
+                <div class="crm-metric-subtext positive">Sin riesgo de desabasto</div>
+            </div>
+            <div class="crm-icon-box crm-icon-emerald">
+                <i class="fas fa-circle-check"></i>
+            </div>
+        </div>
+
+        <div class="crm-card crm-metric-card">
+            <div>
+                <div class="crm-metric-label">Alertas Stock Crítico</div>
+                <div class="crm-metric-value" style="color: var(--danger);" id="invAlertasCriticas">6</div>
+                <div class="crm-metric-subtext" style="color:var(--danger);"><i class="fas fa-triangle-exclamation"></i> Por debajo del mínimo</div>
+            </div>
+            <div class="crm-icon-box" style="background: rgba(239,68,68,0.12); color: #ef4444;">
+                <i class="fas fa-bell"></i>
+            </div>
+        </div>
+
+        <div class="crm-card crm-metric-card">
+            <div>
+                <div class="crm-metric-label">Valor en Existencia</div>
+                <div class="crm-metric-value" style="color: #0f172a;" id="invValorEstimado">$248,500</div>
+                <div class="crm-metric-subtext">Costo estimado MXN</div>
+            </div>
+            <div class="crm-icon-box" style="background: rgba(15,23,42,0.08); color: #0f172a;">
+                <i class="fas fa-vault"></i>
+            </div>
+        </div>
+    </div>
+
+    <!-- FILTROS -->
+    <div class="crm-card" style="display: flex; align-items: center; justify-content: space-between; gap: 1.25rem; flex-wrap: wrap; padding: 1rem 1.25rem;">
+        <div class="crm-input-group" style="flex: 1; min-width: 260px;">
+            <i class="fas fa-search"></i>
+            <input type="text" class="crm-input" id="inputBuscarInventario" placeholder="Buscar por código, producto o pasillo..." oninput="filtrarInventarioSCM()">
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;">
+            <div style="display: flex; align-items: center; gap: 8px; font-size: 0.85rem; font-weight: 600; color: var(--text-heading);">
+                <label>Almacén:</label>
+                <select class="crm-select" id="filtroAlmacenSCM" onchange="filtrarInventarioSCM()">
+                    <option value="todos">Todos los almacenes</option>
+                    <option value="central">Almacén Central (CDMX)</option>
+                    <option value="oaxaca">Centro Regional Oaxaca</option>
+                    <option value="puebla">Bodega Puebla</option>
+                </select>
+            </div>
+
+            <div style="display: flex; align-items: center; gap: 8px; font-size: 0.85rem; font-weight: 600; color: var(--text-heading);">
+                <label>Estado de Stock:</label>
+                <select class="crm-select" id="filtroNivelStock" onchange="filtrarInventarioSCM()">
+                    <option value="todos">Todos</option>
+                    <option value="critico">Bajo / Crítico</option>
+                    <option value="optimo">Nivel Óptimo</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <!-- TABLA DE INVENTARIO -->
+    <div class="crm-table-container">
+        <table class="crm-table">
+            <thead>
+                <tr>
+                    <th>Artículo / Artesanía</th>
+                    <th>Almacén / Pasillo</th>
+                    <th>Stock Actual</th>
+                    <th>Mínimo Requerido</th>
+                    <th>Máximo Capacidad</th>
+                    <th>Estado</th>
+                    <th style="text-align: right;">Acciones</th>
+                </tr>
+            </thead>
+            <tbody id="tbodyInventarioSCM">
+                <!-- Generado dinámicamente -->
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    const inventarioItems = [
+        { id: 1, nombre: "Jarrón de Barro Negro Esmaltado", sku: "SCM-BN01", almacen: "Almacén Central (CDMX)", ubicacion: "Pasillo A-02", actual: 14, min: 25, max: 100, critico: true },
+        { id: 2, nombre: "Platón Decorativo Talavera Poblana", sku: "SCM-TL04", almacen: "Bodega Puebla", ubicacion: "Pasillo B-01", actual: 48, min: 20, max: 120, critico: false },
+        { id: 3, nombre: "Rebozo de Seda Telar de Cintura", sku: "SCM-RB09", almacen: "Centro Regional Oaxaca", ubicacion: "Estante T-04", actual: 8, min: 15, max: 50, critico: true },
+        { id: 4, nombre: "Caja de Olinalá Laqueada en Oro", sku: "SCM-OL03", almacen: "Almacén Central (CDMX)", ubicacion: "Pasillo C-03", actual: 35, min: 10, max: 60, critico: false },
+        { id: 5, nombre: "Alebrije Monumental Dragón Alado", sku: "SCM-AL07", almacen: "Centro Regional Oaxaca", ubicacion: "Zona Exhibición", actual: 19, min: 10, max: 40, critico: false }
+    ];
+
+    function cargarInventarioSCM() {
+        renderizarTablaInventario(inventarioItems);
+    }
+
+    function renderizarTablaInventario(items) {
+        const tbody = document.getElementById("tbodyInventarioSCM");
+        if (!items || items.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding:2rem; color:#64748b;">No hay existencias que coincidan con la búsqueda.</td></tr>`;
+            return;
+        }
+
+        tbody.innerHTML = items.map(item => `
+            <tr>
+                <td style="font-weight: 700; color: #0f172a;">
+                    <div>${item.nombre}</div>
+                    <div style="font-size:0.75rem; color:#94a3b8; font-weight:normal;">SKU: ${item.sku}</div>
+                </td>
+                <td>
+                    <div style="color:#0f172a; font-weight:500;">${item.almacen}</div>
+                    <div style="font-size:0.75rem; color:#64748b;">${item.ubicacion}</div>
+                </td>
+                <td style="font-weight: 700; font-size:1rem; color:${item.critico ? '#ef4444' : '#059669'};">
+                    ${item.actual} <span style="font-size:0.75rem; font-weight:normal; color:#64748b;">piezas</span>
+                </td>
+                <td style="color:#475569; font-weight:600;">${item.min} pzas</td>
+                <td style="color:#64748b;">${item.max} pzas</td>
+                <td>
+                    <span class="badge ${item.critico ? 'badge-inactivo' : 'badge-activo'}" style="font-size:0.72rem; ${item.critico ? 'background:#fee2e2; color:#b91c1c;' : ''}">
+                        <span class="badge-dot"></span>${item.critico ? 'Reponer Stock' : 'Suficiente'}
+                    </span>
+                </td>
+                <td style="text-align: right;">
+                    <button class="crm-btn crm-btn-secondary crm-btn-sm" title="Kardex de movimientos" onclick="navegarDesdeHubSCM('scm-movimientos.html', 'scm-nav-movimientos')" style="padding:4px 8px;">
+                        <i class="fas fa-clock-rotate-left"></i>
+                    </button>
+                </td>
+            </tr>
+        `).join("");
+    }
+
+    function filtrarInventarioSCM() {
+        const query = document.getElementById("inputBuscarInventario").value.toLowerCase().trim();
+        const alm = document.getElementById("filtroAlmacenSCM").value;
+        const est = document.getElementById("filtroNivelStock").value;
+
+        const filtrados = inventarioItems.filter(item => {
+            const matchQuery = !query || item.nombre.toLowerCase().includes(query) || item.sku.toLowerCase().includes(query);
+            const matchAlm = (alm === "todos") || item.almacen.toLowerCase().includes(alm.toLowerCase());
+            const matchEst = (est === "todos") || (est === "critico" && item.critico) || (est === "optimo" && !item.critico);
+            return matchQuery && matchAlm && matchEst;
+        });
+
+        renderizarTablaInventario(filtrados);
+    }
+
+    function abrirModalAjusteInventario() {
+        if (typeof showNotification === 'function') {
+            showNotification("Ajuste de inventario preparado para la lógica de negocio");
+        } else {
+            alert("Ajuste de inventario preparado para la lógica de negocio");
+        }
+    }
+
+    cargarInventarioSCM();
+</script>

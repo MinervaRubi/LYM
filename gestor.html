@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LYM CRM - Gestor Principal</title>
+    <title>LYM - Gestor</title>
 
     <!-- FUENTE GOOGLE PLUS JAKARTA SANS -->
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -12,8 +12,92 @@
     <!-- FONT AWESOME ICONS -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
-    <!-- HOJA DE ESTILOS MODERNA MINIMALISTA DEL CRM -->
-    <link rel="stylesheet" href="crm-style.css">
+    <!-- HOJA DE ESTILOS MODERNA MINIMALISTA DEL CRM (CON CACHE BUSTER) -->
+    <link rel="stylesheet" href="crm-style.css?v=2.2">
+
+    <!-- HOJA DE ESTILOS MODERNA MINIMALISTA DEL CRM (CON CACHE BUSTER) -->
+    <link rel="stylesheet" href="crm-style.css?v=2.3">
+
+    <!-- ESTILOS DIRECTOS Y APEGADOS A LA PANTALLA PARA EL SIDEBAR -->
+    <style>
+        .crm-accordion-wrapper {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+        }
+
+        .crm-nav-accordion-btn {
+            display: flex;
+            align-items: center;
+            width: 100%;
+            cursor: pointer;
+        }
+
+        .crm-chevron {
+            margin-left: auto;
+            font-size: 0.7rem;
+            color: #64748b;
+            transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), color 0.2s ease;
+        }
+
+        .crm-nav-accordion-btn:hover .crm-chevron {
+            color: #ffffff;
+        }
+
+        .crm-nav-accordion-btn.open .crm-chevron {
+            transform: rotate(180deg);
+            color: #ffffff;
+        }
+
+        .crm-nav-sublist {
+            display: none;
+            flex-direction: column;
+            gap: 2px;
+            padding-left: 0.75rem;
+            margin: 4px 0 6px 0;
+            border-left: 1px solid rgba(255, 255, 255, 0.08);
+            margin-left: 1.25rem;
+        }
+
+        .crm-nav-sublist.show {
+            display: flex !important;
+        }
+
+        .crm-nav-subitem {
+            font-size: 0.84rem !important;
+            padding: 0.55rem 0.75rem !important;
+            color: #94a3b8 !important;
+            border-radius: 8px !important;
+        }
+
+        .crm-nav-subitem i {
+            font-size: 0.85rem !important;
+            width: 18px !important;
+            text-align: center;
+            color: #64748b;
+            transition: color 0.2s ease;
+        }
+
+        .crm-nav-subitem:hover {
+            color: #ffffff !important;
+            background-color: var(--sidebar-hover) !important;
+        }
+
+        .crm-nav-subitem:hover i {
+            color: #ffffff !important;
+        }
+
+        .crm-nav-subitem.active {
+            background: linear-gradient(135deg, var(--primary), #7c3aed) !important;
+            color: #ffffff !important;
+            font-weight: 600 !important;
+            box-shadow: 0 4px 12px rgba(107, 70, 193, 0.3) !important;
+        }
+
+        .crm-nav-subitem.active i {
+            color: #ffffff !important;
+        }
+    </style>
 
     <!-- CHART.JS PARA GRÁFICAS DEL CRM -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -26,53 +110,99 @@
         <aside class="crm-sidebar">
             <div class="crm-sidebar-brand">
                 <div class="crm-brand-logo">L</div>
-                <div class="crm-brand-text">LYM <span class="crm-brand-tag">CRM</span></div>
+                <div class="crm-brand-text">LYM <span class="crm-brand-tag" style="background:rgba(236,72,153,0.2); color:#f472b6; font-size:0.68rem; font-weight:700; padding:2px 7px; border-radius:4px; margin-left:6px; letter-spacing:0.04em;">GESTOR</span></div>
             </div>
 
-            <div class="crm-nav-group">
-                <div class="crm-nav-label">Navegación CRM</div>
-                
-                <button class="crm-nav-item active" onclick="loadExternalView('crm-dashboard.html', this)">
+            <div class="crm-nav-group" style="overflow-y:auto; max-height:calc(100vh - 170px);">
+                <div class="crm-nav-label">Navegación Gestor</div>
+
+                <!-- 1. DASHBOARD PRINCIPAL -->
+                <button class="crm-nav-item active" id="navItemInicio" onclick="irAInicioGestor(this)">
                     <i class="fas fa-chart-pie"></i> <span>Dashboard</span>
                 </button>
 
-                <button class="crm-nav-item" onclick="loadExternalView('crm-clientes.html', this)">
-                    <i class="fas fa-users"></i> <span>Clientes</span>
-                </button>
+                <!-- 2. CRM DESPLEGABLE -->
+                <div class="crm-accordion-wrapper">
+                    <button class="crm-nav-item crm-nav-accordion-btn" id="btnAccordionCRM" onclick="toggleAccordion('CRM')">
+                        <i class="fas fa-briefcase"></i>
+                        <span>CRM</span>
+                        <i class="fas fa-chevron-down crm-chevron" id="chevronCRM"></i>
+                    </button>
+                    
+                    <div class="crm-nav-sublist" id="submenuCRM">
+                        <button class="crm-nav-item crm-nav-subitem" id="navItemClientes" onclick="loadExternalView('crm-clientes.html', this, 'CRM')">
+                            <i class="fas fa-users"></i> <span>Clientes</span>
+                        </button>
+                        <button class="crm-nav-item crm-nav-subitem" id="navItemInteracciones" onclick="loadExternalView('crm-interacciones.html', this, 'CRM')">
+                            <i class="fas fa-comments"></i> <span>Interacciones</span>
+                        </button>
+                        <button class="crm-nav-item crm-nav-subitem" id="navItemEvaluaciones" onclick="loadExternalView('crm-evaluaciones.html', this, 'CRM')">
+                            <i class="fas fa-star"></i> <span>Evaluaciones</span>
+                        </button>
+                        <button class="crm-nav-item crm-nav-subitem" id="navItemDescuentos" onclick="loadExternalView('crm-descuentos.html', this, 'CRM')">
+                            <i class="fas fa-tags"></i> <span>Descuentos y Promos</span>
+                            <span id="badgeDescuentosSidebar" class="crm-badge" style="display:none; background:#ef4444; color:white; font-size:0.7rem; padding:1px 6px; border-radius:10px; margin-left:auto; font-weight:700;">0</span>
+                        </button>
+                        <button class="crm-nav-item crm-nav-subitem" id="navItemActividad" onclick="loadExternalView('crm-actividad.html', this, 'CRM')">
+                            <i class="fas fa-clipboard-list"></i> <span>Mi Actividad</span>
+                        </button>
+                        <button class="crm-nav-item crm-nav-subitem" id="navItemReportes" onclick="loadExternalView('crm-reportes.html', this, 'CRM')">
+                            <i class="fas fa-chart-bar"></i> <span>Reportes y Métricas</span>
+                        </button>
+                    </div>
+                </div>
 
-                <button class="crm-nav-item" onclick="loadExternalView('crm-interacciones.html', this)">
-                    <i class="fas fa-comments"></i> <span>Interacciones</span>
-                </button>
+                <!-- 3. SCM DESPLEGABLE -->
+                <div class="crm-accordion-wrapper">
+                    <button class="crm-nav-item crm-nav-accordion-btn" id="btnAccordionSCM" onclick="toggleAccordion('SCM')">
+                        <i class="fas fa-cubes"></i>
+                        <span>SCM</span>
+                        <i class="fas fa-chevron-down crm-chevron" id="chevronSCM"></i>
+                    </button>
+                    
+                    <div class="crm-nav-sublist" id="submenuSCM">
+                        <button class="crm-nav-item crm-nav-subitem" id="scm-nav-inicio" onclick="loadExternalView('scm-inicio.html', this, 'SCM')">
+                            <i class="fas fa-th-large"></i> <span>Menú SCM</span>
+                        </button>
+                        <button class="crm-nav-item crm-nav-subitem" id="scm-nav-productos" onclick="loadExternalView('scm-productos.html', this, 'SCM')">
+                            <i class="fas fa-cube"></i> <span>Productos</span>
+                        </button>
+                        <button class="crm-nav-item crm-nav-subitem" id="scm-nav-proveedores" onclick="loadExternalView('scm-proveedores.html', this, 'SCM')">
+                            <i class="fas fa-user-group"></i> <span>Proveedores</span>
+                        </button>
+                        <button class="crm-nav-item crm-nav-subitem" id="scm-nav-inventario" onclick="loadExternalView('scm-inventario.html', this, 'SCM')">
+                            <i class="fas fa-dice-d6"></i> <span>Inventario</span>
+                        </button>
+                        <button class="crm-nav-item crm-nav-subitem" id="scm-nav-movimientos" onclick="loadExternalView('scm-movimientos.html', this, 'SCM')">
+                            <i class="fas fa-right-left"></i> <span>Movimientos</span>
+                        </button>
+                        <button class="crm-nav-item crm-nav-subitem" id="scm-nav-pedidos" onclick="loadExternalView('scm-pedidos.html', this, 'SCM')">
+                            <i class="fas fa-file-invoice"></i> <span>Pedidos</span>
+                        </button>
+                        <button class="crm-nav-item crm-nav-subitem" id="scm-nav-logistica" onclick="loadExternalView('scm-logistica.html', this, 'SCM')">
+                            <i class="fas fa-arrows-rotate"></i> <span>Logística</span>
+                        </button>
+                        <button class="crm-nav-item crm-nav-subitem" id="scm-nav-reportes" onclick="loadExternalView('scm-reportes.html', this, 'SCM')">
+                            <i class="fas fa-chart-column"></i> <span>Reportes</span>
+                        </button>
+                    </div>
+                </div>
 
-                <button class="crm-nav-item" onclick="loadExternalView('crm-evaluaciones.html', this)">
-                    <i class="fas fa-star"></i> <span>Evaluaciones</span>
-                </button>
-
-                <button class="crm-nav-item" id="navItemDescuentos" onclick="loadExternalView('crm-descuentos.html', this)">
-                    <i class="fas fa-tags"></i> <span>Descuentos y Promos</span>
-                    <span id="badgeDescuentosSidebar" class="crm-badge" style="display:none; background:#ef4444; color:white; font-size:0.7rem; padding:2px 7px; border-radius:10px; margin-left:auto; font-weight:700;">0</span>
-                </button>
-
-                <button class="crm-nav-item" id="navItemUsuarios" onclick="loadExternalView('crm-usuarios.html', this)">
+                <!-- 4. USUARIOS -->
+                <button class="crm-nav-item" id="navItemUsuarios" onclick="loadExternalView('crm-usuarios.html', this, 'Usuarios')">
                     <i class="fas fa-user-shield"></i> <span>Usuarios</span>
                 </button>
 
+                <!-- 5. TRABAJADORES (ADMIN) -->
                 <button class="crm-nav-item" id="navItemTrabajadores" onclick="abrirModalGestionTrabajadores()" style="display:none;">
                     <i class="fas fa-id-badge"></i> <span>Trabajadores</span>
                 </button>
-
-                <button class="crm-nav-item" id="navItemActividad" onclick="loadExternalView('crm-actividad.html', this)">
-                    <i class="fas fa-clipboard-list"></i> <span>Mi Actividad</span>
-                </button>
-
-                <button class="crm-nav-item" id="navItemReportes" onclick="loadExternalView('crm-reportes.html', this)">
-                    <i class="fas fa-chart-bar"></i> <span>Reportes y Métricas</span>
-                </button>
             </div>
 
+            <!-- CUENTA Y CONFIGURACIÓN -->
             <div class="crm-nav-group" style="margin-top: auto;">
                 <div class="crm-nav-label">Cuenta</div>
-                <button class="crm-nav-item" onclick="abrirModalCambiarPassCRM()">
+                <button class="crm-nav-item" id="navItemConfiguracion" onclick="abrirModalCambiarPassCRM()">
                     <i class="fas fa-key"></i> <span>Cambiar Contraseña</span>
                 </button>
                 <button class="crm-nav-item" onclick="logoutGestor()">
@@ -86,8 +216,10 @@
             <!-- TOPBAR MINIMALISTA -->
             <header class="crm-topbar">
                 <div class="crm-breadcrumb">
-                    <span>LYM CRM</span>
-                    <i class="fas fa-chevron-right" style="font-size:0.7rem;"></i>
+                    <span id="breadcrumbModule" style="font-weight:700; color:#0f172a;">LYM Gestor</span>
+                    <i class="fas fa-chevron-right" style="font-size:0.7rem; color:#94a3b8;"></i>
+                    <span id="breadcrumbSection" style="color:#64748b; font-weight:600; display:none;">CRM</span>
+                    <i class="fas fa-chevron-right" id="breadcrumbSeparator" style="font-size:0.7rem; color:#94a3b8; display:none;"></i>
                     <span class="current" id="topbarCurrentView">Dashboard</span>
                 </div>
 
@@ -457,24 +589,145 @@
     <script>
         let currentLoadedView = 'crm-dashboard.html';
 
+        /* MANEJO DE ACORDEONES CRM Y SCM */
+        function toggleAccordion(module) {
+            if (module === 'CRM') {
+                const btn = document.getElementById("btnAccordionCRM");
+                const sub = document.getElementById("submenuCRM");
+                const isOpen = sub.classList.contains("show");
+                
+                if (isOpen) {
+                    btn.classList.remove("open");
+                    sub.classList.remove("show");
+                } else {
+                    btn.classList.add("open");
+                    sub.classList.add("show");
+                }
+            } else if (module === 'SCM') {
+                const btn = document.getElementById("btnAccordionSCM");
+                const sub = document.getElementById("submenuSCM");
+                const isOpen = sub.classList.contains("show");
+
+                if (isOpen) {
+                    // CERRAR SCM
+                    btn.classList.remove("open");
+                    sub.classList.remove("show");
+                } else {
+                    // ABRIR SCM
+                    btn.classList.add("open");
+                    sub.classList.add("show");
+                    
+                    // Si no estamos viendo una pantalla de SCM, cargar el menú de inicio SCM
+                    if (!currentLoadedView || !currentLoadedView.startsWith('scm-')) {
+                        loadExternalView('scm-inicio.html', document.getElementById("scm-nav-inicio"), 'SCM');
+                    }
+                }
+            }
+        }
+
+        function abrirAcordeonSCM() {
+            const btn = document.getElementById("btnAccordionSCM");
+            const sub = document.getElementById("submenuSCM");
+            if (btn && sub) {
+                btn.classList.add("open");
+                sub.classList.add("show");
+            }
+        }
+
+        function abrirAcordeonCRM() {
+            const btn = document.getElementById("btnAccordionCRM");
+            const sub = document.getElementById("submenuCRM");
+            if (btn && sub) {
+                btn.classList.add("open");
+                sub.classList.add("show");
+            }
+        }
+
+        function irAInicioGestor(btn) {
+            document.querySelectorAll(".crm-nav-item, .crm-nav-subitem").forEach(el => el.classList.remove("active"));
+            if (btn) btn.classList.add("active");
+            
+            const bSection = document.getElementById("breadcrumbSection");
+            const bSep = document.getElementById("breadcrumbSeparator");
+            const bCur = document.getElementById("topbarCurrentView");
+            if (bSection) bSection.style.display = "none";
+            if (bSep) bSep.style.display = "none";
+            if (bCur) bCur.textContent = "Dashboard";
+
+            loadExternalView('crm-dashboard.html', null);
+        }
+
         /* NAVEGACIÓN ENTRE VISTAS */
-        function loadExternalView(viewUrl, button) {
+        function loadExternalView(viewUrl, button, moduleCategory) {
             const container = document.getElementById("contenedor-vistas-crm");
             currentLoadedView = viewUrl;
 
-            // Actualizar botones del sidebar
-            if (button) {
-                document.querySelectorAll(".crm-nav-item").forEach(btn => btn.classList.remove("active"));
-                button.classList.add("active");
-                
-                const label = button.querySelector("span")?.textContent || "Dashboard";
-                document.getElementById("topbarCurrentView").textContent = label;
+            // Resolver si button es ID en string
+            if (typeof button === 'string') {
+                button = document.getElementById(button);
             }
+
+            // Actualizar clases activas en sidebar
+            document.querySelectorAll(".crm-nav-item, .crm-nav-subitem").forEach(el => el.classList.remove("active"));
+
+            // Breadcrumb elements
+            const bSection = document.getElementById("breadcrumbSection");
+            const bSep = document.getElementById("breadcrumbSeparator");
+            const bCur = document.getElementById("topbarCurrentView");
+
+            let label = "Dashboard";
+
+            if (button) {
+                button.classList.add("active");
+                label = button.querySelector("span")?.textContent || label;
+
+                // Detectar si está dentro de CRM o SCM
+                if (button.closest("#submenuCRM") || moduleCategory === 'CRM') {
+                    abrirAcordeonCRM();
+                    if (bSection && bSep) {
+                        bSection.textContent = "CRM";
+                        bSection.style.display = "inline";
+                        bSep.style.display = "inline";
+                    }
+                } else if (button.closest("#submenuSCM") || moduleCategory === 'SCM') {
+                    abrirAcordeonSCM();
+                    if (bSection && bSep) {
+                        bSection.textContent = "SCM";
+                        bSection.style.display = "inline";
+                        bSep.style.display = "inline";
+                    }
+                } else {
+                    if (bSection && bSep) {
+                        bSection.style.display = "none";
+                        bSep.style.display = "none";
+                    }
+                }
+            } else if (moduleCategory === 'SCM' || viewUrl.startsWith('scm-')) {
+                abrirAcordeonSCM();
+                if (bSection && bSep) {
+                    bSection.textContent = "SCM";
+                    bSection.style.display = "inline";
+                    bSep.style.display = "inline";
+                }
+                if (viewUrl === 'scm-inicio.html') {
+                    label = "Menú SCM";
+                    const navInicio = document.getElementById("scm-nav-inicio");
+                    if (navInicio) navInicio.classList.add("active");
+                }
+            } else if (moduleCategory === 'CRM' || viewUrl.startsWith('crm-')) {
+                if (bSection && bSep) {
+                    bSection.textContent = "CRM";
+                    bSection.style.display = "inline";
+                    bSep.style.display = "inline";
+                }
+            }
+
+            if (bCur) bCur.textContent = label;
 
             container.innerHTML = `
                 <div style="padding: 3rem; text-align: center; color: #94a3b8;">
                     <i class="fas fa-spinner fa-spin fa-2x" style="color:var(--primary); margin-bottom:12px;"></i>
-                    <div>Cargando módulo CRM...</div>
+                    <div>Cargando módulo...</div>
                 </div>
             `;
 
