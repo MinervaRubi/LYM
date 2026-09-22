@@ -176,7 +176,6 @@ body {
 .crm-nav-item.active i {
     color: #ffffff;
 }
-
 .crm-main {
     flex: 1;
     display: flex;
@@ -184,7 +183,6 @@ body {
     min-width: 0;
     overflow-x: hidden;
 }
-
 .crm-topbar {
     height: 64px;
     background-color: var(--card-bg);
