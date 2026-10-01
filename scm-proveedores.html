@@ -1,5 +1,6 @@
 <!-- ==============================================================
-     MÓDULO SCM: PROVEEDORES (ADMINISTRAR PROVEEDORES)
+     MÓDULO SCM: PROVEEDORES (LISTADO Y FORMULARIO MODAL)
+     CUMPLE PANTALLAS 4 Y 5 DE LA GUÍA VISUAL SCM
      ARCHIVO: scm-proveedores.html
 ============================================================== -->
 
@@ -12,27 +13,27 @@
                 <span style="font-size: 0.85rem; color: var(--text-muted);">Cadena de Suministros</span>
             </div>
             <h2 style="font-size: 1.6rem; font-weight: 800; color: var(--text-heading); margin: 0;">Proveedores</h2>
-            <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 2px;">Directorio de talleres artesanales, fabricantes y proveedores de insumos</p>
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 2px;">Visualiza y administra proveedores de producción e insumos</p>
         </div>
         <div style="display: flex; gap: 10px; flex-wrap: wrap;">
             <button class="crm-btn crm-btn-secondary crm-btn-sm" onclick="cargarProveedoresSCM()">
                 <i class="fas fa-sync-alt"></i> <span>Actualizar</span>
             </button>
-            <button class="crm-btn crm-btn-primary" style="background: linear-gradient(135deg, #2563eb, #1d4ed8); border:none; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);" onclick="abrirModalNuevoProveedorSCM()">
-                <i class="fas fa-user-plus"></i> <span>+ Nuevo Proveedor</span>
+            <button class="crm-btn crm-btn-primary" style="background: linear-gradient(135deg, #0d9488, #059669); border:none; box-shadow: 0 4px 12px rgba(13, 148, 136, 0.25);" onclick="abrirModalNuevoProveedorSCM()">
+                <i class="fas fa-plus"></i> <span>+ Nuevo proveedor</span>
             </button>
         </div>
     </div>
 
-    <!-- TARJETAS DE RESUMEN RÁPIDO -->
+    <!-- TARJETAS DE RESUMEN RÁPIDO PROVEEDORES -->
     <div class="crm-grid-4">
         <div class="crm-card crm-metric-card">
             <div>
                 <div class="crm-metric-label">Total Proveedores</div>
-                <div class="crm-metric-value" id="scmTotalProveedores">12</div>
+                <div class="crm-metric-value" id="scmTotalProveedores">0</div>
                 <div class="crm-metric-subtext">Talleres registrados</div>
             </div>
-            <div class="crm-icon-box" style="background: rgba(37,99,235,0.12); color: #2563eb;">
+            <div class="crm-icon-box" style="background: rgba(13,148,136,0.12); color: #0d9488;">
                 <i class="fas fa-user-group"></i>
             </div>
         </div>
@@ -40,153 +41,371 @@
         <div class="crm-card crm-metric-card">
             <div>
                 <div class="crm-metric-label">Proveedores Activos</div>
-                <div class="crm-metric-value" style="color: var(--success);" id="scmProveedoresActivos">10</div>
-                <div class="crm-metric-subtext positive">Con contrato vigente</div>
+                <div class="crm-metric-value" id="scmProveedoresActivos" style="color: var(--success);">0</div>
+                <div class="crm-metric-subtext positive">En colaboración activa</div>
             </div>
             <div class="crm-icon-box crm-icon-emerald">
-                <i class="fas fa-handshake"></i>
+                <i class="fas fa-check-circle"></i>
             </div>
         </div>
 
         <div class="crm-card crm-metric-card">
             <div>
-                <div class="crm-metric-label">Tiempo Entrega Promedio</div>
-                <div class="crm-metric-value" style="color: #6366f1;">4.5 días</div>
-                <div class="crm-metric-subtext">Lead time promedio</div>
+                <div class="crm-metric-label">Lead Time Promedio</div>
+                <div class="crm-metric-value" id="scmLeadTimePromedio" style="color: #2563eb;">5.0 días</div>
+                <div class="crm-metric-subtext">Tiempo de suministro</div>
             </div>
-            <div class="crm-icon-box" style="background: rgba(99,102,241,0.12); color: #6366f1;">
+            <div class="crm-icon-box" style="background: rgba(37,99,235,0.12); color: #2563eb;">
                 <i class="fas fa-clock"></i>
             </div>
         </div>
 
         <div class="crm-card crm-metric-card">
             <div>
-                <div class="crm-metric-label">Evaluación Calidad</div>
-                <div class="crm-metric-value" style="color: var(--warning);">4.8 / 5</div>
-                <div class="crm-metric-subtext positive"><i class="fas fa-star" style="color:#f59e0b;"></i> Alto estándar</div>
+                <div class="crm-metric-label">Calificación Global</div>
+                <div class="crm-metric-value" id="scmCalificacionPromedio" style="color: var(--warning);">4.9 ★</div>
+                <div class="crm-metric-subtext positive">Calidad artesanal</div>
             </div>
             <div class="crm-icon-box crm-icon-amber">
-                <i class="fas fa-award"></i>
+                <i class="fas fa-star"></i>
             </div>
         </div>
     </div>
 
-    <!-- BARRA DE BÚSQUEDA Y FILTROS -->
+    <!-- BARRA DE BÚSQUEDA -->
     <div class="crm-card" style="display: flex; align-items: center; justify-content: space-between; gap: 1.25rem; flex-wrap: wrap; padding: 1rem 1.25rem;">
         <div class="crm-input-group" style="flex: 1; min-width: 260px;">
             <i class="fas fa-search"></i>
-            <input type="text" class="crm-input" id="inputBuscarProveedorSCM" placeholder="Buscar por taller, contacto, estado o producto..." oninput="filtrarProveedoresSCM()">
-        </div>
-
-        <div style="display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;">
-            <div style="display: flex; align-items: center; gap: 8px; font-size: 0.85rem; font-weight: 600; color: var(--text-heading);">
-                <label>Especialidad:</label>
-                <select class="crm-select" id="filtroEspecialidadSCM" onchange="filtrarProveedoresSCM()">
-                    <option value="todas">Todas</option>
-                    <option value="ceramica">Cerámica y Barro</option>
-                    <option value="textil">Textiles y Bordados</option>
-                    <option value="madera">Madera y Tallados</option>
-                    <option value="cuero">Cuero y Marroquinería</option>
-                </select>
-            </div>
+            <input type="text" class="crm-input" id="inputBuscarProveedorSCM" placeholder="Buscar proveedor por nombre, contacto, correo o teléfono..." oninput="filtrarProveedoresSCM()">
         </div>
     </div>
 
-    <!-- TABLA DE PROVEEDORES -->
+    <!-- TABLA DE PROVEEDORES (PANTALLA 4) -->
     <div class="crm-table-container">
         <table class="crm-table">
             <thead>
                 <tr>
                     <th>Proveedor / Taller</th>
-                    <th>Contacto Principal</th>
-                    <th>Ubicación</th>
-                    <th>Especialidad</th>
-                    <th>Calificación</th>
-                    <th>Estado</th>
+                    <th>Artículos que surte</th>
+                    <th>Contacto</th>
+                    <th>Correo</th>
+                    <th>Teléfono</th>
                     <th style="text-align: right;">Acciones</th>
                 </tr>
             </thead>
             <tbody id="tbodyProveedoresSCM">
-                <!-- Se llena dinámicamente -->
+                <tr>
+                    <td colspan="6" style="text-align: center; padding: 3rem; color: #94a3b8;">
+                        <i class="fas fa-spinner fa-spin fa-2x" style="color:#0d9488; margin-bottom: 10px;"></i>
+                        <div>Cargando directorio de proveedores desde MySQL...</div>
+                    </td>
+                </tr>
             </tbody>
         </table>
     </div>
 </div>
 
-<script>
-    const proveedoresEjemplo = [
-        { id: 1, nombre: "Taller Artesanal Talavera Real", contacto: "Don Mateo Ramírez", tel: "222-491-0391", email: "talaverareal@correo.mx", estado: "Puebla", especialidad: "Cerámica y Barro", calif: "4.9", activo: true },
-        { id: 2, nombre: "Cooperativa de Tejedoras del Valle", contacto: "Elena Hernández", tel: "951-302-8812", email: "tejedorasvalle@correo.mx", estado: "Oaxaca", especialidad: "Textiles y Bordados", calif: "4.8", activo: true },
-        { id: 3, nombre: "Maderas y Lacas de Michoacán", contacto: "Rodrigo Solís", tel: "443-810-9284", email: "maderasur@correo.mx", estado: "Michoacán", especialidad: "Madera y Tallados", calif: "4.7", activo: true },
-        { id: 4, nombre: "Artesanos de Barro Negro", contacto: "Silvia Bautista", tel: "951-678-1122", email: "barronegro@correo.mx", estado: "Oaxaca", especialidad: "Cerámica y Barro", calif: "5.0", activo: true },
-        { id: 5, nombre: "Cueros y Grabados del Bajío", contacto: "Carlos Méndez", tel: "477-512-3409", email: "bajioartesanal@correo.mx", estado: "Guanajuato", especialidad: "Cuero y Marroquinería", calif: "4.6", activo: false }
-    ];
+<!-- ==============================================================
+     MODAL DE ALTA / EDICIÓN DE PROVEEDOR (PANTALLA 5)
+============================================================== -->
+<div class="crm-modal-backdrop" id="modalProveedorSCM" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(15,23,42,0.6); backdrop-filter:blur(4px); z-index:9999; justify-content:center; align-items:center;">
+    <div class="crm-modal" style="background:#ffffff; border-radius:16px; padding:24px; max-width:500px; width:95%; max-height:90vh; overflow-y:auto; box-shadow:0 20px 40px rgba(0,0,0,0.25);">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.25rem; border-bottom:1px solid #e2e8f0; padding-bottom:10px;">
+            <h3 id="modalProveedorTitulo" style="margin:0; font-size:1.3rem; font-weight:800; color:#0f172a;">
+                <i class="fas fa-user-plus" style="color:#0d9488; margin-right:8px;"></i> Nuevo proveedor
+            </h3>
+            <button onclick="cerrarModalProveedorSCM()" style="background:none; border:none; font-size:1.4rem; cursor:pointer; color:#64748b; line-height:1;">&times;</button>
+        </div>
 
-    function cargarProveedoresSCM() {
-        renderizarTablaProveedoresSCM(proveedoresEjemplo);
+        <form id="formProveedorSCM" onsubmit="guardarProveedorSCM(event)">
+            <input type="hidden" id="provFormId" value="0">
+
+            <div style="margin-bottom: 1rem;">
+                <label style="display:block; font-size:0.85rem; font-weight:700; color:#334155; margin-bottom:4px;">Nombre *</label>
+                <input type="text" id="provFormNombre" class="crm-input" placeholder="Nombre del proveedor o taller" required>
+            </div>
+
+            <!-- SECCIÓN INFORMATIVA DE ARTÍCULOS QUE SURTE -->
+            <div id="seccionArticulosProveedor" style="margin-bottom: 1rem; display:none; background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:10px 14px;">
+                <label style="display:block; font-size:0.8rem; font-weight:700; color:#334155; margin-bottom:6px;">
+                    <i class="fas fa-boxes-stacked" style="color:#0d9488; margin-right:4px;"></i> Artículos que surte a LYM
+                </label>
+                <div id="listaArticulosModalProv" style="display:flex; flex-wrap:wrap; gap:6px;"></div>
+            </div>
+
+            <div style="margin-bottom: 1rem;">
+                <label style="display:block; font-size:0.85rem; font-weight:700; color:#334155; margin-bottom:4px;">Contacto *</label>
+                <input type="text" id="provFormContacto" class="crm-input" placeholder="Nombre de contacto" required>
+            </div>
+
+            <div style="margin-bottom: 1rem;">
+                <label style="display:block; font-size:0.85rem; font-weight:700; color:#334155; margin-bottom:4px;">Correo *</label>
+                <input type="email" id="provFormEmail" class="crm-input" placeholder="correo@ejemplo.com" required>
+            </div>
+
+            <div style="margin-bottom: 1rem;">
+                <label style="display:block; font-size:0.85rem; font-weight:700; color:#334155; margin-bottom:4px;">Teléfono *</label>
+                <input type="text" id="provFormTelefono" class="crm-input" placeholder="Teléfono" required>
+            </div>
+
+            <div style="margin-bottom: 1.5rem;">
+                <label style="display:block; font-size:0.85rem; font-weight:700; color:#334155; margin-bottom:4px;">Dirección</label>
+                <input type="text" id="provFormDireccion" class="crm-input" placeholder="Dirección completa o estado...">
+            </div>
+
+            <div style="display:flex; justify-content:flex-end; gap:12px; border-top:1px solid #e2e8f0; padding-top:14px;">
+                <button type="button" class="crm-btn crm-btn-secondary" onclick="cerrarModalProveedorSCM()">Cancelar</button>
+                <button type="submit" class="crm-btn crm-btn-primary" style="background:#0d9488;"><i class="fas fa-save"></i> Guardar</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    var proveedoresSCMList = window.proveedoresSCMList || [];
+
+    async function cargarProveedoresSCM() {
+        var tbody = document.getElementById("tbodyProveedoresSCM");
+        if (tbody) {
+            tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:2rem; color:#64748b;"><i class="fas fa-spinner fa-spin"></i> Cargando proveedores desde MySQL...</td></tr>`;
+        }
+
+        try {
+            var resp = await fetch("php/scm_api.php?resource=proveedores");
+            if (!resp.ok) throw new Error("Error de respuesta del servidor");
+
+            var data = await resp.json();
+            if (data.success && Array.isArray(data.proveedores)) {
+                proveedoresSCMList = data.proveedores;
+                window.proveedoresSCMList = proveedoresSCMList;
+
+                var total = proveedoresSCMList.length;
+                var activos = proveedoresSCMList.filter(p => p.activo).length;
+
+                var elTot = document.getElementById("scmTotalProveedores");
+                var elAct = document.getElementById("scmProveedoresActivos");
+                var elLead = document.getElementById("scmLeadTimePromedio");
+                var elCalif = document.getElementById("scmCalificacionPromedio");
+
+                if (elTot) elTot.textContent = total;
+                if (elAct) elAct.textContent = activos;
+
+                if (total > 0) {
+                    var avgLead = (proveedoresSCMList.reduce((acc, p) => acc + (Number(p.lead_time_dias) || 5), 0) / total).toFixed(1);
+                    var avgCalif = (proveedoresSCMList.reduce((acc, p) => acc + (Number(p.calificacion) || 5), 0) / total).toFixed(1);
+                    if (elLead) elLead.textContent = avgLead + " días";
+                    if (elCalif) elCalif.textContent = avgCalif + " ★";
+                }
+
+                renderizarTablaProveedoresSCM(proveedoresSCMList);
+            } else {
+                throw new Error(data.error || "No se recibieron datos");
+            }
+        } catch (err) {
+            if (tbody) {
+                tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:2rem; color:#ef4444;"><i class="fas fa-exclamation-triangle"></i> Error al conectar con proveedores: ${err.message}</td></tr>`;
+            }
+        }
     }
 
     function renderizarTablaProveedoresSCM(items) {
-        const tbody = document.getElementById("tbodyProveedoresSCM");
+        var tbody = document.getElementById("tbodyProveedoresSCM");
+        if (!tbody) return;
         if (!items || items.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding:2rem; color:#64748b;">No se encontraron proveedores registrados.</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:2rem; color:#64748b;">No se encontraron proveedores coincidentes.</td></tr>`;
             return;
         }
 
-        tbody.innerHTML = items.map(p => `
+        tbody.innerHTML = items.map(function(p) {
+            var artsHtml = '';
+            if (p.articulos && p.articulos.length > 0) {
+                artsHtml = p.articulos.map(function(art) {
+                    return `<span class="badge" style="background:rgba(13,148,136,0.1); color:#0d9488; font-size:0.75rem; font-weight:700; padding:3px 8px; border-radius:6px; border:1px solid rgba(13,148,136,0.2); display:inline-flex; align-items:center; gap:4px;">
+                        <i class="fas fa-box" style="font-size:0.68rem;"></i>${art}
+                    </span>`;
+                }).join("");
+            } else {
+                artsHtml = `<span style="color:#94a3b8; font-size:0.78rem; font-style:italic;">Sin artículos asignados</span>`;
+            }
+
+            return `
             <tr>
                 <td style="font-weight: 700; color: #0f172a;">
                     <div style="display:flex; align-items:center; gap:10px;">
-                        <div style="width:34px; height:34px; border-radius:8px; background:rgba(37,99,235,0.1); color:#2563eb; display:flex; align-items:center; justify-content:center; font-size:0.9rem;">
-                            <i class="fas fa-handshake"></i>
+                        <div style="width:36px; height:36px; border-radius:8px; background:rgba(13,148,136,0.12); color:#0d9488; display:flex; align-items:center; justify-content:center; font-size:1rem; flex-shrink:0;">
+                            <i class="fas fa-building"></i>
                         </div>
                         <div>
-                            <div>${p.nombre}</div>
-                            <div style="font-size:0.75rem; color:#94a3b8; font-weight:normal;">Cod: PRV-${String(p.id).padStart(3, '0')}</div>
+                            <div style="font-size:0.95rem; font-weight:800; color:#0f172a;">${p.nombre}</div>
+                            <div style="font-size:0.75rem; color:#64748b; font-weight:500;">
+                                <i class="fas fa-location-dot" style="color:#0d9488; margin-right:3px;"></i>${p.direccion || p.estado_republica || 'México'} 
+                                <span style="margin: 0 4px; color:#cbd5e1;">•</span>
+                                <span style="color:#475569;">${p.especialidad || 'Artesanías'}</span>
+                            </div>
                         </div>
                     </div>
                 </td>
                 <td>
-                    <div style="color:#0f172a; font-weight:600;">${p.contacto}</div>
-                    <div style="font-size:0.75rem; color:#64748b;">${p.tel}</div>
+                    <div style="display:flex; flex-wrap:wrap; gap:5px; max-width: 320px;">
+                        ${artsHtml}
+                    </div>
                 </td>
-                <td><i class="fas fa-location-dot" style="color:#ef4444; margin-right:4px;"></i>${p.estado}</td>
-                <td><span class="badge" style="background:#eff6ff; color:#1d4ed8; font-size:0.75rem;">${p.especialidad}</span></td>
-                <td style="font-weight:700; color:#f59e0b;"><i class="fas fa-star" style="font-size:0.75rem;"></i> ${p.calif}</td>
-                <td>
-                    <span class="badge ${p.activo ? 'badge-activo' : 'badge-inactivo'}" style="font-size:0.72rem;">
-                        <span class="badge-dot"></span>${p.activo ? 'Activo' : 'Pausado'}
-                    </span>
+                <td style="color:#334155; font-weight:600; font-size:0.88rem;">${p.contacto || 'Sin contacto'}</td>
+                <td style="color:#2563eb; font-weight:500; font-size:0.85rem;">
+                    <a href="mailto:${p.email}" style="color:inherit; text-decoration:none;"><i class="fas fa-envelope" style="margin-right:4px; font-size:0.8rem; color:#94a3b8;"></i>${p.email}</a>
                 </td>
+                <td style="color:#475569; font-weight:600; font-size:0.85rem;"><i class="fas fa-phone" style="margin-right:4px; font-size:0.8rem; color:#94a3b8;"></i>${p.telefono}</td>
                 <td style="text-align: right;">
-                    <button class="crm-btn crm-btn-secondary crm-btn-sm" title="Contactar" style="padding:4px 8px;">
-                        <i class="fas fa-envelope"></i>
-                    </button>
+                    <div style="display:flex; justify-content:flex-end; gap:6px;">
+                        <button class="crm-btn crm-btn-secondary crm-btn-sm" title="Editar proveedor" onclick="abrirModalEditarProveedorSCM(${p.id})" style="padding:4px 8px; color:#2563eb;">
+                            <i class="fas fa-pencil"></i>
+                        </button>
+                        <button class="crm-btn crm-btn-secondary crm-btn-sm" title="Eliminar proveedor" onclick="eliminarProveedorSCM(${p.id})" style="padding:4px 8px; color:#ef4444;">
+                            <i class="fas fa-trash-can"></i>
+                        </button>
+                    </div>
                 </td>
             </tr>
-        `).join("");
+            `;
+        }).join("");
     }
 
     function filtrarProveedoresSCM() {
-        const query = document.getElementById("inputBuscarProveedorSCM").value.toLowerCase().trim();
-        const esp = document.getElementById("filtroEspecialidadSCM").value;
-
-        const filtrados = proveedoresEjemplo.filter(p => {
-            const matchQuery = !query || p.nombre.toLowerCase().includes(query) || p.contacto.toLowerCase().includes(query) || p.estado.toLowerCase().includes(query);
-            const matchEsp = (esp === "todas") || p.especialidad.toLowerCase().includes(esp.toLowerCase());
-            return matchQuery && matchEsp;
+        var queryInput = document.getElementById("inputBuscarProveedorSCM");
+        var query = queryInput ? queryInput.value.toLowerCase().trim() : '';
+        var filtrados = (window.proveedoresSCMList || []).filter(function(p) {
+            var artsStr = (p.articulos || []).join(' ').toLowerCase();
+            return !query || 
+                (p.nombre && p.nombre.toLowerCase().includes(query)) ||
+                (p.contacto && p.contacto.toLowerCase().includes(query)) ||
+                (p.email && p.email.toLowerCase().includes(query)) ||
+                (p.direccion && p.direccion.toLowerCase().includes(query)) ||
+                (p.telefono && p.telefono.toLowerCase().includes(query)) ||
+                (artsStr.includes(query));
         });
-
         renderizarTablaProveedoresSCM(filtrados);
     }
 
     function abrirModalNuevoProveedorSCM() {
-        if (typeof showNotification === 'function') {
-            showNotification("Módulo de alta de proveedor preparado para lógica SCM");
-        } else {
-            alert("Módulo de alta de proveedor preparado para lógica SCM");
+        document.getElementById("modalProveedorTitulo").innerHTML = '<i class="fas fa-plus" style="color:#0d9488; margin-right:8px;"></i> Nuevo proveedor';
+        document.getElementById("provFormId").value = "0";
+        document.getElementById("provFormNombre").value = "";
+        document.getElementById("provFormContacto").value = "";
+        document.getElementById("provFormEmail").value = "";
+        document.getElementById("provFormTelefono").value = "";
+        document.getElementById("provFormDireccion").value = "";
+
+        var secArt = document.getElementById("seccionArticulosProveedor");
+        if (secArt) secArt.style.display = "none";
+
+        document.getElementById("modalProveedorSCM").style.display = "flex";
+    }
+
+    function abrirModalEditarProveedorSCM(id) {
+        var prov = (window.proveedoresSCMList || []).find(function(p) { return p.id === id; });
+        if (!prov) return;
+
+        document.getElementById("modalProveedorTitulo").innerHTML = '<i class="fas fa-pencil" style="color:#0d9488; margin-right:8px;"></i> Editar proveedor';
+        document.getElementById("provFormId").value = prov.id;
+        document.getElementById("provFormNombre").value = prov.nombre || '';
+        document.getElementById("provFormContacto").value = prov.contacto || '';
+        document.getElementById("provFormEmail").value = prov.email || '';
+        document.getElementById("provFormTelefono").value = prov.telefono || '';
+        document.getElementById("provFormDireccion").value = prov.direccion || '';
+
+        var secArt = document.getElementById("seccionArticulosProveedor");
+        var listArt = document.getElementById("listaArticulosModalProv");
+        if (secArt && listArt) {
+            if (prov.articulos && prov.articulos.length > 0) {
+                listArt.innerHTML = prov.articulos.map(function(a) {
+                    return `<span class="badge" style="background:#ffffff; border:1px solid #cbd5e1; color:#0d9488; font-weight:700; font-size:0.75rem; padding:4px 8px; border-radius:6px; box-shadow:0 1px 2px rgba(0,0,0,0.05);"><i class="fas fa-check-circle" style="font-size:0.7rem; margin-right:4px;"></i>${a}</span>`;
+                }).join('');
+                secArt.style.display = "block";
+            } else {
+                listArt.innerHTML = `<span style="font-size:0.8rem; color:#94a3b8; font-style:italic;">No tiene artículos asociados aún en el catálogo.</span>`;
+                secArt.style.display = "block";
+            }
+        }
+
+        document.getElementById("modalProveedorSCM").style.display = "flex";
+    }
+
+    function cerrarModalProveedorSCM() {
+        var modal = document.getElementById("modalProveedorSCM");
+        if (modal) modal.style.display = "none";
+    }
+
+    async function guardarProveedorSCM(ev) {
+        ev.preventDefault();
+        var payload = {
+            id: Number(document.getElementById("provFormId").value),
+            nombre: document.getElementById("provFormNombre").value.trim(),
+            contacto: document.getElementById("provFormContacto").value.trim(),
+            email: document.getElementById("provFormEmail").value.trim(),
+            telefono: document.getElementById("provFormTelefono").value.trim(),
+            direccion: document.getElementById("provFormDireccion").value.trim()
+        };
+
+        try {
+            var resp = await fetch("php/scm_api.php?resource=guardar_proveedor", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload)
+            });
+            var data = await resp.json();
+            if (data.success) {
+                cerrarModalProveedorSCM();
+                if (typeof showNotification === 'function') {
+                    showNotification(data.message);
+                } else {
+                    alert(data.message);
+                }
+                cargarProveedoresSCM();
+            } else {
+                alert("Error: " + (data.error || "No se pudo guardar el proveedor"));
+            }
+        } catch (e) {
+            alert("Error de conexión: " + e.message);
         }
     }
+
+    async function eliminarProveedorSCM(id) {
+        var prov = proveedoresSCMList.find(p => p.id === id);
+        var nombre = prov ? prov.nombre : 'proveedor';
+        if (!confirm(`¿Estás seguro de eliminar al proveedor "${nombre}"?`)) {
+            return;
+        }
+
+        try {
+            var resp = await fetch("php/scm_api.php?resource=eliminar_proveedor", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ id: id })
+            });
+            var data = await resp.json();
+            if (data.success) {
+                if (typeof showNotification === 'function') {
+                    showNotification(data.message);
+                } else {
+                    alert(data.message);
+                }
+                cargarProveedoresSCM();
+            } else {
+                alert("Error al eliminar: " + (data.error || "Error desconocido"));
+            }
+        } catch (e) {
+            alert("Error de conexión: " + e.message);
+        }
+    }
+
+    // Exponer a window para asegurar disponibilidad en inline onclicks
+    window.cargarProveedoresSCM = cargarProveedoresSCM;
+    window.abrirModalNuevoProveedorSCM = abrirModalNuevoProveedorSCM;
+    window.abrirModalEditarProveedorSCM = abrirModalEditarProveedorSCM;
+    window.cerrarModalProveedorSCM = cerrarModalProveedorSCM;
+    window.guardarProveedorSCM = guardarProveedorSCM;
+    window.eliminarProveedorSCM = eliminarProveedorSCM;
+    window.filtrarProveedoresSCM = filtrarProveedoresSCM;
 
     cargarProveedoresSCM();
 </script>

@@ -1,5 +1,6 @@
 <!-- ==============================================================
-     MÓDULO SCM: PRODUCTOS (GESTIÓN DE CATÁLOGO)
+     MÓDULO SCM: PRODUCTOS (LISTADO Y FORMULARIO MODAL)
+     CUMPLE PANTALLAS 2 Y 3 DE LA GUÍA VISUAL SCM
      ARCHIVO: scm-productos.html
 ============================================================== -->
 
@@ -12,14 +13,14 @@
                 <span style="font-size: 0.85rem; color: var(--text-muted);">Cadena de Suministros</span>
             </div>
             <h2 style="font-size: 1.6rem; font-weight: 800; color: var(--text-heading); margin: 0;">Productos</h2>
-            <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 2px;">Gestión de catálogo, especificaciones técnicas y precios de suministro</p>
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 2px;">Visualiza, busca y administra productos en el catálogo de suministro</p>
         </div>
         <div style="display: flex; gap: 10px; flex-wrap: wrap;">
             <button class="crm-btn crm-btn-secondary crm-btn-sm" onclick="cargarProductosSCM()">
                 <i class="fas fa-sync-alt"></i> <span>Actualizar</span>
             </button>
             <button class="crm-btn crm-btn-primary" style="background: linear-gradient(135deg, #0d9488, #059669); border:none; box-shadow: 0 4px 12px rgba(13, 148, 136, 0.25);" onclick="abrirModalNuevoProductoSCM()">
-                <i class="fas fa-plus"></i> <span>+ Nuevo Producto</span>
+                <i class="fas fa-plus"></i> <span>+ Nuevo producto</span>
             </button>
         </div>
     </div>
@@ -29,7 +30,7 @@
         <div class="crm-card crm-metric-card">
             <div>
                 <div class="crm-metric-label">Total en Catálogo</div>
-                <div class="crm-metric-value" id="scmTotalProductos">-</div>
+                <div class="crm-metric-value" id="scmTotalProductos">0</div>
                 <div class="crm-metric-subtext">Productos registrados</div>
             </div>
             <div class="crm-icon-box" style="background: rgba(13,148,136,0.12); color: #0d9488;">
@@ -39,31 +40,31 @@
 
         <div class="crm-card crm-metric-card">
             <div>
-                <div class="crm-metric-label">Activos para Venta</div>
-                <div class="crm-metric-value" id="scmProductosActivos" style="color: var(--success);">-</div>
-                <div class="crm-metric-subtext positive">En circulación</div>
+                <div class="crm-metric-label">Estrategia PUSH</div>
+                <div class="crm-metric-value" id="scmTotalPush" style="color: #059669;">0</div>
+                <div class="crm-metric-subtext positive">Producción anticipada</div>
             </div>
             <div class="crm-icon-box crm-icon-emerald">
-                <i class="fas fa-check-circle"></i>
+                <i class="fas fa-boxes-stacked"></i>
             </div>
         </div>
 
         <div class="crm-card crm-metric-card">
             <div>
-                <div class="crm-metric-label">Categorías</div>
-                <div class="crm-metric-value" id="scmTotalCategorias" style="color: #2563eb;">-</div>
-                <div class="crm-metric-subtext">Líneas de producto</div>
+                <div class="crm-metric-label">Estrategia PULL</div>
+                <div class="crm-metric-value" id="scmTotalPull" style="color: #2563eb;">0</div>
+                <div class="crm-metric-subtext">Bajo demanda</div>
             </div>
             <div class="crm-icon-box" style="background: rgba(37,99,235,0.12); color: #2563eb;">
-                <i class="fas fa-tags"></i>
+                <i class="fas fa-hand-holding-hand"></i>
             </div>
         </div>
 
         <div class="crm-card crm-metric-card">
             <div>
                 <div class="crm-metric-label">Stock Crítico</div>
-                <div class="crm-metric-value" id="scmProductosBajoStock" style="color: var(--warning);">-</div>
-                <div class="crm-metric-subtext warning">Próximos a reabastecer</div>
+                <div class="crm-metric-value" id="scmProductosBajoStock" style="color: var(--danger);">0</div>
+                <div class="crm-metric-subtext warning">Por debajo del mínimo</div>
             </div>
             <div class="crm-icon-box crm-icon-amber">
                 <i class="fas fa-triangle-exclamation"></i>
@@ -75,50 +76,51 @@
     <div class="crm-card" style="display: flex; align-items: center; justify-content: space-between; gap: 1.25rem; flex-wrap: wrap; padding: 1rem 1.25rem;">
         <div class="crm-input-group" style="flex: 1; min-width: 260px;">
             <i class="fas fa-search"></i>
-            <input type="text" class="crm-input" id="inputBuscarProductoSCM" placeholder="Buscar por SKU, nombre de artesanía o descripción..." oninput="filtrarProductosSCM()">
+            <input type="text" class="crm-input" id="inputBuscarProductoSCM" placeholder="Buscar producto por nombre, SKU o categoría..." oninput="filtrarProductosSCM()">
         </div>
 
         <div style="display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;">
             <div style="display: flex; align-items: center; gap: 8px; font-size: 0.85rem; font-weight: 600; color: var(--text-heading);">
                 <label>Categoría:</label>
                 <select class="crm-select" id="filtroCategoriaSCM" onchange="filtrarProductosSCM()">
-                    <option value="todas">Todas las categorías</option>
-                    <option value="textil">Textil / Ropa</option>
-                    <option value="ceramica">Cerámica / Barro</option>
-                    <option value="accesorios">Accesorios</option>
+                    <option value="todas">Todas</option>
+                    <option value="textil">Textil</option>
+                    <option value="ceramica">Cerámica</option>
                     <option value="decoracion">Decoración</option>
+                    <option value="joyeria">Joyería</option>
                 </select>
             </div>
 
             <div style="display: flex; align-items: center; gap: 8px; font-size: 0.85rem; font-weight: 600; color: var(--text-heading);">
-                <label>Estado:</label>
-                <select class="crm-select" id="filtroEstadoSCM" onchange="filtrarProductosSCM()">
-                    <option value="todos">Todos</option>
-                    <option value="1">Activo</option>
-                    <option value="0">Inactivo</option>
+                <label>Estrategia:</label>
+                <select class="crm-select" id="filtroEstrategiaSCM" onchange="filtrarProductosSCM()">
+                    <option value="todas">Todas</option>
+                    <option value="PUSH">PUSH</option>
+                    <option value="PULL">PULL</option>
                 </select>
             </div>
         </div>
     </div>
 
-    <!-- TABLA DE PRODUCTOS -->
+    <!-- TABLA DE PRODUCTOS (PANTALLA 2) -->
     <div class="crm-table-container">
         <table class="crm-table">
             <thead>
                 <tr>
-                    <th>Producto / Artesanía</th>
+                    <th style="width: 60px;">Imagen</th>
+                    <th>Nombre</th>
                     <th>Categoría</th>
-                    <th>Precio Base</th>
-                    <th>Proveedor Principal</th>
-                    <th>Estado</th>
+                    <th style="text-align: center;">Stock</th>
+                    <th style="text-align: center;">Stock mín.</th>
+                    <th style="text-align: center;">Estrategia</th>
                     <th style="text-align: right;">Acciones</th>
                 </tr>
             </thead>
             <tbody id="tbodyProductosSCM">
                 <tr>
-                    <td colspan="6" style="text-align: center; padding: 3rem; color: #94a3b8;">
+                    <td colspan="7" style="text-align: center; padding: 3rem; color: #94a3b8;">
                         <i class="fas fa-spinner fa-spin fa-2x" style="color:#0d9488; margin-bottom: 10px;"></i>
-                        <div>Cargando catálogo de productos SCM...</div>
+                        <div>Cargando catálogo de productos SCM desde MySQL...</div>
                     </td>
                 </tr>
             </tbody>
@@ -126,82 +128,236 @@
     </div>
 </div>
 
+<!-- ==============================================================
+     MODAL DE ALTA / EDICIÓN DE PRODUCTO (PANTALLA 3)
+============================================================== -->
+<div class="crm-modal-backdrop" id="modalProductoSCM" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(15,23,42,0.6); backdrop-filter:blur(4px); z-index:9999; justify-content:center; align-items:center;">
+    <div class="crm-modal" style="background:#ffffff; border-radius:16px; padding:24px; max-width:540px; width:95%; max-height:90vh; overflow-y:auto; box-shadow:0 20px 40px rgba(0,0,0,0.25);">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.25rem; border-bottom:1px solid #e2e8f0; padding-bottom:10px;">
+            <h3 id="modalProductoTitulo" style="margin:0; font-size:1.3rem; font-weight:800; color:#0f172a;">
+                <i class="fas fa-cube" style="color:#0d9488; margin-right:8px;"></i> Nuevo producto
+            </h3>
+            <button onclick="cerrarModalProductoSCM()" style="background:none; border:none; font-size:1.4rem; cursor:pointer; color:#64748b; line-height:1;">&times;</button>
+        </div>
+
+        <form id="formProductoSCM" onsubmit="guardarProductoSCM(event)">
+            <input type="hidden" id="prodFormId" value="0">
+
+            <div style="margin-bottom: 1rem;">
+                <label style="display:block; font-size:0.85rem; font-weight:700; color:#334155; margin-bottom:4px;">Nombre *</label>
+                <input type="text" id="prodFormNombre" class="crm-input" placeholder="Nombre del producto" required>
+            </div>
+
+            <div style="margin-bottom: 1rem;">
+                <label style="display:block; font-size:0.85rem; font-weight:700; color:#334155; margin-bottom:4px;">Descripción</label>
+                <textarea id="prodFormDescripcion" class="crm-input" style="height:70px; resize:vertical;" placeholder="Descripción de materiales, origen o especificaciones..."></textarea>
+            </div>
+
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px; margin-bottom: 1rem;">
+                <div>
+                    <label style="display:block; font-size:0.85rem; font-weight:700; color:#334155; margin-bottom:4px;">Categoría *</label>
+                    <select id="prodFormCategoria" class="crm-select" style="width:100%;" required>
+                        <option value="Cerámica">Cerámica</option>
+                        <option value="Textil">Textil</option>
+                        <option value="Decoración">Decoración</option>
+                        <option value="Joyería">Joyería</option>
+                        <option value="General">General</option>
+                    </select>
+                </div>
+                <div>
+                    <label style="display:block; font-size:0.85rem; font-weight:700; color:#334155; margin-bottom:4px;">Proveedor *</label>
+                    <select id="prodFormProveedor" class="crm-select" style="width:100%;" required>
+                        <option value="">Selecciona un proveedor</option>
+                    </select>
+                </div>
+            </div>
+
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px; margin-bottom: 1rem;">
+                <div>
+                    <label style="display:block; font-size:0.85rem; font-weight:700; color:#334155; margin-bottom:4px;">Stock actual</label>
+                    <input type="number" id="prodFormStockActual" class="crm-input" value="0" min="0" required>
+                </div>
+                <div>
+                    <label style="display:block; font-size:0.85rem; font-weight:700; color:#334155; margin-bottom:4px;">Stock mínimo</label>
+                    <input type="number" id="prodFormStockMin" class="crm-input" value="5" min="1" required>
+                </div>
+            </div>
+
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px; margin-bottom: 1.5rem;">
+                <div>
+                    <label style="display:block; font-size:0.85rem; font-weight:700; color:#334155; margin-bottom:4px;">Estrategia logística *</label>
+                    <select id="prodFormEstrategia" class="crm-select" style="width:100%;" required>
+                        <option value="PUSH">PUSH (Producción anticipada)</option>
+                        <option value="PULL">PULL (Según demanda real)</option>
+                    </select>
+                </div>
+                <div>
+                    <label style="display:block; font-size:0.85rem; font-weight:700; color:#334155; margin-bottom:4px;">Costo unitario ($ MXN)</label>
+                    <input type="number" id="prodFormCosto" class="crm-input" step="0.01" value="0.00" min="0" required>
+                </div>
+            </div>
+
+            <div style="display:flex; justify-content:flex-end; gap:12px; border-top:1px solid #e2e8f0; padding-top:14px;">
+                <button type="button" class="crm-btn crm-btn-secondary" onclick="cerrarModalProductoSCM()">Cancelar</button>
+                <button type="submit" class="crm-btn crm-btn-primary" style="background:#0d9488;"><i class="fas fa-save"></i> Guardar</button>
+            </div>
+        </form>
+    </div>
+</div>
+
 <script>
-    let productosSCMData = [];
+    var productosSCMList = productosSCMList || [];
+    var proveedoresSCMList = proveedoresSCMList || [];
+
+    // Iconos para simular imágenes según la categoría/nombre como en la referencia visual
+    function obtenerIconoProductoSCM(nombre, categoria) {
+        var n = (nombre || '').toLowerCase();
+        var c = (categoria || '').toLowerCase();
+        if (n.includes('vasija') || n.includes('barro') || c.includes('ceramica')) {
+            return '<div style="width:36px; height:36px; border-radius:8px; background:rgba(217,119,6,0.12); color:#d97706; display:flex; align-items:center; justify-content:center; font-size:1.1rem;"><i class="fas fa-mug-hot"></i></div>';
+        }
+        if (n.includes('textil') || n.includes('rebozo') || n.includes('camisa') || c.includes('textil')) {
+            return '<div style="width:36px; height:36px; border-radius:8px; background:rgba(239,68,68,0.12); color:#ef4444; display:flex; align-items:center; justify-content:center; font-size:1.1rem;"><i class="fas fa-vest"></i></div>';
+        }
+        if (n.includes('alebrije') || c.includes('decoracion')) {
+            return '<div style="width:36px; height:36px; border-radius:8px; background:rgba(147,51,234,0.12); color:#9333ea; display:flex; align-items:center; justify-content:center; font-size:1.1rem;"><i class="fas fa-dragon"></i></div>';
+        }
+        if (n.includes('collar') || n.includes('aretes') || c.includes('joyeria') || c.includes('accesorios')) {
+            return '<div style="width:36px; height:36px; border-radius:8px; background:rgba(245,158,11,0.12); color:#f59e0b; display:flex; align-items:center; justify-content:center; font-size:1.1rem;"><i class="fas fa-gem"></i></div>';
+        }
+        return '<div style="width:36px; height:36px; border-radius:8px; background:rgba(13,148,136,0.12); color:#0d9488; display:flex; align-items:center; justify-content:center; font-size:1.1rem;"><i class="fas fa-cube"></i></div>';
+    }
+
+    async function cargarProveedoresParaSelectSCM() {
+        try {
+            var resp = await fetch('php/scm_api.php?resource=proveedores');
+            var data = await resp.json();
+            if (data.success && Array.isArray(data.proveedores)) {
+                proveedoresSCMList = data.proveedores;
+                var select = document.getElementById('prodFormProveedor');
+                if (select) {
+                    var curVal = select.value;
+                    select.innerHTML = '<option value="">Selecciona un proveedor</option>' + 
+                        proveedoresSCMList.map(pr => `<option value="${pr.id}">${pr.nombre}</option>`).join('');
+                    if (curVal) select.value = curVal;
+                }
+            }
+        } catch (e) {
+            console.warn('Error cargando proveedores para select:', e);
+        }
+    }
+
+    function actualizarSelectoresCategoriasSCM(items) {
+        var fSel = document.getElementById('filtroCategoriaSCM');
+        var mSel = document.getElementById('prodFormCategoria');
+        var cats = Array.from(new Set(items.map(p => p.category).filter(Boolean))).sort();
+
+        if (fSel) {
+            var currentFiltro = fSel.value || 'todas';
+            var options = '<option value="todas">Todas</option>';
+            cats.forEach(c => {
+                options += `<option value="${c}">${c}</option>`;
+            });
+            fSel.innerHTML = options;
+            if (cats.map(c => c.toLowerCase()).includes(currentFiltro.toLowerCase())) {
+                fSel.value = currentFiltro;
+            } else {
+                fSel.value = 'todas';
+            }
+        }
+
+        if (mSel) {
+            var currentModalCat = mSel.value || 'Cerámica';
+            var defaultCats = ['Cerámica', 'Textil', 'Decoración', 'Joyería', 'General'];
+            var unionCats = Array.from(new Set([...defaultCats, ...cats])).sort();
+            mSel.innerHTML = unionCats.map(c => `<option value="${c}">${c}</option>`).join('');
+            if (currentModalCat && unionCats.includes(currentModalCat)) {
+                mSel.value = currentModalCat;
+            }
+        }
+    }
 
     async function cargarProductosSCM() {
-        const tbody = document.getElementById("tbodyProductosSCM");
+        var tbody = document.getElementById("tbodyProductosSCM");
+        if (tbody) {
+            tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding:2rem; color:#64748b;"><i class="fas fa-spinner fa-spin"></i> Cargando catálogo de productos SCM...</td></tr>`;
+        }
+
         try {
-            const resp = await fetch("php/productos.php", { credentials: "same-origin" });
-            if (!resp.ok) throw new Error("Respuesta no válida del servidor");
-            
-            const data = await resp.json();
-            const productos = Array.isArray(data) ? data : (data.productos || []);
-            productosSCMData = productos;
+            await cargarProveedoresParaSelectSCM();
+            var resp = await fetch("php/scm_api.php?resource=productos");
+            if (!resp.ok) throw new Error("Error de conexión al servidor");
 
-            // Actualizar contadores
-            const total = productos.length;
-            const activos = productos.filter(p => p.active == 1 || p.active === true).length;
-            const categorias = new Set(productos.map(p => p.category).filter(Boolean)).size;
+            var data = await resp.json();
+            if (data.success && Array.isArray(data.productos)) {
+                productosSCMList = data.productos;
 
-            document.getElementById("scmTotalProductos").textContent = total;
-            document.getElementById("scmProductosActivos").textContent = activos;
-            document.getElementById("scmTotalCategorias").textContent = categorias || "0";
-            document.getElementById("scmProductosBajoStock").textContent = Math.round(total * 0.15);
+                actualizarSelectoresCategoriasSCM(productosSCMList);
 
-            renderizarTablaProductosSCM(productos);
+                // Métricas
+                var total = productosSCMList.length;
+                var pushCount = productosSCMList.filter(p => p.estrategia_logistica === 'PUSH').length;
+                var pullCount = productosSCMList.filter(p => p.estrategia_logistica === 'PULL').length;
+                var bajoStock = productosSCMList.filter(p => Number(p.stock_actual) <= Number(p.stock_minimo)).length;
+
+                var elTot = document.getElementById("scmTotalProductos");
+                var elPush = document.getElementById("scmTotalPush");
+                var elPull = document.getElementById("scmTotalPull");
+                var elBajo = document.getElementById("scmProductosBajoStock");
+
+                if (elTot) elTot.textContent = total;
+                if (elPush) elPush.textContent = pushCount;
+                if (elPull) elPull.textContent = pullCount;
+                if (elBajo) elBajo.textContent = bajoStock;
+
+                renderizarTablaProductosSCM(productosSCMList);
+            } else {
+                throw new Error(data.error || "No se recibieron productos");
+            }
         } catch (err) {
-            tbody.innerHTML = `
-                <tr>
-                    <td colspan="6" style="text-align: center; padding: 2.5rem; color: #64748b;">
-                        <i class="fas fa-box-open fa-2x" style="color: #cbd5e1; margin-bottom: 8px;"></i>
-                        <div>Catálogo de productos listo para configuración de lógica SCM.</div>
-                    </td>
-                </tr>
-            `;
-            document.getElementById("scmTotalProductos").textContent = "0";
-            document.getElementById("scmProductosActivos").textContent = "0";
-            document.getElementById("scmTotalCategorias").textContent = "0";
-            document.getElementById("scmProductosBajoStock").textContent = "0";
+            if (tbody) {
+                tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding:2rem; color:#ef4444;"><i class="fas fa-exclamation-triangle"></i> Error al conectar con SCM: ${err.message}</td></tr>`;
+            }
         }
     }
 
     function renderizarTablaProductosSCM(items) {
-        const tbody = document.getElementById("tbodyProductosSCM");
+        var tbody = document.getElementById("tbodyProductosSCM");
+        if (!tbody) return;
         if (!items || items.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:2rem; color:#64748b;">No se encontraron productos.</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding:2rem; color:#64748b;">No se encontraron productos coincidentes.</td></tr>`;
             return;
         }
 
         tbody.innerHTML = items.map(p => {
-            const activo = (p.active == 1 || p.active === true);
-            const precio = Number(p.price || 0).toLocaleString("es-MX", { style: "currency", currency: "MXN" });
-            const cat = p.category || "General";
+            var esPush = (p.estrategia_logistica === 'PUSH');
+            var stockBajo = (Number(p.stock_actual) <= Number(p.stock_minimo));
+            var iconHtml = obtenerIconoProductoSCM(p.name, p.category);
+
             return `
                 <tr>
+                    <td style="text-align:center;">${iconHtml}</td>
                     <td style="font-weight: 700; color: #0f172a;">
-                        <div style="display:flex; align-items:center; gap:10px;">
-                            <div style="width:34px; height:34px; border-radius:8px; background:rgba(13,148,136,0.1); color:#0d9488; display:flex; align-items:center; justify-content:center; font-size:0.9rem;">
-                                <i class="fas fa-cube"></i>
-                            </div>
-                            <div>
-                                <div>${p.name || 'Sin nombre'}</div>
-                                <div style="font-size:0.75rem; color:#94a3b8; font-weight:normal;">SKU: SCM-${String(p.id).padStart(4, '0')}</div>
-                            </div>
-                        </div>
+                        <div>${p.name || 'Sin nombre'}</div>
+                        <div style="font-size:0.75rem; color:#94a3b8; font-weight:normal;">SKU: ${p.sku || ('SCM-' + String(p.id).padStart(4, '0'))} | Prov: ${p.proveedor_nombre}</div>
                     </td>
-                    <td><span class="badge" style="background:#f1f5f9; color:#475569; font-size:0.75rem;">${cat}</span></td>
-                    <td style="font-weight:600; color:#0f172a;">${precio}</td>
-                    <td style="color:#64748b; font-size:0.85rem;"><i class="fas fa-truck" style="margin-right:6px; color:#94a3b8;"></i>Artesanos México Central</td>
-                    <td>
-                        <span class="badge ${activo ? 'badge-activo' : 'badge-inactivo'}" style="font-size:0.72rem;">
-                            <span class="badge-dot"></span>${activo ? 'Activo' : 'Inactivo'}
+                    <td><span class="badge" style="background:#f1f5f9; color:#475569; font-size:0.75rem; font-weight:600;">${p.category || 'General'}</span></td>
+                    <td style="text-align: center; font-weight: 700; color: ${stockBajo ? '#ef4444' : '#0f172a'};">${p.stock_actual}</td>
+                    <td style="text-align: center; font-weight: 600; color: #64748b;">${p.stock_minimo}</td>
+                    <td style="text-align: center;">
+                        <span class="badge" style="background:${esPush ? 'rgba(5,150,105,0.15)' : 'rgba(37,99,235,0.15)'}; color:${esPush ? '#059669' : '#2563eb'}; font-weight:800; font-size:0.75rem; padding:4px 10px; border-radius:6px;">
+                            ${esPush ? 'PUSH' : 'PULL'}
                         </span>
                     </td>
                     <td style="text-align: right;">
-                        <button class="crm-btn crm-btn-secondary crm-btn-sm" title="Ver ficha técnica" style="padding:4px 8px;">
-                            <i class="fas fa-eye"></i>
-                        </button>
+                        <div style="display:flex; justify-content:flex-end; gap:6px;">
+                            <button class="crm-btn crm-btn-secondary crm-btn-sm" title="Editar producto" onclick="abrirModalEditarProductoSCM(${p.id})" style="padding:4px 8px; color:#2563eb;">
+                                <i class="fas fa-pencil"></i>
+                            </button>
+                            <button class="crm-btn crm-btn-secondary crm-btn-sm" title="Eliminar producto" onclick="eliminarProductoSCM(${p.id})" style="padding:4px 8px; color:#ef4444;">
+                                <i class="fas fa-trash-can"></i>
+                            </button>
+                        </div>
                     </td>
                 </tr>
             `;
@@ -209,14 +365,21 @@
     }
 
     function filtrarProductosSCM() {
-        const query = document.getElementById("inputBuscarProductoSCM").value.toLowerCase().trim();
-        const cat = document.getElementById("filtroCategoriaSCM").value;
-        const est = document.getElementById("filtroEstadoSCM").value;
+        var queryInput = document.getElementById("inputBuscarProductoSCM");
+        var catSelect = document.getElementById("filtroCategoriaSCM");
+        var estSelect = document.getElementById("filtroEstrategiaSCM");
 
-        const filtrados = productosSCMData.filter(p => {
-            const matchQuery = !query || (p.name && p.name.toLowerCase().includes(query)) || (p.description && p.description.toLowerCase().includes(query));
-            const matchCat = (cat === "todas") || (p.category && p.category.toLowerCase().includes(cat.toLowerCase()));
-            const matchEst = (est === "todos") || (String(p.active) === est);
+        var query = queryInput ? queryInput.value.toLowerCase().trim() : '';
+        var cat = catSelect ? catSelect.value : 'todas';
+        var est = estSelect ? estSelect.value : 'todas';
+
+        var filtrados = productosSCMList.filter(p => {
+            var matchQuery = !query || 
+                (p.name && p.name.toLowerCase().includes(query)) || 
+                (p.sku && p.sku.toLowerCase().includes(query)) ||
+                (p.category && p.category.toLowerCase().includes(query));
+            var matchCat = (cat === "todas") || (p.category && p.category.toLowerCase() === cat.toLowerCase());
+            var matchEst = (est === "todas") || (p.estrategia_logistica === est);
             return matchQuery && matchCat && matchEst;
         });
 
@@ -224,12 +387,117 @@
     }
 
     function abrirModalNuevoProductoSCM() {
-        if (typeof showNotification === 'function') {
-            showNotification("Módulo de alta de producto preparado para lógica SCM");
-        } else {
-            alert("Módulo de alta de producto preparado para lógica SCM");
+        document.getElementById("modalProductoTitulo").innerHTML = '<i class="fas fa-plus" style="color:#0d9488; margin-right:8px;"></i> Nuevo producto';
+        document.getElementById("prodFormId").value = "0";
+        document.getElementById("prodFormNombre").value = "";
+        document.getElementById("prodFormDescripcion").value = "";
+        document.getElementById("prodFormCategoria").value = "Cerámica";
+        document.getElementById("prodFormProveedor").value = "";
+        document.getElementById("prodFormStockActual").value = "0";
+        document.getElementById("prodFormStockMin").value = "5";
+        document.getElementById("prodFormEstrategia").value = "PULL";
+        document.getElementById("prodFormCosto").value = "0.00";
+
+        document.getElementById("modalProductoSCM").style.display = "flex";
+    }
+
+    function abrirModalEditarProductoSCM(id) {
+        var prod = productosSCMList.find(p => p.id === id);
+        if (!prod) return;
+
+        document.getElementById("modalProductoTitulo").innerHTML = '<i class="fas fa-pencil" style="color:#0d9488; margin-right:8px;"></i> Editar producto';
+        document.getElementById("prodFormId").value = prod.id;
+        document.getElementById("prodFormNombre").value = prod.name || '';
+        document.getElementById("prodFormDescripcion").value = prod.description || '';
+        document.getElementById("prodFormCategoria").value = prod.category || 'General';
+        document.getElementById("prodFormProveedor").value = prod.proveedor_id || '';
+        document.getElementById("prodFormStockActual").value = prod.stock_actual || 0;
+        document.getElementById("prodFormStockMin").value = prod.stock_minimo || 5;
+        document.getElementById("prodFormEstrategia").value = prod.estrategia_logistica || 'PULL';
+        document.getElementById("prodFormCosto").value = prod.costo_unitario || 0.00;
+
+        document.getElementById("modalProductoSCM").style.display = "flex";
+    }
+
+    function cerrarModalProductoSCM() {
+        var modal = document.getElementById("modalProductoSCM");
+        if (modal) modal.style.display = "none";
+    }
+
+    async function guardarProductoSCM(ev) {
+        ev.preventDefault();
+        var payload = {
+            id: Number(document.getElementById("prodFormId").value),
+            name: document.getElementById("prodFormNombre").value.trim(),
+            description: document.getElementById("prodFormDescripcion").value.trim(),
+            category: document.getElementById("prodFormCategoria").value,
+            proveedor_id: document.getElementById("prodFormProveedor").value ? Number(document.getElementById("prodFormProveedor").value) : null,
+            stock_actual: Number(document.getElementById("prodFormStockActual").value),
+            stock_minimo: Number(document.getElementById("prodFormStockMin").value),
+            estrategia_logistica: document.getElementById("prodFormEstrategia").value,
+            costo_unitario: Number(document.getElementById("prodFormCosto").value)
+        };
+
+        try {
+            var resp = await fetch("php/scm_api.php?resource=guardar_producto", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload)
+            });
+            var data = await resp.json();
+            if (data.success) {
+                cerrarModalProductoSCM();
+                if (typeof showNotification === 'function') {
+                    showNotification(data.message);
+                } else {
+                    alert(data.message);
+                }
+                cargarProductosSCM();
+            } else {
+                alert("Error al guardar: " + (data.error || "Error desconocido"));
+            }
+        } catch (e) {
+            alert("Error de conexión: " + e.message);
         }
     }
+
+    async function eliminarProductoSCM(id) {
+        var prod = productosSCMList.find(p => p.id === id);
+        var nombre = prod ? prod.name : 'producto';
+        if (!confirm(`¿Estás seguro de eliminar el producto "${nombre}" del catálogo e inventario?`)) {
+            return;
+        }
+
+        try {
+            var resp = await fetch("php/scm_api.php?resource=eliminar_producto", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ id: id })
+            });
+            var data = await resp.json();
+            if (data.success) {
+                if (typeof showNotification === 'function') {
+                    showNotification(data.message);
+                } else {
+                    alert(data.message);
+                }
+                cargarProductosSCM();
+            } else {
+                alert("Error al eliminar: " + (data.error || "Error desconocido"));
+            }
+        } catch (e) {
+            alert("Error de conexión: " + e.message);
+        }
+    }
+
+    // Exponer a window para asegurar disponibilidad en inline onclicks
+    window.cargarProductosSCM = cargarProductosSCM;
+    window.abrirModalNuevoProductoSCM = abrirModalNuevoProductoSCM;
+    window.abrirModalEditarProductoSCM = abrirModalEditarProductoSCM;
+    window.cerrarModalProductoSCM = cerrarModalProductoSCM;
+    window.guardarProductoSCM = guardarProductoSCM;
+    window.eliminarProductoSCM = eliminarProductoSCM;
+    window.filtrarProductosSCM = filtrarProductosSCM;
 
     cargarProductosSCM();
 </script>

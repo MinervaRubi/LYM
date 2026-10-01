@@ -24,7 +24,14 @@ try {
         'detalle_pedido',
         'pagos',
         'interacciones',
-        'evaluaciones_crm'
+        'evaluaciones_crm',
+        'solicitudes_descuento',
+        'notificaciones',
+        'scm_proveedores',
+        'scm_inventario',
+        'scm_movimientos',
+        'scm_pedidos_proveedor',
+        'scm_logistica'
     ];
 
     echo "<h2>Estado de las tablas</h2>";

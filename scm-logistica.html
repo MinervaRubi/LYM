@@ -1,5 +1,6 @@
 <!-- ==============================================================
-     MÓDULO SCM: LOGÍSTICA (PUSH / PULL & DISTRIBUCIÓN)
+     MÓDULO SCM: LOGÍSTICA (ESTRATEGIA PUSH/PULL Y COMPARATIVA)
+     CUMPLE PANTALLAS 9 Y 10 DE LA GUÍA VISUAL SCM
      ARCHIVO: scm-logistica.html
 ============================================================== -->
 
@@ -11,128 +12,268 @@
                 <span class="badge" style="background: rgba(13,148,136,0.15); color: #0d9488; font-weight:700; font-size:0.75rem; padding: 2px 8px; border-radius: 6px;">SCM</span>
                 <span style="font-size: 0.85rem; color: var(--text-muted);">Cadena de Suministros</span>
             </div>
-            <h2 style="font-size: 1.6rem; font-weight: 800; color: var(--text-heading); margin: 0;">Logística (Push / Pull)</h2>
-            <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 2px;">Planificación de suministro por pronóstico (Push) y fabricación bajo demanda (Pull)</p>
+            <h2 style="font-size: 1.6rem; font-weight: 800; color: var(--text-heading); margin: 0;">Logística y Estrategias</h2>
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 2px;">Define y compara modelos de reposición Push vs Pull por producto</p>
         </div>
         <div style="display: flex; gap: 10px; flex-wrap: wrap;">
             <button class="crm-btn crm-btn-secondary crm-btn-sm" onclick="cargarLogisticaSCM()">
                 <i class="fas fa-sync-alt"></i> <span>Actualizar</span>
             </button>
-            <button class="crm-btn crm-btn-primary" style="background: linear-gradient(135deg, #2563eb, #1d4ed8); border:none; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);" onclick="abrirModalEstrategiaLogistica()">
-                <i class="fas fa-route"></i> <span>Configurar Estrategia</span>
-            </button>
         </div>
     </div>
 
-    <!-- PANELES DE COMPARACIÓN DE ESTRATEGIAS PUSH VS PULL -->
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.5rem;">
-        <!-- PANEL PUSH -->
-        <div class="crm-card" style="padding: 1.5rem; border-top: 4px solid #0d9488;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-                <div>
-                    <span class="badge" style="background: rgba(13,148,136,0.15); color: #0d9488; font-weight: 700;">Estrategia PUSH</span>
-                    <h3 style="font-size: 1.2rem; font-weight: 700; color: #0f172a; margin-top: 6px;">Empuje por Pronóstico</h3>
+    <!-- SECCIÓN DE 2 COLUMNAS: PANTALLA 9 (CONFIGURACIÓN) Y PANTALLA 10 (MÉTRICAS COMPARATIVAS) -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)); gap: 1.5rem; align-items: start;">
+        
+        <!-- PANTALLA 9: CONFIGURAR ESTRATEGIA -->
+        <div class="crm-card" style="padding: 1.5rem;">
+            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 1.25rem;">
+                <div class="crm-icon-box" style="background: rgba(13,148,136,0.12); color: #0d9488;">
+                    <i class="fas fa-route"></i>
                 </div>
-                <div style="width: 44px; height: 44px; border-radius: 10px; background: rgba(13,148,136,0.1); color: #0d9488; display:flex; align-items:center; justify-content:center; font-size:1.3rem;">
-                    <i class="fas fa-boxes-stacked"></i>
+                <h3 style="margin: 0; font-size: 1.2rem; font-weight: 800; color: #0f172a;">Configurar estrategia</h3>
+            </div>
+
+            <form id="formConfigEstrategia" onsubmit="guardarEstrategiaLogistica(event)">
+                <div style="margin-bottom: 1.25rem;">
+                    <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #334155; margin-bottom: 6px;">Producto *</label>
+                    <select id="selectProductoEstrategia" class="crm-select" style="width: 100%;" required onchange="cargarDetalleProductoSeleccionado()">
+                        <option value="">Selecciona un producto...</option>
+                    </select>
                 </div>
-            </div>
-            <p style="font-size: 0.85rem; color: #64748b; line-height: 1.5; margin-bottom: 1.25rem;">
-                Producción anticipada y almacenamiento en bodegas centrales basada en históricos de venta. Ideal para piezas de alta rotación (tazas, textiles estándar, souvenirs).
-            </p>
-            <div style="display: flex; justify-content: space-between; padding: 10px 14px; background: #f8fafc; border-radius: 8px; font-size: 0.85rem; margin-bottom: 8px;">
-                <span style="color: #64748b;">SKUs bajo modalidad Push:</span>
-                <strong style="color: #0f172a;">18 artículos</strong>
-            </div>
-            <div style="display: flex; justify-content: space-between; padding: 10px 14px; background: #f8fafc; border-radius: 8px; font-size: 0.85rem;">
-                <span style="color: #64748b;">Nivel de cumplimiento pronóstico:</span>
-                <strong style="color: #059669;">94.2%</strong>
-            </div>
+
+                <div style="margin-bottom: 1.25rem;">
+                    <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #334155; margin-bottom: 8px;">Estrategia *</label>
+                    <div style="display: flex; flex-direction: column; gap: 10px;">
+                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 0.9rem; font-weight: 600; color: #059669;">
+                            <input type="radio" name="radioEstrategia" value="PUSH" checked style="accent-color: #059669;">
+                            <span><strong>PUSH</strong> (producción/compra anticipada)</span>
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 0.9rem; font-weight: 600; color: #2563eb;">
+                            <input type="radio" name="radioEstrategia" value="PULL" style="accent-color: #2563eb;">
+                            <span><strong>PULL</strong> (según demanda real)</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- CAJAS INFORMATIVAS EXPLICATIVAS (COMO EN PANTALLA 9) -->
+                <div style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 1.5rem;">
+                    <div style="display: flex; gap: 12px; align-items: flex-start; padding: 12px; border-radius: 10px; background: rgba(5,150,105,0.06); border: 1px solid rgba(5,150,105,0.2);">
+                        <i class="fas fa-boxes-stacked" style="color: #059669; font-size: 1.3rem; margin-top: 2px;"></i>
+                        <div>
+                            <strong style="color: #059669; font-size: 0.85rem; display: block; margin-bottom: 2px;">PUSH</strong>
+                            <span style="font-size: 0.82rem; color: #475569; line-height: 1.4;">Se genera pedido automáticamente cuando el stock llega al mínimo. Ideal para productos de alta rotación.</span>
+                        </div>
+                    </div>
+
+                    <div style="display: flex; gap: 12px; align-items: flex-start; padding: 12px; border-radius: 10px; background: rgba(37,99,235,0.06); border: 1px solid rgba(37,99,235,0.2);">
+                        <i class="fas fa-hand-holding-hand" style="color: #2563eb; font-size: 1.3rem; margin-top: 2px;"></i>
+                        <div>
+                            <strong style="color: #2563eb; font-size: 0.85rem; display: block; margin-bottom: 2px;">PULL</strong>
+                            <span style="font-size: 0.82rem; color: #475569; line-height: 1.4;">Se genera pedido solo bajo pedido o demanda del cliente. Ideal para artesanías exclusivas de alto valor.</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="display: flex; justify-content: flex-end;">
+                    <button type="submit" class="crm-btn crm-btn-primary" style="background: #0d9488; width: 100%; justify-content: center; padding: 10px;">
+                        <i class="fas fa-save"></i> Guardar estrategia
+                    </button>
+                </div>
+            </form>
         </div>
 
-        <!-- PANEL PULL -->
-        <div class="crm-card" style="padding: 1.5rem; border-top: 4px solid #2563eb;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-                <div>
-                    <span class="badge" style="background: rgba(37,99,235,0.15); color: #2563eb; font-weight: 700;">Estrategia PULL</span>
-                    <h3 style="font-size: 1.2rem; font-weight: 700; color: #0f172a; margin-top: 6px;">Atracción por Demanda</h3>
+        <!-- PANTALLA 10: COMPARATIVA PUSH VS PULL (TARJETAS DE CONTEO) -->
+        <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                <!-- TARJETA PUSH -->
+                <div class="crm-card" style="padding: 1.25rem; border-top: 4px solid #059669;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                        <span style="font-size: 0.85rem; font-weight: 700; color: #059669; text-transform: uppercase;">PUSH</span>
+                        <div class="crm-icon-box" style="width: 32px; height: 32px; font-size: 0.9rem; background: rgba(5,150,105,0.12); color: #059669;">
+                            <i class="fas fa-boxes-stacked"></i>
+                        </div>
+                    </div>
+                    <div style="font-size: 1.8rem; font-weight: 800; color: #0f172a;" id="statTotalPush">0</div>
+                    <div style="font-size: 0.8rem; color: #64748b;">productos asignados</div>
                 </div>
-                <div style="width: 44px; height: 44px; border-radius: 10px; background: rgba(37,99,235,0.1); color: #2563eb; display:flex; align-items:center; justify-content:center; font-size:1.3rem;">
-                    <i class="fas fa-arrows-spin"></i>
-                </div>
-            </div>
-            <p style="font-size: 0.85rem; color: #64748b; line-height: 1.5; margin-bottom: 1.25rem;">
-                Elaboración artesanal sobre pedido del cliente (Just-in-Time). Reduce costos de inventario para piezas de alto valor (alebrijes tallados, tapetes por encargo).
-            </p>
-            <div style="display: flex; justify-content: space-between; padding: 10px 14px; background: #f8fafc; border-radius: 8px; font-size: 0.85rem; margin-bottom: 8px;">
-                <span style="color: #64748b;">SKUs bajo modalidad Pull:</span>
-                <strong style="color: #0f172a;">7 artículos exclusivos</strong>
-            </div>
-            <div style="display: flex; justify-content: space-between; padding: 10px 14px; background: #f8fafc; border-radius: 8px; font-size: 0.85rem;">
-                <span style="color: #64748b;">Lead Time de manufactura:</span>
-                <strong style="color: #2563eb;">5 a 8 días hábiles</strong>
-            </div>
-        </div>
-    </div>
 
-    <!-- TABLA DE CONTROL DE DESPACHOS Y ASIGNACIÓN DE ESTRATEGIA -->
-    <div class="crm-table-container">
-        <div style="padding: 1.25rem; border-bottom: 1px solid var(--border-color); font-weight: 700; color: var(--text-heading); font-size: 1rem;">
-            Matriz de Estrategia Logística por Categoría
+                <!-- TARJETA PULL -->
+                <div class="crm-card" style="padding: 1.25rem; border-top: 4px solid #2563eb;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                        <span style="font-size: 0.85rem; font-weight: 700; color: #2563eb; text-transform: uppercase;">PULL</span>
+                        <div class="crm-icon-box" style="width: 32px; height: 32px; font-size: 0.9rem; background: rgba(37,99,235,0.12); color: #2563eb;">
+                            <i class="fas fa-hand-holding-hand"></i>
+                        </div>
+                    </div>
+                    <div style="font-size: 1.8rem; font-weight: 800; color: #0f172a;" id="statTotalPull">0</div>
+                    <div style="font-size: 0.8rem; color: #64748b;">productos asignados</div>
+                </div>
+            </div>
+
+            <!-- TABLA COMPARATIVA COMPLETA DE PRODUCTOS POR ESTRATEGIA (PANTALLA 10) -->
+            <div class="crm-table-container">
+                <div style="padding: 1rem 1.25rem; border-bottom: 1px solid var(--border-color); font-weight: 800; color: var(--text-heading); font-size: 0.95rem; display: flex; justify-content: space-between; align-items: center;">
+                    <span>Productos por estrategia</span>
+                    <span style="font-size: 0.75rem; color: #64748b; font-weight: normal;">Haz clic en el badge para alternar</span>
+                </div>
+                <table class="crm-table">
+                    <thead>
+                        <tr>
+                            <th>Producto</th>
+                            <th>Categoría</th>
+                            <th style="text-align: center;">Stock</th>
+                            <th style="text-align: center;">Stock mín.</th>
+                            <th style="text-align: center;">Estrategia</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tbodyLogisticaProductos">
+                        <tr>
+                            <td colspan="5" style="text-align: center; padding: 2rem; color: #94a3b8;">
+                                <i class="fas fa-spinner fa-spin"></i> Cargando matriz comparativa...
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
-        <table class="crm-table">
-            <thead>
-                <tr>
-                    <th>Categoría / Línea</th>
-                    <th>Estrategia Asignada</th>
-                    <th>Punto de Despacho</th>
-                    <th>Tiempo de Tránsito</th>
-                    <th>Estado de Flujo</th>
-                    <th style="text-align: right;">Acciones</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td style="font-weight: 700; color: #0f172a;">Tazas y Termos Conmemorativos</td>
-                    <td><span class="badge" style="background:#ccfbf1; color:#0f766e; font-weight:700;"><i class="fas fa-arrow-right"></i> PUSH (Lote fijo)</span></td>
-                    <td>Almacén Central (CDMX)</td>
-                    <td>24 - 48 hrs</td>
-                    <td><span class="badge badge-activo"><span class="badge-dot"></span>Flujo Continuo</span></td>
-                    <td style="text-align: right;"><button class="crm-btn crm-btn-secondary crm-btn-sm" style="padding:4px 8px;"><i class="fas fa-gear"></i></button></td>
-                </tr>
-                <tr>
-                    <td style="font-weight: 700; color: #0f172a;">Alebrijes y Esculturas en Madera</td>
-                    <td><span class="badge" style="background:#eff6ff; color:#1d4ed8; font-weight:700;"><i class="fas fa-arrow-left"></i> PULL (Bajo pedido)</span></td>
-                    <td>Taller Artesanal (Oaxaca)</td>
-                    <td>5 - 7 días</td>
-                    <td><span class="badge" style="background:#fef3c7; color:#b45309;"><span class="badge-dot" style="background:#b45309;"></span>Bajo Pedido</span></td>
-                    <td style="text-align: right;"><button class="crm-btn crm-btn-secondary crm-btn-sm" style="padding:4px 8px;"><i class="fas fa-gear"></i></button></td>
-                </tr>
-                <tr>
-                    <td style="font-weight: 700; color: #0f172a;">Cerámica de Talavera Certificada</td>
-                    <td><span class="badge" style="background:#f3e8ff; color:#7e22ce; font-weight:700;"><i class="fas fa-arrows-rotate"></i> HÍBRIDO (Push-Pull)</span></td>
-                    <td>Bodega Puebla + Taller</td>
-                    <td>3 - 4 días</td>
-                    <td><span class="badge badge-activo"><span class="badge-dot"></span>Balanceado</span></td>
-                    <td style="text-align: right;"><button class="crm-btn crm-btn-secondary crm-btn-sm" style="padding:4px 8px;"><i class="fas fa-gear"></i></button></td>
-                </tr>
-            </tbody>
-        </table>
     </div>
 </div>
 
 <script>
-    function cargarLogisticaSCM() {
-        if (typeof showNotification === 'function') {
-            showNotification("Flujos logísticos actualizados");
+    var logisticaProductos = logisticaProductos || [];
+
+    async function cargarLogisticaSCM() {
+        var tbody = document.getElementById("tbodyLogisticaProductos");
+        try {
+            var resp = await fetch("php/scm_api.php?resource=logistica");
+            if (!resp.ok) throw new Error("Error en servidor");
+
+            var data = await resp.json();
+            if (data.success && Array.isArray(data.productos)) {
+                logisticaProductos = data.productos;
+
+                var elPush = document.getElementById("statTotalPush");
+                var elPull = document.getElementById("statTotalPull");
+                if (elPush) elPush.textContent = data.push_count + " productos";
+                if (elPull) elPull.textContent = data.pull_count + " productos";
+
+                // Llenar select de productos
+                var sel = document.getElementById("selectProductoEstrategia");
+                if (sel) {
+                    var curVal = sel.value;
+                    sel.innerHTML = '<option value="">Selecciona un producto...</option>' + 
+                        logisticaProductos.map(p => `<option value="${p.id}" data-est="${p.estrategia}">${p.producto} (${p.categoria})</option>`).join('');
+                    if (curVal) sel.value = curVal;
+                }
+
+                renderizarTablaLogistica(logisticaProductos);
+            }
+        } catch (e) {
+            if (tbody) {
+                tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding:2rem; color:#ef4444;">Error al cargar datos logísticos: ${e.message}</td></tr>`;
+            }
         }
     }
 
-    function abrirModalEstrategiaLogistica() {
-        if (typeof showNotification === 'function') {
-            showNotification("Configuración de logística preparada para la lógica de negocio");
-        } else {
-            alert("Configuración de logística preparada para la lógica de negocio");
+    function renderizarTablaLogistica(items) {
+        var tbody = document.getElementById("tbodyLogisticaProductos");
+        if (!tbody) return;
+        if (!items || items.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding:2rem; color:#64748b;">No hay productos registrados.</td></tr>`;
+            return;
+        }
+
+        tbody.innerHTML = items.map(p => {
+            var esPush = (p.estrategia === 'PUSH');
+            var nuevaEst = esPush ? 'PULL' : 'PUSH';
+
+            return `
+                <tr>
+                    <td style="font-weight: 700; color: #0f172a;">${p.producto}</td>
+                    <td><span class="badge" style="background:#f1f5f9; color:#475569; font-size:0.75rem;">${p.categoria}</span></td>
+                    <td style="text-align: center; font-weight: 700; color: #0f172a;">${p.stock}</td>
+                    <td style="text-align: center; font-weight: 600; color: #64748b;">${p.stock_min}</td>
+                    <td style="text-align: center;">
+                        <button onclick="alternarEstrategiaProducto(${p.id}, '${nuevaEst}')" title="Clic para cambiar a ${nuevaEst}" style="cursor:pointer; border:none; background:none;">
+                            <span class="badge" style="background:${esPush ? 'rgba(5,150,105,0.15)' : 'rgba(37,99,235,0.15)'}; color:${esPush ? '#059669' : '#2563eb'}; font-weight:800; font-size:0.75rem; padding:4px 12px; border-radius:6px; transition:transform 0.15s ease;">
+                                ${p.estrategia} <i class="fas fa-arrows-rotate" style="font-size:0.65rem; margin-left:4px; opacity:0.7;"></i>
+                            </span>
+                        </button>
+                    </td>
+                </tr>
+            `;
+        }).join("");
+    }
+
+    function cargarDetalleProductoSeleccionado() {
+        var sel = document.getElementById("selectProductoEstrategia");
+        if (!sel) return;
+        var opt = sel.options[sel.selectedIndex];
+        if (opt && opt.value) {
+            var est = opt.getAttribute("data-est") || "PULL";
+            var radio = document.querySelector(`input[name='radioEstrategia'][value='${est}']`);
+            if (radio) radio.checked = true;
         }
     }
+
+    async function alternarEstrategiaProducto(prodId, nuevaEstrategia) {
+        try {
+            var resp = await fetch("php/scm_api.php?resource=guardar_estrategia", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ producto_id: prodId, estrategia: nuevaEstrategia })
+            });
+            var data = await resp.json();
+            if (data.success) {
+                if (typeof showNotification === 'function') {
+                    showNotification(data.message);
+                }
+                cargarLogisticaSCM();
+            }
+        } catch (e) {
+            alert("Error al actualizar estrategia: " + e.message);
+        }
+    }
+
+    async function guardarEstrategiaLogistica(ev) {
+        ev.preventDefault();
+        var prodId = Number(document.getElementById("selectProductoEstrategia").value);
+        var rChecked = document.querySelector("input[name='radioEstrategia']:checked");
+        var est = rChecked ? rChecked.value : 'PULL';
+
+        if (!prodId) {
+            alert("Por favor selecciona un producto.");
+            return;
+        }
+
+        try {
+            var resp = await fetch("php/scm_api.php?resource=guardar_estrategia", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ producto_id: prodId, estrategia: est })
+            });
+            var data = await resp.json();
+            if (data.success) {
+                if (typeof showNotification === 'function') {
+                    showNotification(data.message);
+                } else {
+                    alert(data.message);
+                }
+                cargarLogisticaSCM();
+            } else {
+                alert("Error: " + (data.error || "No se pudo guardar la estrategia"));
+            }
+        } catch (e) {
+            alert("Error de conexión: " + e.message);
+        }
+    }
+
+    // Exponer a window para asegurar disponibilidad en inline onclicks
+    window.cargarLogisticaSCM = cargarLogisticaSCM;
+    window.cargarDetalleProductoSeleccionado = cargarDetalleProductoSeleccionado;
+    window.alternarEstrategiaProducto = alternarEstrategiaProducto;
+    window.guardarEstrategiaLogistica = guardarEstrategiaLogistica;
+
+    cargarLogisticaSCM();
 </script>

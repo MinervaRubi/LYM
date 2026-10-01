@@ -185,6 +185,9 @@
                         <button class="crm-nav-item crm-nav-subitem" id="scm-nav-reportes" onclick="loadExternalView('scm-reportes.html', this, 'SCM')">
                             <i class="fas fa-chart-column"></i> <span>Reportes</span>
                         </button>
+                        <button class="crm-nav-item crm-nav-subitem" id="scm-nav-madurez" onclick="loadExternalView('scm-madurez.html', this, 'SCM')">
+                            <i class="fas fa-layer-group"></i> <span>Nivel de Madurez</span>
+                        </button>
                     </div>
                 </div>
 
@@ -1172,20 +1175,80 @@
 
         function bloquearAccesoCRM(mensaje) {
             document.body.innerHTML = `
-                <div style="min-height:100vh; display:flex; align-items:center; justify-content:center; background:#f8fafc; font-family:'Plus Jakarta Sans', sans-serif;">
-                    <div style="background:#ffffff; padding:3rem; border-radius:16px; border:1px solid #e2e8f0; text-align:center; max-width:480px; box-shadow:0 10px 30px rgba(0,0,0,0.08);">
-                        <div style="width:64px; height:64px; background:#fee2e2; color:#ef4444; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:1.8rem; margin:0 auto 1.25rem;">
-                            <i class="fas fa-lock"></i>
+                <div style="min-height:100vh; display:flex; align-items:center; justify-content:center; background:#f1f5f9; font-family:'Plus Jakarta Sans', sans-serif; padding:20px;">
+                    <div style="background:#ffffff; padding:2.5rem; border-radius:18px; border:1px solid #e2e8f0; width:100%; max-width:440px; box-shadow:0 20px 40px rgba(0,0,0,0.08); text-align:center;">
+                        <div style="width:60px; height:60px; background:linear-gradient(135deg, #6B46C1, #8B5CF6); color:#fff; border-radius:16px; display:flex; align-items:center; justify-content:center; font-size:1.6rem; margin:0 auto 1.25rem; box-shadow:0 8px 20px rgba(107, 70, 193, 0.3);">
+                            <i class="fas fa-shield-alt"></i>
                         </div>
-                        <h2 style="color:#0f172a; margin-bottom:8px; font-weight:800;">Acceso Restringido</h2>
-                        <p style="color:#64748b; font-size:0.92rem; margin-bottom:1.5rem; line-height:1.5;">${escapeHtml(mensaje)}</p>
-                        <a href="index.php" style="display:inline-block; background:linear-gradient(135deg, #6B46C1, #8B5CF6); color:#ffffff; padding:10px 24px; border-radius:10px; font-weight:600; text-decoration:none;">
-                            <i class="fas fa-arrow-left"></i> Volver al Inicio
-                        </a>
+                        <h2 style="color:#0f172a; margin-bottom:6px; font-weight:800; font-size:1.5rem;">Gestor LYM (CRM / SCM)</h2>
+                        <p style="color:#64748b; font-size:0.88rem; margin-bottom:1.5rem;">Conexión directa a base de datos MariaDB/MySQL. Inicia sesión para continuar:</p>
+                        
+                        <form onsubmit="handleLoginDirectoGestor(event)" style="display:flex; flex-direction:column; gap:12px; text-align:left;">
+                            <div>
+                                <label style="font-size:0.8rem; font-weight:700; color:#334155; margin-bottom:4px; display:block;">Usuario</label>
+                                <input type="text" id="directGestorUser" value="admin" required style="width:100%; padding:10px 14px; border:1px solid #cbd5e1; border-radius:8px; font-size:0.95rem; box-sizing:border-box;">
+                            </div>
+                            <div>
+                                <label style="font-size:0.8rem; font-weight:700; color:#334155; margin-bottom:4px; display:block;">Contraseña</label>
+                                <input type="password" id="directGestorPass" value="admin" required style="width:100%; padding:10px 14px; border:1px solid #cbd5e1; border-radius:8px; font-size:0.95rem; box-sizing:border-box;">
+                            </div>
+                            <div id="directGestorError" style="display:none; color:#ef4444; font-size:0.82rem; font-weight:600; text-align:center;"></div>
+                            
+                            <button type="submit" id="btnDirectLogin" style="background:linear-gradient(135deg, #6B46C1, #8B5CF6); color:#ffffff; padding:12px; border:none; border-radius:10px; font-weight:700; font-size:0.95rem; cursor:pointer; margin-top:6px; box-shadow:0 4px 14px rgba(107,70,193,0.35);">
+                                <i class="fas fa-sign-in-alt"></i> Iniciar Sesión en el Gestor
+                            </button>
+                            <button type="button" onclick="loginRapidoAdminDirecto()" style="background:#f8fafc; color:#6B46C1; border:1px solid #e2e8f0; padding:10px; border-radius:10px; font-weight:700; font-size:0.88rem; cursor:pointer;">
+                                ⚡ Entrar con 1 Clic (admin / admin)
+                            </button>
+                        </form>
+
+                        <div style="margin-top:1.5rem; border-top:1px solid #f1f5f9; padding-top:1rem;">
+                            <a href="sistema.html" style="color:#64748b; font-size:0.85rem; text-decoration:none;">
+                                <i class="fas fa-arrow-left"></i> Ir a la Tienda Pública
+                            </a>
+                        </div>
                     </div>
                 </div>
             `;
-            setTimeout(() => { window.location.href = "index.php"; }, 2500);
+        }
+
+        async function handleLoginDirectoGestor(e) {
+            e.preventDefault();
+            const u = document.getElementById("directGestorUser").value.trim();
+            const p = document.getElementById("directGestorPass").value;
+            const btn = document.getElementById("btnDirectLogin");
+            const err = document.getElementById("directGestorError");
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Conectando con MySQL...';
+            err.style.display = 'none';
+
+            try {
+                const resp = await fetch("php/login.php", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ username: u, password: p }),
+                    credentials: "same-origin"
+                });
+                const data = await resp.json();
+                if (data.success) {
+                    window.location.reload();
+                } else {
+                    err.style.display = 'block';
+                    err.textContent = data.error || 'Credenciales incorrectas';
+                }
+            } catch (ex) {
+                err.style.display = 'block';
+                err.textContent = 'Error de conexión: ' + ex.message;
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Iniciar Sesión en el Gestor';
+            }
+        }
+
+        async function loginRapidoAdminDirecto() {
+            document.getElementById("directGestorUser").value = "admin";
+            document.getElementById("directGestorPass").value = "admin";
+            document.getElementById("btnDirectLogin").click();
         }
 
         /* GESTIÓN DE TRABAJADORES (ADMIN) */

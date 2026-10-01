@@ -126,7 +126,7 @@
                 <i class="fas fa-cube"></i>
             </div>
             <div class="scm-tile-title">Productos</div>
-            <div class="scm-tile-desc">Gestión de catálogo</div>
+            <div class="scm-tile-desc" id="descHubProductos">Gestión de catálogo</div>
         </div>
 
         <!-- 2. PROVEEDORES -->
@@ -135,7 +135,7 @@
                 <i class="fas fa-user-group"></i>
             </div>
             <div class="scm-tile-title">Proveedores</div>
-            <div class="scm-tile-desc">Administrar proveedores</div>
+            <div class="scm-tile-desc" id="descHubProveedores">Administrar proveedores</div>
         </div>
 
         <!-- 3. INVENTARIO -->
@@ -144,7 +144,7 @@
                 <i class="fas fa-dice-d6"></i>
             </div>
             <div class="scm-tile-title">Inventario</div>
-            <div class="scm-tile-desc">Control de existencias</div>
+            <div class="scm-tile-desc" id="descHubInventario">Control de existencias</div>
         </div>
 
         <!-- 4. PEDIDOS -->
@@ -153,7 +153,7 @@
                 <i class="fas fa-file-invoice"></i>
             </div>
             <div class="scm-tile-title">Pedidos</div>
-            <div class="scm-tile-desc">Reposición y suministro</div>
+            <div class="scm-tile-desc" id="descHubPedidos">Reposición y suministro</div>
         </div>
 
         <!-- 5. LOGÍSTICA -->
@@ -162,7 +162,7 @@
                 <i class="fas fa-arrows-rotate"></i>
             </div>
             <div class="scm-tile-title">Logística</div>
-            <div class="scm-tile-desc">Push / Pull</div>
+            <div class="scm-tile-desc" id="descHubLogistica">Push / Pull</div>
         </div>
 
         <!-- 6. REPORTES -->
@@ -171,7 +171,16 @@
                 <i class="fas fa-chart-column"></i>
             </div>
             <div class="scm-tile-title">Reportes</div>
-            <div class="scm-tile-desc">Métricas y análisis</div>
+            <div class="scm-tile-desc" id="descHubReportes">Métricas y análisis</div>
+        </div>
+
+        <!-- 7. NIVEL DE MADUREZ SCM -->
+        <div class="scm-card-tile" onclick="navegarDesdeHubSCM('scm-madurez.html', 'scm-nav-madurez')" style="grid-column: span 2;">
+            <div class="scm-tile-icon scm-icon-green" style="color: #6366f1;">
+                <i class="fas fa-layer-group"></i>
+            </div>
+            <div class="scm-tile-title">Nivel de Madurez SCM</div>
+            <div class="scm-tile-desc" id="descHubMadurez">Evaluación del avance de implementación en vivo</div>
         </div>
     </div>
 </div>
@@ -182,9 +191,40 @@
             abrirAcordeonSCM();
         }
         
-        const navBtn = document.getElementById(navItemId);
+        var navBtn = document.getElementById(navItemId);
         if (typeof loadExternalView === 'function') {
             loadExternalView(viewUrl, navBtn, 'SCM');
         }
     }
+
+    async function cargarMetricasHubSCM() {
+        try {
+            var resp = await fetch('php/scm_api.php?resource=resumen');
+            var data = await resp.json();
+            if (data.success && data.resumen) {
+                var r = data.resumen;
+                var p = document.getElementById('descHubProductos');
+                if (p) p.innerHTML = `<span style="color:#059669; font-weight:700;">${r.total_productos}</span> productos en catálogo`;
+                var pr = document.getElementById('descHubProveedores');
+                if (pr) pr.innerHTML = `<span style="color:#2563eb; font-weight:700;">${r.total_proveedores}</span> proveedores registrados`;
+                var inv = document.getElementById('descHubInventario');
+                if (inv) inv.innerHTML = `<span style="color:#059669; font-weight:700;">${r.total_inventario}</span> en almacén (${r.stock_bajo} con stock bajo)`;
+                var ped = document.getElementById('descHubPedidos');
+                if (ped) ped.innerHTML = `<span style="color:#ea580c; font-weight:700;">${r.pedidos_pendientes}</span> pedidos pendientes`;
+                var log = document.getElementById('descHubLogistica');
+                if (log) log.innerHTML = `<span style="color:#2563eb; font-weight:700;">${r.push_count} PUSH</span> / <span style="color:#059669; font-weight:700;">${r.pull_count} PULL</span>`;
+                var rep = document.getElementById('descHubReportes');
+                if (rep) rep.innerHTML = `<span style="color:#2563eb; font-weight:700;">${r.total_movimientos}</span> movimientos registrados`;
+                var mad = document.getElementById('descHubMadurez');
+                if (mad) mad.innerHTML = `Nivel: <span style="color:#6366f1; font-weight:700;">${r.madurez_nivel}</span> (${r.madurez_porcentaje}% implementado)`;
+            }
+        } catch (e) {
+            console.warn('No se pudieron cargar métricas de SCM en inicio:', e);
+        }
+    }
+
+    window.navegarDesdeHubSCM = navegarDesdeHubSCM;
+    window.cargarMetricasHubSCM = cargarMetricasHubSCM;
+
+    cargarMetricasHubSCM();
 </script>

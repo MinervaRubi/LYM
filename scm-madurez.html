@@ -1,0 +1,165 @@
+<!-- ==============================================================
+     MÓDULO SCM: NIVEL DE MADUREZ SCM (EVALUACIÓN DE AVANCE)
+     CUMPLE PANTALLA 13 DE LA GUÍA VISUAL SCM
+     ARCHIVO: scm-madurez.html
+============================================================== -->
+
+<div style="display: flex; flex-direction: column; gap: 1.5rem; max-width: 1000px; margin: 0 auto;">
+    <!-- CABECERA -->
+    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+        <div>
+            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+                <span class="badge" style="background: rgba(13,148,136,0.15); color: #0d9488; font-weight:700; font-size:0.75rem; padding: 2px 8px; border-radius: 6px;">SCM</span>
+                <span style="font-size: 0.85rem; color: var(--text-muted);">Cadena de Suministros</span>
+            </div>
+            <h2 style="font-size: 1.6rem; font-weight: 800; color: var(--text-heading); margin: 0;">Nivel de madurez SCM</h2>
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 2px;">Evalúa el avance en la implementación de la cadena de suministros</p>
+        </div>
+        <div>
+            <button class="crm-btn crm-btn-secondary crm-btn-sm" onclick="cargarMadurezSCM()">
+                <i class="fas fa-sync-alt"></i> <span>Recalcular</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- TARJETA PRINCIPAL: NIVEL ACTUAL Y BARRA DE PROGRESO -->
+    <div class="crm-card" style="padding: 1.5rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; flex-wrap: wrap; gap: 10px;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <span style="font-size: 1.1rem; font-weight: 800; color: #0f172a;">Nivel actual</span>
+                <span id="badgeNivelMadurez" class="badge" style="background: rgba(13,148,136,0.15); color: #0d9488; font-size: 0.85rem; font-weight: 800; padding: 4px 12px; border-radius: 8px;">
+                    Calculando...
+                </span>
+            </div>
+            <div style="font-size: 1.25rem; font-weight: 800; color: #0d9488;" id="porcentajeMadurezTexto">0%</div>
+        </div>
+
+        <!-- Barra de progreso -->
+        <div style="width: 100%; height: 12px; background: #e2e8f0; border-radius: 999px; overflow: hidden; margin-bottom: 1.5rem;">
+            <div id="barraProgresoMadurez" style="height: 100%; width: 0%; background: linear-gradient(90deg, #0d9488, #059669); transition: width 0.8s ease; border-radius: 999px;"></div>
+        </div>
+
+        <!-- 3 ETAPAS DE MADUREZ (PANTALLA 13) -->
+        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem;" id="contenedorEtapasMadurez">
+            <!-- 1. Inicial -->
+            <div id="etapaInicial" class="crm-card" style="padding: 1.25rem; text-align: center; border: 2px solid #e2e8f0; transition: all 0.3s ease;">
+                <div style="font-size: 1.15rem; font-weight: 800; color: #0f172a; margin-bottom: 4px;">Inicial</div>
+                <div style="font-size: 0.8rem; color: #64748b;">Procesos básicos</div>
+            </div>
+
+            <!-- 2. En desarrollo -->
+            <div id="etapaDesarrollo" class="crm-card" style="padding: 1.25rem; text-align: center; border: 2px solid #e2e8f0; transition: all 0.3s ease;">
+                <div style="font-size: 1.15rem; font-weight: 800; color: #0f172a; margin-bottom: 4px;">En desarrollo</div>
+                <div style="font-size: 0.8rem; color: #64748b;">Integración de procesos</div>
+            </div>
+
+            <!-- 3. Optimizado -->
+            <div id="etapaOptimizado" class="crm-card" style="padding: 1.25rem; text-align: center; border: 2px solid #e2e8f0; transition: all 0.3s ease;">
+                <div style="font-size: 1.15rem; font-weight: 800; color: #0f172a; margin-bottom: 4px;">Optimizado</div>
+                <div style="font-size: 0.8rem; color: #64748b;">Procesos avanzados</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- CHECKLIST DE AVANCE (PANTALLA 13) -->
+    <div class="crm-card" style="padding: 1.5rem;">
+        <h3 style="margin: 0 0 1rem 0; font-size: 1.15rem; font-weight: 800; color: #0f172a;">Checklist de avance</h3>
+        <div id="listaChecklistMadurez" style="display: flex; flex-direction: column; gap: 12px;">
+            <div style="color: #94a3b8; text-align: center; padding: 1.5rem;">
+                <i class="fas fa-spinner fa-spin"></i> Evaluando módulos en base de datos...
+            </div>
+        </div>
+    </div>
+
+    <!-- DESCRIPCIÓN DEL NIVEL (PANTALLA 13) -->
+    <div class="crm-card" style="padding: 1.5rem; border-left: 4px solid #0d9488;">
+        <h4 style="margin: 0 0 6px 0; font-size: 1rem; font-weight: 800; color: #0f172a;">Descripción del nivel</h4>
+        <p id="descripcionNivelMadurez" style="margin: 0; font-size: 0.9rem; color: #475569; line-height: 1.6;">
+            Cargando evaluación diagnóstica...
+        </p>
+    </div>
+</div>
+
+<script>
+    async function cargarMadurezSCM() {
+        try {
+            var resp = await fetch("php/scm_api.php?resource=madurez");
+            if (!resp.ok) throw new Error("Error en la respuesta del servidor");
+
+            var data = await resp.json();
+            if (data.success) {
+                renderizarMadurez(data);
+            }
+        } catch (e) {
+            console.error("Error al cargar madurez:", e);
+        }
+    }
+
+    function renderizarMadurez(data) {
+        var nivel = data.nivel_actual || 'Inicial';
+        var pct = data.porcentaje || 0;
+
+        // Actualizar badges y porcentaje
+        var badge = document.getElementById("badgeNivelMadurez");
+        var txtPct = document.getElementById("porcentajeMadurezTexto");
+        var barra = document.getElementById("barraProgresoMadurez");
+
+        if (badge) badge.textContent = nivel;
+        if (txtPct) txtPct.textContent = pct + "%";
+        if (barra) barra.style.width = pct + "%";
+
+        // Estilos de etapas
+        var eIni = document.getElementById("etapaInicial");
+        var eDes = document.getElementById("etapaDesarrollo");
+        var eOpt = document.getElementById("etapaOptimizado");
+
+        // Reset
+        [eIni, eDes, eOpt].forEach(function(el) {
+            if (el) {
+                el.style.borderColor = "#e2e8f0";
+                el.style.background = "#ffffff";
+            }
+        });
+
+        // Activo
+        var activeEl = eIni;
+        if (nivel === 'En desarrollo') activeEl = eDes;
+        else if (nivel === 'Optimizado') activeEl = eOpt;
+
+        if (activeEl) {
+            activeEl.style.borderColor = "#0d9488";
+            activeEl.style.background = "rgba(13,148,136,0.06)";
+            var childDiv = activeEl.querySelector("div");
+            if (childDiv) childDiv.style.color = "#0d9488";
+        }
+
+        // Renderizar Checklist
+        var clContainer = document.getElementById("listaChecklistMadurez");
+        if (clContainer && Array.isArray(data.checklist)) {
+            clContainer.innerHTML = data.checklist.map(function(c) {
+                return `
+                <div style="display:flex; align-items:flex-start; gap:12px; padding:10px 14px; border-radius:10px; background:${c.completado ? 'rgba(5,150,105,0.05)' : '#f8fafc'}; border:1px solid ${c.completado ? 'rgba(5,150,105,0.2)' : '#e2e8f0'};">
+                    <div style="font-size:1.1rem; color:${c.completado ? '#059669' : '#cbd5e1'}; margin-top:2px;">
+                        <i class="fas ${c.completado ? 'fa-square-check' : 'fa-square'}"></i>
+                    </div>
+                    <div>
+                        <div style="font-size:0.92rem; font-weight:700; color:${c.completado ? '#0f172a' : '#64748b'};">${c.titulo}</div>
+                        <div style="font-size:0.8rem; color:#64748b;">${c.descripcion}</div>
+                    </div>
+                </div>
+                `;
+            }).join("");
+        }
+
+        // Descripción del nivel
+        var descEl = document.getElementById("descripcionNivelMadurez");
+        if (descEl) {
+            descEl.textContent = data.descripcion_nivel || '';
+        }
+    }
+
+    window.cargarMadurezSCM = cargarMadurezSCM;
+    window.renderizarMadurez = renderizarMadurez;
+
+    cargarMadurezSCM();
+</script>

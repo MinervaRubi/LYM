@@ -147,19 +147,22 @@
             };
         }
 
-        function guardarEnLocalStorage() {
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(posts));
-        }
-
-        function cargarDesdeLocalStorage() {
-            const guardados = localStorage.getItem(STORAGE_KEY);
-
-            if (guardados) {
-                posts = JSON.parse(guardados);
-            } else {
+        async function cargarDesdeBD() {
+            const contenedor = document.getElementById("listaPosts");
+            contenedor.innerHTML = '<p style="text-align:center; width:100%; color:#64748b;"><i class="fas fa-spinner fa-spin"></i> Cargando publicaciones desde la base de datos...</p>';
+            try {
+                const resp = await fetch('php/api_publicaciones.php');
+                const data = await resp.json();
+                if (data.success && Array.isArray(data.posts)) {
+                    posts = data.posts;
+                } else {
+                    posts = [obtenerPublicacionInicial()];
+                }
+            } catch (e) {
+                console.warn("Error de conexión, usando respaldo:", e);
                 posts = [obtenerPublicacionInicial()];
-                guardarEnLocalStorage();
             }
+            renderPosts();
         }
 
         function renderPosts() {
@@ -168,7 +171,7 @@
 
             if (posts.length === 0) {
                 contenedor.innerHTML = `
-                    <p style="text-align:center; width:100%;">No hay publicaciones todavía.</p>
+                    <p style="text-align:center; width:100%; color:#64748b;">No hay publicaciones en la base de datos todavía. ¡Sé el primero en crear una!</p>
                 `;
                 return;
             }
@@ -176,27 +179,33 @@
             posts.forEach((post, index) => {
                 contenedor.innerHTML += `
                     <div class="producto-card">
-                        <img src="${post.imagen}" alt="${post.titulo}" class="producto-img"
-                             onerror="this.src='https://via.placeholder.com/400x220?text=Imagen+no+disponible'">
+                        <img src="${post.imagen || 'imagenes/default.png'}" alt="${escapeHtml(post.titulo)}" class="producto-img"
+                             onerror="this.src='https://via.placeholder.com/400x220?text=LYM+Personalizado'">
 
                         <div class="producto-content">
-                            <h3>${post.titulo}</h3>
-                            <p>${post.contenido}</p>
-                            <p class="precio-post">$${post.precio}</p>
+                            <h3>${escapeHtml(post.titulo)}</h3>
+                            <p>${escapeHtml(post.contenido)}</p>
+                            <p class="precio-post">$${parseFloat(post.precio).toFixed(2)}</p>
 
                             <div class="acciones-post">
                                 <button class="btn btn-outline" onclick="editarPost(${index})">
                                     <i class="fas fa-edit"></i> Editar
                                 </button>
 
-                                <button class="btn btn-outline" style="border-color:red; color:red;"
-                                    onclick="eliminarPost(${index})">
+                                <button class="btn btn-outline" style="border-color:#ef4444; color:#ef4444;"
+                                    onclick="eliminarPost(${post.id || index}, ${index})">
                                     <i class="fas fa-trash"></i> Eliminar
                                 </button>
                             </div>
                         </div>
                     </div>
                 `;
+            });
+        }
+
+        function escapeHtml(str) {
+            return String(str || '').replace(/[&<>"']/g, function(m) {
+                return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[m];
             });
         }
 
@@ -208,15 +217,12 @@
                 }
 
                 const reader = new FileReader();
-
                 reader.onload = function (e) {
                     resolve(e.target.result);
                 };
-
                 reader.onerror = function () {
                     reject("No se pudo leer la imagen.");
                 };
-
                 reader.readAsDataURL(file);
             });
         }
@@ -224,45 +230,62 @@
         async function agregarPost() {
             const titulo = document.getElementById("titulo").value.trim();
             const contenido = document.getElementById("contenido").value.trim();
-            const precio = document.getElementById("precio").value.trim();
+            const precio = parseFloat(document.getElementById("precio").value.trim());
             const imagenInput = document.getElementById("imagen");
             const archivoImagen = imagenInput.files[0];
 
-            if (titulo === "" || contenido === "" || precio === "") {
-                alert("Llena título, contenido y precio.");
+            if (titulo === "" || contenido === "" || isNaN(precio) || precio <= 0) {
+                alert("Llena título, contenido y un precio válido.");
                 return;
             }
 
             try {
                 let imagenBase64 = null;
-
                 if (archivoImagen) {
                     imagenBase64 = await convertirImagenABase64(archivoImagen);
                 }
 
                 if (editando !== null) {
-                    posts[editando] = {
-                        ...posts[editando],
-                        titulo,
-                        contenido,
-                        precio,
-                        imagen: imagenBase64 ? imagenBase64 : posts[editando].imagen
-                    };
+                    const postActual = posts[editando];
+                    const resp = await fetch('php/api_publicaciones.php', {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            id: postActual.id,
+                            titulo,
+                            contenido,
+                            precio,
+                            imagen: imagenBase64 || postActual.imagen
+                        })
+                    });
+                    const resData = await resp.json();
+                    if (!resData.success) {
+                        alert(resData.error || "No se pudo actualizar la publicación");
+                        return;
+                    }
                     editando = null;
                 } else {
-                    posts.push({
-                        titulo,
-                        contenido,
-                        precio,
-                        imagen: imagenBase64 || "img/publicacion-inicial.jpg"
+                    const resp = await fetch('php/api_publicaciones.php', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            titulo,
+                            contenido,
+                            precio,
+                            imagen: imagenBase64 || 'imagenes/default.png'
+                        })
                     });
+                    const resData = await resp.json();
+                    if (!resData.success) {
+                        alert(resData.error || "No se pudo guardar la publicación");
+                        return;
+                    }
                 }
 
-                guardarEnLocalStorage();
                 limpiarFormulario();
-                renderPosts();
+                await cargarDesdeBD();
             } catch (error) {
-                alert("Ocurrió un error al guardar la publicación.");
+                alert("Ocurrió un error al guardar en la base de datos.");
                 console.error(error);
             }
         }
@@ -285,11 +308,23 @@
             window.scrollTo({ top: 0, behavior: "smooth" });
         }
 
-        function eliminarPost(index) {
-            if (confirm("¿Seguro que quieres eliminar esta publicación?")) {
-                posts.splice(index, 1);
-                guardarEnLocalStorage();
-                renderPosts();
+        async function eliminarPost(id, index) {
+            if (!confirm("¿Seguro que quieres eliminar esta publicación de la base de datos?")) return;
+
+            try {
+                const resp = await fetch('php/api_publicaciones.php', {
+                    method: 'DELETE',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ id: id })
+                });
+                const data = await resp.json();
+                if (data.success) {
+                    await cargarDesdeBD();
+                } else {
+                    alert(data.error || "No se pudo eliminar");
+                }
+            } catch (e) {
+                alert("Error de conexión al eliminar: " + e.message);
             }
         }
 
@@ -303,6 +338,7 @@
             const preview = document.getElementById("previewImagen");
             preview.src = "";
             preview.style.display = "none";
+            editando = null;
         }
 
         document.getElementById("imagen").addEventListener("change", function () {
@@ -322,8 +358,7 @@
             }
         });
 
-        cargarDesdeLocalStorage();
-        renderPosts();
+        cargarDesdeBD();
     </script>
 
 </body>

@@ -678,7 +678,7 @@
                     <input type="tel" id="phone" value="" placeholder="Tu número de contacto">
                 </div>
 
-                <button type="button" class="continue-btn" onclick="window.location.href='checkout.html';">
+                <button type="button" class="continue-btn" onclick="guardarYContinuar()">
                     Continuar al pago
                 </button>
             </form>
@@ -686,6 +686,34 @@
     </main>
 
     <script>
+        document.addEventListener("DOMContentLoaded", async function() {
+            try {
+                const res = await fetch('php/check_session.php');
+                const data = await res.json();
+                if (data.authenticated && data.user) {
+                    const nameInput = document.getElementById("name");
+                    if (nameInput && !nameInput.value) {
+                        nameInput.value = data.user.username || '';
+                    }
+                }
+            } catch(e) {}
+        });
+
+        function guardarYContinuar() {
+            const envio = {
+                calle: document.getElementById("street")?.value || '',
+                numero: document.getElementById("number")?.value || '',
+                estado: document.getElementById("state")?.value || '',
+                ciudad: document.getElementById("city")?.value || '',
+                colonia: document.getElementById("neighborhood")?.value || '',
+                cp: document.getElementById("zip")?.value || '',
+                nombre: document.getElementById("name")?.value || '',
+                telefono: document.getElementById("phone")?.value || ''
+            };
+            localStorage.setItem("datosEnvio", JSON.stringify(envio));
+            window.location.href = 'checkout.html';
+        }
+
         function toggleUserMenu(event) {
             event.stopPropagation();
             document.getElementById("userDropdown").classList.toggle("show");

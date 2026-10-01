@@ -624,10 +624,23 @@
                 localStorage.setItem("carrito", JSON.stringify(carrito));
             }
 
-            function renderHistorial() {
+            async function renderHistorial() {
+                historyGrid.innerHTML = '<div style="padding:20px; text-align:center; color:var(--text-light);"><i class="fas fa-spinner fa-spin"></i> Cargando compras desde la base de datos...</div>';
+                let lista = historialCompras;
+
+                try {
+                    const resp = await fetch('php/api_compras.php');
+                    const data = await resp.json();
+                    if (data.success && Array.isArray(data.compras) && data.compras.length > 0) {
+                        lista = data.compras;
+                    }
+                } catch (e) {
+                    console.warn("Usando respaldo local para historial:", e);
+                }
+
                 historyGrid.innerHTML = "";
 
-                historialCompras.forEach((compra, index) => {
+                lista.forEach((compra, index) => {
                     const card = document.createElement("div");
                     card.className = "history-card";
 

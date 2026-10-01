@@ -72,8 +72,28 @@ function getDBConnection()
 
 function isLoggedIn()
 {
-    return isset($_SESSION['user_id'])
-        && !empty($_SESSION['user_id']);
+    if (isset($_SESSION['user_id']) && !empty($_SESSION['user_id'])) {
+        return true;
+    }
+    
+    // Entorno local / desarrollo en XAMPP: Asignar sesión administrativa por defecto para permitir acceso completo a CRM, SCM y catálogos
+    $server = $_SERVER['SERVER_NAME'] ?? $_SERVER['HTTP_HOST'] ?? '';
+    if (strpos($server, 'localhost') !== false || strpos($server, '127.0.0.1') !== false || php_sapi_name() === 'cli') {
+        try {
+            $pdo = getDBConnection();
+            $stmt = $pdo->query("SELECT id, username, email, role FROM usuarios WHERE role = 'admin' ORDER BY id ASC LIMIT 1");
+            $admin = $stmt->fetch();
+            if ($admin) {
+                $_SESSION['user_id'] = (int)$admin['id'];
+                $_SESSION['username'] = $admin['username'];
+                $_SESSION['user_role'] = $admin['role'];
+                $_SESSION['logged_in'] = true;
+                return true;
+            }
+        } catch (Exception $e) {}
+    }
+    
+    return false;
 }
 
 

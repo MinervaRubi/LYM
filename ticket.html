@@ -597,15 +597,46 @@
         const productosDiv = document.getElementById("productos");
         const totalDiv = document.getElementById("total");
         const downloadBanner = document.getElementById("downloadBanner");
+        const folioEl = document.getElementById("folio");
+        const fechaEl = document.getElementById("fecha");
 
         let total = 0;
 
+        const fecha = new Date();
+        fechaEl.innerText = fecha.toLocaleDateString() + " " + fecha.toLocaleTimeString();
+
         if (carrito.length === 0) {
-            productosDiv.innerHTML = `
-                <div class="empty-message">
-                    No se encontraron productos en el carrito, pero tu diseño de confirmación ya está listo
-                </div>
-            `;
+            const ultimoPedido = JSON.parse(localStorage.getItem("ultimoPedidoLYM"));
+            if (ultimoPedido) {
+                folioEl.innerText = ultimoPedido.folio || "#LYM-10001";
+                totalDiv.innerText = "$" + Number(ultimoPedido.total || 0).toFixed(2) + " MXN";
+                if (ultimoPedido.items && ultimoPedido.items.length) {
+                    ultimoPedido.items.forEach(item => {
+                        const precio = Number(item.precio) || 0;
+                        const cantidad = Number(item.cantidad) || 1;
+                        const subtotal = precio * cantidad;
+                        const div = document.createElement("div");
+                        div.classList.add("item");
+                        div.innerHTML = `
+                            <div class="item-left">
+                                <span class="item-name">${item.producto || "Producto"} x${cantidad}</span>
+                                <span class="item-detail">Precio unitario: $${precio.toFixed(2)} MXN</span>
+                            </div>
+                            <span class="item-price">$${subtotal.toFixed(2)} MXN</span>
+                        `;
+                        productosDiv.appendChild(div);
+                    });
+                } else {
+                    productosDiv.innerHTML = `<div class="empty-message">Pedido consultado con éxito.</div>`;
+                }
+            } else {
+                folioEl.innerText = "#LYM-00000";
+                productosDiv.innerHTML = `
+                    <div class="empty-message">
+                        No se encontraron productos pendientes en el carrito.
+                    </div>
+                `;
+            }
         } else {
             carrito.forEach(item => {
                 const precio = Number(item.precio) || 0;
@@ -624,16 +655,41 @@
                 `;
                 productosDiv.appendChild(div);
             });
+
+            totalDiv.innerText = "$" + total.toFixed(2) + " MXN";
+            folioEl.innerText = "Registrando en MySQL...";
+
+            // Registrar pedido en la base de datos MySQL
+            fetch('php/api_crear_pedido.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    items: carrito,
+                    total: total,
+                    metodo: 'tarjeta'
+                })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    folioEl.innerText = data.folio;
+                    localStorage.setItem("ultimoPedidoLYM", JSON.stringify({
+                        folio: data.folio,
+                        total: total,
+                        items: carrito,
+                        fecha: fechaEl.innerText
+                    }));
+                    localStorage.removeItem("carrito");
+                } else {
+                    folioEl.innerText = "#LYM-" + Math.floor(1000 + Math.random() * 9000);
+                    console.error("Error al registrar en BD:", data.error);
+                }
+            })
+            .catch(err => {
+                folioEl.innerText = "#LYM-" + Math.floor(1000 + Math.random() * 9000);
+                console.error("Error de red:", err);
+            });
         }
-
-        totalDiv.innerText = "$" + total.toFixed(2) + " MXN";
-
-        const fecha = new Date();
-        document.getElementById("fecha").innerText =
-            fecha.toLocaleDateString() + " " + fecha.toLocaleTimeString();
-
-        const folio = Math.floor(Math.random() * 1000000);
-        document.getElementById("folio").innerText = "#" + folio;
 
         function mostrarDescargaExitosa() {
             downloadBanner.classList.add("show");
@@ -642,8 +698,6 @@
                 downloadBanner.classList.remove("show");
             }, 2200);
         }
-
-        localStorage.removeItem("carrito");
     </script>
 </body>
 

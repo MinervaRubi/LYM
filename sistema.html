@@ -10,6 +10,199 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
         rel="stylesheet" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+
+    <style>
+        /* Barra de búsqueda Navbar */
+        .nav-search-container {
+            display: flex;
+            align-items: center;
+            margin: 0 14px;
+            flex: 1;
+            max-width: 300px;
+        }
+        .nav-search-box {
+            position: relative;
+            width: 100%;
+            display: flex;
+            align-items: center;
+        }
+        .nav-search-box i.nav-search-icon {
+            position: absolute;
+            left: 14px;
+            color: #7c3aed;
+            font-size: 13px;
+            pointer-events: none;
+        }
+        .nav-search-box input {
+            width: 100%;
+            padding: 8px 34px 8px 36px;
+            border-radius: 999px;
+            border: 1.5px solid #dec8ff;
+            background: #fdfaff;
+            font-size: 0.88rem;
+            outline: none;
+            transition: all 0.25s ease;
+            color: #2d1e40;
+            font-family: inherit;
+        }
+        .nav-search-box input:focus {
+            border-color: #7c3aed;
+            background: #ffffff;
+            box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.15);
+        }
+        .nav-search-box button.clear-btn {
+            position: absolute;
+            right: 10px;
+            background: none;
+            border: none;
+            font-size: 18px;
+            color: #94a3b8;
+            cursor: pointer;
+            padding: 0 4px;
+            line-height: 1;
+        }
+
+        /* Controles de Búsqueda y Filtros en la sección de Productos */
+        .store-search-panel {
+            background: #ffffff;
+            border: 1px solid #ebd9fc;
+            border-radius: 20px;
+            padding: 20px 24px;
+            margin: 20px auto 35px;
+            max-width: 1000px;
+            box-shadow: 0 10px 30px rgba(106, 13, 173, 0.06);
+        }
+        .store-search-row {
+            display: flex;
+            gap: 14px;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16px;
+        }
+        .store-search-input-wrap {
+            position: relative;
+            flex: 1;
+            min-width: 260px;
+        }
+        .store-search-input-wrap i {
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #7c3aed;
+        }
+        .store-search-input-wrap input {
+            width: 100%;
+            padding: 12px 40px 12px 44px;
+            border: 1.5px solid #dec8ff;
+            border-radius: 14px;
+            font-size: 0.98rem;
+            outline: none;
+            transition: all 0.25s ease;
+            font-family: inherit;
+        }
+        .store-search-input-wrap input:focus {
+            border-color: #7c3aed;
+            box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.15);
+        }
+        .store-sort-select {
+            padding: 12px 18px;
+            border: 1.5px solid #dec8ff;
+            border-radius: 14px;
+            background: #fff;
+            color: #2d1e40;
+            font-size: 0.92rem;
+            font-weight: 500;
+            outline: none;
+            cursor: pointer;
+            font-family: inherit;
+        }
+        .store-categories-bar {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        .cat-chip {
+            padding: 7px 16px;
+            border-radius: 999px;
+            border: 1px solid #dec8ff;
+            background: #fdfaff;
+            color: #4b0082;
+            font-size: 0.88rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .cat-chip:hover, .cat-chip.active {
+            background: linear-gradient(135deg, #6a0dad, #7c3aed);
+            color: #ffffff;
+            border-color: transparent;
+            box-shadow: 0 4px 12px rgba(106, 13, 173, 0.2);
+        }
+        .search-feedback-text {
+            font-size: 0.92rem;
+            color: #64748b;
+            margin-top: 14px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-top: 1px solid #f1f5f9;
+            padding-top: 10px;
+        }
+
+        /* Estilo Menú Flotante de Búsqueda */
+        .search-menu-input {
+            width: 100%;
+            padding: 10px 14px;
+            border: 1.5px solid #dec8ff;
+            border-radius: 12px;
+            outline: none;
+            font-size: 0.92rem;
+            font-family: inherit;
+            margin-bottom: 12px;
+            box-sizing: border-box;
+        }
+        .search-menu-input:focus {
+            border-color: #7c3aed;
+        }
+        .search-subtitle-mini {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: #94a3b8;
+            margin: 6px 0 4px;
+            letter-spacing: 0.5px;
+        }
+        .search-categories-pills {
+            display: flex;
+            gap: 5px;
+            flex-wrap: wrap;
+            margin-bottom: 10px;
+        }
+        .pill-btn {
+            padding: 4px 10px;
+            font-size: 11px;
+            border-radius: 999px;
+            border: 1px solid #dec8ff;
+            background: #fdfaff;
+            color: #4b0082;
+            cursor: pointer;
+            font-weight: 600;
+        }
+        .pill-btn.active, .pill-btn:hover {
+            background: #7c3aed;
+            color: #fff;
+            border-color: transparent;
+        }
+        .search-floating .search-menu {
+            width: 290px;
+            bottom: 75px;
+            right: 0;
+            padding: 16px;
+        }
+    </style>
 </head>
 
 <body>
@@ -34,6 +227,15 @@
                     <li><a href="#nosotros">Nosotros</a></li>
                     <li><a href="#anuncio">Campaña</a></li>
                 </ul>
+
+                <!-- BARRA DE BÚSQUEDA EN NAVBAR -->
+                <div class="nav-search-container">
+                    <div class="nav-search-box">
+                        <i class="fas fa-search nav-search-icon"></i>
+                        <input type="text" id="navSearchInput" placeholder="Buscar tazas, termos, sudaderas..." oninput="ejecutarBusquedaTienda(this.value)">
+                        <button type="button" id="navClearSearchBtn" class="clear-btn" onclick="limpiarBusquedaTienda()" style="display:none;" title="Limpiar">&times;</button>
+                    </div>
+                </div>
 
                 <div class="auth-buttons">
                     <!-- BOTONES INVITADO -->
@@ -92,21 +294,42 @@
 
     <!-- BOTÓN FLOTANTE BÚSQUEDA -->
     <div class="search-floating">
-        <button id="btnSearch" class="search-btn" aria-label="Abrir opciones de búsqueda" type="button">
+        <button id="btnSearch" class="search-btn" aria-label="Abrir opciones de búsqueda" type="button" onclick="toggleMenuBusqueda(event)">
             <i class="fas fa-search"></i>
         </button>
 
         <div id="searchMenu" class="search-menu" role="menu" aria-hidden="true">
-            <div class="search-title">Opciones de búsqueda</div>
+            <div class="search-title" style="display:flex; justify-content:space-between; align-items:center;">
+                <span><i class="fas fa-search" style="color:#7c3aed;"></i> Buscar en Tienda</span>
+                <button type="button" onclick="cerrarMenuBusqueda()" style="background:none;border:none;cursor:pointer;font-size:18px;color:#94a3b8;" title="Cerrar">&times;</button>
+            </div>
 
-            <button class="menu-option" type="button">
+            <input type="text" id="floatingSearchInput" class="search-menu-input" placeholder="Buscar por palabra clave..." oninput="ejecutarBusquedaTienda(this.value, true)">
+
+            <div class="search-subtitle-mini">Filtrar por categoría:</div>
+            <div class="search-categories-pills">
+                <button type="button" class="pill-btn active" data-cat="todos" onclick="filtrarPorCategoria('todos', this)">Todos</button>
+                <button type="button" class="pill-btn" data-cat="tazas" onclick="filtrarPorCategoria('tazas', this)">Tazas</button>
+                <button type="button" class="pill-btn" data-cat="termos" onclick="filtrarPorCategoria('termos', this)">Termos</button>
+                <button type="button" class="pill-btn" data-cat="sudaderas" onclick="filtrarPorCategoria('sudaderas', this)">Sudaderas</button>
+                <button type="button" class="pill-btn" data-cat="uniformes" onclick="filtrarPorCategoria('uniformes', this)">Uniformes</button>
+                <button type="button" class="pill-btn" data-cat="tapetes" onclick="filtrarPorCategoria('tapetes', this)">Tapetes</button>
+            </div>
+
+            <div class="search-subtitle-mini">Ordenar resultados:</div>
+            <button class="menu-option" type="button" id="btnSortPrecio" onclick="toggleOrdenPrecio()">
                 <i class="fas fa-dollar-sign"></i>
-                Buscar por precio
+                <span id="txtSortPrecio">Buscar por precio</span>
             </button>
 
-            <button class="menu-option" type="button">
+            <button class="menu-option" type="button" id="btnSortAlpha" onclick="toggleOrdenAlpha()">
                 <i class="fas fa-sort-alpha-down"></i>
-                Buscar por abecedario
+                <span id="txtSortAlpha">Buscar por abecedario</span>
+            </button>
+
+            <button class="menu-option" type="button" onclick="limpiarBusquedaTienda()" style="color:#ef4444; margin-top:6px; border-top:1px solid #f1f5f9; padding-top:10px;">
+                <i class="fas fa-rotate-left"></i>
+                Restablecer filtros
             </button>
         </div>
     </div>
@@ -147,7 +370,44 @@
             <h2 class="section-title">Nuestros Productos</h2>
             <p class="section-subtitle">Descubre nuestra amplia gama de productos personalizables</p>
 
-            <div class="productos-grid">
+            <!-- PANEL DE BÚSQUEDA Y FILTRADO CONECTADO A MYSQL -->
+            <div class="store-search-panel">
+                <div class="store-search-row">
+                    <div class="store-search-input-wrap">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="storeCatalogSearchInput" placeholder="Buscar por producto (ej. tazas, termos, sudaderas...)" oninput="ejecutarBusquedaTienda(this.value)">
+                    </div>
+
+                    <select id="storeSortSelect" class="store-sort-select" onchange="cambiarOrdenTienda(this.value)">
+                        <option value="">Ordenar por: Por defecto</option>
+                        <option value="price_asc">Precio: Menor a Mayor</option>
+                        <option value="price_desc">Precio: Mayor a Menor</option>
+                        <option value="alpha_asc">Nombre: A - Z</option>
+                        <option value="alpha_desc">Nombre: Z - A</option>
+                    </select>
+                </div>
+
+                <div class="store-categories-bar">
+                    <span style="font-size:0.88rem; font-weight:600; color:#64748b; margin-right:4px;">Categorías:</span>
+                    <button type="button" class="cat-chip active" data-cat="todos" onclick="filtrarPorCategoria('todos', this)">Todos</button>
+                    <button type="button" class="cat-chip" data-cat="tazas" onclick="filtrarPorCategoria('tazas', this)"><i class="fas fa-mug-hot"></i> Tazas</button>
+                    <button type="button" class="cat-chip" data-cat="termos" onclick="filtrarPorCategoria('termos', this)"><i class="fas fa-thermometer-half"></i> Termos</button>
+                    <button type="button" class="cat-chip" data-cat="sudaderas" onclick="filtrarPorCategoria('sudaderas', this)"><i class="fas fa-tshirt"></i> Sudaderas</button>
+                    <button type="button" class="cat-chip" data-cat="uniformes" onclick="filtrarPorCategoria('uniformes', this)"><i class="fas fa-user-tie"></i> Camisas / Uniformes</button>
+                    <button type="button" class="cat-chip" data-cat="tapetes" onclick="filtrarPorCategoria('tapetes', this)"><i class="fas fa-home"></i> Tapetes</button>
+                </div>
+
+                <div class="search-feedback-text">
+                    <div id="searchResultsCount">
+                        <i class="fas fa-database" style="color:#10b981;"></i> Catálogo conectado en vivo con MySQL
+                    </div>
+                    <button type="button" onclick="limpiarBusquedaTienda()" style="background:none; border:none; color:#7c3aed; font-size:0.88rem; font-weight:600; cursor:pointer;">
+                        <i class="fas fa-rotate-left"></i> Restablecer
+                    </button>
+                </div>
+            </div>
+
+            <div class="productos-grid" id="dynamicProductosGrid">
                 <!-- Tazas -->
                 <div class="producto-card">
                     <div class="producto-image">
@@ -243,7 +503,7 @@
             <h2 class="section-title">Paquetes Especiales</h2>
             <p class="section-subtitle">Combos diseñados para diferentes ocasiones</p>
 
-            <div class="paquetes-grid">
+            <div class="paquetes-grid" id="dynamicPaquetesGrid">
                 <!-- Paquete Básico -->
                 <a href="basico.html" class="paquete-link">
                     <div class="paquete-card">
@@ -1623,7 +1883,264 @@
                 // window.open("https://facebook.com/TU_PAGINA", "_blank");
                 showSuccessBanner("Configura tu link de Facebook");
             });
+
+            // CARGAR PRODUCTOS Y PAQUETES REALES DESDE MYSQL
+            cargarCatalogoDesdeBD();
         });
+
+        // ==============================================================
+        // MOTOR DE BÚSQUEDA Y FILTRADO EN TIENDA (CONECTADO A MYSQL)
+        // ==============================================================
+        let filtroQuery = '';
+        let filtroCategoria = 'todos';
+        let filtroOrden = '';
+        let busquedaTimeout = null;
+
+        function escapeHtml(str) {
+            return String(str || '').replace(/[&<>"']/g, function(m) {
+                return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m];
+            });
+        }
+
+        function toggleMenuBusqueda(e) {
+            if (e) e.stopPropagation();
+            const menu = document.getElementById("searchMenu");
+            if (menu) {
+                menu.classList.toggle("active");
+                if (menu.classList.contains("active")) {
+                    const inp = document.getElementById("floatingSearchInput");
+                    if (inp) {
+                        inp.value = filtroQuery;
+                        inp.focus();
+                    }
+                }
+            }
+        }
+
+        function cerrarMenuBusqueda() {
+            const menu = document.getElementById("searchMenu");
+            if (menu) menu.classList.remove("active");
+        }
+
+        document.addEventListener("click", function(e) {
+            const floating = document.querySelector(".search-floating");
+            if (floating && !floating.contains(e.target)) {
+                cerrarMenuBusqueda();
+            }
+        });
+
+        function ejecutarBusquedaTienda(val, autoScroll = false) {
+            filtroQuery = (val || '').trim();
+
+            // Sincronizar todos los inputs de búsqueda
+            const navInp = document.getElementById("navSearchInput");
+            const catalogInp = document.getElementById("storeCatalogSearchInput");
+            const floatingInp = document.getElementById("floatingSearchInput");
+
+            if (navInp && navInp.value !== filtroQuery) navInp.value = filtroQuery;
+            if (catalogInp && catalogInp.value !== filtroQuery) catalogInp.value = filtroQuery;
+            if (floatingInp && floatingInp.value !== filtroQuery) floatingInp.value = filtroQuery;
+
+            const navClear = document.getElementById("navClearSearchBtn");
+            if (navClear) navClear.style.display = filtroQuery ? "block" : "none";
+
+            clearTimeout(busquedaTimeout);
+            busquedaTimeout = setTimeout(() => {
+                cargarCatalogoDesdeBD();
+                if (autoScroll || filtroQuery.length > 1) {
+                    const sec = document.getElementById("productos");
+                    if (sec) sec.scrollIntoView({ behavior: "smooth" });
+                }
+            }, 250);
+        }
+
+        function filtrarPorCategoria(cat, btn) {
+            filtroCategoria = cat || 'todos';
+
+            // Actualizar clase activa en chips
+            document.querySelectorAll(".cat-chip").forEach(ch => {
+                if (ch.dataset.cat === filtroCategoria) ch.classList.add("active");
+                else ch.classList.remove("active");
+            });
+
+            // Actualizar clase activa en floating pills
+            document.querySelectorAll(".pill-btn").forEach(pb => {
+                if (pb.dataset.cat === filtroCategoria) pb.classList.add("active");
+                else pb.classList.remove("active");
+            });
+
+            cargarCatalogoDesdeBD();
+            const sec = document.getElementById("productos");
+            if (sec) sec.scrollIntoView({ behavior: "smooth" });
+        }
+
+        function cambiarOrdenTienda(orden) {
+            filtroOrden = orden || '';
+            const select = document.getElementById("storeSortSelect");
+            if (select && select.value !== filtroOrden) select.value = filtroOrden;
+            cargarCatalogoDesdeBD();
+        }
+
+        function toggleOrdenPrecio() {
+            if (filtroOrden === 'price_asc') {
+                filtroOrden = 'price_desc';
+                const el = document.getElementById("txtSortPrecio");
+                if (el) el.textContent = "Buscar por precio (Mayor a menor)";
+            } else {
+                filtroOrden = 'price_asc';
+                const el = document.getElementById("txtSortPrecio");
+                if (el) el.textContent = "Buscar por precio (Menor a mayor)";
+            }
+            cambiarOrdenTienda(filtroOrden);
+        }
+
+        function toggleOrdenAlpha() {
+            if (filtroOrden === 'alpha_asc') {
+                filtroOrden = 'alpha_desc';
+                const el = document.getElementById("txtSortAlpha");
+                if (el) el.textContent = "Buscar por abecedario (Z - A)";
+            } else {
+                filtroOrden = 'alpha_asc';
+                const el = document.getElementById("txtSortAlpha");
+                if (el) el.textContent = "Buscar por abecedario (A - Z)";
+            }
+            cambiarOrdenTienda(filtroOrden);
+        }
+
+        function limpiarBusquedaTienda() {
+            filtroQuery = '';
+            filtroCategoria = 'todos';
+            filtroOrden = '';
+
+            const navInp = document.getElementById("navSearchInput");
+            const catalogInp = document.getElementById("storeCatalogSearchInput");
+            const floatingInp = document.getElementById("floatingSearchInput");
+            const navClear = document.getElementById("navClearSearchBtn");
+            const select = document.getElementById("storeSortSelect");
+
+            if (navInp) navInp.value = '';
+            if (catalogInp) catalogInp.value = '';
+            if (floatingInp) floatingInp.value = '';
+            if (navClear) navClear.style.display = 'none';
+            if (select) select.value = '';
+
+            document.querySelectorAll(".cat-chip").forEach(ch => {
+                if (ch.dataset.cat === 'todos') ch.classList.add("active");
+                else ch.classList.remove("active");
+            });
+            document.querySelectorAll(".pill-btn").forEach(pb => {
+                if (pb.dataset.cat === 'todos') pb.classList.add("active");
+                else pb.classList.remove("active");
+            });
+
+            const txtP = document.getElementById("txtSortPrecio");
+            if (txtP) txtP.textContent = "Buscar por precio";
+            const txtA = document.getElementById("txtSortAlpha");
+            if (txtA) txtA.textContent = "Buscar por abecedario";
+
+            cargarCatalogoDesdeBD();
+        }
+
+        async function cargarCatalogoDesdeBD() {
+            const gridP = document.getElementById('dynamicProductosGrid');
+            const gridPaq = document.getElementById('dynamicPaquetesGrid');
+            const countInfo = document.getElementById('searchResultsCount');
+
+            if (gridP) {
+                gridP.innerHTML = '<div style="grid-column: 1/-1; text-align:center; padding: 40px; color:#64748b;"><i class="fas fa-spinner fa-spin fa-2x" style="color:#7c3aed; margin-bottom:10px;"></i><div>Buscando productos en la base de datos MySQL...</div></div>';
+            }
+
+            try {
+                const params = new URLSearchParams();
+                if (filtroQuery) params.append('q', filtroQuery);
+                if (filtroCategoria && filtroCategoria !== 'todos') params.append('category', filtroCategoria);
+                if (filtroOrden) params.append('sort', filtroOrden);
+
+                const resp = await fetch('php/get_products.php?' + params.toString());
+                const data = await resp.json();
+
+                if (data.success) {
+                    const productos = data.productos || [];
+                    const paquetes = data.paquetes || [];
+
+                    if (countInfo) {
+                        const totalRes = productos.length + paquetes.length;
+                        countInfo.innerHTML = `<span><i class="fas fa-database" style="color:#10b981;"></i> MySQL: <strong>${productos.length}</strong> producto${productos.length === 1 ? '' : 's'} y <strong>${paquetes.length}</strong> paquete${paquetes.length === 1 ? '' : 's'} encontrados</span>`;
+                    }
+
+                    if (gridP) {
+                        if (productos.length === 0) {
+                            gridP.innerHTML = `
+                                <div style="grid-column: 1/-1; text-align:center; padding: 50px 20px; background:#fff; border-radius:20px; border:1px dashed #dec8ff;">
+                                    <i class="fas fa-search" style="font-size:3rem; color:#c4b5fd; margin-bottom:14px;"></i>
+                                    <h3 style="color:#2d1e40; margin-bottom:8px;">No se encontraron productos</h3>
+                                    <p style="color:#64748b; margin-bottom:18px;">No hay resultados en la base de datos para "<strong>${escapeHtml(filtroQuery || filtroCategoria)}</strong>".</p>
+                                    <button type="button" class="btn btn-primary" onclick="limpiarBusquedaTienda()"><i class="fas fa-rotate-left"></i> Ver todo el catálogo</button>
+                                </div>
+                            `;
+                        } else {
+                            gridP.innerHTML = productos.map(p => {
+                                const icon = p.image_icon || 'fas fa-box';
+                                const cat = (p.category ? p.category.toLowerCase() : 'tazas');
+                                const enlace = cat + '.html';
+                                return `
+                                    <div class="producto-card">
+                                        <div class="producto-image">
+                                            <i class="${icon}"></i>
+                                            <div class="producto-overlay">
+                                                <span class="precio">Desde $${parseFloat(p.price).toFixed(2)}</span>
+                                            </div>
+                                        </div>
+                                        <div class="producto-content">
+                                            <h3>${escapeHtml(p.name)}</h3>
+                                            <div data-eval-producto="${escapeHtml(p.name)}"></div>
+                                        </div>
+                                        <div class="btn-producto">
+                                            <a href="${enlace}" class="btn-producto">Seleccionar</a>
+                                        </div>
+                                    </div>
+                                `;
+                            }).join('');
+
+                            if (typeof inicializarEvaluaciones === 'function') {
+                                inicializarEvaluaciones();
+                            }
+                        }
+                    }
+
+                    if (gridPaq) {
+                        if (paquetes.length === 0) {
+                            gridPaq.innerHTML = '<div style="grid-column: 1/-1; text-align:center; padding:20px; color:#64748b;">No hay paquetes disponibles para esta búsqueda.</div>';
+                        } else {
+                            gridPaq.innerHTML = paquetes.map(pq => {
+                                const itemsList = Array.isArray(pq.items) ? pq.items.map(it => `<li>${escapeHtml(it)}</li>`).join('') : '';
+                                const isFeatured = Number(pq.featured) === 1;
+                                const enlace = (pq.name.toLowerCase().includes('viajero') ? 'viajero' : (pq.name.toLowerCase().includes('deport') ? 'deportivo' : (pq.name.toLowerCase().includes('potter') ? 'potterhead' : 'basico'))) + '.html';
+                                return `
+                                    <a href="${enlace}" class="paquete-link">
+                                        <div class="paquete-card ${isFeatured ? 'featured' : ''}">
+                                            ${isFeatured ? '<span class="nuevo-badge">Más vendido</span>' : ''}
+                                            <div class="paquete-header">
+                                                <h3>${escapeHtml(pq.name)}</h3>
+                                                <div class="precio-paquete">$${parseFloat(pq.price).toFixed(2)}</div>
+                                            </div>
+                                            <div class="paquete-content">
+                                                <ul>${itemsList}</ul>
+                                            </div>
+                                        </div>
+                                    </a>
+                                `;
+                            }).join('');
+                        }
+                    }
+                }
+            } catch (e) {
+                console.error("Error al consultar productos:", e);
+                if (gridP) {
+                    gridP.innerHTML = `<div style="grid-column: 1/-1; text-align:center; padding: 30px; color:#ef4444;"><i class="fas fa-triangle-exclamation"></i> Error al conectar con la base de datos MySQL: ${e.message}</div>`;
+                }
+            }
+        }
     </script>
 
     <!-- EVALUACIONES LYM -->

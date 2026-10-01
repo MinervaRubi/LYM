@@ -377,30 +377,7 @@
     </footer>
 
     <script>
-        const comentariosBase = [
-            {
-                nombre: 'Laura R.',
-                titulo: 'Muy recomendado',
-                texto: 'Me encanta esta tienda. Las tazas personalizadas quedaron muy bonitas y la impresión se ve de excelente calidad.',
-                fecha: '2026-03-20',
-                likes: 4
-            },
-            {
-                nombre: 'Pedro M.',
-                titulo: 'Buen servicio',
-                texto: 'Excelente atención y muy buen acabado en la cerámica. Volvería a comprar para un regalo especial.',
-                fecha: '2026-03-18',
-                likes: 2
-            }
-        ];
-
-        let comentariosGuardados = JSON.parse(localStorage.getItem('foroComentariosLYM'));
-
-        if (!comentariosGuardados || !Array.isArray(comentariosGuardados)) {
-            comentariosGuardados = comentariosBase;
-            localStorage.setItem('foroComentariosLYM', JSON.stringify(comentariosGuardados));
-        }
-
+        let comentariosGuardados = [];
         const listaComentarios = document.getElementById('listaComentarios');
         const inputNombre = document.getElementById('nombreUsuario');
         const inputTitulo = document.getElementById('tituloComentario');
@@ -428,7 +405,7 @@
         }
 
         function obtenerIniciales(nombre) {
-            return nombre
+            return (nombre || 'Anónimo')
                 .split(' ')
                 .filter(Boolean)
                 .slice(0, 2)
@@ -436,14 +413,15 @@
                 .join('');
         }
 
-        function guardarComentarios() {
-            localStorage.setItem('foroComentariosLYM', JSON.stringify(comentariosGuardados));
-        }
-
         function renderizarComentarios() {
             listaComentarios.innerHTML = '';
 
             const comentariosOrdenados = comentariosGuardados.slice().reverse();
+
+            if (comentariosOrdenados.length === 0) {
+                listaComentarios.innerHTML = '<div style="text-align:center; padding:30px; color:#888;">No hay comentarios todavía. ¡Sé el primero en opinar!</div>';
+                return;
+            }
 
             comentariosOrdenados.forEach((comentario, indexInvertido) => {
                 const indexReal = comentariosGuardados.length - 1 - indexInvertido;
@@ -455,23 +433,35 @@
                         <div class="user-box">
                             <div class="avatar">${obtenerIniciales(comentario.nombre)}</div>
                             <div>
-                                <div class="name">${comentario.nombre}</div>
-                                <div class="date">${comentario.fecha}${comentario.titulo ? ' · ' + comentario.titulo : ''}</div>
+                                <div class="name">${comentario.nombre || 'Cliente'}</div>
+                                <div class="date">${comentario.fecha || ''}${comentario.titulo ? ' · ' + comentario.titulo : ''}</div>
                             </div>
                         </div>
                         <div class="date">#${indexReal + 1}</div>
                     </div>
                     <p>${comentario.texto}</p>
                     <div class="comment-actions">
-                        <button onclick="darLike(${indexReal})">Me gusta (${comentario.likes || 0})</button>
-                       
+                        <button onclick="darLike(${comentario.id})">Me gusta (${comentario.likes || 0})</button>
                     </div>
                 `;
                 listaComentarios.appendChild(card);
             });
         }
 
-        function publicarComentario() {
+        async function cargarComentarios() {
+            try {
+                const res = await fetch('php/api_comunidad.php');
+                const data = await res.json();
+                if (data.success && Array.isArray(data.comentarios)) {
+                    comentariosGuardados = data.comentarios;
+                    renderizarComentarios();
+                }
+            } catch (err) {
+                console.error('Error al cargar comentarios:', err);
+            }
+        }
+
+        async function publicarComentario() {
             const nombre = inputNombre.value.trim();
             const titulo = inputTitulo.value.trim();
             const texto = inputTexto.value.trim();
@@ -481,41 +471,47 @@
                 return;
             }
 
-            const hoy = new Date();
-            const fecha = hoy.getFullYear() + '-' +
-                String(hoy.getMonth() + 1).padStart(2, '0') + '-' +
-                String(hoy.getDate()).padStart(2, '0');
+            try {
+                const res = await fetch('php/api_comunidad.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ nombre, titulo, texto })
+                });
+                const data = await res.json();
 
-            comentariosGuardados.push({
-                nombre: nombre,
-                titulo: titulo,
-                texto: texto,
-                fecha: fecha,
-                likes: 0
-            });
-
-            guardarComentarios();
-            renderizarComentarios();
-
-            inputNombre.value = '';
-            inputTitulo.value = '';
-            inputTexto.value = '';
-            mostrarMensaje('exito');
+                if (data.success) {
+                    inputNombre.value = '';
+                    inputTitulo.value = '';
+                    inputTexto.value = '';
+                    mostrarMensaje('exito');
+                    cargarComentarios();
+                } else {
+                    alert(data.error || 'Error al publicar comentario');
+                }
+            } catch (err) {
+                console.error('Error:', err);
+                mostrarMensaje('error');
+            }
         }
 
-        function darLike(index) {
-            comentariosGuardados[index].likes = (comentariosGuardados[index].likes || 0) + 1;
-            guardarComentarios();
-            renderizarComentarios();
+        async function darLike(id) {
+            try {
+                const res = await fetch('php/api_comunidad.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'like', id: id })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    cargarComentarios();
+                }
+            } catch (err) {
+                console.error('Error al registrar like:', err);
+            }
         }
 
-        function eliminarComentario(index) {
-            comentariosGuardados.splice(index, 1);
-            guardarComentarios();
-            renderizarComentarios();
-        }
-
-        renderizarComentarios();
+        // Cargar desde la base de datos MySQL al iniciar
+        cargarComentarios();
     </script>
 
 </body>

@@ -524,11 +524,9 @@
                         </div>
 
                         <div class="mensajes">
-                            <p id="mensajeExito" class="success-mini">✔ Tu puja fue registrada correctamente.</p>
-                            <p id="mensajeError" class="warning-mini">⚠ Ingresa una cantidad válida mayor a la puja
-                                actual.</p>
-                            <p class="info-mini"><i class="fas fa-circle-info"></i> Todo se guarda localmente en el
-                                navegador con <strong>localStorage</strong>, así que no necesita base de datos.</p>
+                            <p id="mensajeExito" class="success-mini">✔ Tu puja fue registrada correctamente en la base de datos.</p>
+                            <p id="mensajeError" class="warning-mini">⚠ Ingresa una cantidad válida mayor a la puja actual.</p>
+                            <p class="info-mini"><i class="fas fa-circle-check" style="color:#22c55e;"></i> Conectado con <strong>MySQL (Tabla subastas y subasta_pujas)</strong> en tiempo real.</p>
                         </div>
                     </div>
 
@@ -543,18 +541,12 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function () {
-            const precioInicial = 250;
-            const incrementoMinimo = 10;
-            const duracionMinutos = 15;
-
-            let precioActual = Number(localStorage.getItem('subastaPrecioActual')) || precioInicial;
-            let historial = JSON.parse(localStorage.getItem('subastaHistorial')) || [];
-            let finSubasta = Number(localStorage.getItem('subastaFin'));
-
-            if (!finSubasta || isNaN(finSubasta) || finSubasta <= Date.now()) {
-                finSubasta = Date.now() + duracionMinutos * 60 * 1000;
-                localStorage.setItem('subastaFin', String(finSubasta));
-            }
+            const subastaId = 1;
+            let precioInicial = 250;
+            let incrementoMinimo = 10;
+            let precioActual = 250;
+            let historial = [];
+            let finSubasta = Date.now() + 15 * 60 * 1000;
 
             const precioActualEl = document.getElementById('precioActual');
             const historialEl = document.getElementById('historialPujas');
@@ -572,27 +564,24 @@
                 return '$' + Number(valor).toLocaleString('es-MX');
             }
 
-            function guardarDatos() {
-                localStorage.setItem('subastaPrecioActual', String(precioActual));
-                localStorage.setItem('subastaHistorial', JSON.stringify(historial));
-            }
-
-            function mostrarMensaje(tipo) {
+            function mostrarMensaje(tipo, texto) {
                 mensajeExito.style.display = 'none';
                 mensajeError.style.display = 'none';
 
                 if (tipo === 'exito') {
+                    if (texto) mensajeExito.textContent = '✔ ' + texto;
                     mensajeExito.style.display = 'block';
                     setTimeout(function () {
                         mensajeExito.style.display = 'none';
-                    }, 2200);
+                    }, 2500);
                 }
 
                 if (tipo === 'error') {
+                    if (texto) mensajeError.textContent = '⚠ ' + texto;
                     mensajeError.style.display = 'block';
                     setTimeout(function () {
                         mensajeError.style.display = 'none';
-                    }, 2200);
+                    }, 2500);
                 }
             }
 
@@ -613,28 +602,14 @@
                 const historialInvertido = historial.slice().reverse();
                 historialInvertido.forEach(function (item, index) {
                     const li = document.createElement('li');
-                    li.innerHTML = '<span><strong>Puja #' + (historial.length - index) + '</strong> - ' + item.fecha + '</span><strong>' + formatearPrecio(item.monto) + '</strong>';
+                    const postor = item.nombre_postor ? ` (${item.nombre_postor})` : '';
+                    li.innerHTML = '<span><strong>Puja #' + (historial.length - index) + '</strong> - ' + item.fecha + postor + '</span><strong>' + formatearPrecio(item.monto) + '</strong>';
                     historialEl.appendChild(li);
                 });
             }
 
             function subastaTerminada() {
                 return Date.now() >= finSubasta;
-            }
-
-            function registrarPuja(monto) {
-                const fecha = new Date().toLocaleString('es-MX', {
-                    day: '2-digit',
-                    month: '2-digit',
-                    year: 'numeric',
-                    hour: '2-digit',
-                    minute: '2-digit'
-                });
-
-                historial.push({ monto: monto, fecha: fecha });
-                guardarDatos();
-                renderizarPrecio();
-                renderizarHistorial();
             }
 
             function finalizarSubasta() {
@@ -667,35 +642,85 @@
                 return true;
             }
 
+            async function cargarSubastaDesdeBD() {
+                try {
+                    const res = await fetch('php/api_subastas.php?id=' + subastaId);
+                    const data = await res.json();
+                    if (data.success && data.subasta) {
+                        precioActual = Number(data.subasta.precio_actual);
+                        incrementoMinimo = Number(data.subasta.incremento_minimo) || 10;
+                        precioInicial = Number(data.subasta.precio_inicial) || 250;
+                        historial = data.historial || [];
+
+                        if (data.subasta.fecha_fin) {
+                            const parsedFin = new Date(data.subasta.fecha_fin.replace(' ', 'T')).getTime();
+                            if (!isNaN(parsedFin)) {
+                                finSubasta = parsedFin;
+                            }
+                        }
+
+                        renderizarPrecio();
+                        renderizarHistorial();
+                        actualizarTemporizador();
+                    }
+                } catch (e) {
+                    console.error('Error al cargar subasta de MySQL:', e);
+                }
+            }
+
+            async function registrarPujaBD(monto) {
+                try {
+                    const res = await fetch('php/api_subastas.php', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            subasta_id: subastaId,
+                            monto: monto
+                        })
+                    });
+                    const data = await res.json();
+                    if (data.success) {
+                        mostrarMensaje('exito', 'Tu puja fue registrada correctamente en MySQL.');
+                        cargarSubastaDesdeBD();
+                        return true;
+                    } else {
+                        mostrarMensaje('error', data.error || 'No se pudo registrar la puja.');
+                        return false;
+                    }
+                } catch (e) {
+                    console.error('Error al registrar puja:', e);
+                    mostrarMensaje('error', 'Error de conexión con el servidor.');
+                    return false;
+                }
+            }
+
             function pujar(incremento) {
                 if (subastaTerminada()) {
                     finalizarSubasta();
-                    mostrarMensaje('error');
+                    mostrarMensaje('error', 'Esta subasta ya ha finalizado.');
                     return;
                 }
 
-                precioActual += incremento;
-                registrarPuja(precioActual);
-                mostrarMensaje('exito');
+                const nuevoPrecio = precioActual + incremento;
+                registrarPujaBD(nuevoPrecio);
             }
 
             function hacerPujaManual() {
                 if (subastaTerminada()) {
                     finalizarSubasta();
-                    mostrarMensaje('error');
+                    mostrarMensaje('error', 'Esta subasta ya ha finalizado.');
                     return;
                 }
 
                 const oferta = Number(inputPuja.value);
                 if (isNaN(oferta) || oferta < precioActual + incrementoMinimo) {
-                    mostrarMensaje('error');
+                    mostrarMensaje('error', 'Ingresa una cantidad mayor o igual a ' + formatearPrecio(precioActual + incrementoMinimo));
                     return;
                 }
 
-                precioActual = oferta;
-                registrarPuja(precioActual);
-                inputPuja.value = '';
-                mostrarMensaje('exito');
+                registrarPujaBD(oferta).then(function(ok) {
+                    if (ok) inputPuja.value = '';
+                });
             }
 
             function volverPagina(event) {
@@ -711,15 +736,11 @@
             window.hacerPujaManual = hacerPujaManual;
             window.volverPagina = volverPagina;
 
-            renderizarPrecio();
-            renderizarHistorial();
-            const sigueActiva = actualizarTemporizador();
+            cargarSubastaDesdeBD();
 
-            if (sigueActiva) {
-                setInterval(function () {
-                    actualizarTemporizador();
-                }, 1000);
-            }
+            setInterval(function () {
+                actualizarTemporizador();
+            }, 1000);
         });
     </script>
     <footer
@@ -728,11 +749,10 @@
             <a href="sistema.html" style="text-decoration: none; color: #4b0082;">Inicio</a>
             <a href="carrito.html" style="text-decoration: none; color: #4b0082;">Carrito</a>
             <a href="prodrelacionados.html" style="text-decoration: none; color: #4b0082;">Relacionados</a>
-            <a href="subasta_tazas_personalizadas.html"
+            <a href="subasta.html"
                 style="text-decoration: none; color: #6a0dad; font-weight: 700;">Subasta</a>
         </div>
-        <p style="margin-top: 12px; font-size: 0.94rem;">LYM Diseño e Impresión · Página de subasta funcional sin base
-            de datos</p>
+        <p style="margin-top: 12px; font-size: 0.94rem;">LYM Diseño e Impresión · Subastas conectadas con Base de Datos MySQL</p>
     </footer>
 </body>
 
