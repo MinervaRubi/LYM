@@ -53,6 +53,7 @@
 
 
                     <select class="select-producto" id="opcionesProducto" data-producto="Uniforme personalizado"
+                        data-producto-id="4"
                         data-mensaje="mensajeAgregado">
                         <option value="195">Camisa básica estampada - $195</option>
                         <option value="250">Camisa bordada premium - $250</option>
@@ -94,13 +95,17 @@
     <script>
         function agregarCarritoDesdeSelect(selectId) {
             const select = document.getElementById(selectId);
+            const cantidadInput = document.getElementById("cantidadProducto");
 
             const producto = select.dataset.producto;
+            const productoId = select.dataset.productoId ? Number(select.dataset.productoId) : 4;
             const mensajeId = select.dataset.mensaje;
             const imagen = select.dataset.imagen;
 
             const descripcion = select.options[select.selectedIndex].text;
             const precio = Number(select.value);
+            let cantidad = cantidadInput ? Number(cantidadInput.value) : 1;
+            if (isNaN(cantidad) || cantidad <= 0) cantidad = 1;
 
             let carrito = JSON.parse(localStorage.getItem("carrito")) || [];
 
@@ -109,17 +114,17 @@
             );
 
             if (existente) {
-                existente.cantidad += 1;
-
-                // opcional: si antes no tenía imagen, se la asignas
-                if (!existente.imagen) existente.imagen = imagen;
+                existente.cantidad += cantidad;
+                if (!existente.producto_id) existente.producto_id = productoId;
+                if (!existente.imagen && imagen) existente.imagen = imagen;
             } else {
                 carrito.push({
                     producto,
+                    producto_id: productoId,
                     descripcion,
                     precio,
-                    imagen,      // ✅ GUARDADA
-                    cantidad: 1
+                    imagen,
+                    cantidad
                 });
             }
 

@@ -50,7 +50,7 @@
             <div>
                 <div class="crm-metric-label">Alertas Stock Bajo</div>
                 <div class="crm-metric-value" style="color: var(--danger);" id="invAlertasCriticas">0</div>
-                <div class="crm-metric-subtext" style="color:var(--danger);"><i class="fas fa-triangle-exclamation"></i> Por debajo del mínimo</div>
+                <div class="crm-metric-subtext" style="color:var(--danger);"><i class="fas fa-triangle-exclamation"></i> Estrictamente menor al mín.</div>
             </div>
             <div class="crm-icon-box" style="background: rgba(239,68,68,0.12); color: #ef4444;">
                 <i class="fas fa-bell"></i>
@@ -97,13 +97,14 @@
                     <th>Producto</th>
                     <th style="text-align: center;">Stock actual</th>
                     <th style="text-align: center;">Stock mínimo</th>
+                    <th style="text-align: center;">Estrategia</th>
                     <th style="text-align: center;">Estado</th>
                     <th style="text-align: right;">Acciones</th>
                 </tr>
             </thead>
             <tbody id="tbodyInventarioSCM">
                 <tr>
-                    <td colspan="5" style="text-align: center; padding: 3rem; color: #94a3b8;">
+                    <td colspan="6" style="text-align: center; padding: 3rem; color: #94a3b8;">
                         <i class="fas fa-spinner fa-spin fa-2x" style="color:#0d9488; margin-bottom: 10px;"></i>
                         <div>Cargando existencias de inventario desde MySQL...</div>
                     </td>
@@ -149,56 +150,100 @@
 </div>
 
 <script>
-    let inventarioItems = [];
+    var inventarioItems = inventarioItems || [];
+
+    function generarPedidoDesdeInventario(prodId, provId, prodNombre) {
+        window.scmPedidoPrellenado = {
+            producto_id: prodId,
+            proveedor_id: provId,
+            producto_nombre: prodNombre
+        };
+        if (typeof loadExternalView === 'function') {
+            loadExternalView('scm-pedidos.html', document.getElementById('scm-nav-pedidos'), 'SCM');
+        }
+    }
 
     async function cargarInventarioSCM() {
-        const tbody = document.getElementById("tbodyInventarioSCM");
-        tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding:2rem; color:#64748b;"><i class="fas fa-spinner fa-spin"></i> Cargando existencias desde MySQL...</td></tr>`;
+        var tbody = document.getElementById("tbodyInventarioSCM");
+        if (tbody) {
+            tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:2rem; color:#64748b;"><i class="fas fa-spinner fa-spin"></i> Cargando existencias desde MySQL...</td></tr>`;
+        }
 
         try {
-            const resp = await fetch("php/scm_api.php?resource=inventario", { credentials: "same-origin" });
+            var resp = await fetch("php/scm_api.php?resource=inventario", { credentials: "same-origin" });
             if (!resp.ok) throw new Error("Respuesta no válida del servidor");
 
-            const data = await resp.json();
+            var data = await resp.json();
             if (data.success && Array.isArray(data.inventario)) {
                 inventarioItems = data.inventario;
                 
-                const totalPzas = inventarioItems.reduce((acc, it) => acc + (Number(it.actual) || 0), 0);
-                const criticos = inventarioItems.filter(it => it.critico).length;
-                const optimos = inventarioItems.length > 0 ? Math.round(((inventarioItems.length - criticos) / inventarioItems.length) * 100) : 100;
+                var totalPzas = inventarioItems.reduce((acc, it) => acc + (Number(it.actual) || 0), 0);
+                // Regla estricta: Stock bajo = it.actual < it.min
+                var criticos = inventarioItems.filter(it => Number(it.actual) < Number(it.min)).length;
+                var optimos = inventarioItems.length > 0 ? Math.round(((inventarioItems.length - criticos) / inventarioItems.length) * 100) : 100;
 
-                document.getElementById("invTotalUnidades").textContent = totalPzas.toLocaleString();
-                document.getElementById("invAlertasCriticas").textContent = criticos;
-                document.getElementById("invNivelOptimo").textContent = optimos + "%";
-                document.getElementById("invTotalItems").textContent = inventarioItems.length;
+                var elTot = document.getElementById("invTotalUnidades");
+                var elCrit = document.getElementById("invAlertasCriticas");
+                var elOpt = document.getElementById("invNivelOptimo");
+                var elItems = document.getElementById("invTotalItems");
+
+                if (elTot) elTot.textContent = totalPzas.toLocaleString();
+                if (elCrit) elCrit.textContent = criticos;
+                if (elOpt) elOpt.textContent = optimos + "%";
+                if (elItems) elItems.textContent = inventarioItems.length;
 
                 renderizarTablaInventario(inventarioItems);
             } else {
                 throw new Error(data.error || "No se recibieron datos");
             }
         } catch (err) {
-            tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding:2rem; color:#ef4444;"><i class="fas fa-exclamation-triangle"></i> Error al conectar con inventario: ${err.message}</td></tr>`;
+            if (tbody) {
+                tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:2rem; color:#ef4444;"><i class="fas fa-exclamation-triangle"></i> Error al conectar con inventario: ${err.message}</td></tr>`;
+            }
         }
     }
 
     function renderizarTablaInventario(items) {
-        const tbody = document.getElementById("tbodyInventarioSCM");
+        var tbody = document.getElementById("tbodyInventarioSCM");
+        if (!tbody) return;
         if (!items || items.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding:2rem; color:#64748b;">No hay existencias que coincidan con la búsqueda.</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:2rem; color:#64748b;">No hay existencias que coincidan con la búsqueda.</td></tr>`;
             return;
         }
 
         tbody.innerHTML = items.map(item => {
-            const estado = item.estado_stock || (item.actual <= 0 ? 'Sin stock' : (item.actual <= item.min ? 'Stock bajo' : 'Normal'));
+            var actual = Number(item.actual);
+            var min = Number(item.min);
+            // Regla de negocio obligatoria: Stock bajo = actual < min (estrictamente menor).
+            // Si actual == min, el estado es "Normal".
+            var estado = (actual === 0) ? 'Sin stock' : (actual < min ? 'Stock bajo' : 'Normal');
+            var esPush = (item.estrategia === 'PUSH');
             
-            let badgeClass = 'background:rgba(5,150,105,0.12); color:#059669; border:1px solid rgba(5,150,105,0.2);';
-            let dotColor = '#059669';
+            var badgeClass = 'background:rgba(5,150,105,0.12); color:#059669; border:1px solid rgba(5,150,105,0.2);';
+            var dotColor = '#059669';
             if (estado === 'Stock bajo') {
                 badgeClass = 'background:rgba(239,68,68,0.12); color:#ef4444; border:1px solid rgba(239,68,68,0.2);';
                 dotColor = '#ef4444';
             } else if (estado === 'Sin stock') {
                 badgeClass = 'background:rgba(185,28,28,0.18); color:#b91c1c; border:1px solid rgba(185,28,28,0.3);';
                 dotColor = '#b91c1c';
+            }
+
+            var accionBajoStock = '';
+            if (actual < min) {
+                if (esPush) {
+                    accionBajoStock = `
+                        <span class="badge" style="background:rgba(5,150,105,0.15); color:#059669; font-weight:700; font-size:0.75rem; padding:4px 8px; border-radius:6px; display:inline-flex; align-items:center; gap:4px;">
+                            <i class="fas fa-arrows-rotate"></i> Reposición automática
+                        </span>
+                    `;
+                } else {
+                    accionBajoStock = `
+                        <button class="crm-btn crm-btn-primary crm-btn-sm" style="background:#2563eb; padding:4px 10px; font-weight:700; font-size:0.75rem;" onclick="generarPedidoDesdeInventario(${item.producto_id}, ${item.proveedor_id || 'null'}, '${(item.nombre || '').replace(/'/g, "\\'")}')">
+                            <i class="fas fa-cart-plus" style="margin-right:4px;"></i> Generar pedido
+                        </button>
+                    `;
+                }
             }
 
             return `
@@ -214,8 +259,13 @@
                             </div>
                         </div>
                     </td>
-                    <td style="text-align:center; font-weight: 800; font-size:1.05rem; color: ${item.critico ? '#ef4444' : '#0f172a'};">${item.actual}</td>
+                    <td style="text-align:center; font-weight: 800; font-size:1.05rem; color: ${actual < min ? '#ef4444' : '#0f172a'};">${item.actual}</td>
                     <td style="text-align:center; color:#64748b; font-weight:600;">${item.min}</td>
+                    <td style="text-align:center;">
+                        <span class="badge" style="background:${esPush ? 'rgba(5,150,105,0.15)' : 'rgba(37,99,235,0.15)'}; color:${esPush ? '#059669' : '#2563eb'}; font-weight:700; font-size:0.75rem; padding:3px 8px; border-radius:6px;">
+                            ${item.estrategia || 'PULL'}
+                        </span>
+                    </td>
                     <td style="text-align:center;">
                         <span class="badge" style="${badgeClass} font-weight:700; font-size:0.78rem; padding:4px 10px; border-radius:999px; display:inline-flex; align-items:center; gap:6px;">
                             <span style="width:7px; height:7px; border-radius:50%; background:${dotColor};"></span>
@@ -223,9 +273,12 @@
                         </span>
                     </td>
                     <td style="text-align: right;">
-                        <button class="crm-btn crm-btn-secondary crm-btn-sm" title="Ajustar stock" onclick="abrirModalAjustarStockSCM(${item.id})" style="padding:4px 10px; color:#0d9488; font-weight:600;">
-                            <i class="fas fa-sliders" style="margin-right:4px;"></i> Ajustar
-                        </button>
+                        <div style="display:flex; justify-content:flex-end; align-items:center; gap:6px;">
+                            ${accionBajoStock}
+                            <button class="crm-btn crm-btn-secondary crm-btn-sm" title="Ajustar stock" onclick="abrirModalAjustarStockSCM(${item.id})" style="padding:4px 10px; color:#0d9488; font-weight:600;">
+                                <i class="fas fa-sliders" style="margin-right:4px;"></i> Ajustar
+                            </button>
+                        </div>
                     </td>
                 </tr>
             `;
@@ -239,7 +292,9 @@
         var est = estSelect ? estSelect.value : 'todos';
 
         var filtrados = inventarioItems.filter(it => {
-            var estado = it.estado_stock || (it.actual <= 0 ? 'Sin stock' : (it.actual <= it.min ? 'Stock bajo' : 'Normal'));
+            var actual = Number(it.actual);
+            var min = Number(it.min);
+            var estado = (actual === 0) ? 'Sin stock' : (actual < min ? 'Stock bajo' : 'Normal');
             var matchQuery = !query || 
                 (it.nombre && it.nombre.toLowerCase().includes(query)) || 
                 (it.sku && it.sku.toLowerCase().includes(query)) ||
@@ -284,7 +339,9 @@
             var data = await resp.json();
             if (data.success) {
                 cerrarModalAjusteStockSCM();
-                if (typeof showNotification === 'function') {
+                if (data.reposicion_push) {
+                    alert(`Stock actualizado.\nRegla PUSH aplicada: pedido ${data.reposicion_push.folio} surtido, entrada de ${data.reposicion_push.cantidad} registrada. Stock actual: ${data.reposicion_push.stock_final}`);
+                } else if (typeof showNotification === 'function') {
                     showNotification(data.message);
                 } else {
                     alert(data.message);
@@ -304,6 +361,7 @@
     window.cerrarModalAjusteStockSCM = cerrarModalAjusteStockSCM;
     window.guardarAjusteStockSCM = guardarAjusteStockSCM;
     window.filtrarInventarioSCM = filtrarInventarioSCM;
+    window.generarPedidoDesdeInventario = generarPedidoDesdeInventario;
 
     cargarInventarioSCM();
 </script>

@@ -42,7 +42,7 @@
             <div>
                 <div class="crm-metric-label">Estrategia PUSH</div>
                 <div class="crm-metric-value" id="scmTotalPush" style="color: #059669;">0</div>
-                <div class="crm-metric-subtext positive">Producción anticipada</div>
+                <div class="crm-metric-subtext positive">Reposición automática</div>
             </div>
             <div class="crm-icon-box crm-icon-emerald">
                 <i class="fas fa-boxes-stacked"></i>
@@ -53,7 +53,7 @@
             <div>
                 <div class="crm-metric-label">Estrategia PULL</div>
                 <div class="crm-metric-value" id="scmTotalPull" style="color: #2563eb;">0</div>
-                <div class="crm-metric-subtext">Bajo demanda</div>
+                <div class="crm-metric-subtext">Bajo demanda manual</div>
             </div>
             <div class="crm-icon-box" style="background: rgba(37,99,235,0.12); color: #2563eb;">
                 <i class="fas fa-hand-holding-hand"></i>
@@ -64,7 +64,7 @@
             <div>
                 <div class="crm-metric-label">Stock Crítico</div>
                 <div class="crm-metric-value" id="scmProductosBajoStock" style="color: var(--danger);">0</div>
-                <div class="crm-metric-subtext warning">Por debajo del mínimo</div>
+                <div class="crm-metric-subtext warning">Estrictamente menor al mín.</div>
             </div>
             <div class="crm-icon-box crm-icon-amber">
                 <i class="fas fa-triangle-exclamation"></i>
@@ -84,10 +84,6 @@
                 <label>Categoría:</label>
                 <select class="crm-select" id="filtroCategoriaSCM" onchange="filtrarProductosSCM()">
                     <option value="todas">Todas</option>
-                    <option value="textil">Textil</option>
-                    <option value="ceramica">Cerámica</option>
-                    <option value="decoracion">Decoración</option>
-                    <option value="joyeria">Joyería</option>
                 </select>
             </div>
 
@@ -112,13 +108,14 @@
                     <th>Categoría</th>
                     <th style="text-align: center;">Stock</th>
                     <th style="text-align: center;">Stock mín.</th>
+                    <th style="text-align: center;">Cant. reposición</th>
                     <th style="text-align: center;">Estrategia</th>
                     <th style="text-align: right;">Acciones</th>
                 </tr>
             </thead>
             <tbody id="tbodyProductosSCM">
                 <tr>
-                    <td colspan="7" style="text-align: center; padding: 3rem; color: #94a3b8;">
+                    <td colspan="8" style="text-align: center; padding: 3rem; color: #94a3b8;">
                         <i class="fas fa-spinner fa-spin fa-2x" style="color:#0d9488; margin-bottom: 10px;"></i>
                         <div>Cargando catálogo de productos SCM desde MySQL...</div>
                     </td>
@@ -183,10 +180,10 @@
                 </div>
             </div>
 
-            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px; margin-bottom: 1.5rem;">
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px; margin-bottom: 1rem;">
                 <div>
                     <label style="display:block; font-size:0.85rem; font-weight:700; color:#334155; margin-bottom:4px;">Estrategia logística *</label>
-                    <select id="prodFormEstrategia" class="crm-select" style="width:100%;" required>
+                    <select id="prodFormEstrategia" class="crm-select" style="width:100%;" required onchange="toggleCamposEstrategia()">
                         <option value="PUSH">PUSH (Producción anticipada)</option>
                         <option value="PULL">PULL (Según demanda real)</option>
                     </select>
@@ -195,6 +192,17 @@
                     <label style="display:block; font-size:0.85rem; font-weight:700; color:#334155; margin-bottom:4px;">Costo unitario ($ MXN)</label>
                     <input type="number" id="prodFormCosto" class="crm-input" step="0.01" value="0.00" min="0" required>
                 </div>
+            </div>
+
+            <!-- Cantidad de reposición: Visible y obligatoria solo si la estrategia es PUSH -->
+            <div id="wrapCantidadReposicion" style="margin-bottom: 1.25rem; display:none; background:#f0fdf4; border:1px solid #bbf7d0; border-radius:10px; padding:12px;">
+                <label style="display:block; font-size:0.85rem; font-weight:700; color:#059669; margin-bottom:4px;">
+                    <i class="fas fa-boxes-stacked"></i> Cantidad de reposición * (Obligatoria para PUSH)
+                </label>
+                <input type="number" id="prodFormCantidadReposicion" class="crm-input" value="5" min="1" placeholder="Ej. 5">
+                <small style="color:#15803d; font-size:0.75rem; display:block; margin-top:4px;">
+                    Unidades que se ordenarán y recibirán automáticamente al caer por debajo del mínimo.
+                </small>
             </div>
 
             <div style="display:flex; justify-content:flex-end; gap:12px; border-top:1px solid #e2e8f0; padding-top:14px;">
@@ -208,6 +216,26 @@
 <script>
     var productosSCMList = productosSCMList || [];
     var proveedoresSCMList = proveedoresSCMList || [];
+
+    function toggleCamposEstrategia() {
+        var est = document.getElementById("prodFormEstrategia").value;
+        var wrap = document.getElementById("wrapCantidadReposicion");
+        var input = document.getElementById("prodFormCantidadReposicion");
+        if (est === 'PUSH') {
+            if (wrap) wrap.style.display = 'block';
+            if (input) input.required = true;
+        } else {
+            if (wrap) wrap.style.display = 'none';
+            if (input) input.required = false;
+        }
+    }
+
+    function verMovimientosProducto(productoId) {
+        window.scmFiltroProductoId = productoId;
+        if (typeof loadExternalView === 'function') {
+            loadExternalView('scm-movimientos.html', document.getElementById('scm-nav-movimientos'), 'SCM');
+        }
+    }
 
     // Iconos para simular imágenes según la categoría/nombre como en la referencia visual
     function obtenerIconoProductoSCM(nombre, categoria) {
@@ -230,10 +258,11 @@
 
     async function cargarProveedoresParaSelectSCM() {
         try {
-            var resp = await fetch('php/scm_api.php?resource=proveedores');
+            var resp = await fetch('php/scm_api.php?resource=proveedores&activos=1');
             var data = await resp.json();
             if (data.success && Array.isArray(data.proveedores)) {
-                proveedoresSCMList = data.proveedores;
+                // Filtrar solo activos y existentes
+                proveedoresSCMList = data.proveedores.filter(pr => pr.activo);
                 var select = document.getElementById('prodFormProveedor');
                 if (select) {
                     var curVal = select.value;
@@ -280,7 +309,7 @@
     async function cargarProductosSCM() {
         var tbody = document.getElementById("tbodyProductosSCM");
         if (tbody) {
-            tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding:2rem; color:#64748b;"><i class="fas fa-spinner fa-spin"></i> Cargando catálogo de productos SCM...</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; padding:2rem; color:#64748b;"><i class="fas fa-spinner fa-spin"></i> Cargando catálogo de productos SCM...</td></tr>`;
         }
 
         try {
@@ -294,11 +323,11 @@
 
                 actualizarSelectoresCategoriasSCM(productosSCMList);
 
-                // Métricas
+                // Métricas (Regla estricta: Stock bajo = stock_actual < stock_minimo)
                 var total = productosSCMList.length;
                 var pushCount = productosSCMList.filter(p => p.estrategia_logistica === 'PUSH').length;
                 var pullCount = productosSCMList.filter(p => p.estrategia_logistica === 'PULL').length;
-                var bajoStock = productosSCMList.filter(p => Number(p.stock_actual) <= Number(p.stock_minimo)).length;
+                var bajoStock = productosSCMList.filter(p => Number(p.stock_actual) < Number(p.stock_minimo)).length;
 
                 var elTot = document.getElementById("scmTotalProductos");
                 var elPush = document.getElementById("scmTotalPush");
@@ -316,7 +345,7 @@
             }
         } catch (err) {
             if (tbody) {
-                tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding:2rem; color:#ef4444;"><i class="fas fa-exclamation-triangle"></i> Error al conectar con SCM: ${err.message}</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; padding:2rem; color:#ef4444;"><i class="fas fa-exclamation-triangle"></i> Error al conectar con SCM: ${err.message}</td></tr>`;
             }
         }
     }
@@ -325,13 +354,14 @@
         var tbody = document.getElementById("tbodyProductosSCM");
         if (!tbody) return;
         if (!items || items.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding:2rem; color:#64748b;">No se encontraron productos coincidentes.</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; padding:2rem; color:#64748b;">No se encontraron productos coincidentes.</td></tr>`;
             return;
         }
 
         tbody.innerHTML = items.map(p => {
             var esPush = (p.estrategia_logistica === 'PUSH');
-            var stockBajo = (Number(p.stock_actual) <= Number(p.stock_minimo));
+            // Regla estricta: stock_actual < stock_minimo
+            var stockBajo = (Number(p.stock_actual) < Number(p.stock_minimo));
             var iconHtml = obtenerIconoProductoSCM(p.name, p.category);
 
             return `
@@ -344,6 +374,7 @@
                     <td><span class="badge" style="background:#f1f5f9; color:#475569; font-size:0.75rem; font-weight:600;">${p.category || 'General'}</span></td>
                     <td style="text-align: center; font-weight: 700; color: ${stockBajo ? '#ef4444' : '#0f172a'};">${p.stock_actual}</td>
                     <td style="text-align: center; font-weight: 600; color: #64748b;">${p.stock_minimo}</td>
+                    <td style="text-align: center; font-weight: 600; color: #0d9488;">${p.cantidad_reposicion || 5}</td>
                     <td style="text-align: center;">
                         <span class="badge" style="background:${esPush ? 'rgba(5,150,105,0.15)' : 'rgba(37,99,235,0.15)'}; color:${esPush ? '#059669' : '#2563eb'}; font-weight:800; font-size:0.75rem; padding:4px 10px; border-radius:6px;">
                             ${esPush ? 'PUSH' : 'PULL'}
@@ -351,6 +382,9 @@
                     </td>
                     <td style="text-align: right;">
                         <div style="display:flex; justify-content:flex-end; gap:6px;">
+                            <button class="crm-btn crm-btn-secondary crm-btn-sm" title="Ver movimientos de este producto" onclick="verMovimientosProducto(${p.id})" style="padding:4px 8px; color:#0d9488; font-weight:600;">
+                                <i class="fas fa-right-left"></i> Movimientos
+                            </button>
                             <button class="crm-btn crm-btn-secondary crm-btn-sm" title="Editar producto" onclick="abrirModalEditarProductoSCM(${p.id})" style="padding:4px 8px; color:#2563eb;">
                                 <i class="fas fa-pencil"></i>
                             </button>
@@ -395,9 +429,11 @@
         document.getElementById("prodFormProveedor").value = "";
         document.getElementById("prodFormStockActual").value = "0";
         document.getElementById("prodFormStockMin").value = "5";
-        document.getElementById("prodFormEstrategia").value = "PULL";
+        document.getElementById("prodFormEstrategia").value = "PUSH";
+        document.getElementById("prodFormCantidadReposicion").value = "5";
         document.getElementById("prodFormCosto").value = "0.00";
 
+        toggleCamposEstrategia();
         document.getElementById("modalProductoSCM").style.display = "flex";
     }
 
@@ -414,8 +450,10 @@
         document.getElementById("prodFormStockActual").value = prod.stock_actual || 0;
         document.getElementById("prodFormStockMin").value = prod.stock_minimo || 5;
         document.getElementById("prodFormEstrategia").value = prod.estrategia_logistica || 'PULL';
+        document.getElementById("prodFormCantidadReposicion").value = prod.cantidad_reposicion || 5;
         document.getElementById("prodFormCosto").value = prod.costo_unitario || 0.00;
 
+        toggleCamposEstrategia();
         document.getElementById("modalProductoSCM").style.display = "flex";
     }
 
@@ -426,6 +464,14 @@
 
     async function guardarProductoSCM(ev) {
         ev.preventDefault();
+        var est = document.getElementById("prodFormEstrategia").value;
+        var cantRep = Number(document.getElementById("prodFormCantidadReposicion").value) || 5;
+
+        if (est === 'PUSH' && cantRep <= 0) {
+            alert("La cantidad de reposición es obligatoria y debe ser mayor a 0 para productos PUSH");
+            return;
+        }
+
         var payload = {
             id: Number(document.getElementById("prodFormId").value),
             name: document.getElementById("prodFormNombre").value.trim(),
@@ -434,7 +480,8 @@
             proveedor_id: document.getElementById("prodFormProveedor").value ? Number(document.getElementById("prodFormProveedor").value) : null,
             stock_actual: Number(document.getElementById("prodFormStockActual").value),
             stock_minimo: Number(document.getElementById("prodFormStockMin").value),
-            estrategia_logistica: document.getElementById("prodFormEstrategia").value,
+            estrategia_logistica: est,
+            cantidad_reposicion: cantRep,
             costo_unitario: Number(document.getElementById("prodFormCosto").value)
         };
 
@@ -447,7 +494,9 @@
             var data = await resp.json();
             if (data.success) {
                 cerrarModalProductoSCM();
-                if (typeof showNotification === 'function') {
+                if (data.reposicion_push) {
+                    alert(`Producto guardado.\nRegla PUSH aplicada: pedido ${data.reposicion_push.folio} surtido, entrada de ${data.reposicion_push.cantidad} registrada. Stock actual: ${data.reposicion_push.stock_final}`);
+                } else if (typeof showNotification === 'function') {
                     showNotification(data.message);
                 } else {
                     alert(data.message);
@@ -498,6 +547,8 @@
     window.guardarProductoSCM = guardarProductoSCM;
     window.eliminarProductoSCM = eliminarProductoSCM;
     window.filtrarProductosSCM = filtrarProductosSCM;
+    window.toggleCamposEstrategia = toggleCamposEstrategia;
+    window.verMovimientosProducto = verMovimientosProducto;
 
     cargarProductosSCM();
 </script>

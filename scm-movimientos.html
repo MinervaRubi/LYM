@@ -25,6 +25,20 @@
         </div>
     </div>
 
+    <!-- BANNER AVISO REGLA PUSH -->
+    <div id="bannerReglaPUSH" style="display:none; background: #ecfdf5; border: 1.5px solid #059669; border-radius: 12px; padding: 14px 18px; align-items: center; justify-content: space-between; gap: 12px;">
+        <div style="display:flex; align-items:center; gap:12px;">
+            <div style="width:38px; height:38px; border-radius:50%; background:#059669; color:#fff; display:flex; align-items:center; justify-content:center; font-size:1.1rem; flex-shrink:0;">
+                <i class="fas fa-robot"></i>
+            </div>
+            <div>
+                <strong style="color:#065f46; font-size:0.95rem; display:block;">Regla PUSH ejecutada automáticamente</strong>
+                <span style="color:#047857; font-size:0.88rem; font-weight:600;" id="bannerReglaPUSHTex"></span>
+            </div>
+        </div>
+        <button onclick="document.getElementById('bannerReglaPUSH').style.display='none'" style="background:none; border:none; color:#065f46; font-size:1.3rem; cursor:pointer;">&times;</button>
+    </div>
+
     <!-- BARRA DE FILTROS (PANTALLA 7) -->
     <div class="crm-card" style="display: flex; align-items: center; justify-content: space-between; gap: 1.25rem; flex-wrap: wrap; padding: 1rem 1.25rem;">
         <div style="display: flex; align-items: center; gap: 1.5rem; flex-wrap: wrap; width: 100%;">
@@ -138,8 +152,6 @@
                 <label style="display:block; font-size:0.85rem; font-weight:700; color:#334155; margin-bottom:4px;">Usuario *</label>
                 <select id="movFormUsuario" class="crm-select" style="width:100%;" required>
                     <option value="Admin">Admin</option>
-                    <option value="Usuario1">Usuario1</option>
-                    <option value="Staff">Staff</option>
                 </select>
             </div>
 
@@ -151,8 +163,51 @@
     </div>
 </div>
 
+<!-- ==============================================================
+     VENTANA MODAL DE ALERTA DE STOCK BAJO (ESTRATEGIA PULL)
+============================================================== -->
+<div class="crm-modal-backdrop" id="modalAlertaStockBajoPULL" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(15,23,42,0.6); backdrop-filter:blur(4px); z-index:10000; justify-content:center; align-items:center;">
+    <div class="crm-modal" style="background:#ffffff; border-radius:18px; padding:28px; max-width:480px; width:92%; box-shadow:0 25px 50px rgba(0,0,0,0.3); text-align:center;">
+        <div style="width:60px; height:60px; border-radius:50%; background:rgba(239,68,68,0.12); color:#ef4444; display:flex; align-items:center; justify-content:center; font-size:1.8rem; margin:0 auto 16px;">
+            <i class="fas fa-triangle-exclamation"></i>
+        </div>
+        <h3 style="margin:0 0 10px; font-size:1.35rem; font-weight:800; color:#0f172a;">Alerta: Stock Bajo (Estrategia PULL)</h3>
+        <p id="pullAlertaTexto" style="font-size:0.95rem; color:#475569; margin-bottom:22px; line-height:1.5;">
+            El producto ha quedado por debajo del stock mínimo. En la estrategia PULL, la reposición no es automática.
+        </p>
+        <div style="display:flex; justify-content:center; gap:12px; flex-wrap:wrap;">
+            <button class="crm-btn crm-btn-secondary" onclick="cerrarModalAlertaPULL()" style="padding:8px 18px;">
+                Entendido
+            </button>
+            <button class="crm-btn crm-btn-primary" style="background:#2563eb; padding:8px 18px;" onclick="irAGenerarPedidoPULL()">
+                <i class="fas fa-cart-plus" style="margin-right:6px;"></i> Generar pedido al proveedor
+            </button>
+        </div>
+    </div>
+</div>
+
 <script>
     var productosDisponiblesMov = productosDisponiblesMov || [];
+    var productoAlertaPULLActual = null;
+
+    function cerrarModalAlertaPULL() {
+        var modal = document.getElementById("modalAlertaStockBajoPULL");
+        if (modal) modal.style.display = "none";
+    }
+
+    function irAGenerarPedidoPULL() {
+        cerrarModalAlertaPULL();
+        if (productoAlertaPULLActual) {
+            window.scmPedidoPrellenado = {
+                producto_id: productoAlertaPULLActual.id,
+                proveedor_id: productoAlertaPULLActual.proveedor_id,
+                producto_nombre: productoAlertaPULLActual.nombre
+            };
+        }
+        if (typeof loadExternalView === 'function') {
+            loadExternalView('scm-pedidos.html', document.getElementById('scm-nav-pedidos'), 'SCM');
+        }
+    }
 
     async function cargarUsuariosParaSelectMov() {
         try {
@@ -184,7 +239,7 @@
                     var curFilterVal = fSel.value;
                     fSel.innerHTML = '<option value="0">Todos los productos</option>' + 
                         productosDisponiblesMov.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
-                    if (curFilterVal) fSel.value = curFilterVal;
+                    if (curFilterVal && curFilterVal !== '0') fSel.value = curFilterVal;
                 }
 
                 // Llenar select de modal
@@ -330,11 +385,41 @@
             var data = await resp.json();
             if (data.success) {
                 cerrarModalNuevoMovimientoSCM();
-                if (typeof showNotification === 'function') {
-                    showNotification(data.message);
+
+                // 1. REGLA PUSH: Si disparó reposición PUSH, mostrar aviso
+                if (data.reposicion_push) {
+                    var msjPush = `Regla PUSH aplicada: pedido ${data.reposicion_push.folio} surtido, entrada de ${data.reposicion_push.cantidad} registrada. Stock actual: ${data.reposicion_push.stock_final}`;
+                    var banner = document.getElementById("bannerReglaPUSH");
+                    var bannerTex = document.getElementById("bannerReglaPUSHTex");
+                    if (banner && bannerTex) {
+                        bannerTex.textContent = msjPush;
+                        banner.style.display = "flex";
+                    }
+                    alert(msjPush);
+                } else if (data.alerta_pull) {
+                    // 2. REGLA PULL: Si la salida deja un producto PULL bajo el mínimo, mostrar ventana modal de alerta de stock bajo
+                    var prodInfo = productosDisponiblesMov.find(p => p.id === productoId);
+                    productoAlertaPULLActual = {
+                        id: productoId,
+                        nombre: data.producto_nombre || (prodInfo ? prodInfo.name : 'Producto'),
+                        proveedor_id: prodInfo ? prodInfo.proveedor_id : null
+                    };
+                    var pullModal = document.getElementById("modalAlertaStockBajoPULL");
+                    var pullTexto = document.getElementById("pullAlertaTexto");
+                    if (pullTexto) {
+                        pullTexto.innerHTML = `La salida de <strong>${cantidad}</strong> unidades dejó a <strong>${productoAlertaPULLActual.nombre}</strong> con un stock de <strong>${data.nuevo_stock}</strong> piezas, por debajo del mínimo requerido (<strong>${data.stock_minimo}</strong> piezas).<br><br>Al ser un producto con estrategia <strong>PULL</strong>, el sistema no realiza pedidos automáticos.`;
+                    }
+                    if (pullModal) {
+                        pullModal.style.display = "flex";
+                    }
                 } else {
-                    alert(data.message);
+                    if (typeof showNotification === 'function') {
+                        showNotification(data.message);
+                    } else {
+                        alert(data.message);
+                    }
                 }
+
                 cargarMovimientosSCM();
                 cargarProductosParaFiltroMov();
             } else {
@@ -353,9 +438,22 @@
     window.cerrarModalNuevoMovimientoSCM = cerrarModalNuevoMovimientoSCM;
     window.guardarMovimientoSCM = guardarMovimientoSCM;
     window.cargarUsuariosParaSelectMov = cargarUsuariosParaSelectMov;
+    window.cerrarModalAlertaPULL = cerrarModalAlertaPULL;
+    window.irAGenerarPedidoPULL = irAGenerarPedidoPULL;
 
     Promise.all([
         cargarProductosParaFiltroMov(),
         cargarUsuariosParaSelectMov()
-    ]).then(() => cargarMovimientosSCM());
+    ]).then(() => {
+        // Criterio V3: si se entró desde Acciones de productos, filtrar solo ese producto
+        if (window.scmFiltroProductoId) {
+            var fSel = document.getElementById("filtroProductoMovSCM");
+            if (fSel) {
+                fSel.value = String(window.scmFiltroProductoId);
+            }
+            // Limpiar para que la próxima entrada desde el menú cargue todos
+            window.scmFiltroProductoId = null;
+        }
+        cargarMovimientosSCM();
+    });
 </script>

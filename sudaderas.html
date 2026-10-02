@@ -52,6 +52,7 @@
                     <h4>Selecciona tu sudadera:</h4>
 
                     <select class="select-producto" id="opcionesProducto" data-producto="Sudadera personalizada"
+                        data-producto-id="3"
                         data-mensaje="mensajeAgregado">
                         <option value="425">Sudadera básica DTF - $425</option>
                         <option value="480">Sudadera premium (DTF grande) - $480</option>
@@ -71,6 +72,7 @@
                         <a href="carrito.html" class="btn btn-outline">
                             <i class="fas fa-shopping-cart"></i> Ver carrito
                         </a>
+
                         <a href="prodrelacionados .html" class="btn btn-outline">
                             Productos relacionados
                         </a>
@@ -104,6 +106,7 @@
             }
 
             const producto = select.dataset.producto;
+            const productoId = select.dataset.productoId ? Number(select.dataset.productoId) : 3;
             const mensajeId = select.dataset.mensaje;
 
             const descripcion = select.options[select.selectedIndex].text;
@@ -125,9 +128,11 @@
 
             if (existente) {
                 existente.cantidad += cantidad;
+                if (!existente.producto_id) existente.producto_id = productoId;
             } else {
                 carrito.push({
                     producto: producto,
+                    producto_id: productoId,
                     descripcion: descripcion,
                     precio: precio,
                     cantidad: cantidad

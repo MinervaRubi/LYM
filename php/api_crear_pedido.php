@@ -1,5 +1,7 @@
 <?php
 require_once __DIR__ . '/../includes/config.php';
+require_once __DIR__ . '/../includes/scm_functions.php';
+
 header('Content-Type: application/json; charset=utf-8');
 header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
 header('Pragma: no-cache');
@@ -15,13 +17,13 @@ try {
     $input = json_decode(file_get_contents('php://input'), true) ?: $_POST;
 
     $items = $input['items'] ?? [];
-    $total = floatval($input['total'] ?? 0);
+    $totalRecibido = floatval($input['total'] ?? 0);
     $metodo = $input['metodo'] ?? 'tarjeta';
     $notas = trim($input['notas'] ?? 'Pedido generado desde la tienda web');
 
-    if (empty($items) || $total <= 0) {
+    if (empty($items)) {
         http_response_code(400);
-        echo json_encode(['success' => false, 'error' => 'El pedido debe incluir al menos un producto y un monto válido']);
+        echo json_encode(['success' => false, 'error' => 'El pedido debe incluir al menos un producto']);
         exit();
     }
 
@@ -37,10 +39,62 @@ try {
         }
     }
 
-    $subtotal = $total >= 500 ? $total : max(0, $total - 80);
-    $envio = $total >= 500 ? 0 : 80;
-
     $pdo->beginTransaction();
+
+    // Preparar consultas para productos e inventario
+    $stmtGetProdById = $pdo->prepare("SELECT id, name, price, stock_minimo, estrategia_logistica FROM productos WHERE id = ?");
+    $stmtFindProdByName = $pdo->prepare("SELECT id, name, price, stock_minimo, estrategia_logistica FROM productos WHERE LOWER(name) LIKE LOWER(?) LIMIT 1");
+    
+    $stmtFindInvByProdId = $pdo->prepare("SELECT id, sku, nombre, stock_actual FROM scm_inventario WHERE producto_id = ? LIMIT 1");
+    $stmtFindInvByName = $pdo->prepare("SELECT id, sku, nombre, stock_actual FROM scm_inventario WHERE LOWER(nombre) LIKE LOWER(?) LIMIT 1");
+    $stmtUpInv = $pdo->prepare("UPDATE scm_inventario SET stock_actual = GREATEST(0, stock_actual - ?) WHERE id = ?");
+    $stmtMov = $pdo->prepare("
+        INSERT INTO scm_movimientos (folio, tipo, producto_id, producto_nombre, cantidad, origen, destino, usuario, motivo, fecha) 
+        VALUES (?, 'salida', ?, ?, ?, 'Almacén Central', 'Cliente Web', 'Venta Tienda', ?, NOW())
+    ");
+
+    $itemsProcesados = [];
+    $subtotalCalculado = 0;
+
+    foreach ($items as $item) {
+        $nombre = trim($item['producto'] ?? $item['name'] ?? 'Producto personalizado');
+        $cant = max(1, intval($item['cantidad'] ?? 1));
+        $rawProdId = isset($item['producto_id']) ? intval($item['producto_id']) : 0;
+        
+        $prodRow = null;
+        if ($rawProdId > 0) {
+            $stmtGetProdById->execute([$rawProdId]);
+            $prodRow = $stmtGetProdById->fetch(PDO::FETCH_ASSOC);
+        }
+        if (!$prodRow) {
+            $stmtFindProdByName->execute(["%$nombre%"]);
+            $prodRow = $stmtFindProdByName->fetch(PDO::FETCH_ASSOC);
+        }
+
+        $prodId = $prodRow ? (int)$prodRow['id'] : ($rawProdId > 0 ? $rawProdId : null);
+        // Tomar el precio desde la base de datos si existe; de lo contrario el enviado
+        $precio = ($prodRow && floatval($prodRow['price']) > 0) 
+            ? floatval($prodRow['price']) 
+            : floatval($item['precio'] ?? $item['price'] ?? 0);
+        
+        $sub = round($precio * $cant, 2);
+        $subtotalCalculado += $sub;
+
+        $itemsProcesados[] = [
+            'producto_id' => $prodId,
+            'nombre' => $prodRow ? $prodRow['name'] : $nombre,
+            'cantidad' => $cant,
+            'precio' => $precio,
+            'subtotal' => $sub
+        ];
+    }
+
+    $subtotal = $subtotalCalculado;
+    $envio = $subtotal >= 500 ? 0 : 80;
+    $total = $subtotal + $envio;
+    if ($total <= 0 && $totalRecibido > 0) {
+        $total = $totalRecibido;
+    }
 
     // 1. Insertar en tabla pedidos
     $stmtPed = $pdo->prepare("
@@ -56,33 +110,37 @@ try {
         VALUES (?, ?, ?, ?, ?, ?)
     ");
 
-    $stmtFindProd = $pdo->prepare("SELECT id, price FROM productos WHERE LOWER(name) LIKE LOWER(?) LIMIT 1");
-    $stmtFindInv = $pdo->prepare("SELECT id, sku, nombre, stock_actual FROM scm_inventario WHERE LOWER(nombre) LIKE LOWER(?) LIMIT 1");
-    $stmtUpInv = $pdo->prepare("UPDATE scm_inventario SET stock_actual = GREATEST(0, stock_actual - ?) WHERE id = ?");
-    $stmtMov = $pdo->prepare("INSERT INTO scm_movimientos (folio, tipo, producto_id, producto_nombre, cantidad, origen, destino, usuario, motivo, fecha) VALUES (?, 'salida', ?, ?, ?, 'Almacén Principal', 'Cliente Web', 'Venta Tienda', ?, NOW())");
+    $reposicionesPush = [];
 
-    foreach ($items as $item) {
-        $nombre = trim($item['producto'] ?? $item['name'] ?? 'Producto personalizado');
-        $cant = max(1, intval($item['cantidad'] ?? 1));
-        $precio = floatval($item['precio'] ?? $item['price'] ?? 0);
-        $sub = $precio * $cant;
+    foreach ($itemsProcesados as $it) {
+        $stmtDet->execute([$pedidoId, $it['producto_id'], $it['nombre'], $it['cantidad'], $it['precio'], $it['subtotal']]);
 
-        // Intentar enlazar con producto_id
-        $stmtFindProd->execute(["%$nombre%"]);
-        $prodRow = $stmtFindProd->fetch();
-        $prodId = $prodRow ? (int)$prodRow['id'] : null;
+        // Ajuste en inventario SCM por producto_id (o por nombre como respaldo)
+        $invRow = null;
+        if ($it['producto_id']) {
+            $stmtFindInvByProdId->execute([$it['producto_id']]);
+            $invRow = $stmtFindInvByProdId->fetch(PDO::FETCH_ASSOC);
+        }
+        if (!$invRow) {
+            $stmtFindInvByName->execute(["%{$it['nombre']}%"]);
+            $invRow = $stmtFindInvByName->fetch(PDO::FETCH_ASSOC);
+        }
 
-        $stmtDet->execute([$pedidoId, $prodId, $nombre, $cant, $precio, $sub]);
-
-        // Ajuste automático en inventario SCM
-        $stmtFindInv->execute(["%$nombre%"]);
-        $invRow = $stmtFindInv->fetch();
         if ($invRow) {
             $invId = $invRow['id'];
             $invNombre = $invRow['nombre'];
-            $stmtUpInv->execute([$cant, $invId]);
+            $stmtUpInv->execute([$it['cantidad'], $invId]);
+            
             $folioMov = 'MOV-' . rand(10000, 99999);
-            $stmtMov->execute([$folioMov, $prodId, $invNombre, $cant, "Venta en tienda web de pedido #$pedidoId"]);
+            $stmtMov->execute([$folioMov, $it['producto_id'], $invNombre, $it['cantidad'], "Venta en tienda web de pedido #$pedidoId"]);
+        }
+
+        // Aplicar regla PUSH si el producto quedó con stock < stock_minimo
+        if ($it['producto_id']) {
+            $pushRes = aplicarReposicionPush($pdo, $it['producto_id'], 'Venta Tienda');
+            if ($pushRes) {
+                $reposicionesPush[] = $pushRes;
+            }
         }
     }
 
@@ -109,6 +167,8 @@ try {
         'pedido_id' => $pedidoId,
         'folio' => $folio,
         'total' => $total,
+        'reposicion_push' => !empty($reposicionesPush) ? $reposicionesPush[0] : null,
+        'reposiciones' => $reposicionesPush,
         'message' => '¡Pedido registrado y procesado exitosamente en MySQL!'
     ]);
 

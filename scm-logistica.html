@@ -22,16 +22,86 @@
         </div>
     </div>
 
-    <!-- SECCIÓN DE 2 COLUMNAS: PANTALLA 9 (CONFIGURACIÓN) Y PANTALLA 10 (MÉTRICAS COMPARATIVAS) -->
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)); gap: 1.5rem; align-items: start;">
+    <!-- AVISO DE PRODUCTOS PULL EN STOCK BAJO -->
+    <div id="alertaPullStockBajoWrap" style="display:none; background:#fff1f2; border:1.5px solid #f43f5e; border-radius:14px; padding:16px 20px; box-shadow:0 4px 15px rgba(244,63,94,0.12);">
+        <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:14px; flex-wrap:wrap;">
+            <div style="display:flex; gap:14px; align-items:center;">
+                <div style="width:42px; height:42px; border-radius:50%; background:rgba(244,63,94,0.15); color:#e11d48; display:flex; align-items:center; justify-content:center; font-size:1.3rem; flex-shrink:0;">
+                    <i class="fas fa-triangle-exclamation"></i>
+                </div>
+                <div>
+                    <h4 style="margin:0 0 4px; color:#9f1239; font-size:1rem; font-weight:800;" id="alertaPullTitulo">
+                        Productos PULL en Stock Bajo
+                    </h4>
+                    <p style="margin:0; font-size:0.88rem; color:#be123c;" id="alertaPullDetalle">
+                        Los productos PULL no se reponen de forma automática. Se requiere intervención manual para generar las órdenes de compra.
+                    </p>
+                </div>
+            </div>
+            <button class="crm-btn crm-btn-primary" style="background:#2563eb; padding:8px 16px; font-size:0.85rem; font-weight:700;" onclick="irAPedidosDesdeLogistica()">
+                <i class="fas fa-cart-plus" style="margin-right:6px;"></i> Ir a Pedidos
+            </button>
+        </div>
+        <div id="alertaPullLista" style="margin-top:12px; display:flex; gap:8px; flex-wrap:wrap;"></div>
+    </div>
+
+    <!-- TARJETAS EXPLICATIVAS PUSH VS PULL -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.25rem;">
+        <!-- TARJETA PUSH -->
+        <div class="crm-card" style="padding: 1.4rem; border-top: 4px solid #059669; background: linear-gradient(180deg, rgba(5,150,105,0.03), #ffffff);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                <div style="display:flex; align-items:center; gap:10px;">
+                    <div class="crm-icon-box" style="width: 36px; height: 36px; font-size: 1.1rem; background: rgba(5,150,105,0.15); color: #059669;">
+                        <i class="fas fa-boxes-stacked"></i>
+                    </div>
+                    <div>
+                        <span style="font-size: 1.1rem; font-weight: 800; color: #059669;">PUSH</span>
+                        <div style="font-size: 0.75rem; color: #059669; font-weight: 700;">REPOSICIÓN AUTOMÁTICA</div>
+                    </div>
+                </div>
+                <div style="text-align:right;">
+                    <div style="font-size: 1.6rem; font-weight: 800; color: #0f172a;" id="statTotalPush">0</div>
+                    <div style="font-size: 0.75rem; color: #64748b;">productos</div>
+                </div>
+            </div>
+            <p style="margin: 0; font-size: 0.86rem; color: #475569; line-height: 1.45;">
+                <strong>PUSH: reposición automática al quedar bajo el mínimo.</strong> En cuanto una salida de inventario deja el producto por debajo del mínimo, el sistema genera inmediatamente un pedido surtido al proveedor y la entrada correspondiente en almacén.
+            </p>
+        </div>
+
+        <!-- TARJETA PULL -->
+        <div class="crm-card" style="padding: 1.4rem; border-top: 4px solid #2563eb; background: linear-gradient(180deg, rgba(37,99,235,0.03), #ffffff);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                <div style="display:flex; align-items:center; gap:10px;">
+                    <div class="crm-icon-box" style="width: 36px; height: 36px; font-size: 1.1rem; background: rgba(37,99,235,0.15); color: #2563eb;">
+                        <i class="fas fa-hand-holding-hand"></i>
+                    </div>
+                    <div>
+                        <span style="font-size: 1.1rem; font-weight: 800; color: #2563eb;">PULL</span>
+                        <div style="font-size: 0.75rem; color: #2563eb; font-weight: 700;">BAJO DEMANDA MANUAL</div>
+                    </div>
+                </div>
+                <div style="text-align:right;">
+                    <div style="font-size: 1.6rem; font-weight: 800; color: #0f172a;" id="statTotalPull">0</div>
+                    <div style="font-size: 0.75rem; color: #64748b;">productos</div>
+                </div>
+            </div>
+            <p style="margin: 0; font-size: 0.86rem; color: #475569; line-height: 1.45;">
+                <strong>PULL: reposición solo bajo pedido.</strong> El sistema no genera compras automáticas; únicamente emite alertas de stock bajo para que el administrador o encargado genere manualmente la orden al taller o artesano.
+            </p>
+        </div>
+    </div>
+
+    <!-- SECCIÓN DE CONFIGURACIÓN Y TABLA COMPARATIVA -->
+    <div style="display: grid; grid-template-columns: 340px 1fr; gap: 1.5rem; align-items: start;">
         
         <!-- PANTALLA 9: CONFIGURAR ESTRATEGIA -->
         <div class="crm-card" style="padding: 1.5rem;">
             <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 1.25rem;">
                 <div class="crm-icon-box" style="background: rgba(13,148,136,0.12); color: #0d9488;">
-                    <i class="fas fa-route"></i>
+                    <i class="fas fa-sliders"></i>
                 </div>
-                <h3 style="margin: 0; font-size: 1.2rem; font-weight: 800; color: #0f172a;">Configurar estrategia</h3>
+                <h3 style="margin: 0; font-size: 1.15rem; font-weight: 800; color: #0f172a;">Asignar estrategia</h3>
             </div>
 
             <form id="formConfigEstrategia" onsubmit="guardarEstrategiaLogistica(event)">
@@ -43,39 +113,20 @@
                 </div>
 
                 <div style="margin-bottom: 1.25rem;">
-                    <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #334155; margin-bottom: 8px;">Estrategia *</label>
+                    <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #334155; margin-bottom: 8px;">Estrategia logística *</label>
                     <div style="display: flex; flex-direction: column; gap: 10px;">
                         <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 0.9rem; font-weight: 600; color: #059669;">
                             <input type="radio" name="radioEstrategia" value="PUSH" checked style="accent-color: #059669;">
-                            <span><strong>PUSH</strong> (producción/compra anticipada)</span>
+                            <span><strong>PUSH</strong> (Automática al caer del mín.)</span>
                         </label>
                         <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 0.9rem; font-weight: 600; color: #2563eb;">
                             <input type="radio" name="radioEstrategia" value="PULL" style="accent-color: #2563eb;">
-                            <span><strong>PULL</strong> (según demanda real)</span>
+                            <span><strong>PULL</strong> (Solo manual bajo demanda)</span>
                         </label>
                     </div>
                 </div>
 
-                <!-- CAJAS INFORMATIVAS EXPLICATIVAS (COMO EN PANTALLA 9) -->
-                <div style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 1.5rem;">
-                    <div style="display: flex; gap: 12px; align-items: flex-start; padding: 12px; border-radius: 10px; background: rgba(5,150,105,0.06); border: 1px solid rgba(5,150,105,0.2);">
-                        <i class="fas fa-boxes-stacked" style="color: #059669; font-size: 1.3rem; margin-top: 2px;"></i>
-                        <div>
-                            <strong style="color: #059669; font-size: 0.85rem; display: block; margin-bottom: 2px;">PUSH</strong>
-                            <span style="font-size: 0.82rem; color: #475569; line-height: 1.4;">Se genera pedido automáticamente cuando el stock llega al mínimo. Ideal para productos de alta rotación.</span>
-                        </div>
-                    </div>
-
-                    <div style="display: flex; gap: 12px; align-items: flex-start; padding: 12px; border-radius: 10px; background: rgba(37,99,235,0.06); border: 1px solid rgba(37,99,235,0.2);">
-                        <i class="fas fa-hand-holding-hand" style="color: #2563eb; font-size: 1.3rem; margin-top: 2px;"></i>
-                        <div>
-                            <strong style="color: #2563eb; font-size: 0.85rem; display: block; margin-bottom: 2px;">PULL</strong>
-                            <span style="font-size: 0.82rem; color: #475569; line-height: 1.4;">Se genera pedido solo bajo pedido o demanda del cliente. Ideal para artesanías exclusivas de alto valor.</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div style="display: flex; justify-content: flex-end;">
+                <div style="display: flex; justify-content: flex-end; margin-top: 1.5rem;">
                     <button type="submit" class="crm-btn crm-btn-primary" style="background: #0d9488; width: 100%; justify-content: center; padding: 10px;">
                         <i class="fas fa-save"></i> Guardar estrategia
                     </button>
@@ -83,65 +134,50 @@
             </form>
         </div>
 
-        <!-- PANTALLA 10: COMPARATIVA PUSH VS PULL (TARJETAS DE CONTEO) -->
-        <div style="display: flex; flex-direction: column; gap: 1.5rem;">
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
-                <!-- TARJETA PUSH -->
-                <div class="crm-card" style="padding: 1.25rem; border-top: 4px solid #059669;">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                        <span style="font-size: 0.85rem; font-weight: 700; color: #059669; text-transform: uppercase;">PUSH</span>
-                        <div class="crm-icon-box" style="width: 32px; height: 32px; font-size: 0.9rem; background: rgba(5,150,105,0.12); color: #059669;">
-                            <i class="fas fa-boxes-stacked"></i>
-                        </div>
-                    </div>
-                    <div style="font-size: 1.8rem; font-weight: 800; color: #0f172a;" id="statTotalPush">0</div>
-                    <div style="font-size: 0.8rem; color: #64748b;">productos asignados</div>
-                </div>
-
-                <!-- TARJETA PULL -->
-                <div class="crm-card" style="padding: 1.25rem; border-top: 4px solid #2563eb;">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                        <span style="font-size: 0.85rem; font-weight: 700; color: #2563eb; text-transform: uppercase;">PULL</span>
-                        <div class="crm-icon-box" style="width: 32px; height: 32px; font-size: 0.9rem; background: rgba(37,99,235,0.12); color: #2563eb;">
-                            <i class="fas fa-hand-holding-hand"></i>
-                        </div>
-                    </div>
-                    <div style="font-size: 1.8rem; font-weight: 800; color: #0f172a;" id="statTotalPull">0</div>
-                    <div style="font-size: 0.8rem; color: #64748b;">productos asignados</div>
+        <!-- TABLA COMPARATIVA PUSH VS PULL (PANTALLA 10) -->
+        <div class="crm-table-container">
+            <div style="padding: 1rem 1.25rem; border-bottom: 1px solid var(--border-color); font-weight: 800; color: var(--text-heading); font-size: 0.95rem; display: flex; justify-content: space-between; align-items: center; flex-wrap:wrap; gap:10px;">
+                <span>Comparativa de Inventario y Estrategias</span>
+                <div style="display:flex; align-items:center; gap:8px;">
+                    <label style="font-size:0.8rem; font-weight:600; color:#64748b;">Filtrar:</label>
+                    <select class="crm-select crm-select-sm" id="filtroTablaLogistica" onchange="filtrarTablaLogistica()" style="padding:4px 8px; font-size:0.8rem;">
+                        <option value="todas">Todas</option>
+                        <option value="PUSH">Solo PUSH</option>
+                        <option value="PULL">Solo PULL</option>
+                    </select>
                 </div>
             </div>
-
-            <!-- TABLA COMPARATIVA COMPLETA DE PRODUCTOS POR ESTRATEGIA (PANTALLA 10) -->
-            <div class="crm-table-container">
-                <div style="padding: 1rem 1.25rem; border-bottom: 1px solid var(--border-color); font-weight: 800; color: var(--text-heading); font-size: 0.95rem; display: flex; justify-content: space-between; align-items: center;">
-                    <span>Productos por estrategia</span>
-                    <span style="font-size: 0.75rem; color: #64748b; font-weight: normal;">Haz clic en el badge para alternar</span>
-                </div>
-                <table class="crm-table">
-                    <thead>
-                        <tr>
-                            <th>Producto</th>
-                            <th>Categoría</th>
-                            <th style="text-align: center;">Stock</th>
-                            <th style="text-align: center;">Stock mín.</th>
-                            <th style="text-align: center;">Estrategia</th>
-                        </tr>
-                    </thead>
-                    <tbody id="tbodyLogisticaProductos">
-                        <tr>
-                            <td colspan="5" style="text-align: center; padding: 2rem; color: #94a3b8;">
-                                <i class="fas fa-spinner fa-spin"></i> Cargando matriz comparativa...
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
+            <table class="crm-table">
+                <thead>
+                    <tr>
+                        <th>Producto</th>
+                        <th style="text-align: center;">Stock</th>
+                        <th style="text-align: center;">Stock mín.</th>
+                        <th style="text-align: center;">Cant. reposición</th>
+                        <th style="text-align: center;">Estado</th>
+                        <th style="text-align: center;">Estrategia</th>
+                    </tr>
+                </thead>
+                <tbody id="tbodyLogisticaProductos">
+                    <tr>
+                        <td colspan="6" style="text-align: center; padding: 2rem; color: #94a3b8;">
+                            <i class="fas fa-spinner fa-spin"></i> Cargando matriz comparativa...
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
         </div>
     </div>
 </div>
 
 <script>
     var logisticaProductos = logisticaProductos || [];
+
+    function irAPedidosDesdeLogistica() {
+        if (typeof loadExternalView === 'function') {
+            loadExternalView('scm-pedidos.html', document.getElementById('scm-nav-pedidos'), 'SCM');
+        }
+    }
 
     async function cargarLogisticaSCM() {
         var tbody = document.getElementById("tbodyLogisticaProductos");
@@ -155,8 +191,8 @@
 
                 var elPush = document.getElementById("statTotalPush");
                 var elPull = document.getElementById("statTotalPull");
-                if (elPush) elPush.textContent = data.push_count + " productos";
-                if (elPull) elPull.textContent = data.pull_count + " productos";
+                if (elPush) elPush.textContent = data.push_count;
+                if (elPull) elPull.textContent = data.pull_count;
 
                 // Llenar select de productos
                 var sel = document.getElementById("selectProductoEstrategia");
@@ -167,11 +203,31 @@
                     if (curVal) sel.value = curVal;
                 }
 
-                renderizarTablaLogistica(logisticaProductos);
+                // Manejo de aviso de productos PULL en stock bajo
+                var pullBajo = data.pull_stock_bajo || [];
+                var wrapAviso = document.getElementById("alertaPullStockBajoWrap");
+                var listaAviso = document.getElementById("alertaPullLista");
+                var titAviso = document.getElementById("alertaPullTitulo");
+
+                if (wrapAviso && listaAviso) {
+                    if (pullBajo.length > 0) {
+                        titAviso.innerHTML = `<i class="fas fa-triangle-exclamation" style="margin-right:6px;"></i> ${pullBajo.length} producto(s) PULL en Stock Bajo`;
+                        listaAviso.innerHTML = pullBajo.map(p => `
+                            <span class="badge" style="background:#ffffff; color:#be123c; border:1px solid #fca5a5; font-weight:700; padding:4px 10px; font-size:0.8rem; border-radius:6px;">
+                                ${p.producto}: Stock ${p.stock} (Mín. ${p.stock_min})
+                            </span>
+                        `).join("");
+                        wrapAviso.style.display = "block";
+                    } else {
+                        wrapAviso.style.display = "none";
+                    }
+                }
+
+                filtrarTablaLogistica();
             }
         } catch (e) {
             if (tbody) {
-                tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding:2rem; color:#ef4444;">Error al cargar datos logísticos: ${e.message}</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:2rem; color:#ef4444;">Error al cargar datos logísticos: ${e.message}</td></tr>`;
             }
         }
     }
@@ -180,22 +236,45 @@
         var tbody = document.getElementById("tbodyLogisticaProductos");
         if (!tbody) return;
         if (!items || items.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding:2rem; color:#64748b;">No hay productos registrados.</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:2rem; color:#64748b;">No hay productos con los filtros seleccionados.</td></tr>`;
             return;
         }
 
         tbody.innerHTML = items.map(p => {
             var esPush = (p.estrategia === 'PUSH');
             var nuevaEst = esPush ? 'PULL' : 'PUSH';
+            var stock = Number(p.stock);
+            var stockMin = Number(p.stock_min);
+            // Regla estricta: stock < stock_min
+            var stockBajo = (stock < stockMin);
+            var estado = (stock === 0) ? 'Sin stock' : (stockBajo ? 'Stock bajo' : 'Normal');
+
+            var badgeBg = 'rgba(5,150,105,0.12)';
+            var badgeColor = '#059669';
+            if (stockBajo) {
+                badgeBg = 'rgba(239,68,68,0.12)';
+                badgeColor = '#ef4444';
+            } else if (stock === 0) {
+                badgeBg = 'rgba(185,28,28,0.18)';
+                badgeColor = '#b91c1c';
+            }
 
             return `
                 <tr>
-                    <td style="font-weight: 700; color: #0f172a;">${p.producto}</td>
-                    <td><span class="badge" style="background:#f1f5f9; color:#475569; font-size:0.75rem;">${p.categoria}</span></td>
-                    <td style="text-align: center; font-weight: 700; color: #0f172a;">${p.stock}</td>
+                    <td style="font-weight: 700; color: #0f172a;">
+                        <div>${p.producto}</div>
+                        <div style="font-size:0.75rem; color:#94a3b8; font-weight:normal;">Taller: ${p.taller || 'General'}</div>
+                    </td>
+                    <td style="text-align: center; font-weight: 800; color: ${stockBajo ? '#ef4444' : '#0f172a'};">${p.stock}</td>
                     <td style="text-align: center; font-weight: 600; color: #64748b;">${p.stock_min}</td>
+                    <td style="text-align: center; font-weight: 600; color: #0d9488;">${p.cantidad_reposicion || 5}</td>
                     <td style="text-align: center;">
-                        <button onclick="alternarEstrategiaProducto(${p.id}, '${nuevaEst}')" title="Clic para cambiar a ${nuevaEst}" style="cursor:pointer; border:none; background:none;">
+                        <span class="badge" style="background:${badgeBg}; color:${badgeColor}; font-weight:700; font-size:0.75rem; padding:3px 8px; border-radius:999px;">
+                            ${estado}
+                        </span>
+                    </td>
+                    <td style="text-align: center;">
+                        <button onclick="alternarEstrategiaProducto(${p.id}, '${nuevaEst}')" title="Clic para alternar a ${nuevaEst}" style="cursor:pointer; border:none; background:none;">
                             <span class="badge" style="background:${esPush ? 'rgba(5,150,105,0.15)' : 'rgba(37,99,235,0.15)'}; color:${esPush ? '#059669' : '#2563eb'}; font-weight:800; font-size:0.75rem; padding:4px 12px; border-radius:6px; transition:transform 0.15s ease;">
                                 ${p.estrategia} <i class="fas fa-arrows-rotate" style="font-size:0.65rem; margin-left:4px; opacity:0.7;"></i>
                             </span>
@@ -204,6 +283,16 @@
                 </tr>
             `;
         }).join("");
+    }
+
+    function filtrarTablaLogistica() {
+        var filtro = document.getElementById("filtroTablaLogistica") ? document.getElementById("filtroTablaLogistica").value : 'todas';
+        var filtrados = logisticaProductos.filter(p => {
+            if (filtro === 'PUSH') return p.estrategia === 'PUSH';
+            if (filtro === 'PULL') return p.estrategia === 'PULL';
+            return true;
+        });
+        renderizarTablaLogistica(filtrados);
     }
 
     function cargarDetalleProductoSeleccionado() {
@@ -226,7 +315,9 @@
             });
             var data = await resp.json();
             if (data.success) {
-                if (typeof showNotification === 'function') {
+                if (data.reposicion_push) {
+                    alert(`Estrategia actualizada a PUSH.\nRegla PUSH aplicada: pedido ${data.reposicion_push.folio} surtido, entrada de ${data.reposicion_push.cantidad} registrada. Stock actual: ${data.reposicion_push.stock_final}`);
+                } else if (typeof showNotification === 'function') {
                     showNotification(data.message);
                 }
                 cargarLogisticaSCM();
@@ -255,25 +346,30 @@
             });
             var data = await resp.json();
             if (data.success) {
-                if (typeof showNotification === 'function') {
+                if (data.reposicion_push) {
+                    alert(`Estrategia guardada en PUSH.\nRegla PUSH aplicada: pedido ${data.reposicion_push.folio} surtido, entrada de ${data.reposicion_push.cantidad} registrada. Stock actual: ${data.reposicion_push.stock_final}`);
+                } else if (typeof showNotification === 'function') {
                     showNotification(data.message);
                 } else {
                     alert(data.message);
                 }
                 cargarLogisticaSCM();
             } else {
-                alert("Error: " + (data.error || "No se pudo guardar la estrategia"));
+                alert("Error: " + (data.error || "No se pudo actualizar"));
             }
         } catch (e) {
             alert("Error de conexión: " + e.message);
         }
     }
 
-    // Exponer a window para asegurar disponibilidad en inline onclicks
+    // Exponer a window
     window.cargarLogisticaSCM = cargarLogisticaSCM;
+    window.renderizarTablaLogistica = renderizarTablaLogistica;
+    window.filtrarTablaLogistica = filtrarTablaLogistica;
     window.cargarDetalleProductoSeleccionado = cargarDetalleProductoSeleccionado;
     window.alternarEstrategiaProducto = alternarEstrategiaProducto;
     window.guardarEstrategiaLogistica = guardarEstrategiaLogistica;
+    window.irAPedidosDesdeLogistica = irAPedidosDesdeLogistica;
 
     cargarLogisticaSCM();
 </script>

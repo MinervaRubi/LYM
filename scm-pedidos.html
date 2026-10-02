@@ -40,6 +40,15 @@
             </div>
 
             <div style="display: flex; align-items: center; gap: 8px; font-size: 0.85rem; font-weight: 600; color: var(--text-heading);">
+                <label>Origen:</label>
+                <select class="crm-select" id="filtroOrigenPedidoSCM" onchange="filtrarPedidosSCM()">
+                    <option value="Todos">Todos</option>
+                    <option value="automatico">Automático (PUSH)</option>
+                    <option value="manual">Manual</option>
+                </select>
+            </div>
+
+            <div style="display: flex; align-items: center; gap: 8px; font-size: 0.85rem; font-weight: 600; color: var(--text-heading);">
                 <label>Tipo:</label>
                 <select class="crm-select" id="filtroTipoPedidoSCM" onchange="filtrarPedidosSCM()">
                     <option value="Todos">Todos</option>
@@ -59,15 +68,16 @@
                     <th>Folio</th>
                     <th>Fecha</th>
                     <th>Producto</th>
+                    <th>Proveedor</th>
                     <th style="text-align: center;">Cantidad</th>
-                    <th>Tipo</th>
+                    <th style="text-align: center;">Origen</th>
                     <th style="text-align: center;">Estado</th>
                     <th style="text-align: right;">Acciones</th>
                 </tr>
             </thead>
             <tbody id="tbodyPedidosSCM">
                 <tr>
-                    <td colspan="7" style="text-align: center; padding: 3rem; color: #94a3b8;">
+                    <td colspan="8" style="text-align: center; padding: 3rem; color: #94a3b8;">
                         <i class="fas fa-spinner fa-spin fa-2x" style="color:#0d9488; margin-bottom: 10px;"></i>
                         <div>Cargando pedidos de suministro desde MySQL...</div>
                     </td>
@@ -92,12 +102,22 @@
         <form id="formPedidoSCM" onsubmit="guardarPedidoSCM(event)">
             <input type="hidden" id="pedFormId" value="0">
             <input type="hidden" id="pedFormFolio" value="">
-            <input type="hidden" id="pedFormEstado" value="Pendiente">
+
+            <!-- Estado del Pedido -->
+            <div style="margin-bottom: 1.25rem;">
+                <label style="display:block; font-size:0.85rem; font-weight:700; color:#334155; margin-bottom:4px;">Estado del pedido *</label>
+                <select id="pedFormEstado" class="crm-select" style="width:100%; font-weight:700;" required>
+                    <option value="Pendiente">Pendiente (No suma inventario)</option>
+                    <option value="En proceso">En proceso</option>
+                    <option value="Surtido">Surtido (Suma inventario)</option>
+                    <option value="Cancelado">Cancelado (Descuenta si estaba surtido)</option>
+                </select>
+            </div>
 
             <!-- Producto -->
             <div style="margin-bottom: 1.25rem;">
                 <label style="display:block; font-size:0.85rem; font-weight:700; color:#334155; margin-bottom:4px;">Producto *</label>
-                <select id="pedFormProducto" class="crm-select" style="width:100%;" required>
+                <select id="pedFormProducto" class="crm-select" style="width:100%;" required onchange="onSelectProductoPedido()">
                     <option value="">Selecciona un producto</option>
                 </select>
             </div>
@@ -118,7 +138,7 @@
                 </select>
             </div>
 
-            <!-- Proveedor -->
+            <!-- Proveedor (Solo proveedores existentes y activos) -->
             <div style="margin-bottom: 1.25rem;">
                 <label style="display:block; font-size:0.85rem; font-weight:700; color:#334155; margin-bottom:4px;">Proveedor *</label>
                 <select id="pedFormProveedor" class="crm-select" style="width:100%;" required>
@@ -148,6 +168,19 @@
 
 <script>
     var pedidosSCMList = pedidosSCMList || [];
+    var productosCatalogoPedido = [];
+    var proveedoresActivosPedido = [];
+
+    function onSelectProductoPedido() {
+        var sProd = document.getElementById("pedFormProducto");
+        var sProv = document.getElementById("pedFormProveedor");
+        if (!sProd || !sProv) return;
+        var pId = Number(sProd.value);
+        var pObj = productosCatalogoPedido.find(p => p.id === pId);
+        if (pObj && pObj.proveedor_id) {
+            sProv.value = pObj.proveedor_id;
+        }
+    }
 
     async function cargarCatalogosParaPedido() {
         try {
@@ -155,24 +188,26 @@
             var rProd = await fetch("php/scm_api.php?resource=productos");
             var dProd = await rProd.json();
             if (dProd.success && Array.isArray(dProd.productos)) {
+                productosCatalogoPedido = dProd.productos;
                 var sProd = document.getElementById("pedFormProducto");
                 if (sProd) {
                     var curProd = sProd.value;
                     sProd.innerHTML = '<option value="">Selecciona un producto</option>' + 
-                        dProd.productos.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
+                        productosCatalogoPedido.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
                     if (curProd) sProd.value = curProd;
                 }
             }
 
-            // Cargar proveedores
-            var rProv = await fetch("php/scm_api.php?resource=proveedores");
+            // Cargar proveedores existentes y activos
+            var rProv = await fetch("php/scm_api.php?resource=proveedores&activos=1");
             var dProv = await rProv.json();
             if (dProv.success && Array.isArray(dProv.proveedores)) {
+                proveedoresActivosPedido = dProv.proveedores.filter(pr => pr.activo);
                 var sProv = document.getElementById("pedFormProveedor");
                 if (sProv) {
                     var curProv = sProv.value;
                     sProv.innerHTML = '<option value="">Selecciona un proveedor</option>' + 
-                        dProv.proveedores.map(p => `<option value="${p.id}">${p.nombre}</option>`).join('');
+                        proveedoresActivosPedido.map(p => `<option value="${p.id}">${p.nombre}</option>`).join('');
                     if (curProv) sProv.value = curProv;
                 }
             }
@@ -184,7 +219,7 @@
     async function cargarPedidosSCM() {
         var tbody = document.getElementById("tbodyPedidosSCM");
         if (tbody) {
-            tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding:2rem; color:#64748b;"><i class="fas fa-spinner fa-spin"></i> Cargando pedidos desde MySQL...</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; padding:2rem; color:#64748b;"><i class="fas fa-spinner fa-spin"></i> Cargando pedidos desde MySQL...</td></tr>`;
         }
 
         try {
@@ -196,66 +231,103 @@
             if (data.success && Array.isArray(data.pedidos)) {
                 pedidosSCMList = data.pedidos;
                 filtrarPedidosSCM();
+
+                // Si viene prellenado desde inventario
+                if (window.scmPedidoPrellenado) {
+                    abrirModalNuevoPedidoSCM();
+                    if (window.scmPedidoPrellenado.producto_id) {
+                        var pSel = document.getElementById("pedFormProducto");
+                        if (pSel) pSel.value = window.scmPedidoPrellenado.producto_id;
+                    }
+                    if (window.scmPedidoPrellenado.proveedor_id) {
+                        var prSel = document.getElementById("pedFormProveedor");
+                        if (prSel) prSel.value = window.scmPedidoPrellenado.proveedor_id;
+                    }
+                    window.scmPedidoPrellenado = null;
+                }
             } else {
                 throw new Error(data.error || "No se recibieron pedidos");
             }
         } catch (err) {
             if (tbody) {
-                tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding:2rem; color:#ef4444;"><i class="fas fa-exclamation-triangle"></i> Error al conectar con pedidos: ${err.message}</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; padding:2rem; color:#ef4444;"><i class="fas fa-exclamation-triangle"></i> Error al conectar con pedidos: ${err.message}</td></tr>`;
             }
         }
     }
 
     function renderizarTablaPedidosSCM(items) {
         var tbody = document.getElementById("tbodyPedidosSCM");
+        if (!tbody) return;
         if (!items || items.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding:2rem; color:#64748b;">No se encontraron pedidos con los filtros seleccionados.</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; padding:2rem; color:#64748b;">No se encontraron pedidos con los filtros seleccionados.</td></tr>`;
             return;
         }
 
         tbody.innerHTML = items.map(function(p) {
             var estado = p.estado || 'Pendiente';
-            var badgeBg = 'rgba(234,88,12,0.12)';
-            var badgeColor = '#ea580c';
+            
+            // Colores requeridos por la guía de pruebas:
+            // Pendiente ámbar, En proceso azul, Surtido verde, Cancelado rojo. Solo esos 4 estados.
+            var badgeBg = 'rgba(245,158,11,0.15)';
+            var badgeColor = '#d97706'; // Pendiente ámbar
 
-            if (estado.toLowerCase() === 'en proceso' || estado.toLowerCase() === 'transito' || estado.toLowerCase() === 'produccion') {
-                badgeBg = 'rgba(37,99,235,0.12)';
-                badgeColor = '#2563eb';
-            } else if (estado.toLowerCase() === 'surtido' || estado.toLowerCase() === 'completado') {
-                badgeBg = 'rgba(5,150,105,0.12)';
-                badgeColor = '#059669';
-            } else if (estado.toLowerCase() === 'cancelado') {
-                badgeBg = 'rgba(239,68,68,0.12)';
-                badgeColor = '#ef4444';
+            if (estado === 'En proceso') {
+                badgeBg = 'rgba(37,99,235,0.15)';
+                badgeColor = '#2563eb'; // En proceso azul
+            } else if (estado === 'Surtido') {
+                badgeBg = 'rgba(5,150,105,0.15)';
+                badgeColor = '#059669'; // Surtido verde
+            } else if (estado === 'Cancelado') {
+                badgeBg = 'rgba(239,68,68,0.15)';
+                badgeColor = '#ef4444'; // Cancelado rojo
             }
+
+            // Columna Origen: Automático (PUSH) en verde o Manual en gris
+            var esAuto = (p.origen === 'automatico');
+            var origenHtml = esAuto 
+                ? `<span class="badge" style="background:rgba(5,150,105,0.15); color:#059669; font-weight:700; font-size:0.75rem; padding:4px 8px; border-radius:6px; display:inline-flex; align-items:center; gap:4px;"><i class="fas fa-robot"></i> Automático (PUSH)</span>`
+                : `<span class="badge" style="background:#f1f5f9; color:#64748b; font-weight:600; font-size:0.75rem; padding:4px 8px; border-radius:6px;">Manual</span>`;
 
             return `
                 <tr>
                     <td style="font-weight: 800; color: #0f172a; font-family: monospace; font-size: 0.95rem;">${p.folio}</td>
                     <td style="color:#64748b; font-size:0.85rem; font-weight:500;">${p.fecha}</td>
                     <td style="font-weight:700; color:#0f172a;">${p.producto}</td>
+                    <td style="color:#334155; font-size:0.85rem; font-weight:600;"><i class="fas fa-truck" style="color:#94a3b8; margin-right:4px;"></i>${p.proveedor}</td>
                     <td style="text-align:center; font-weight:700; color:#0f172a;">${p.cantidad}</td>
-                    <td><span class="badge" style="background:#f1f5f9; color:#475569; font-size:0.75rem;">${p.tipo}</span></td>
+                    <td style="text-align:center;">${origenHtml}</td>
                     <td style="text-align:center;">
-                        <span class="badge" style="background:${badgeBg}; color:${badgeColor}; font-weight:700; font-size:0.75rem; padding:4px 10px; border-radius:6px;">
-                            ${estado}
-                        </span>
+                        <select class="crm-select" onchange="cambiarEstadoPedidoRapido(${p.id}, this.value, '${p.folio}')" style="background:${badgeBg}; color:${badgeColor}; font-weight:800; font-size:0.78rem; padding:4px 8px; border-radius:6px; border:1px solid ${badgeColor}40; cursor:pointer; outline:none; text-align-last:center;">
+                            <option value="Pendiente" ${estado === 'Pendiente' ? 'selected' : ''} style="background:#fff; color:#d97706; font-weight:700;">Pendiente</option>
+                            <option value="En proceso" ${estado === 'En proceso' ? 'selected' : ''} style="background:#fff; color:#2563eb; font-weight:700;">En proceso</option>
+                            <option value="Surtido" ${estado === 'Surtido' ? 'selected' : ''} style="background:#fff; color:#059669; font-weight:700;">Surtido</option>
+                            <option value="Cancelado" ${estado === 'Cancelado' ? 'selected' : ''} style="background:#fff; color:#ef4444; font-weight:700;">Cancelado</option>
+                        </select>
                     </td>
                     <td style="text-align: right;">
-                        <div style="display:flex; justify-content:flex-end; gap:6px;">
+                        <div style="display:flex; justify-content:flex-end; gap:6px; align-items:center;">
                             ${estado !== 'Surtido' && estado !== 'Cancelado' ? `
-                                <button class="crm-btn crm-btn-secondary crm-btn-sm" title="Marcar como Surtido e ingresar stock" onclick="marcarPedidoSurtido(${p.id}, '${p.folio}')" style="padding:4px 8px; color:#059669;">
-                                    <i class="fas fa-check-circle"></i>
+                                <button class="crm-btn crm-btn-secondary crm-btn-sm" title="Marcar como Surtido e ingresar stock" onclick="cambiarEstadoPedidoRapido(${p.id}, 'Surtido', '${p.folio}')" style="padding:4px 8px; color:#059669; font-weight:600;">
+                                    <i class="fas fa-check-circle"></i> Surtir
+                                </button>
+                            ` : ''}
+                            ${estado === 'Surtido' ? `
+                                <button class="crm-btn crm-btn-secondary crm-btn-sm" title="Regresar pedido a Pendiente (para probar B-L4 de no duplicidad)" onclick="cambiarEstadoPedidoRapido(${p.id}, 'Pendiente', '${p.folio}')" style="padding:4px 8px; color:#d97706; font-weight:600;">
+                                    <i class="fas fa-undo"></i> Pendiente
                                 </button>
                             ` : ''}
                             <button class="crm-btn crm-btn-secondary crm-btn-sm" title="Editar pedido" onclick="abrirModalEditarPedidoSCM(${p.id})" style="padding:4px 8px; color:#2563eb;">
                                 <i class="fas fa-pencil"></i>
                             </button>
                             ${estado !== 'Cancelado' ? `
-                                <button class="crm-btn crm-btn-secondary crm-btn-sm" title="Cancelar pedido" onclick="cancelarPedidoSCM(${p.id}, '${p.folio}')" style="padding:4px 8px; color:#ef4444;">
+                                <button class="crm-btn crm-btn-secondary crm-btn-sm" title="Cancelar pedido (resta cantidad del inventario si estaba surtido)" onclick="cambiarEstadoPedidoRapido(${p.id}, 'Cancelado', '${p.folio}')" style="padding:4px 8px; color:#ef4444;">
                                     <i class="fas fa-ban"></i>
                                 </button>
-                            ` : ''}
+                            ` : `
+                                <button class="crm-btn crm-btn-secondary crm-btn-sm" title="Reactivar pedido (Pendiente)" onclick="cambiarEstadoPedidoRapido(${p.id}, 'Pendiente', '${p.folio}')" style="padding:4px 8px; color:#d97706; font-weight:600;">
+                                    <i class="fas fa-redo"></i>
+                                </button>
+                            `}
                         </div>
                     </td>
                 </tr>
@@ -265,12 +337,14 @@
 
     function filtrarPedidosSCM() {
         var est = document.getElementById("filtroEstadoPedidoSCM").value;
+        var ori = document.getElementById("filtroOrigenPedidoSCM") ? document.getElementById("filtroOrigenPedidoSCM").value : 'Todos';
         var tip = document.getElementById("filtroTipoPedidoSCM").value;
 
         var filtrados = (window.pedidosSCMList || []).filter(function(p) {
             var matchEst = (est === "Todos") || (p.estado && p.estado.toLowerCase() === est.toLowerCase());
+            var matchOri = (ori === "Todos") || (p.origen && p.origen.toLowerCase() === ori.toLowerCase());
             var matchTip = (tip === "Todos") || (p.tipo && p.tipo.toLowerCase() === tip.toLowerCase());
-            return matchEst && matchTip;
+            return matchEst && matchOri && matchTip;
         });
 
         renderizarTablaPedidosSCM(filtrados);
@@ -364,8 +438,27 @@
         }
     }
 
-    async function marcarPedidoSurtido(id, folio) {
-        if (!confirm(`¿Confirmas que el pedido ${folio} ha sido recibido y surtido? Esto ingresará el stock al almacén automáticamente.`)) {
+    async function cambiarEstadoPedidoRapido(id, nuevoEstado, folio) {
+        var ped = (window.pedidosSCMList || []).find(function(p) { return Number(p.id) === Number(id); });
+        var estadoActual = ped ? (ped.estado || 'Pendiente') : '';
+        if (estadoActual === nuevoEstado) return;
+
+        var mensajeConfirm = `¿Deseas cambiar el estado del pedido ${folio} a '${nuevoEstado}'?`;
+        if (nuevoEstado === 'Surtido') {
+            mensajeConfirm = `¿Confirmas que el pedido ${folio} ha sido recibido y surtido? Esto registrará la entrada asociada e incrementará el inventario en almacén.`;
+        } else if (nuevoEstado === 'Cancelado') {
+            if (estadoActual === 'Surtido' || (ped && Number(ped.entrada_registrada) === 1)) {
+                mensajeConfirm = `¿Deseas cancelar el pedido ${folio}? Al estar surtido, esto RESTARÁ las ${ped ? ped.cantidad : ''} piezas del inventario del producto y registrará la salida por cancelación.`;
+            } else {
+                mensajeConfirm = `¿Deseas cancelar el pedido ${folio}?`;
+            }
+        } else if (nuevoEstado === 'Pendiente' && estadoActual === 'Surtido') {
+            mensajeConfirm = `¿Deseas regresar el pedido ${folio} a 'Pendiente'? (Al volver a surtirlo se verificará que no se duplique inventario - Caso B-L4).`;
+        }
+
+        if (!confirm(mensajeConfirm)) {
+            // Re-render para restaurar select en caso de cancelar
+            filtrarPedidosSCM();
             return;
         }
 
@@ -373,7 +466,7 @@
             var resp = await fetch("php/scm_api.php?resource=cambiar_estado_pedido", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ id: id, estado: "Surtido" })
+                body: JSON.stringify({ id: id, estado: nuevoEstado })
             });
             var data = await resp.json();
             if (data.success) {
@@ -384,38 +477,21 @@
                 }
                 cargarPedidosSCM();
             } else {
-                alert("Error: " + data.error);
+                alert("Error: " + (data.error || "No se pudo actualizar el estado"));
+                cargarPedidosSCM();
             }
         } catch (e) {
             alert("Error de conexión: " + e.message);
+            cargarPedidosSCM();
         }
     }
 
-    async function cancelarPedidoSCM(id, folio) {
-        if (!confirm(`¿Deseas cancelar la orden ${folio}?`)) {
-            return;
-        }
+    async function marcarPedidoSurtido(id, folio) {
+        return cambiarEstadoPedidoRapido(id, 'Surtido', folio);
+    }
 
-        try {
-            var resp = await fetch("php/scm_api.php?resource=cambiar_estado_pedido", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ id: id, estado: "Cancelado" })
-            });
-            var data = await resp.json();
-            if (data.success) {
-                if (typeof showNotification === 'function') {
-                    showNotification(data.message);
-                } else {
-                    alert(data.message);
-                }
-                cargarPedidosSCM();
-            } else {
-                alert("Error: " + data.error);
-            }
-        } catch (e) {
-            alert("Error de conexión: " + e.message);
-        }
+    async function cancelarPedidoSCM(id, folio) {
+        return cambiarEstadoPedidoRapido(id, 'Cancelado', folio);
     }
 
     // Expose all functions to global window scope
@@ -430,6 +506,8 @@
     window.guardarPedidoSCM = guardarPedidoSCM;
     window.marcarPedidoSurtido = marcarPedidoSurtido;
     window.cancelarPedidoSCM = cancelarPedidoSCM;
+    window.cambiarEstadoPedidoRapido = cambiarEstadoPedidoRapido;
+    window.onSelectProductoPedido = onSelectProductoPedido;
 
     cargarPedidosSCM();
 </script>
