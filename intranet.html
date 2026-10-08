@@ -6,6 +6,8 @@
     <title>CRM Intranet - LYM</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="notifications.css">
+    <script src="notifications.js"></script>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: 'Poppins', sans-serif; background: #f4f7fb; color: #1f2937; }
@@ -354,12 +356,18 @@
                 await loadData();
             } catch (error) {
                 console.error('Error actualizando cliente:', error);
-                alert(error.message || 'No se pudo actualizar el cliente');
+                mostrarNotificacion(error.message || 'No se pudo actualizar el cliente', 'error');
             }
         }
 
         async function deleteCliente(id) {
-            const confirmar = confirm('¿Deseas eliminar este registro de cliente?');
+            const confirmar = await mostrarConfirmacion('¿Deseas eliminar este registro de cliente?', {
+                titulo: 'Eliminar Cliente',
+                tipo: 'danger',
+                esPeligroso: true,
+                textoConfirmar: 'Eliminar',
+                textoCancelar: 'Cancelar'
+            });
             if (!confirmar) return;
 
             try {
@@ -368,15 +376,22 @@
                     headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
                     body: JSON.stringify({ id })
                 });
+                mostrarNotificacion('Cliente eliminado correctamente', 'success');
                 await loadData();
             } catch (error) {
                 console.error('Error eliminando cliente:', error);
-                alert(error.message || 'No se pudo eliminar el cliente');
+                mostrarNotificacion(error.message || 'No se pudo eliminar el cliente', 'error');
             }
         }
 
         async function deleteProducto(id) {
-            const confirmar = confirm('¿Deseas eliminar este producto del catálogo?');
+            const confirmar = await mostrarConfirmacion('¿Deseas eliminar este producto del catálogo?', {
+                titulo: 'Eliminar Producto',
+                tipo: 'danger',
+                esPeligroso: true,
+                textoConfirmar: 'Eliminar Producto',
+                textoCancelar: 'Cancelar'
+            });
             if (!confirmar) return;
 
             try {
@@ -385,10 +400,11 @@
                     headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
                     body: JSON.stringify({ id })
                 });
+                mostrarNotificacion('Producto eliminado del catálogo', 'success');
                 await loadData();
             } catch (error) {
                 console.error('Error eliminando producto:', error);
-                alert(error.message || 'No se pudo eliminar el producto');
+                mostrarNotificacion(error.message || 'No se pudo eliminar el producto', 'error');
             }
         }
 
@@ -413,7 +429,7 @@
                 renderPedidos();
             } catch (error) {
                 console.error('Error cargando datos del CRM:', error);
-                alert(error.message || 'No se pudieron cargar los datos del CRM.');
+                mostrarNotificacion(error.message || 'No se pudieron cargar los datos del CRM.', 'error');
             }
         }
 

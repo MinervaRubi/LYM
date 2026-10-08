@@ -6,9 +6,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>LYM Diseño e Impresión - Personaliza tus regalos y promocionales</title>
     <link rel="stylesheet" href="Proyecto.css">
+    <link rel="stylesheet" href="notifications.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
         rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="notifications.js"></script>
 
 
 </head>
@@ -107,7 +109,7 @@
                             <i class="fas fa-arrow-left"></i> Seguir comprando
                         </a>
 
-                        <a href="datospersonales.html" class="btn btn-primary btn-block">
+                        <a href="datospersonales.html" id="btnContinuarPago" class="btn btn-primary btn-block">
                             <i class="fas fa-credit-card"></i> Continuar a pago
                         </a>
                     </div>
@@ -251,6 +253,7 @@
                     cuponFeedback.style.display = "block";
                     cuponFeedback.style.color = "#ef4444";
                     cuponFeedback.textContent = "Ingresa un código de cupón.";
+                    mostrarNotificacion("Ingresa un código de cupón.", "warning", "Cupón Requerido");
                     return;
                 }
 
@@ -267,30 +270,46 @@
                         sessionStorage.setItem("cuponAplicado", JSON.stringify(cuponAplicado));
                         cuponFeedback.style.color = "#059669";
                         cuponFeedback.textContent = `✓ ¡Descuento del ${data.cupon.porcentaje}% aplicado!`;
+                        mostrarNotificacion(`¡Cupón "${data.cupon.codigo}" aplicado con éxito! Descuento del ${data.cupon.porcentaje}%.`, "success", "Cupón Válido");
                         renderCarrito();
                     } else {
                         cuponAplicado = null;
                         sessionStorage.removeItem("cuponAplicado");
                         cuponFeedback.style.color = "#ef4444";
                         cuponFeedback.textContent = "✕ " + (data.error || "Cupón no válido.");
+                        mostrarNotificacion(data.error || "El cupón ingresado no es válido o ha expirado.", "error", "Cupón Inválido");
                         renderCarrito();
                     }
                 } catch (e) {
                     cuponFeedback.style.display = "block";
                     cuponFeedback.style.color = "#ef4444";
                     cuponFeedback.textContent = "Error al verificar cupón.";
+                    mostrarNotificacion("Error al verificar el cupón con el servidor.", "error");
                 } finally {
                     btnAplicarCupon.disabled = false;
                     btnAplicarCupon.textContent = "Aplicar";
                 }
             });
 
+            // Guard para continuar a pago
+            const btnContinuarPago = document.getElementById("btnContinuarPago");
+            if (btnContinuarPago) {
+                btnContinuarPago.addEventListener("click", (e) => {
+                    if (!carrito || carrito.length === 0) {
+                        e.preventDefault();
+                        mostrarNotificacion("Tu carrito está vacío. Agrega algún producto antes de continuar al pago.", "warning", "Carrito Vacío");
+                    }
+                });
+            }
+
             // -------- CAMBIAR CANTIDAD ----------
             window.cambiarCantidad = function (index, cambio) {
                 carrito[index].cantidad += cambio;
 
                 if (carrito[index].cantidad <= 0) {
+                    const desc = carrito[index]?.descripcion || "Producto";
                     carrito.splice(index, 1);
+                    mostrarNotificacion(`"${desc}" eliminado del carrito.`, "info");
                 }
 
                 renderCarrito();
@@ -298,7 +317,9 @@
 
             // -------- ELIMINAR ----------
             window.eliminarItem = function (index) {
+                const desc = carrito[index]?.descripcion || "Producto";
                 carrito.splice(index, 1);
+                mostrarNotificacion(`"${desc}" eliminado del carrito.`, "info");
                 renderCarrito();
             }
 

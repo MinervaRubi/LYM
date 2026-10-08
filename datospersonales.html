@@ -7,9 +7,11 @@
     <title>Nuevo domicilio | LYM</title>
 
     <link rel="stylesheet" href="Proyecto.css" />
+    <link rel="stylesheet" href="notifications.css" />
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap"
         rel="stylesheet" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <script src="notifications.js"></script>
 
     <style>
         :root {
@@ -700,16 +702,21 @@
         });
 
         function guardarYContinuar() {
-            const envio = {
-                calle: document.getElementById("street")?.value || '',
-                numero: document.getElementById("number")?.value || '',
-                estado: document.getElementById("state")?.value || '',
-                ciudad: document.getElementById("city")?.value || '',
-                colonia: document.getElementById("neighborhood")?.value || '',
-                cp: document.getElementById("zip")?.value || '',
-                nombre: document.getElementById("name")?.value || '',
-                telefono: document.getElementById("phone")?.value || ''
-            };
+            const calle = document.getElementById("street")?.value.trim() || '';
+            const numero = document.getElementById("number")?.value.trim() || '';
+            const estado = document.getElementById("state")?.value.trim() || '';
+            const ciudad = document.getElementById("city")?.value.trim() || '';
+            const colonia = document.getElementById("neighborhood")?.value.trim() || '';
+            const cp = document.getElementById("zip")?.value.trim() || '';
+            const nombre = document.getElementById("name")?.value.trim() || '';
+            const telefono = document.getElementById("phone")?.value.trim() || '';
+
+            if (!calle || !numero || !estado || !ciudad || !nombre || !telefono) {
+                mostrarNotificacion("Por favor completa los campos obligatorios de dirección y contacto.", "warning", "Datos Incompletos");
+                return;
+            }
+
+            const envio = { calle, numero, estado, ciudad, colonia, cp, nombre, telefono };
             localStorage.setItem("datosEnvio", JSON.stringify(envio));
             window.location.href = 'checkout.html';
         }

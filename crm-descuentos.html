@@ -279,9 +279,16 @@
 
     // ACCIÓN: APROBAR DESCUENTO (ADMIN)
     window.aprobarDescuentoModal = async function(id, clienteNombre, porcentaje) {
-        if (!confirm(`¿Confirmas aprobar el descuento del ${porcentaje}% para el cliente "${clienteNombre}"?\n\nAl aprobarlo, el cliente recibirá una NOTIFICACIÓN en su perfil con su código de cupón.`)) {
-            return;
-        }
+        const confirmed = await mostrarConfirmacion(
+            `¿Confirmas aprobar el descuento del ${porcentaje}% para el cliente "${clienteNombre}"?\n\nAl aprobarlo, el cliente recibirá una notificación en su perfil con su código de cupón.`,
+            {
+                titulo: "Aprobar Descuento",
+                tipo: "warning",
+                textoConfirmar: "Aprobar Descuento",
+                textoCancelar: "Cancelar"
+            }
+        );
+        if (!confirmed) return;
 
         try {
             const resp = await fetch("php/crm_api.php?resource=aprobar_descuento", {
@@ -295,19 +302,28 @@
 
             const data = await resp.json();
             if (data.success) {
-                alert(`✅ ${data.message}`);
+                mostrarNotificacion(data.message || "Descuento aprobado con éxito", "success");
                 cargarDescuentosCRM();
             } else {
-                alert(`❌ Error: ${data.error}`);
+                mostrarNotificacion(data.error || "No se pudo aprobar el descuento", "error");
             }
         } catch (e) {
-            alert(`Error de conexión: ${e.message}`);
+            mostrarNotificacion(`Error de conexión: ${e.message}`, "error");
         }
     };
 
     // ACCIÓN: RECHAZAR DESCUENTO (ADMIN)
     window.rechazarDescuentoModal = async function(id, clienteNombre) {
-        const motivo = prompt(`Ingresa un motivo para rechazar la solicitud de descuento de "${clienteNombre}":`, "No autorizado en este momento");
+        const motivo = await mostrarPrompt(
+            `Ingresa el motivo para rechazar la solicitud de descuento de "${clienteNombre}":`,
+            "No autorizado en este momento",
+            {
+                titulo: "Rechazar Solicitud de Descuento",
+                placeholder: "Motivo del rechazo...",
+                textoConfirmar: "Rechazar Solicitud",
+                textoCancelar: "Cancelar"
+            }
+        );
         if (motivo === null) return;
 
         try {
@@ -322,13 +338,13 @@
 
             const data = await resp.json();
             if (data.success) {
-                alert("Solicitud rechazada correctamente.");
+                mostrarNotificacion("Solicitud rechazada correctamente.", "success");
                 cargarDescuentosCRM();
             } else {
-                alert(`Error: ${data.error}`);
+                mostrarNotificacion(data.error || "Error al rechazar solicitud", "error");
             }
         } catch (e) {
-            alert(`Error de conexión: ${e.message}`);
+            mostrarNotificacion(`Error de conexión: ${e.message}`, "error");
         }
     };
 

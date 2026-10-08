@@ -6,11 +6,13 @@
     <title>Termos | LYM</title>
 
     <link rel="stylesheet" href="Proyecto.css">
+    <link rel="stylesheet" href="notifications.css">
 
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
         rel="stylesheet">
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="notifications.js"></script>
 </head>
 
 <body>
@@ -81,10 +83,6 @@
 
                     <div id="resenasProductoDetalle" style="margin-top: 20px;"></div>
 
-                    <p id="mensajeAgregado" class="success-mini" style="display:none;">
-                        ✔ Producto agregado al carrito
-                    </p>
-
                 </div>
 
             </div>
@@ -100,13 +98,12 @@
 
             // seguridad
             if (!select || !cantidadInput) {
-                alert("Error: no se encontró el producto o la cantidad");
+                mostrarNotificacion("Error: no se encontró el producto o la cantidad", "error");
                 return;
             }
 
             const producto = select.dataset.producto;
             const productoId = select.dataset.productoId ? Number(select.dataset.productoId) : 9;
-            const mensajeId = select.dataset.mensaje;
 
             const descripcion = select.options[select.selectedIndex].text;
             const precio = Number(select.value);
@@ -141,14 +138,8 @@
             // guardar
             localStorage.setItem("carrito", JSON.stringify(carrito));
 
-            // mensaje visual
-            const msg = document.getElementById(mensajeId);
-            if (msg) {
-                msg.style.display = "block";
-                setTimeout(() => {
-                    msg.style.display = "none";
-                }, 2000);
-            }
+            // Notificación visual Toast
+            mostrarNotificacion(`"${descripcion}" agregado al carrito (${cantidad} pza${cantidad > 1 ? 's' : ''}).`, 'success', 'Producto Agregado');
 
             cantidadInput.value = 1;
         }

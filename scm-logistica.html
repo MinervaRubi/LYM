@@ -316,14 +316,14 @@
             var data = await resp.json();
             if (data.success) {
                 if (data.reposicion_push) {
-                    alert(`Estrategia actualizada a PUSH.\nRegla PUSH aplicada: pedido ${data.reposicion_push.folio} surtido, entrada de ${data.reposicion_push.cantidad} registrada. Stock actual: ${data.reposicion_push.stock_final}`);
-                } else if (typeof showNotification === 'function') {
-                    showNotification(data.message);
+                    mostrarNotificacion(`Estrategia actualizada a PUSH.\nRegla PUSH aplicada: pedido ${data.reposicion_push.folio} surtido, entrada de ${data.reposicion_push.cantidad} registrada. Stock actual: ${data.reposicion_push.stock_final}`, 'success', 'Regla PUSH Aplicada');
+                } else {
+                    mostrarNotificacion(data.message || 'Estrategia logística actualizada.', 'success');
                 }
                 cargarLogisticaSCM();
             }
         } catch (e) {
-            alert("Error al actualizar estrategia: " + e.message);
+            mostrarNotificacion("Error al actualizar estrategia: " + e.message, "error");
         }
     }
 
@@ -334,7 +334,7 @@
         var est = rChecked ? rChecked.value : 'PULL';
 
         if (!prodId) {
-            alert("Por favor selecciona un producto.");
+            mostrarNotificacion("Por favor selecciona un producto.", "warning");
             return;
         }
 
@@ -347,18 +347,16 @@
             var data = await resp.json();
             if (data.success) {
                 if (data.reposicion_push) {
-                    alert(`Estrategia guardada en PUSH.\nRegla PUSH aplicada: pedido ${data.reposicion_push.folio} surtido, entrada de ${data.reposicion_push.cantidad} registrada. Stock actual: ${data.reposicion_push.stock_final}`);
-                } else if (typeof showNotification === 'function') {
-                    showNotification(data.message);
+                    mostrarNotificacion(`Estrategia guardada en PUSH.\nRegla PUSH aplicada: pedido ${data.reposicion_push.folio} surtido, entrada de ${data.reposicion_push.cantidad} registrada. Stock actual: ${data.reposicion_push.stock_final}`, 'success', 'Regla PUSH Aplicada');
                 } else {
-                    alert(data.message);
+                    mostrarNotificacion(data.message || 'Estrategia logística guardada.', 'success');
                 }
                 cargarLogisticaSCM();
             } else {
-                alert("Error: " + (data.error || "No se pudo actualizar"));
+                mostrarNotificacion("Error: " + (data.error || "No se pudo actualizar"), "error");
             }
         } catch (e) {
-            alert("Error de conexión: " + e.message);
+            mostrarNotificacion("Error de conexión: " + e.message, "error");
         }
     }
 

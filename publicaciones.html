@@ -7,9 +7,11 @@
     <title>Mis Publicaciones - LYM</title>
 
     <link rel="stylesheet" href="Proyecto.css" />
+    <link rel="stylesheet" href="notifications.css" />
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
         rel="stylesheet" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <script src="notifications.js"></script>
 
     <style>
         .preview-img {
@@ -235,7 +237,7 @@
             const archivoImagen = imagenInput.files[0];
 
             if (titulo === "" || contenido === "" || isNaN(precio) || precio <= 0) {
-                alert("Llena título, contenido y un precio válido.");
+                mostrarNotificacion("Llena título, contenido y un precio válido.", "warning");
                 return;
             }
 
@@ -260,9 +262,10 @@
                     });
                     const resData = await resp.json();
                     if (!resData.success) {
-                        alert(resData.error || "No se pudo actualizar la publicación");
+                        mostrarNotificacion(resData.error || "No se pudo actualizar la publicación", "error");
                         return;
                     }
+                    mostrarNotificacion("Publicación actualizada correctamente.", "success");
                     editando = null;
                 } else {
                     const resp = await fetch('php/api_publicaciones.php', {
@@ -277,15 +280,16 @@
                     });
                     const resData = await resp.json();
                     if (!resData.success) {
-                        alert(resData.error || "No se pudo guardar la publicación");
+                        mostrarNotificacion(resData.error || "No se pudo guardar la publicación", "error");
                         return;
                     }
+                    mostrarNotificacion("Publicación creada correctamente.", "success");
                 }
 
                 limpiarFormulario();
                 await cargarDesdeBD();
             } catch (error) {
-                alert("Ocurrió un error al guardar en la base de datos.");
+                mostrarNotificacion("Ocurrió un error al guardar en la base de datos.", "error");
                 console.error(error);
             }
         }
@@ -309,7 +313,17 @@
         }
 
         async function eliminarPost(id, index) {
-            if (!confirm("¿Seguro que quieres eliminar esta publicación de la base de datos?")) return;
+            const confirmed = await mostrarConfirmacion(
+                "¿Seguro que quieres eliminar esta publicación de la base de datos?",
+                {
+                    titulo: "Eliminar Publicación",
+                    tipo: "danger",
+                    esPeligroso: true,
+                    textoConfirmar: "Eliminar",
+                    textoCancelar: "Cancelar"
+                }
+            );
+            if (!confirmed) return;
 
             try {
                 const resp = await fetch('php/api_publicaciones.php', {
@@ -319,12 +333,13 @@
                 });
                 const data = await resp.json();
                 if (data.success) {
+                    mostrarNotificacion("Publicación eliminada correctamente.", "success");
                     await cargarDesdeBD();
                 } else {
-                    alert(data.error || "No se pudo eliminar");
+                    mostrarNotificacion(data.error || "No se pudo eliminar", "error");
                 }
             } catch (e) {
-                alert("Error de conexión al eliminar: " + e.message);
+                mostrarNotificacion("Error de conexión al eliminar: " + e.message, "error");
             }
         }
 

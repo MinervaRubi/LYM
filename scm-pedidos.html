@@ -407,11 +407,11 @@
         };
 
         if (!payload.producto_id) {
-            alert("Por favor selecciona un producto.");
+            mostrarNotificacion("Por favor selecciona un producto.", "warning");
             return;
         }
         if (!payload.proveedor_id) {
-            alert("Por favor selecciona un proveedor.");
+            mostrarNotificacion("Por favor selecciona un proveedor.", "warning");
             return;
         }
 
@@ -424,17 +424,13 @@
             var data = await resp.json();
             if (data.success) {
                 cerrarModalNuevoPedidoSCM();
-                if (typeof showNotification === 'function') {
-                    showNotification(data.message);
-                } else {
-                    alert(data.message);
-                }
+                mostrarNotificacion(data.message || "Pedido guardado exitosamente.", "success");
                 cargarPedidosSCM();
             } else {
-                alert("Error al guardar pedido: " + (data.error || "Error desconocido"));
+                mostrarNotificacion("Error al guardar pedido: " + (data.error || "Error desconocido"), "error");
             }
         } catch (e) {
-            alert("Error de conexión: " + e.message);
+            mostrarNotificacion("Error de conexión: " + e.message, "error");
         }
     }
 
@@ -444,9 +440,11 @@
         if (estadoActual === nuevoEstado) return;
 
         var mensajeConfirm = `¿Deseas cambiar el estado del pedido ${folio} a '${nuevoEstado}'?`;
+        var esPeligroso = false;
         if (nuevoEstado === 'Surtido') {
             mensajeConfirm = `¿Confirmas que el pedido ${folio} ha sido recibido y surtido? Esto registrará la entrada asociada e incrementará el inventario en almacén.`;
         } else if (nuevoEstado === 'Cancelado') {
+            esPeligroso = true;
             if (estadoActual === 'Surtido' || (ped && Number(ped.entrada_registrada) === 1)) {
                 mensajeConfirm = `¿Deseas cancelar el pedido ${folio}? Al estar surtido, esto RESTARÁ las ${ped ? ped.cantidad : ''} piezas del inventario del producto y registrará la salida por cancelación.`;
             } else {
@@ -456,7 +454,15 @@
             mensajeConfirm = `¿Deseas regresar el pedido ${folio} a 'Pendiente'? (Al volver a surtirlo se verificará que no se duplique inventario - Caso B-L4).`;
         }
 
-        if (!confirm(mensajeConfirm)) {
+        var confirmed = await mostrarConfirmacion(mensajeConfirm, {
+            titulo: "Cambio de Estado - Pedido " + folio,
+            tipo: esPeligroso ? "danger" : "warning",
+            esPeligroso: esPeligroso,
+            textoConfirmar: "Actualizar Estado",
+            textoCancelar: "Cancelar"
+        });
+
+        if (!confirmed) {
             // Re-render para restaurar select en caso de cancelar
             filtrarPedidosSCM();
             return;
@@ -470,18 +476,14 @@
             });
             var data = await resp.json();
             if (data.success) {
-                if (typeof showNotification === 'function') {
-                    showNotification(data.message);
-                } else {
-                    alert(data.message);
-                }
+                mostrarNotificacion(data.message || "Estado del pedido actualizado.", "success");
                 cargarPedidosSCM();
             } else {
-                alert("Error: " + (data.error || "No se pudo actualizar el estado"));
+                mostrarNotificacion("Error: " + (data.error || "No se pudo actualizar el estado"), "error");
                 cargarPedidosSCM();
             }
         } catch (e) {
-            alert("Error de conexión: " + e.message);
+            mostrarNotificacion("Error de conexión: " + e.message, "error");
             cargarPedidosSCM();
         }
     }

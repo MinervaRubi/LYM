@@ -162,7 +162,7 @@
         const nuevaEtapa = document.getElementById('selectNuevaEtapa').value;
 
         if (!clienteObj || !clienteObj.id) {
-            alert('No se identificó el cliente a modificar.');
+            mostrarNotificacion('No se identificó el cliente a modificar.', 'warning');
             return;
         }
 
@@ -179,19 +179,19 @@
 
             const resData = await resp.json();
             if (resData.success) {
-                if (typeof showNotification === 'function') showNotification('¡Etapa CRM actualizada!');
+                mostrarNotificacion('¡Etapa CRM actualizada!', 'success');
                 clienteObj.etapa_crm = nuevaEtapa;
                 window.clienteSeleccionadoCRM = clienteObj;
                 sessionStorage.setItem('clienteSeleccionadoCRM', JSON.stringify(clienteObj));
                 
                 cancelarEdicionEtapa();
             } else {
-                alert('Error: ' + resData.error);
+                mostrarNotificacion('Error: ' + resData.error, 'error');
                 btn.disabled = false;
                 btn.textContent = 'Guardar cambios';
             }
         } catch (err) {
-            alert('Error al conectar con la base de datos: ' + err.message);
+            mostrarNotificacion('Error al conectar con la base de datos: ' + err.message, 'error');
             btn.disabled = false;
             btn.textContent = 'Guardar cambios';
         }

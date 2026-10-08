@@ -181,6 +181,7 @@
                     <div style="margin-top:8px;">${escaparHTML(error.message)}</div>
                 </div>
             `;
+            if (typeof mostrarNotificacion === 'function') mostrarNotificacion(error.message, 'error');
         }
     }
 

@@ -89,9 +89,12 @@
             var data = await resp.json();
             if (data.success) {
                 renderizarMadurez(data);
+            } else {
+                if (typeof mostrarNotificacion === 'function') mostrarNotificacion(data.error || 'No se pudo calcular la madurez', 'error');
             }
         } catch (e) {
             console.error("Error al cargar madurez:", e);
+            if (typeof mostrarNotificacion === 'function') mostrarNotificacion('Error al calcular madurez: ' + e.message, 'error');
         }
     }
 

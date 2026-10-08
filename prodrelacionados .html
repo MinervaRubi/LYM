@@ -6,11 +6,13 @@
     <title>Productos relacionados | LYM</title>
 
     <link rel="stylesheet" href="Proyecto.css">
+    <link rel="stylesheet" href="notifications.css">
 
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
         rel="stylesheet">
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="notifications.js"></script>
 </head>
 
 <body>
@@ -74,10 +76,6 @@
                         </a>
                     </div>
 
-                    <p id="mensajeAgregadoPlayera" class="success-mini" style="display:none;">
-                        ✔ Producto agregado al carrito
-                    </p>
-
                 </div>
 
             </div>
@@ -133,10 +131,6 @@
                             <i class="fas fa-shopping-cart"></i> Ver carrito
                         </a>
                     </div>
-
-                    <p id="mensajeAgregadoTermo" class="success-mini" style="display:none;">
-                        ✔ Producto agregado al carrito
-                    </p>
 
                 </div>
 
@@ -194,10 +188,6 @@
                         </a>
                     </div>
 
-                    <p id="mensajeAgregadoStickers" class="success-mini" style="display:none;">
-                        ✔ Producto agregado al carrito
-                    </p>
-
                 </div>
 
             </div>
@@ -215,8 +205,6 @@
             const cantidadInput = document.getElementById(cantidadId);
 
             const producto = select.dataset.producto;
-            const mensajeId = select.dataset.mensaje;
-
             const descripcion = select.options[select.selectedIndex].text;
             const precio = Number(select.value);
 
@@ -245,12 +233,8 @@
 
             localStorage.setItem("carrito", JSON.stringify(carrito));
 
-            const msg = document.getElementById(mensajeId);
-            msg.style.display = "block";
-
-            setTimeout(() => {
-                msg.style.display = "none";
-            }, 2000);
+            // Notificación visual Toast
+            mostrarNotificacion(`"${descripcion}" agregado al carrito (${cantidad} pza${cantidad > 1 ? 's' : ''}).`, 'success', 'Producto Agregado');
 
             // Reset visual opcional
             cantidadInput.value = 1;

@@ -340,18 +340,16 @@
             if (data.success) {
                 cerrarModalAjusteStockSCM();
                 if (data.reposicion_push) {
-                    alert(`Stock actualizado.\nRegla PUSH aplicada: pedido ${data.reposicion_push.folio} surtido, entrada de ${data.reposicion_push.cantidad} registrada. Stock actual: ${data.reposicion_push.stock_final}`);
-                } else if (typeof showNotification === 'function') {
-                    showNotification(data.message);
+                    mostrarNotificacion(`Stock actualizado.\nRegla PUSH aplicada: pedido ${data.reposicion_push.folio} surtido, entrada de ${data.reposicion_push.cantidad} registrada. Stock actual: ${data.reposicion_push.stock_final}`, 'success', 'Regla PUSH Aplicada');
                 } else {
-                    alert(data.message);
+                    mostrarNotificacion(data.message || 'Stock actualizado correctamente.', 'success');
                 }
                 cargarInventarioSCM();
             } else {
-                alert("Error al ajustar stock: " + (data.error || "Error"));
+                mostrarNotificacion("Error al ajustar stock: " + (data.error || "Error"), "error");
             }
         } catch (e) {
-            alert("Error de conexión: " + e.message);
+            mostrarNotificacion("Error de conexión: " + e.message, "error");
         }
     }
 

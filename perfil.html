@@ -7,9 +7,11 @@
     <title>Mi información | LYM</title>
 
     <link rel="stylesheet" href="Proyecto.css" />
+    <link rel="stylesheet" href="notifications.css" />
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
         rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="notifications.js"></script>
 
     <style>
         /* Solo layout de la página (usa tu CSS base para inputs/botones) */
@@ -334,12 +336,17 @@
                 const orig = btn.innerHTML;
                 btn.innerHTML = '<i class="fas fa-check"></i> ¡Copiado!';
                 btn.style.background = '#059669';
+                mostrarNotificacion(`Código de cupón "${codigo}" copiado al portapapeles.`, 'success', 'Cupón Copiado');
                 setTimeout(() => {
                     btn.innerHTML = orig;
                     btn.style.background = '';
                 }, 2000);
             }).catch(() => {
-                prompt("Copia tu código de cupón:", codigo);
+                mostrarPrompt("Copia tu código de cupón manualmente:", codigo, {
+                    titulo: "Código de Cupón",
+                    textoConfirmar: "Cerrar",
+                    textoCancelar: "Cerrar"
+                });
             });
         }
 
@@ -366,22 +373,26 @@
 
                 const data = await resp.json();
 
-                msg.style.display = 'block';
                 if (data.success) {
+                    msg.style.display = 'block';
                     msg.style.background = '#dcfce7';
                     msg.style.color = '#15803d';
                     msg.textContent = '✔ ' + data.message;
+                    mostrarNotificacion(data.message || 'Contraseña actualizada correctamente', 'success');
                     document.getElementById('formCambiarPass').reset();
                 } else {
+                    msg.style.display = 'block';
                     msg.style.background = '#fee2e2';
                     msg.style.color = '#b91c1c';
                     msg.textContent = '✖ ' + (data.error || 'Error al cambiar contraseña');
+                    mostrarNotificacion(data.error || 'Error al cambiar contraseña', 'error');
                 }
             } catch (err) {
                 msg.style.display = 'block';
                 msg.style.background = '#fee2e2';
                 msg.style.color = '#b91c1c';
                 msg.textContent = '✖ Error de servidor al intentar cambiar contraseña.';
+                mostrarNotificacion('Error de conexión al intentar cambiar contraseña.', 'error');
             } finally {
                 btn.disabled = false;
                 btn.innerHTML = '<i class="fas fa-save"></i> Actualizar Contraseña';

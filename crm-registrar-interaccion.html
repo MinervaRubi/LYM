@@ -211,7 +211,7 @@
         const descripcion = document.getElementById('txtDescripcionInteraccion').value;
 
         if (!cliente_id) {
-            alert('Por favor selecciona un cliente de la lista.');
+            mostrarNotificacion('Por favor selecciona un cliente de la lista.', 'warning');
             return;
         }
 
@@ -229,11 +229,7 @@
             const resData = await resp.json();
 
             if (resData.success) {
-                if (typeof showNotification === 'function') {
-                    showNotification('¡Interacción registrada exitosamente!');
-                } else {
-                    alert('Interacción registrada con éxito');
-                }
+                mostrarNotificacion('¡Interacción registrada exitosamente!', 'success');
 
                 // Disparar evento para actualización en tiempo real
                 window.dispatchEvent(new CustomEvent('crm-interaction-updated'));
@@ -241,12 +237,12 @@
                 // Volver a la vista de interacciones
                 cancelarInteraccionForm();
             } else {
-                alert('Error: ' + (resData.error || 'No se pudo guardar la interacción'));
+                mostrarNotificacion('Error: ' + (resData.error || 'No se pudo guardar la interacción'), 'error');
                 btn.disabled = false;
                 btn.innerHTML = '<i class="fas fa-save"></i> Guardar Interacción';
             }
         } catch (err) {
-            alert('Error de conexión al servidor: ' + err.message);
+            mostrarNotificacion('Error de conexión al servidor: ' + err.message, 'error');
             btn.disabled = false;
             btn.innerHTML = '<i class="fas fa-save"></i> Guardar Interacción';
         }

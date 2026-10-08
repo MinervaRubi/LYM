@@ -180,9 +180,12 @@
                 renderizarBarrasMasVendidos(data.mas_vendidos);
                 renderizarTablaCriticos(data.inventario_critico);
                 renderizarGraficaPushPull(data.comparativa_mensual);
+            } else {
+                if (typeof mostrarNotificacion === 'function') mostrarNotificacion(data.error || 'No se pudieron cargar los reportes SCM', 'error');
             }
         } catch (e) {
             console.error("Error al cargar reportes SCM:", e);
+            if (typeof mostrarNotificacion === 'function') mostrarNotificacion('Error de conexión con reportes SCM: ' + e.message, 'error');
         }
     }
 

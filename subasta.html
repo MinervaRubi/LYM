@@ -6,9 +6,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Subasta de Tazas Personalizadas | LYM</title>
 
+    <link rel="stylesheet" href="notifications.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
         rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="notifications.js"></script>
 
     <style>
         * {
@@ -524,8 +526,6 @@
                         </div>
 
                         <div class="mensajes">
-                            <p id="mensajeExito" class="success-mini">✔ Tu puja fue registrada correctamente en la base de datos.</p>
-                            <p id="mensajeError" class="warning-mini">⚠ Ingresa una cantidad válida mayor a la puja actual.</p>
                             <p class="info-mini"><i class="fas fa-circle-check" style="color:#22c55e;"></i> Conectado con <strong>MySQL (Tabla subastas y subasta_pujas)</strong> en tiempo real.</p>
                         </div>
                     </div>
@@ -550,8 +550,6 @@
 
             const precioActualEl = document.getElementById('precioActual');
             const historialEl = document.getElementById('historialPujas');
-            const mensajeExito = document.getElementById('mensajeExito');
-            const mensajeError = document.getElementById('mensajeError');
             const estadoSubasta = document.getElementById('estadoSubasta');
             const cardSubasta = document.getElementById('subastaCard');
             const inputPuja = document.getElementById('pujaManual');
@@ -565,23 +563,12 @@
             }
 
             function mostrarMensaje(tipo, texto) {
-                mensajeExito.style.display = 'none';
-                mensajeError.style.display = 'none';
-
                 if (tipo === 'exito') {
-                    if (texto) mensajeExito.textContent = '✔ ' + texto;
-                    mensajeExito.style.display = 'block';
-                    setTimeout(function () {
-                        mensajeExito.style.display = 'none';
-                    }, 2500);
-                }
-
-                if (tipo === 'error') {
-                    if (texto) mensajeError.textContent = '⚠ ' + texto;
-                    mensajeError.style.display = 'block';
-                    setTimeout(function () {
-                        mensajeError.style.display = 'none';
-                    }, 2500);
+                    mostrarNotificacion(texto || 'Tu puja fue registrada correctamente en MySQL.', 'success', 'Puja Registrada');
+                } else if (tipo === 'error') {
+                    mostrarNotificacion(texto || 'Ingresa una cantidad válida mayor a la puja actual.', 'warning', 'Atención');
+                } else {
+                    mostrarNotificacion(texto, 'info');
                 }
             }
 

@@ -13,10 +13,9 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
     <!-- HOJA DE ESTILOS MODERNA MINIMALISTA DEL CRM (CON CACHE BUSTER) -->
-    <link rel="stylesheet" href="crm-style.css?v=2.2">
-
-    <!-- HOJA DE ESTILOS MODERNA MINIMALISTA DEL CRM (CON CACHE BUSTER) -->
     <link rel="stylesheet" href="crm-style.css?v=2.3">
+    <link rel="stylesheet" href="notifications.css">
+    <script src="notifications.js"></script>
 
     <!-- ESTILOS DIRECTOS Y APEGADOS A LA PANTALLA PARA EL SIDEBAR -->
     <style>
@@ -582,12 +581,6 @@
         </div>
     </div>
 
-    <!-- NOTIFICACIÓN TOAST GLOBAL -->
-    <div id="crmToastNotification" style="position:fixed; bottom:24px; right:24px; background:#0f172a; color:#ffffff; padding:12px 20px; border-radius:10px; font-weight:600; font-size:0.88rem; box-shadow:0 10px 25px rgba(0,0,0,0.2); z-index:9999; display:flex; align-items:center; gap:10px; opacity:0; pointer-events:none; transition:opacity 0.3s ease;">
-        <i class="fas fa-check-circle" style="color:#10b981;"></i>
-        <span id="crmToastText">Notificación</span>
-    </div>
-
     <!-- JAVASCRIPT PRINCIPAL -->
     <script>
         let currentLoadedView = 'crm-dashboard.html';
@@ -825,7 +818,7 @@
             const btn = document.getElementById("btnGuardarInteraccionGlobal");
 
             if (!cliente_id) {
-                alert("Selecciona un cliente de la lista.");
+                mostrarNotificacion("Selecciona un cliente de la lista.", "warning");
                 return;
             }
 
@@ -841,7 +834,7 @@
 
                 const data = await resp.json();
                 if (data.success) {
-                    showNotification("¡Interacción registrada con éxito!");
+                    mostrarNotificacion("¡Interacción registrada con éxito!", "success");
                     cerrarModalGlobalInteraccion();
                     document.getElementById("mGlobalInteraccionDesc").value = "";
                     
@@ -850,10 +843,10 @@
                         loadExternalView(currentLoadedView, null);
                     }
                 } else {
-                    alert("Error: " + (data.error || "No se pudo guardar"));
+                    mostrarNotificacion("Error: " + (data.error || "No se pudo guardar"), "error");
                 }
             } catch (err) {
-                alert("Error de conexión: " + err.message);
+                mostrarNotificacion("Error de conexión: " + err.message, "error");
             } finally {
                 btn.disabled = false;
                 btn.innerHTML = '<i class="fas fa-save"></i> Guardar Interacción';
@@ -893,10 +886,10 @@
                         loadExternalView(currentLoadedView, null);
                     }
                 } else {
-                    alert("Error: " + data.error);
+                    mostrarNotificacion("Error: " + data.error, "error");
                 }
             } catch (err) {
-                alert("Error de conexión: " + err.message);
+                mostrarNotificacion("Error de conexión: " + err.message, "error");
             }
         }
 
@@ -926,14 +919,14 @@
 
                 const data = await resp.json();
                 if (data.success) {
-                    showNotification("Etapa CRM actualizada");
+                    mostrarNotificacion("Etapa CRM actualizada", "success");
                     cerrarModalGlobalEtapa();
                     loadExternalView(currentLoadedView, null);
                 } else {
-                    alert(data.error || "Error al actualizar etapa");
+                    mostrarNotificacion(data.error || "Error al actualizar etapa", "error");
                 }
             } catch (err) {
-                alert("Error de conexión: " + err.message);
+                mostrarNotificacion("Error de conexión: " + err.message, "error");
             }
         }
 
@@ -970,14 +963,14 @@
 
                 const data = await resp.json();
                 if (data.success) {
-                    showNotification("¡Datos del cliente actualizados!");
+                    mostrarNotificacion("¡Datos del cliente actualizados!", "success");
                     cerrarModalGlobalEditarCliente();
                     loadExternalView(currentLoadedView, null);
                 } else {
-                    alert(data.error || "No se pudo actualizar los datos del cliente");
+                    mostrarNotificacion(data.error || "No se pudo actualizar los datos del cliente", "error");
                 }
             } catch (err) {
-                alert("Error de conexión: " + err.message);
+                mostrarNotificacion("Error de conexión: " + err.message, "error");
             }
         }
 
@@ -1042,15 +1035,15 @@
             const btn = document.getElementById("btnEnviarSugerenciaDescuento");
 
             if (!cliente_id) {
-                alert("Por favor selecciona un cliente de la lista.");
+                mostrarNotificacion("Por favor selecciona un cliente de la lista.", "warning");
                 return;
             }
             if (!porcentaje || porcentaje <= 0 || porcentaje > 90) {
-                alert("Introduce un porcentaje válido entre 1% y 90%.");
+                mostrarNotificacion("Introduce un porcentaje válido entre 1% y 90%.", "warning");
                 return;
             }
             if (!motivo) {
-                alert("Escribe el motivo o justificación de la sugerencia.");
+                mostrarNotificacion("Escribe el motivo o justificación de la sugerencia.", "warning");
                 return;
             }
 
@@ -1066,17 +1059,17 @@
 
                 const data = await resp.json();
                 if (data.success) {
-                    showNotification("¡Sugerencia de descuento enviada al Administrador!");
+                    mostrarNotificacion("¡Sugerencia de descuento enviada al Administrador!", "success");
                     cerrarModalGlobalSugerirDescuento();
                     refrescarContadorDescuentosPendientes();
                     if (currentLoadedView && (currentLoadedView.includes("crm-descuentos") || currentLoadedView.includes("crm-detalle-cliente"))) {
                         loadExternalView(currentLoadedView, null);
                     }
                 } else {
-                    alert("Error: " + (data.error || "No se pudo registrar la sugerencia"));
+                    mostrarNotificacion("Error: " + (data.error || "No se pudo registrar la sugerencia"), "error");
                 }
             } catch (err) {
-                alert("Error de red: " + err.message);
+                mostrarNotificacion("Error de red: " + err.message, "error");
             } finally {
                 btn.disabled = false;
                 btn.innerHTML = '<i class="fas fa-paper-plane"></i> Enviar al Administrador';
@@ -1102,16 +1095,20 @@
         }
 
         /* TOAST NOTIFICATION */
-        function showNotification(message) {
-            const toast = document.getElementById("crmToastNotification");
-            const text = document.getElementById("crmToastText");
-            text.textContent = message;
-            toast.style.opacity = "1";
-            setTimeout(() => { toast.style.opacity = "0"; }, 3000);
+        function showNotification(message, type = 'success') {
+            if (typeof mostrarNotificacion === 'function') {
+                return mostrarNotificacion(message, type);
+            }
         }
 
-        function logoutGestor() {
-            if (confirm("¿Seguro que deseas cerrar sesión en LYM CRM?")) {
+        async function logoutGestor() {
+            const confirmar = await mostrarConfirmacion("¿Seguro que deseas cerrar la sesión actual en LYM CRM?", {
+                titulo: "Cerrar Sesión",
+                tipo: "warning",
+                textoConfirmar: "Cerrar Sesión",
+                textoCancelar: "Permanecer"
+            });
+            if (confirmar) {
                 window.location.href = "php/logout.php";
             }
         }
@@ -1350,9 +1347,16 @@
         }
 
         async function hacerTrabajadorAdmin(id, username) {
-            if (!confirm(`¿Estás seguro de hacer Administrador al trabajador "${username}"?\n\nAl confirmarlo, se le otorgarán de inmediato TODOS los privilegios de Administrador:\n• Acceso a métricas y reportes globales\n• Aprobación y rechazo de descuentos para clientes\n• Gestión de cuentas de usuarios y trabajadores\n• Eliminación de clientes y gestión de productos`)) {
-                return;
-            }
+            const confirmed = await mostrarConfirmacion(
+                `¿Estás seguro de hacer Administrador al trabajador "${username}"?\n\nAl confirmarlo, se le otorgarán de inmediato TODOS los privilegios de Administrador en el CRM.`,
+                {
+                    titulo: "Promover a Administrador",
+                    tipo: "warning",
+                    textoConfirmar: "Otorgar Permisos",
+                    textoCancelar: "Cancelar"
+                }
+            );
+            if (!confirmed) return;
 
             try {
                 const resp = await fetch("php/api_trabajadores.php", {
@@ -1363,23 +1367,30 @@
                 const data = await resp.json();
 
                 if (data.success) {
-                    showNotification(data.message || `¡"${username}" ahora es Administrador y tiene acceso total!`);
+                    mostrarNotificacion(data.message || `¡"${username}" ahora es Administrador y tiene acceso total!`, "success");
                     await cargarTrabajadoresLista();
                     if (typeof cargarUsuarios === "function") {
                         cargarUsuarios();
                     }
                 } else {
-                    alert(data.error || "No se pudo otorgar el rol de Administrador");
+                    mostrarNotificacion(data.error || "No se pudo otorgar el rol de Administrador", "error");
                 }
             } catch (err) {
-                alert("Error de red: " + err.message);
+                mostrarNotificacion("Error de red: " + err.message, "error");
             }
         }
 
         async function quitarAdminTrabajador(id, username) {
-            if (!confirm(`¿Deseas revocar los privilegios de Administrador al usuario "${username}" y regresarlo al rol de Trabajador?`)) {
-                return;
-            }
+            const confirmed = await mostrarConfirmacion(
+                `¿Deseas revocar los privilegios de Administrador al usuario "${username}" y regresarlo al rol de Trabajador?`,
+                {
+                    titulo: "Revocar Privilegios",
+                    tipo: "warning",
+                    textoConfirmar: "Revocar Rol",
+                    textoCancelar: "Cancelar"
+                }
+            );
+            if (!confirmed) return;
 
             try {
                 const resp = await fetch("php/api_trabajadores.php", {
@@ -1390,16 +1401,16 @@
                 const data = await resp.json();
 
                 if (data.success) {
-                    showNotification(data.message || `Privilegios revocados a "${username}". Ahora es Trabajador.`);
+                    mostrarNotificacion(data.message || `Privilegios revocados a "${username}". Ahora es Trabajador.`, "success");
                     await cargarTrabajadoresLista();
                     if (typeof cargarUsuarios === "function") {
                         cargarUsuarios();
                     }
                 } else {
-                    alert(data.error || "No se pudo revocar el rol de Administrador");
+                    mostrarNotificacion(data.error || "No se pudo revocar el rol de Administrador", "error");
                 }
             } catch (err) {
-                alert("Error de red: " + err.message);
+                mostrarNotificacion("Error de red: " + err.message, "error");
             }
         }
 
@@ -1422,16 +1433,16 @@
                 const data = await resp.json();
 
                 if (data.success) {
-                    showNotification("¡Cuenta de trabajador creada exitosamente!");
+                    mostrarNotificacion("¡Cuenta de trabajador creada exitosamente!", "success");
                     document.getElementById("mTrabajadorUsername").value = '';
                     document.getElementById("mTrabajadorEmail").value = '';
                     document.getElementById("mTrabajadorPassword").value = '';
                     await cargarTrabajadoresLista();
                 } else {
-                    alert(data.error || "No se pudo registrar al trabajador");
+                    mostrarNotificacion(data.error || "No se pudo registrar al trabajador", "error");
                 }
             } catch (err) {
-                alert("Error de red: " + err.message);
+                mostrarNotificacion("Error de red: " + err.message, "error");
             } finally {
                 btn.disabled = false;
                 btn.innerHTML = '<i class="fas fa-plus-circle"></i> Crear Cuenta de Trabajador';
@@ -1439,7 +1450,17 @@
         }
 
         async function eliminarTrabajador(id, username) {
-            if (!confirm(`¿Seguro que deseas eliminar al trabajador "${username}"?`)) return;
+            const confirmed = await mostrarConfirmacion(
+                `¿Seguro que deseas eliminar permanentemente la cuenta del trabajador "${username}"?`,
+                {
+                    titulo: "Eliminar Trabajador",
+                    tipo: "danger",
+                    esPeligroso: true,
+                    textoConfirmar: "Eliminar Cuenta",
+                    textoCancelar: "Cancelar"
+                }
+            );
+            if (!confirmed) return;
 
             try {
                 const resp = await fetch("php/api_trabajadores.php", {
@@ -1449,13 +1470,13 @@
                 });
                 const data = await resp.json();
                 if (data.success) {
-                    showNotification("Trabajador eliminado correctamente.");
+                    mostrarNotificacion("Trabajador eliminado correctamente.", "success");
                     await cargarTrabajadoresLista();
                 } else {
-                    alert(data.error || "Error al eliminar");
+                    mostrarNotificacion(data.error || "Error al eliminar", "error");
                 }
             } catch (e) {
-                alert("Error: " + e.message);
+                mostrarNotificacion("Error: " + e.message, "error");
             }
         }
 

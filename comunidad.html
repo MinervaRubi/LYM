@@ -7,6 +7,8 @@
     <title>Comunidad | LYM</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
         rel="stylesheet">
+    <link rel="stylesheet" href="notifications.css">
+    <script src="notifications.js"></script>
     <style>
         * {
             margin: 0;
@@ -467,7 +469,7 @@
             const texto = inputTexto.value.trim();
 
             if (!nombre || !texto) {
-                mostrarMensaje('error');
+                mostrarNotificacion('Por favor escribe al menos tu nombre y un comentario.', 'warning');
                 return;
             }
 
@@ -483,14 +485,14 @@
                     inputNombre.value = '';
                     inputTitulo.value = '';
                     inputTexto.value = '';
-                    mostrarMensaje('exito');
+                    mostrarNotificacion('¡Comentario publicado exitosamente en la comunidad!', 'success');
                     cargarComentarios();
                 } else {
-                    alert(data.error || 'Error al publicar comentario');
+                    mostrarNotificacion(data.error || 'Error al publicar comentario', 'error');
                 }
             } catch (err) {
                 console.error('Error:', err);
-                mostrarMensaje('error');
+                mostrarNotificacion('Error de conexión al publicar comentario.', 'error');
             }
         }
 
