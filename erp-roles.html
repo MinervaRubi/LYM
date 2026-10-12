@@ -1,0 +1,182 @@
+<!-- ==============================================================
+     MÓDULO ERP: CONTROL DE ACCESOS Y ROLES
+     CUMPLE PANTALLA 10 DE LA GUÍA VISUAL ERP (ETAPA 3)
+     ARCHIVO: erp-roles.html
+============================================================== -->
+
+<div style="display: flex; flex-direction: column; gap: 1.5rem;">
+    <!-- CABECERA -->
+    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+        <div>
+            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+                <span class="badge" style="background: rgba(99,102,241,0.15); color: #6366f1; font-weight:700; font-size:0.75rem; padding: 2px 8px; border-radius: 6px;">ERP - SEGURIDAD</span>
+                <span style="font-size: 0.85rem; color: var(--text-muted);">Gobernanza y Permisos del Sistema</span>
+            </div>
+            <h2 style="font-size: 1.6rem; font-weight: 800; color: var(--text-heading); margin: 0;">Panel por Rol y Permisos ERP</h2>
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 2px;">Vista diferenciada y control de accesos según la responsabilidad del usuario</p>
+        </div>
+        <div style="display: flex; gap: 10px; align-items: center;">
+            <label style="font-size: 0.85rem; font-weight: 700; color: #475569;">Simular Rol:</label>
+            <select id="selectCambiarRolSimulado" class="crm-form-select" style="width: auto; padding: 4px 12px; font-weight: 700;" onchange="cambiarRolSimuladoERP(this.value)">
+                <option value="Administrador">👑 Administrador</option>
+                <option value="Ventas">💼 Ventas / Comercial</option>
+                <option value="Logística">🚚 Logística / Almacén</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- TARJETA DEL ROL ACTIVO -->
+    <div class="crm-card" style="padding: 1.75rem; border-left: 4px solid #6366f1;">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+            <div style="display: flex; align-items: center; gap: 14px;">
+                <div style="width: 52px; height: 52px; border-radius: 50%; background: #6366f1; color: white; display: flex; align-items: center; justify-content: center; font-size: 1.5rem;" id="badgeIconoRolActivo">
+                    <i class="fas fa-user-shield"></i>
+                </div>
+                <div>
+                    <div style="font-size: 0.8rem; font-weight: 700; color: #64748b; text-transform: uppercase;">Rol Activo en Sesión</div>
+                    <div style="font-size: 1.4rem; font-weight: 900; color: #0f172a;" id="txtNombreRolActivo">Administrador</div>
+                    <div style="font-size: 0.85rem; color: #475569;" id="txtDescRolActivo">Control total sobre CRM, SCM, Configuración, Finanzas y Órdenes ERP.</div>
+                </div>
+            </div>
+            <span class="badge" style="background: rgba(16,185,129,0.15); color: #10b981; font-size: 0.85rem; font-weight: 800; padding: 6px 14px;" id="badgeStatusRolActivo">
+                Acceso Total Habilitado
+            </span>
+        </div>
+    </div>
+
+    <!-- MATRIZ DE PERMISOS POR ROL (PANTALLA 10) -->
+    <div class="crm-card" style="padding: 0; overflow: hidden; border: 1px solid #e2e8f0;">
+        <div style="padding: 1.25rem 1.5rem; background: #f8fafc; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center;">
+            <div>
+                <h3 style="margin: 0; font-size: 1.1rem; font-weight: 800; color: #0f172a;">Matriz de Accesos por Módulo</h3>
+                <p style="margin: 2px 0 0 0; font-size: 0.8rem; color: #64748b;">Visualización clara de permisos de lectura, edición y despacho</p>
+            </div>
+            <span class="badge" style="background: rgba(99,102,241,0.12); color: #6366f1; font-weight: 700;">Seguridad RBAC</span>
+        </div>
+
+        <table class="crm-table" style="margin: 0; width: 100%;">
+            <thead>
+                <tr>
+                    <th style="padding: 12px 18px;">Módulo / Funcionalidad</th>
+                    <th style="padding: 12px 18px; text-align: center;">Administrador</th>
+                    <th style="padding: 12px 18px; text-align: center;">Ventas / CRM</th>
+                    <th style="padding: 12px 18px; text-align: center;">Logística / SCM</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td style="padding: 12px 18px; font-weight: 700; color: #1e293b;">
+                        <i class="fas fa-chart-pie" style="color:#6366f1; margin-right:8px;"></i> Dashboard ERP Global
+                    </td>
+                    <td style="padding: 12px 18px; text-align: center; color: #10b981; font-weight: 800;"><i class="fas fa-check-circle"></i> Total</td>
+                    <td style="padding: 12px 18px; text-align: center; color: #10b981; font-weight: 800;"><i class="fas fa-check-circle"></i> Lectura</td>
+                    <td style="padding: 12px 18px; text-align: center; color: #10b981; font-weight: 800;"><i class="fas fa-check-circle"></i> Lectura</td>
+                </tr>
+                <tr>
+                    <td style="padding: 12px 18px; font-weight: 700; color: #1e293b;">
+                        <i class="fas fa-users" style="color:#10b981; margin-right:8px;"></i> Gestión de Clientes (CRM)
+                    </td>
+                    <td style="padding: 12px 18px; text-align: center; color: #10b981; font-weight: 800;"><i class="fas fa-check-circle"></i> Total</td>
+                    <td style="padding: 12px 18px; text-align: center; color: #10b981; font-weight: 800;"><i class="fas fa-check-circle"></i> Total</td>
+                    <td style="padding: 12px 18px; text-align: center; color: #94a3b8;"><i class="fas fa-times-circle"></i> Solo Consulta</td>
+                </tr>
+                <tr>
+                    <td style="padding: 12px 18px; font-weight: 700; color: #1e293b;">
+                        <i class="fas fa-cube" style="color:#3b82f6; margin-right:8px;"></i> Catálogo e Inventario (SCM)
+                    </td>
+                    <td style="padding: 12px 18px; text-align: center; color: #10b981; font-weight: 800;"><i class="fas fa-check-circle"></i> Total</td>
+                    <td style="padding: 12px 18px; text-align: center; color: #94a3b8;"><i class="fas fa-times-circle"></i> Solo Consulta</td>
+                    <td style="padding: 12px 18px; text-align: center; color: #10b981; font-weight: 800;"><i class="fas fa-check-circle"></i> Total</td>
+                </tr>
+                <tr>
+                    <td style="padding: 12px 18px; font-weight: 700; color: #1e293b;">
+                        <i class="fas fa-cart-plus" style="color:#f59e0b; margin-right:8px;"></i> Crear Nueva Orden ERP
+                    </td>
+                    <td style="padding: 12px 18px; text-align: center; color: #10b981; font-weight: 800;"><i class="fas fa-check-circle"></i> Permitido</td>
+                    <td style="padding: 12px 18px; text-align: center; color: #10b981; font-weight: 800;"><i class="fas fa-check-circle"></i> Permitido</td>
+                    <td style="padding: 12px 18px; text-align: center; color: #ef4444;"><i class="fas fa-ban"></i> Restringido</td>
+                </tr>
+                <tr>
+                    <td style="padding: 12px 18px; font-weight: 700; color: #1e293b;">
+                        <i class="fas fa-truck" style="color:#06b6d4; margin-right:8px;"></i> Despacho y Logística
+                    </td>
+                    <td style="padding: 12px 18px; text-align: center; color: #10b981; font-weight: 800;"><i class="fas fa-check-circle"></i> Permitido</td>
+                    <td style="padding: 12px 18px; text-align: center; color: #ef4444;"><i class="fas fa-ban"></i> Restringido</td>
+                    <td style="padding: 12px 18px; text-align: center; color: #10b981; font-weight: 800;"><i class="fas fa-check-circle"></i> Permitido</td>
+                </tr>
+                <tr>
+                    <td style="padding: 12px 18px; font-weight: 700; color: #1e293b;">
+                        <i class="fas fa-user-cog" style="color:#ec4899; margin-right:8px;"></i> Configuración de Usuarios
+                    </td>
+                    <td style="padding: 12px 18px; text-align: center; color: #10b981; font-weight: 800;"><i class="fas fa-check-circle"></i> Exclusivo</td>
+                    <td style="padding: 12px 18px; text-align: center; color: #ef4444;"><i class="fas fa-ban"></i> Restringido</td>
+                    <td style="padding: 12px 18px; text-align: center; color: #ef4444;"><i class="fas fa-ban"></i> Restringido</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- ==============================================================
+     JAVASCRIPT DE ROLES
+     ============================================================== -->
+<script>
+    function cambiarRolSimuladoERP(rol) {
+        var txtNom = document.getElementById("txtNombreRolActivo");
+        var txtDesc = document.getElementById("txtDescRolActivo");
+        var badge = document.getElementById("badgeStatusRolActivo");
+        var icon = document.getElementById("badgeIconoRolActivo");
+
+        if (rol === "Administrador") {
+            if (txtNom) txtNom.textContent = "Administrador";
+            if (txtDesc) txtDesc.textContent = "Control total sobre CRM, SCM, Configuración, Finanzas y Órdenes ERP.";
+            if (badge) {
+                badge.textContent = "Acceso Total Habilitado";
+                badge.style.background = "rgba(16,185,129,0.15)";
+                badge.style.color = "#10b981";
+            }
+            if (icon) icon.innerHTML = '<i class="fas fa-user-shield"></i>';
+        } else if (rol === "Ventas") {
+            if (txtNom) txtNom.textContent = "Ventas / Comercial";
+            if (txtDesc) txtDesc.textContent = "Gestión de clientes, registro de órdenes, cotizaciones y promociones.";
+            if (badge) {
+                badge.textContent = "Perfil Comercial Activo";
+                badge.style.background = "rgba(99,102,241,0.15)";
+                badge.style.color = "#6366f1";
+            }
+            if (icon) icon.innerHTML = '<i class="fas fa-briefcase"></i>';
+        } else if (rol === "Logística") {
+            if (txtNom) txtNom.textContent = "Logística / Almacén";
+            if (txtDesc) txtDesc.textContent = "Control de existencias, recepción de proveedores, movimientos y despachos.";
+            if (badge) {
+                badge.textContent = "Perfil Operativo Activo";
+                badge.style.background = "rgba(59,130,246,0.15)";
+                badge.style.color = "#2563eb";
+            }
+            if (icon) icon.innerHTML = '<i class="fas fa-truck-ramp-box"></i>';
+        }
+
+        var rolSlug = 'admin';
+        if (rol === "Ventas") rolSlug = 'ventas';
+        else if (rol === "Logística") rolSlug = 'logistica';
+
+        // Actualizar UI del Gestor en vivo (Sidebar, permisos y vistas)
+        if (typeof aplicarMatrizPermisosPorRol === 'function') {
+            aplicarMatrizPermisosPorRol(rolSlug);
+        }
+        var gestorRoleElem = document.getElementById("gestorRole");
+        if (gestorRoleElem) {
+            gestorRoleElem.textContent = (rol === "Ventas" ? "Ventas / Comercial" : (rol === "Logística" ? "Logística / Almacén" : "Administrador"));
+        }
+
+        // Notificar al backend de la sesión si es necesario
+        fetch("php/erp_api.php?resource=cambiar_rol", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ rol: rolSlug })
+        }).catch(function(err) { console.error(err); });
+    }
+
+    // Exponer a window
+    window.cambiarRolSimuladoERP = cambiarRolSimuladoERP;
+</script>

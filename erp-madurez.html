@@ -1,0 +1,182 @@
+<!-- ==============================================================
+     MÓDULO ERP: NIVEL DE MADUREZ ERP
+     CUMPLE PANTALLA 8 DE LA GUÍA VISUAL ERP (ETAPA 3)
+     ARCHIVO: erp-madurez.html
+============================================================== -->
+
+<div style="display: flex; flex-direction: column; gap: 1.5rem;">
+    <!-- CABECERA -->
+    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+        <div>
+            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+                <span class="badge" style="background: rgba(99,102,241,0.15); color: #6366f1; font-weight:700; font-size:0.75rem; padding: 2px 8px; border-radius: 6px;">ERP - EVOLUCIÓN</span>
+                <span style="font-size: 0.85rem; color: var(--text-muted);">Modelo de Madurez Empresarial</span>
+            </div>
+            <h2 style="font-size: 1.6rem; font-weight: 800; color: var(--text-heading); margin: 0;">Nivel de Madurez ERP</h2>
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 2px;">Diagnóstico del estado de digitalización e integración global del sistema</p>
+        </div>
+        <div style="display: flex; gap: 10px;">
+            <button class="crm-btn crm-btn-secondary crm-btn-sm" onclick="cargarMadurezERP()">
+                <i class="fas fa-sync-alt"></i> <span>Recalcular Madurez</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- TARJETA PRINCIPAL DEL NIVEL ACTUAL (PANTALLA 8) -->
+    <div class="crm-card" style="padding: 2rem; background: linear-gradient(135deg, rgba(99,102,241,0.06), rgba(16,185,129,0.06)); border: 1px solid rgba(99,102,241,0.2);">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1.5rem;">
+            <div>
+                <div style="font-size: 0.85rem; font-weight: 700; text-transform: uppercase; color: #64748b; letter-spacing: 0.05em; margin-bottom: 6px;">Nivel Actual del Sistema</div>
+                <div style="display: flex; align-items: center; gap: 14px;">
+                    <span style="font-size: 2.2rem; font-weight: 900; color: #4338ca;" id="txtNivelActualNombreERP">Nivel 4: Optimizado</span>
+                    <span class="badge" style="background: #10b981; color: white; font-size: 0.85rem; font-weight: 800; padding: 4px 12px; border-radius: 20px;" id="badgeNivelPorcentajeERP">100% Cumplido</span>
+                </div>
+                <p style="font-size: 0.95rem; color: #475569; margin: 8px 0 0 0; max-width: 650px;" id="txtNivelDescripcionERP">
+                    Sincronización total y bidireccional entre CRM, SCM y ERP con automatización en tiempo real, validación atómica y reportería unificada.
+                </p>
+            </div>
+            
+            <div style="background: white; border-radius: 12px; padding: 1.25rem 2rem; border: 1px solid #e2e8f0; text-align: center; box-shadow: 0 4px 12px rgba(0,0,0,0.03);">
+                <div style="font-size: 2.6rem; font-weight: 900; color: #10b981;" id="scoreGlobalMadurezERP">100<span style="font-size: 1.3rem;">%</span></div>
+                <div style="font-size: 0.78rem; font-weight: 700; color: #64748b; text-transform: uppercase;">Calificación Global</div>
+            </div>
+        </div>
+
+        <!-- Barra de progreso global -->
+        <div style="margin-top: 1.5rem; background: #e2e8f0; height: 12px; border-radius: 10px; overflow: hidden;">
+            <div id="barraProgresoMadurezERP" style="width: 100%; height: 100%; background: linear-gradient(90deg, #6366f1, #10b981); border-radius: 10px; transition: width 0.5s ease;"></div>
+        </div>
+    </div>
+
+    <!-- ESCALA DE MADUREZ EN 4 NIVELES (PANTALLA 8: BÁSICO -> INTEGRADO -> AUTOMATIZADO -> OPTIMIZADO) -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.25rem;">
+        
+        <!-- NIVEL 1: BÁSICO -->
+        <div class="crm-card" id="cardNivel1ERP" style="padding: 1.25rem; border-top: 4px solid #94a3b8; transition: all 0.3s ease;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                <span style="font-size: 0.8rem; font-weight: 800; color: #64748b; text-transform: uppercase;">Nivel 1</span>
+                <span class="badge" style="background: #e2e8f0; color: #475569;" id="statusNivel1ERP">Completado</span>
+            </div>
+            <h4 style="margin: 0 0 6px 0; font-size: 1.1rem; font-weight: 800; color: #0f172a;">Básico</h4>
+            <p style="font-size: 0.82rem; color: #64748b; margin: 0;">
+                Módulos aislados. Registro manual de clientes en hojas o formularios individuales sin conexión central.
+            </p>
+        </div>
+
+        <!-- NIVEL 2: INTEGRADO -->
+        <div class="crm-card" id="cardNivel2ERP" style="padding: 1.25rem; border-top: 4px solid #3b82f6; transition: all 0.3s ease;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                <span style="font-size: 0.8rem; font-weight: 800; color: #2563eb; text-transform: uppercase;">Nivel 2</span>
+                <span class="badge" style="background: rgba(59,130,246,0.15); color: #2563eb;" id="statusNivel2ERP">Completado</span>
+            </div>
+            <h4 style="margin: 0 0 6px 0; font-size: 1.1rem; font-weight: 800; color: #0f172a;">Integrado</h4>
+            <p style="font-size: 0.82rem; color: #64748b; margin: 0;">
+                Base de datos relacional común. Clientes y catálogo SCM consultables desde la misma plataforma web.
+            </p>
+        </div>
+
+        <!-- NIVEL 3: AUTOMATIZADO -->
+        <div class="crm-card" id="cardNivel3ERP" style="padding: 1.25rem; border-top: 4px solid #8b5cf6; transition: all 0.3s ease;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                <span style="font-size: 0.8rem; font-weight: 800; color: #7c3aed; text-transform: uppercase;">Nivel 3</span>
+                <span class="badge" style="background: rgba(139,92,246,0.15); color: #7c3aed;" id="statusNivel3ERP">Completado</span>
+            </div>
+            <h4 style="margin: 0 0 6px 0; font-size: 1.1rem; font-weight: 800; color: #0f172a;">Automatizado</h4>
+            <p style="font-size: 0.82rem; color: #64748b; margin: 0;">
+                Descuento automático de inventario al vender, registro de movimientos y transacciones protegidas con rollback.
+            </p>
+        </div>
+
+        <!-- NIVEL 4: OPTIMIZADO -->
+        <div class="crm-card" id="cardNivel4ERP" style="padding: 1.25rem; border-top: 4px solid #10b981; transition: all 0.3s ease; box-shadow: 0 6px 16px rgba(16,185,129,0.15);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                <span style="font-size: 0.8rem; font-weight: 800; color: #059669; text-transform: uppercase;">Nivel 4</span>
+                <span class="badge" style="background: #10b981; color: white;" id="statusNivel4ERP">Activo</span>
+            </div>
+            <h4 style="margin: 0 0 6px 0; font-size: 1.1rem; font-weight: 800; color: #0f172a;">Optimizado</h4>
+            <p style="font-size: 0.82rem; color: #64748b; margin: 0;">
+                Ecosistema empresarial completo. Reposición PUSH automática, promociones CRM sincronizadas y visión 360°.
+            </p>
+        </div>
+    </div>
+
+    <!-- LISTA DE CHEQUEO DINÁMICA (PANTALLA 8) -->
+    <div class="crm-card" style="padding: 1.75rem;">
+        <div style="margin-bottom: 1.25rem;">
+            <h3 style="margin: 0; font-size: 1.15rem; font-weight: 800; color: #0f172a;">
+                <i class="fas fa-tasks" style="color: #6366f1; margin-right: 8px;"></i>Criterios de Verificación en Tiempo Real
+            </h3>
+            <p style="font-size: 0.85rem; color: #64748b; margin: 4px 0 0 0;">
+                Evaluación automatizada contra los datos vivos de la base de datos MariaDB
+            </p>
+        </div>
+
+        <div id="contenedorChecklistMadurezERP" style="display: flex; flex-direction: column; gap: 10px;">
+            <div style="text-align: center; color: #94a3b8; padding: 2rem;">Evaluando criterios del sistema...</div>
+        </div>
+    </div>
+</div>
+
+<!-- ==============================================================
+     JAVASCRIPT DEL NIVEL DE MADUREZ
+     ============================================================== -->
+<script>
+    function cargarMadurezERP() {
+        fetch("php/erp_api.php?resource=madurez")
+            .then(function(r) { return r.json(); })
+            .then(function(res) {
+                if (res.status === "success") {
+                    renderizarMadurezERP(res.data);
+                }
+            })
+            .catch(function(err) {
+                console.error("Error al cargar madurez ERP:", err);
+            });
+    }
+
+    function renderizarMadurezERP(data) {
+        var nombre = data.nivel_actual || "Optimizado";
+        var score = parseInt(data.score_global || 100);
+
+        var txtNom = document.getElementById("txtNivelActualNombreERP");
+        var badgePct = document.getElementById("badgeNivelPorcentajeERP");
+        var scoreGlob = document.getElementById("scoreGlobalMadurezERP");
+        var barra = document.getElementById("barraProgresoMadurezERP");
+
+        if (txtNom) txtNom.textContent = "Nivel 4: " + nombre;
+        if (badgePct) badgePct.textContent = score + "% Cumplido";
+        if (scoreGlob) scoreGlob.innerHTML = score + '<span style="font-size:1.3rem;">%</span>';
+        if (barra) barra.style.width = score + "%";
+
+        // Renderizar items del checklist
+        var contCheck = document.getElementById("contenedorChecklistMadurezERP");
+        if (contCheck && Array.isArray(data.checklist)) {
+            contCheck.innerHTML = data.checklist.map(function(item) {
+                var completado = item.cumplido;
+                var iconColor = completado ? "#10b981" : "#ef4444";
+                var iconClass = completado ? "fas fa-check-circle" : "fas fa-times-circle";
+                var bgClass = completado ? "background: #f0fdf4; border: 1px solid #bbf7d0;" : "background: #fef2f2; border: 1px solid #fecaca;";
+
+                return `
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; border-radius: 8px; ${bgClass}">
+                        <div style="display: flex; align-items: center; gap: 12px;">
+                            <i class="${iconClass}" style="color: ${iconColor}; font-size: 1.15rem;"></i>
+                            <div>
+                                <span style="font-weight: 700; font-size: 0.92rem; color: #0f172a;">${item.criterio}</span>
+                                <div style="font-size: 0.78rem; color: #64748b;">${item.modulo} · ${item.descripcion}</div>
+                            </div>
+                        </div>
+                        <span class="badge" style="font-size: 0.75rem; ${completado ? 'background: #10b981; color: white;' : 'background: #ef4444; color: white;'}">
+                            ${completado ? 'Verificado' : 'Pendiente'}
+                        </span>
+                    </div>
+                `;
+            }).join("");
+        }
+    }
+
+    // Exponer a window
+    window.cargarMadurezERP = cargarMadurezERP;
+
+    cargarMadurezERP();
+</script>

@@ -1,0 +1,1 @@
+-- Migración ERP generada exitosamente

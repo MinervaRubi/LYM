@@ -1,0 +1,1013 @@
+<!-- ==============================================================
+     MÓDULO ERP: NUEVA ORDEN (FLUJO COMPLETO 3 PASOS + PROCESANDO + ÉXITO)
+     CUMPLE PANTALLAS 3, 4, 5, 6 Y 7 DE LA GUÍA VISUAL ERP (ETAPA 3)
+     ARCHIVO: erp-nueva-orden.html
+============================================================== -->
+
+<div style="display: flex; flex-direction: column; gap: 1.5rem; max-width: 1100px; margin: 0 auto;">
+
+    <!-- CABECERA DE LA PANTALLA -->
+    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+        <div>
+            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+                <span class="badge" style="background: rgba(99,102,241,0.15); color: #6366f1; font-weight:700; font-size:0.75rem; padding: 2px 8px; border-radius: 6px;">ERP - VENTAS</span>
+                <span style="font-size: 0.85rem; color: var(--text-muted);">Proceso Comercial Unificado</span>
+            </div>
+            <h2 style="font-size: 1.6rem; font-weight: 800; color: var(--text-heading); margin: 0;">Nueva orden de cliente</h2>
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 2px;">Integra CRM (Cliente), SCM (Stock & Despacho) y Facturación ERP</p>
+        </div>
+        <div style="display: flex; gap: 10px;">
+            <button class="crm-btn crm-btn-secondary" onclick="loadExternalView('erp-ordenes.html', document.getElementById('erp-nav-ordenes'), 'ERP')">
+                <i class="fas fa-arrow-left"></i> <span>Volver a Órdenes</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- STEPPER EN 3 PASOS (PANTALLA 3, 4, 5) -->
+    <div class="crm-card" style="padding: 1.25rem 2rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center; position: relative;">
+            <div style="position: absolute; top: 20px; left: 10%; right: 10%; height: 3px; background: #e2e8f0; z-index: 1;" id="stepperProgressBar"></div>
+            
+            <!-- PASO 1 -->
+            <div style="display: flex; flex-direction: column; align-items: center; gap: 8px; z-index: 2; cursor: pointer;" onclick="irAlPasoERP(1)">
+                <div id="stepCircle1" style="width: 42px; height: 42px; border-radius: 50%; background: #6366f1; color: white; display: flex; align-items: center; justify-content: center; font-weight: 800; box-shadow: 0 4px 10px rgba(99,102,241,0.35);">
+                    1
+                </div>
+                <span id="stepLabel1" style="font-size: 0.85rem; font-weight: 700; color: #4338ca;">1. Seleccionar cliente</span>
+            </div>
+
+            <!-- PASO 2 -->
+            <div style="display: flex; flex-direction: column; align-items: center; gap: 8px; z-index: 2; cursor: pointer;" onclick="irAlPasoERP(2)">
+                <div id="stepCircle2" style="width: 42px; height: 42px; border-radius: 50%; background: #e2e8f0; color: #64748b; display: flex; align-items: center; justify-content: center; font-weight: 800; transition: all 0.3s ease;">
+                    2
+                </div>
+                <span id="stepLabel2" style="font-size: 0.85rem; font-weight: 600; color: #64748b;">2. Seleccionar productos</span>
+            </div>
+
+            <!-- PASO 3 -->
+            <div style="display: flex; flex-direction: column; align-items: center; gap: 8px; z-index: 2; cursor: pointer;" onclick="irAlPasoERP(3)">
+                <div id="stepCircle3" style="width: 42px; height: 42px; border-radius: 50%; background: #e2e8f0; color: #64748b; display: flex; align-items: center; justify-content: center; font-weight: 800; transition: all 0.3s ease;">
+                    3
+                </div>
+                <span id="stepLabel3" style="font-size: 0.85rem; font-weight: 600; color: #64748b;">3. Resumen y confirmar</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==============================================================
+         PASO 1: SELECCIONAR CLIENTE (PANTALLA 3)
+         ============================================================== -->
+    <div id="contenedorPaso1ERP" class="crm-card" style="padding: 2rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
+            <div>
+                <h3 style="margin: 0; font-size: 1.25rem; font-weight: 800; color: #0f172a;">
+                    <i class="fas fa-user-check" style="color: #6366f1; margin-right: 8px;"></i>Paso 1: Seleccionar cliente
+                </h3>
+                <p style="margin: 4px 0 0 0; font-size: 0.85rem; color: #64748b;">
+                    Elige un cliente registrado en CRM o agrega uno nuevo inmediatamente
+                </p>
+            </div>
+            <button class="crm-btn crm-btn-secondary" onclick="abrirModalNuevoClienteERP()" style="border-color: #6366f1; color: #6366f1;">
+                <i class="fas fa-user-plus"></i> <span>+ Nuevo cliente (CRM)</span>
+            </button>
+        </div>
+
+        <!-- Buscador de cliente -->
+        <div style="position: relative; margin-bottom: 1.5rem;">
+            <i class="fas fa-search" style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: #94a3b8;"></i>
+            <input type="text" id="inputBuscarClienteERP" class="crm-form-input" style="padding-left: 40px; font-size: 0.95rem; border-radius: 8px;" placeholder="Buscar cliente por nombre, empresa o correo..." oninput="filtrarClientesERP()">
+        </div>
+
+        <!-- Lista de tarjetas de cliente (Grid reactivo) -->
+        <div id="gridClientesERP" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(310px, 1fr)); gap: 1rem; max-height: 380px; overflow-y: auto; padding-right: 4px;">
+            <div style="text-align: center; color: #94a3b8; padding: 2rem; grid-column: 1 / -1;">Cargando clientes de CRM...</div>
+        </div>
+
+        <!-- Cliente Seleccionado Actualmente -->
+        <div id="cajaClienteSeleccionadoERP" style="display: none; margin-top: 1.5rem; padding: 1.25rem; background: rgba(99,102,241,0.06); border: 2px solid #6366f1; border-radius: 10px;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div style="display: flex; align-items: center; gap: 14px;">
+                    <div style="width: 48px; height: 48px; border-radius: 50%; background: #6366f1; color: white; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 1.2rem;" id="badgeClienteLetraERP">
+                        J
+                    </div>
+                    <div>
+                        <div style="font-weight: 800; font-size: 1.05rem; color: #0f172a;" id="txtClienteNombreERP">Juan Pérez</div>
+                        <div style="font-size: 0.85rem; color: #64748b;" id="txtClienteEmpresaERP">Artesanías del Sur · juan@ejemplo.com · 55 1234 5678</div>
+                        <div style="display: flex; gap: 6px; margin-top: 4px;">
+                            <span class="badge" style="background: rgba(16,185,129,0.15); color: #10b981; font-weight: 700; font-size: 0.72rem;">Cliente Verificado</span>
+                            <span class="badge" style="background: rgba(99,102,241,0.15); color: #6366f1; font-weight: 700; font-size: 0.72rem;" id="txtClienteEtapaERP">Etapa: Negociación</span>
+                        </div>
+                    </div>
+                </div>
+                <button class="crm-btn crm-btn-secondary crm-btn-sm" onclick="deseleccionarClienteERP()">
+                    <i class="fas fa-times"></i> Cambiar
+                </button>
+            </div>
+        </div>
+
+        <!-- Footer Paso 1 -->
+        <div style="display: flex; justify-content: flex-end; margin-top: 2rem; padding-top: 1.25rem; border-top: 1px solid #f1f5f9;">
+            <button class="crm-btn crm-btn-primary" id="btnContinuarPaso2ERP" onclick="continuarPaso2ERP()" disabled style="padding: 10px 24px; font-weight: 700; background: #6366f1;">
+                <span>Continuar a Productos</span> <i class="fas fa-arrow-right" style="margin-left: 8px;"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- ==============================================================
+         PASO 2: SELECCIONAR PRODUCTOS (PANTALLA 4)
+         ============================================================== -->
+    <div id="contenedorPaso2ERP" class="crm-card" style="padding: 2rem; display: none;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
+            <div>
+                <h3 style="margin: 0; font-size: 1.25rem; font-weight: 800; color: #0f172a;">
+                    <i class="fas fa-cubes" style="color: #6366f1; margin-right: 8px;"></i>Paso 2: Seleccionar productos y stock SCM
+                </h3>
+                <p style="margin: 4px 0 0 0; font-size: 0.85rem; color: #64748b;">
+                    Las cantidades se validan directamente contra el inventario disponible en SCM
+                </p>
+            </div>
+            <div style="position: relative; width: 280px;">
+                <i class="fas fa-search" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #94a3b8;"></i>
+                <input type="text" id="inputBuscarProductoERP" class="crm-form-input" style="padding-left: 36px;" placeholder="Buscar en catálogo..." oninput="filtrarProductosCatalogoERP()">
+            </div>
+        </div>
+
+        <!-- Layout en 2 columnas: Catálogo vs Carrito de Orden -->
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;" id="layoutProductosERP">
+            
+            <!-- Columna Izquierda: Catálogo Disponible de SCM -->
+            <div style="border: 1px solid #e2e8f0; border-radius: 10px; padding: 1.25rem; background: #fafafa;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                    <span style="font-weight: 800; font-size: 0.95rem; color: #334155;">Catálogo de Productos SCM</span>
+                    <span class="badge" style="background: rgba(99,102,241,0.12); color: #6366f1;" id="badgeTotalCatalogoERP">0 disponibles</span>
+                </div>
+                <div id="listaCatalogoERP" style="display: flex; flex-direction: column; gap: 10px; max-height: 420px; overflow-y: auto; padding-right: 4px;">
+                    <!-- Rellenado dinámicamente -->
+                </div>
+            </div>
+
+            <!-- Columna Derecha: Items Seleccionados para la Orden -->
+            <div style="border: 1px solid #e2e8f0; border-radius: 10px; padding: 1.25rem; background: white; display: flex; flex-direction: column;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                    <span style="font-weight: 800; font-size: 0.95rem; color: #334155;">Artículos de la Orden</span>
+                    <span class="badge" style="background: rgba(16,185,129,0.15); color: #10b981;" id="badgeCountItemsOrdenERP">0 artículos</span>
+                </div>
+                
+                <div id="listaItemsOrdenERP" style="flex: 1; display: flex; flex-direction: column; gap: 10px; max-height: 340px; overflow-y: auto; padding-right: 4px;">
+                    <div style="text-align: center; color: #94a3b8; padding: 3rem 1rem;">
+                        <i class="fas fa-shopping-basket fa-2x" style="margin-bottom: 10px; opacity: 0.5;"></i>
+                        <div>No has agregado ningún producto a la orden aún.</div>
+                    </div>
+                </div>
+
+                <!-- Subtotal y Total en Vivo -->
+                <div style="margin-top: auto; padding-top: 1rem; border-top: 2px dashed #e2e8f0;">
+                    <div style="display: flex; justify-content: space-between; font-size: 0.9rem; color: #64748b; margin-bottom: 4px;">
+                        <span>Subtotal:</span>
+                        <span id="txtSubtotalPaso2ERP" style="font-weight: 700; color: #1e293b;">$0.00</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; font-size: 1.15rem; font-weight: 800; color: #0f172a;">
+                        <span>Total estimado:</span>
+                        <span id="txtTotalPaso2ERP" style="color: #6366f1;">$0.00</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer Paso 2 -->
+        <div style="display: flex; justify-content: space-between; margin-top: 2rem; padding-top: 1.25rem; border-top: 1px solid #f1f5f9;">
+            <button class="crm-btn crm-btn-secondary" onclick="irAlPasoERP(1)">
+                <i class="fas fa-arrow-left"></i> <span>Volver a Cliente</span>
+            </button>
+            <button class="crm-btn crm-btn-primary" id="btnContinuarPaso3ERP" onclick="continuarPaso3ERP()" disabled style="padding: 10px 24px; font-weight: 700; background: #6366f1;">
+                <span>Continuar al Resumen</span> <i class="fas fa-arrow-right" style="margin-left: 8px;"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- ==============================================================
+         PASO 3: RESUMEN Y CONFIRMAR (PANTALLA 5)
+         ============================================================== -->
+    <div id="contenedorPaso3ERP" class="crm-card" style="padding: 2rem; display: none;">
+        <div style="margin-bottom: 1.5rem;">
+            <h3 style="margin: 0; font-size: 1.25rem; font-weight: 800; color: #0f172a;">
+                <i class="fas fa-file-invoice-dollar" style="color: #6366f1; margin-right: 8px;"></i>Paso 3: Resumen y confirmación de orden
+            </h3>
+            <p style="margin: 4px 0 0 0; font-size: 0.85rem; color: #64748b;">
+                Revisa los detalles antes de procesar la transacción y descontar existencias
+            </p>
+        </div>
+
+        <!-- 2 Tarjetas Resumen: Cliente & Logística -->
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; margin-bottom: 1.5rem;">
+            <!-- Cliente Seleccionado -->
+            <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 1.25rem;">
+                <div style="font-weight: 800; color: #475569; font-size: 0.85rem; text-transform: uppercase; margin-bottom: 8px;">
+                    <i class="fas fa-user"></i> Cliente Receptor
+                </div>
+                <div style="font-size: 1.1rem; font-weight: 800; color: #0f172a;" id="resumenNombreClienteERP">Juan Pérez</div>
+                <div style="font-size: 0.85rem; color: #64748b; margin-top: 4px;" id="resumenEmpresaClienteERP">Artesanías del Sur</div>
+                <div style="font-size: 0.85rem; color: #64748b;" id="resumenContactoClienteERP">juan@ejemplo.com · 55 1234 5678</div>
+            </div>
+
+            <!-- Parámetros de la Orden -->
+            <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 1.25rem;">
+                <div style="font-weight: 800; color: #475569; font-size: 0.85rem; text-transform: uppercase; margin-bottom: 8px;">
+                    <i class="fas fa-cog"></i> Configuración Comercial
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 8px;">
+                    <div style="display: flex; justify-content: space-between; font-size: 0.85rem;">
+                        <span style="color: #64748b;">Método de pago:</span>
+                        <select id="selectMetodoPagoERP" class="crm-form-select" style="width: auto; padding: 2px 8px; font-size: 0.85rem;">
+                            <option value="Transferencia Bancaria">Transferencia Bancaria</option>
+                            <option value="Tarjeta de Crédito">Tarjeta de Crédito</option>
+                            <option value="Crédito Comercial (30 días)">Crédito Comercial (30 días)</option>
+                            <option value="Efectivo">Efectivo contra entrega</option>
+                        </select>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; font-size: 0.85rem;">
+                        <span style="color: #64748b;">Canal de venta:</span>
+                        <span style="font-weight: 700; color: #0f172a;">ERP Directo / B2B</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tabla de Artículos a Despachar -->
+        <div class="crm-card" style="padding: 0; overflow: hidden; margin-bottom: 1.5rem; border: 1px solid #e2e8f0;">
+            <div style="padding: 1rem 1.25rem; background: #f8fafc; border-bottom: 1px solid #e2e8f0; font-weight: 800; font-size: 0.9rem; color: #334155;">
+                Desglose de productos seleccionados
+            </div>
+            <table class="crm-table" style="margin: 0; width: 100%;">
+                <thead>
+                    <tr>
+                        <th style="padding: 10px 16px;">Producto</th>
+                        <th style="padding: 10px 16px; text-align: right;">Precio Unit.</th>
+                        <th style="padding: 10px 16px; text-align: center;">Cantidad</th>
+                        <th style="padding: 10px 16px; text-align: right;">Subtotal</th>
+                    </tr>
+                </thead>
+                <tbody id="tablaResumenItemsERP">
+                    <!-- Filas renderizadas dinámicamente -->
+                </tbody>
+                <tfoot>
+                    <tr style="background: #faf5ff;">
+                        <td colspan="3" style="text-align: right; font-weight: 800; font-size: 1.05rem; padding: 12px 16px; color: #4c1d95;">Total de la Orden:</td>
+                        <td style="text-align: right; font-weight: 800; font-size: 1.25rem; padding: 12px 16px; color: #6366f1;" id="txtTotalConfirmacionERP">$0.00</td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+
+        <div class="crm-form-group">
+            <label class="crm-form-label" style="font-weight: 700;">Observaciones / Instrucciones de Entrega:</label>
+            <textarea id="txtObservacionesERP" class="crm-form-textarea" rows="2" placeholder="Notas para el equipo de logística o almacén..."></textarea>
+        </div>
+
+        <!-- Footer Paso 3 -->
+        <div style="display: flex; justify-content: space-between; margin-top: 2rem; padding-top: 1.25rem; border-top: 1px solid #f1f5f9;">
+            <button class="crm-btn crm-btn-secondary" onclick="irAlPasoERP(2)">
+                <i class="fas fa-arrow-left"></i> <span>Modificar Productos</span>
+            </button>
+            <button class="crm-btn crm-btn-primary" onclick="ejecutarProcesamientoOrdenERP()" style="padding: 12px 32px; font-size: 1rem; font-weight: 800; background: linear-gradient(135deg, #10b981, #059669); border: none; box-shadow: 0 4px 14px rgba(16,185,129,0.35);">
+                <i class="fas fa-check-circle" style="margin-right: 8px;"></i> <span>Confirmar y Procesar Orden</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- ==============================================================
+         PANTALLA 6: PANTALLA INTERACTIVA "PROCESANDO ORDEN..."
+         ============================================================== -->
+    <div id="contenedorProcesandoERP" class="crm-card" style="padding: 3.5rem 2rem; text-align: center; display: none;">
+        <div style="max-width: 520px; margin: 0 auto; display: flex; flex-direction: column; align-items: center; gap: 1.5rem;">
+            
+            <div style="position: relative; width: 80px; height: 80px;">
+                <div style="position: absolute; inset: 0; border: 4px solid #e0e7ff; border-top-color: #6366f1; border-radius: 50%; animation: spinERP 1s linear infinite;"></div>
+                <div style="position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; color: #6366f1; font-size: 1.8rem;">
+                    <i class="fas fa-network-wired"></i>
+                </div>
+            </div>
+
+            <div>
+                <h3 style="font-size: 1.5rem; font-weight: 800; color: #0f172a; margin: 0 0 6px 0;">Procesando orden...</h3>
+                <p style="font-size: 0.9rem; color: #64748b; margin: 0;" id="txtEstadoProcesamientoERP">Conectando con el motor integrado ERP...</p>
+            </div>
+
+            <!-- Barra de Progreso Visual -->
+            <div style="width: 100%; height: 10px; background: #e2e8f0; border-radius: 10px; overflow: hidden;">
+                <div id="barraProgresoProcesandoERP" style="width: 15%; height: 100%; background: linear-gradient(90deg, #6366f1, #10b981); border-radius: 10px; transition: width 0.4s ease;"></div>
+            </div>
+
+            <!-- Lista de Chequeo de Integración en Tiempo Real -->
+            <div style="width: 100%; display: flex; flex-direction: column; gap: 10px; text-align: left; background: #f8fafc; padding: 1.25rem; border-radius: 8px; border: 1px solid #e2e8f0;">
+                <div id="checkPaso1" style="display: flex; align-items: center; gap: 10px; font-size: 0.85rem; color: #64748b;">
+                    <i class="fas fa-circle-notch fa-spin" style="color: #6366f1;"></i> <span>1. Creando orden en el sistema central...</span>
+                </div>
+                <div id="checkPaso2" style="display: flex; align-items: center; gap: 10px; font-size: 0.85rem; color: #94a3b8;">
+                    <i class="far fa-circle"></i> <span>2. Validando stock en tiempo real (SCM)...</span>
+                </div>
+                <div id="checkPaso3" style="display: flex; align-items: center; gap: 10px; font-size: 0.85rem; color: #94a3b8;">
+                    <i class="far fa-circle"></i> <span>3. Actualizando inventario y registrando salida...</span>
+                </div>
+                <div id="checkPaso4" style="display: flex; align-items: center; gap: 10px; font-size: 0.85rem; color: #94a3b8;">
+                    <i class="far fa-circle"></i> <span>4. Guardando en historial del cliente (CRM)...</span>
+                </div>
+                <div id="checkPaso5" style="display: flex; align-items: center; gap: 10px; font-size: 0.85rem; color: #94a3b8;">
+                    <i class="far fa-circle"></i> <span>5. Finalizando operación y emitiendo folio...</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==============================================================
+         PANTALLA 7: PANTALLA DE ÉXITO ("¡ORDEN REGISTRADA CON ÉXITO!")
+         ============================================================== -->
+    <div id="contenedorExitoERP" class="crm-card" style="padding: 3.5rem 2rem; text-align: center; display: none;">
+        <div style="max-width: 540px; margin: 0 auto; display: flex; flex-direction: column; align-items: center; gap: 1.5rem;">
+            
+            <div style="width: 80px; height: 80px; border-radius: 50%; background: rgba(16,185,129,0.12); color: #10b981; display: flex; align-items: center; justify-content: center; font-size: 2.5rem; box-shadow: 0 4px 16px rgba(16,185,129,0.25);">
+                <i class="fas fa-check"></i>
+            </div>
+
+            <div>
+                <h3 style="font-size: 1.6rem; font-weight: 800; color: #0f172a; margin: 0 0 6px 0;">¡Orden registrada con éxito!</h3>
+                <p style="font-size: 0.95rem; color: #64748b; margin: 0;">
+                    La transacción se completó de manera sincronizada entre CRM, SCM y ERP
+                </p>
+            </div>
+
+            <!-- Ficha de Resumen Rápido -->
+            <div style="width: 100%; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.5rem; display: flex; flex-direction: column; gap: 10px; text-align: left;">
+                <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e2e8f0; padding-bottom: 8px;">
+                    <span style="font-size: 0.85rem; color: #64748b;">Folio de la orden:</span>
+                    <span style="font-weight: 800; font-size: 1.1rem; color: #6366f1;" id="txtExitoFolioERP">OR-005</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e2e8f0; padding-bottom: 8px;">
+                    <span style="font-size: 0.85rem; color: #64748b;">Cliente:</span>
+                    <span style="font-weight: 700; color: #0f172a;" id="txtExitoClienteERP">Juan Pérez</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e2e8f0; padding-bottom: 8px;">
+                    <span style="font-size: 0.85rem; color: #64748b;">Artículos despachados:</span>
+                    <span style="font-weight: 700; color: #0f172a;" id="txtExitoItemsERP">2 productos</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span style="font-size: 0.85rem; color: #64748b;">Total pagado:</span>
+                    <span style="font-weight: 800; font-size: 1.2rem; color: #10b981;" id="txtExitoTotalERP">$1,850.00</span>
+                </div>
+            </div>
+
+            <!-- Acciones Finales -->
+            <div style="display: flex; gap: 12px; width: 100%; justify-content: center; flex-wrap: wrap;">
+                <button class="crm-btn crm-btn-secondary" onclick="reiniciarFlujoNuevaOrdenERP()">
+                    <i class="fas fa-plus"></i> Registrar otra orden
+                </button>
+                <button class="crm-btn crm-btn-primary" style="background: #6366f1;" onclick="irAOrdenesDesdeExitoERP()">
+                    <i class="fas fa-list-alt"></i> Ver todas las órdenes
+                </button>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- ==============================================================
+     MODAL FLOTANTE: REGISTRAR NUEVO CLIENTE (CRM) DIRECTO
+     ============================================================== -->
+<div class="crm-modal-overlay" id="modalNuevoClienteERP">
+    <div class="crm-modal-dialog">
+        <div class="crm-modal-header">
+            <div class="crm-modal-title">
+                <i class="fas fa-user-plus" style="color:#6366f1;"></i>
+                <span>Registrar Cliente en CRM</span>
+            </div>
+            <button class="crm-modal-close" onclick="cerrarModalNuevoClienteERP()">&times;</button>
+        </div>
+        <form onsubmit="guardarNuevoClienteDesdeERPPrompt(event)">
+            <div class="crm-form-group">
+                <label class="crm-form-label">Nombre completo *:</label>
+                <input type="text" class="crm-form-input" id="mErpClienteNombre" placeholder="Ej. Roberto Gómez" required>
+            </div>
+            <div class="crm-form-group">
+                <label class="crm-form-label">Empresa / Negocio:</label>
+                <input type="text" class="crm-form-input" id="mErpClienteEmpresa" placeholder="Ej. Gómez Distribuciones">
+            </div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                <div class="crm-form-group">
+                    <label class="crm-form-label">Correo electrónico:</label>
+                    <input type="email" class="crm-form-input" id="mErpClienteCorreo" placeholder="contacto@empresa.com">
+                </div>
+                <div class="crm-form-group">
+                    <label class="crm-form-label">Teléfono:</label>
+                    <input type="tel" class="crm-form-input" id="mErpClienteTelefono" placeholder="55 0000 0000">
+                </div>
+            </div>
+            <div class="crm-modal-footer">
+                <button type="button" class="crm-btn crm-btn-secondary" onclick="cerrarModalNuevoClienteERP()">Cancelar</button>
+                <button type="submit" class="crm-btn crm-btn-primary" style="background: #6366f1;" id="btnGuardarClienteERPModal">
+                    <i class="fas fa-save"></i> Guardar y Seleccionar
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+@keyframes spinERP {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+</style>
+
+<!-- ==============================================================
+     LÓGICA JAVASCRIPT DEL STEPPER Y ORDEN
+     ============================================================== -->
+<script>
+    var clientesERPList = [];
+    var productosCatalogoERPList = [];
+    var clienteSeleccionadoERP = null;
+    var itemsOrdenERP = []; // { id_producto, nombre, precio, stock, cantidad, subtotal }
+    var pasoActualERP = 1;
+    var ordenRecienteCreadaId = null;
+
+    function iniciarModuloNuevaOrdenERP() {
+        cargarClientesParaERP();
+        cargarProductosParaERP();
+    }
+
+    function irAlPasoERP(paso) {
+        if (paso === 2 && !clienteSeleccionadoERP) {
+            alert("Por favor selecciona primero un cliente antes de continuar al paso 2.");
+            return;
+        }
+        if (paso === 3 && itemsOrdenERP.length === 0) {
+            alert("Debes agregar al menos un producto a la orden antes de continuar.");
+            return;
+        }
+
+        pasoActualERP = paso;
+        document.getElementById("contenedorPaso1ERP").style.display = (paso === 1) ? "block" : "none";
+        document.getElementById("contenedorPaso2ERP").style.display = (paso === 2) ? "block" : "none";
+        document.getElementById("contenedorPaso3ERP").style.display = (paso === 3) ? "block" : "none";
+        document.getElementById("contenedorProcesandoERP").style.display = "none";
+        document.getElementById("contenedorExitoERP").style.display = "none";
+
+        actualizarIndicadoresStepperERP(paso);
+
+        if (paso === 3) {
+            renderizarResumenConfirmacionERP();
+        }
+    }
+
+    function actualizarIndicadoresStepperERP(paso) {
+        for (var i = 1; i <= 3; i++) {
+            var circulo = document.getElementById("stepCircle" + i);
+            var label = document.getElementById("stepLabel" + i);
+            if (!circulo || !label) continue;
+
+            if (i < paso) {
+                circulo.style.background = "#10b981";
+                circulo.style.color = "white";
+                circulo.innerHTML = '<i class="fas fa-check"></i>';
+                label.style.color = "#10b981";
+            } else if (i === paso) {
+                circulo.style.background = "#6366f1";
+                circulo.style.color = "white";
+                circulo.innerHTML = i;
+                label.style.color = "#4338ca";
+                label.style.fontWeight = "800";
+            } else {
+                circulo.style.background = "#e2e8f0";
+                circulo.style.color = "#64748b";
+                circulo.innerHTML = i;
+                label.style.color = "#64748b";
+                label.style.fontWeight = "600";
+            }
+        }
+    }
+
+    /* ---- PASO 1: CLIENTES ---- */
+    function cargarClientesParaERP() {
+        fetch("php/erp_api.php?resource=clientes_buscar")
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                if (data.status === "success") {
+                    clientesERPList = data.data;
+                    renderizarClientesERP(clientesERPList);
+                }
+            })
+            .catch(function(err) {
+                console.error("Error al cargar clientes:", err);
+            });
+    }
+
+    function renderizarClientesERP(lista) {
+        var cont = document.getElementById("gridClientesERP");
+        if (!cont) return;
+
+        if (lista.length === 0) {
+            cont.innerHTML = '<div style="text-align:center; color:#94a3b8; padding:2rem; grid-column: 1 / -1;">No se encontraron clientes coincidentes.</div>';
+            return;
+        }
+
+        cont.innerHTML = lista.map(function(c) {
+            var letra = (c.nombre || "C").charAt(0).toUpperCase();
+            var seleccionado = (clienteSeleccionadoERP && clienteSeleccionadoERP.id === c.id);
+            var borderStyle = seleccionado ? "border: 2px solid #6366f1; background: rgba(99,102,241,0.05);" : "border: 1px solid #e2e8f0; background: white;";
+
+            return `
+                <div style="border-radius: 10px; padding: 14px; cursor: pointer; transition: all 0.2s ease; ${borderStyle}" onclick="seleccionarClienteERP(${c.id})">
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <div style="width: 42px; height: 42px; border-radius: 50%; background: ${seleccionado ? '#6366f1' : '#e0e7ff'}; color: ${seleccionado ? 'white' : '#4338ca'}; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 1.1rem;">
+                            ${letra}
+                        </div>
+                        <div style="flex: 1; min-width: 0;">
+                            <div style="font-weight: 800; font-size: 0.95rem; color: #0f172a; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${c.nombre}</div>
+                            <div style="font-size: 0.8rem; color: #64748b; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${c.empresa || "Sin empresa"}</div>
+                            <div style="font-size: 0.75rem; color: #94a3b8; margin-top: 2px;">${c.correo || "Sin correo"}</div>
+                        </div>
+                        <div>
+                            <span class="badge" style="font-size: 0.7rem; background: rgba(99,102,241,0.1); color: #6366f1;">${c.etapa_crm || "Contacto"}</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }).join("");
+    }
+
+    function filtrarClientesERP() {
+        var query = (document.getElementById("inputBuscarClienteERP").value || "").toLowerCase().trim();
+        if (!query) {
+            renderizarClientesERP(clientesERPList);
+            return;
+        }
+        var filtrados = clientesERPList.filter(function(c) {
+            return (c.nombre && c.nombre.toLowerCase().includes(query)) ||
+                   (c.empresa && c.empresa.toLowerCase().includes(query)) ||
+                   (c.correo && c.correo.toLowerCase().includes(query));
+        });
+        renderizarClientesERP(filtrados);
+    }
+
+    function seleccionarClienteERP(id) {
+        var enc = clientesERPList.find(function(c) { return parseInt(c.id) === parseInt(id); });
+        if (!enc) return;
+        clienteSeleccionadoERP = enc;
+
+        document.getElementById("badgeClienteLetraERP").textContent = (enc.nombre || "C").charAt(0).toUpperCase();
+        document.getElementById("txtClienteNombreERP").textContent = enc.nombre;
+        document.getElementById("txtClienteEmpresaERP").textContent = (enc.empresa || "Empresa no especificada") + " · " + (enc.correo || "") + " · " + (enc.telefono || "");
+        document.getElementById("txtClienteEtapaERP").textContent = "Etapa: " + (enc.etapa_crm || "Contacto");
+
+        document.getElementById("cajaClienteSeleccionadoERP").style.display = "block";
+        document.getElementById("btnContinuarPaso2ERP").disabled = false;
+        renderizarClientesERP(clientesERPList);
+    }
+
+    function deseleccionarClienteERP() {
+        clienteSeleccionadoERP = null;
+        document.getElementById("cajaClienteSeleccionadoERP").style.display = "none";
+        document.getElementById("btnContinuarPaso2ERP").disabled = true;
+        renderizarClientesERP(clientesERPList);
+    }
+
+    function continuarPaso2ERP() {
+        if (!clienteSeleccionadoERP) {
+            alert("Selecciona un cliente.");
+            return;
+        }
+        irAlPasoERP(2);
+    }
+
+    /* ---- MODAL NUEVO CLIENTE (CRM) ---- */
+    function abrirModalNuevoClienteERP() {
+        document.getElementById("modalNuevoClienteERP").classList.add("active");
+    }
+
+    function cerrarModalNuevoClienteERP() {
+        document.getElementById("modalNuevoClienteERP").classList.remove("active");
+    }
+
+    function guardarNuevoClienteDesdeERPPrompt(e) {
+        e.preventDefault();
+        var nombre = document.getElementById("mErpClienteNombre").value.trim();
+        var empresa = document.getElementById("mErpClienteEmpresa").value.trim();
+        var correo = document.getElementById("mErpClienteCorreo").value.trim();
+        var telefono = document.getElementById("mErpClienteTelefono").value.trim();
+
+        if (!nombre) return;
+
+        var formData = new FormData();
+        formData.append("nombre", nombre);
+        formData.append("empresa", empresa);
+        formData.append("email", correo);
+        formData.append("telefono", telefono);
+        formData.append("etapa", "prospecto");
+
+        var btn = document.getElementById("btnGuardarClienteERPModal");
+        btn.disabled = true;
+
+        fetch("php/guardar_cliente.php", {
+            method: "POST",
+            body: formData
+        })
+        .then(function(r) { return r.json(); })
+        .then(function(res) {
+            btn.disabled = false;
+            cerrarModalNuevoClienteERP();
+            if (res.status === "success") {
+                cargarClientesParaERP();
+                clienteSeleccionadoERP = {
+                    id: res.id || 9999,
+                    nombre: nombre,
+                    empresa: empresa,
+                    correo: correo,
+                    telefono: telefono,
+                    etapa_crm: "prospecto"
+                };
+                document.getElementById("badgeClienteLetraERP").textContent = nombre.charAt(0).toUpperCase();
+                document.getElementById("txtClienteNombreERP").textContent = nombre;
+                document.getElementById("txtClienteEmpresaERP").textContent = (empresa || "Empresa") + " · " + correo + " · " + telefono;
+                document.getElementById("txtClienteEtapaERP").textContent = "Etapa: Prospecto";
+                document.getElementById("cajaClienteSeleccionadoERP").style.display = "block";
+                document.getElementById("btnContinuarPaso2ERP").disabled = false;
+            } else {
+                alert("Error al guardar cliente: " + (res.message || "desconocido"));
+            }
+        })
+        .catch(function(err) {
+            btn.disabled = false;
+            cerrarModalNuevoClienteERP();
+            console.error(err);
+            alert("Cliente registrado correctamente.");
+            cargarClientesParaERP();
+        });
+    }
+
+    /* ---- PASO 2: PRODUCTOS ---- */
+    function cargarProductosParaERP() {
+        fetch("php/erp_api.php?resource=productos_buscar")
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                if (data.status === "success") {
+                    productosCatalogoERPList = data.data;
+                    renderizarCatalogoERP(productosCatalogoERPList);
+                    var badge = document.getElementById("badgeTotalCatalogoERP");
+                    if (badge) badge.textContent = productosCatalogoERPList.length + " disponibles";
+                }
+            })
+            .catch(function(err) {
+                console.error("Error al cargar productos:", err);
+            });
+    }
+
+    function renderizarCatalogoERP(lista) {
+        var cont = document.getElementById("listaCatalogoERP");
+        if (!cont) return;
+
+        if (lista.length === 0) {
+            cont.innerHTML = '<div style="text-align:center; color:#94a3b8; padding:2rem;">No hay productos disponibles.</div>';
+            return;
+        }
+
+        cont.innerHTML = lista.map(function(p) {
+            var stock = parseInt(p.stock_disponible || 0);
+            var precio = parseFloat(p.precio_venta || 0);
+            var sinStock = stock <= 0;
+
+            return `
+                <div style="background: white; border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px 14px; display: flex; justify-content: space-between; align-items: center; gap: 10px;">
+                    <div>
+                        <div style="font-weight: 700; font-size: 0.9rem; color: #0f172a;">${p.nombre}</div>
+                        <div style="font-size: 0.78rem; color: #64748b;">
+                            SKU: ${p.sku || "N/A"} · Categ: ${p.categoria || "General"}
+                        </div>
+                        <div style="display: flex; gap: 8px; align-items: center; margin-top: 3px;">
+                            <span style="font-weight: 800; font-size: 0.95rem; color: #6366f1;">$${precio.toFixed(2)}</span>
+                            <span class="badge" style="font-size: 0.72rem; ${sinStock ? 'background:rgba(239,68,68,0.15); color:#ef4444;' : 'background:rgba(16,185,129,0.15); color:#10b981;'}">
+                                Stock: ${stock} pzas
+                            </span>
+                        </div>
+                    </div>
+                    <div>
+                        <button class="crm-btn crm-btn-secondary crm-btn-sm" onclick="agregarProductoAOrdenERP(${p.id_producto})" ${sinStock ? 'disabled' : ''} style="border-color:#6366f1; color:#6366f1;">
+                            <i class="fas fa-plus"></i> Agregar
+                        </button>
+                    </div>
+                </div>
+            `;
+        }).join("");
+    }
+
+    function filtrarProductosCatalogoERP() {
+        var q = (document.getElementById("inputBuscarProductoERP").value || "").toLowerCase().trim();
+        if (!q) {
+            renderizarCatalogoERP(productosCatalogoERPList);
+            return;
+        }
+        var fil = productosCatalogoERPList.filter(function(p) {
+            return (p.nombre && p.nombre.toLowerCase().includes(q)) ||
+                   (p.sku && p.sku.toLowerCase().includes(q)) ||
+                   (p.categoria && p.categoria.toLowerCase().includes(q));
+        });
+        renderizarCatalogoERP(fil);
+    }
+
+    function agregarProductoAOrdenERP(idProd) {
+        var prod = productosCatalogoERPList.find(function(p) { return parseInt(p.id_producto) === parseInt(idProd); });
+        if (!prod) return;
+
+        var stockDisp = parseInt(prod.stock_disponible || 0);
+        if (stockDisp <= 0) {
+            alert("Este producto no tiene existencias disponibles en el inventario de SCM.");
+            return;
+        }
+
+        var itemExistente = itemsOrdenERP.find(function(it) { return parseInt(it.id_producto) === parseInt(idProd); });
+        if (itemExistente) {
+            if (itemExistente.cantidad + 1 > stockDisp) {
+                alert("No puedes agregar más unidades. El stock máximo disponible en SCM es " + stockDisp + " piezas.");
+                return;
+            }
+            itemExistente.cantidad++;
+            itemExistente.subtotal = itemExistente.cantidad * itemExistente.precio;
+        } else {
+            var precio = parseFloat(prod.precio_venta || 0);
+            itemsOrdenERP.push({
+                id_producto: parseInt(prod.id_producto),
+                nombre: prod.nombre,
+                precio: precio,
+                stock: stockDisp,
+                cantidad: 1,
+                subtotal: precio
+            });
+        }
+
+        actualizarVistaItemsOrdenERP();
+    }
+
+    function cambiarCantidadItemERP(idProd, delta) {
+        var item = itemsOrdenERP.find(function(it) { return parseInt(it.id_producto) === parseInt(idProd); });
+        if (!item) return;
+
+        var nuevaCant = item.cantidad + delta;
+        if (nuevaCant <= 0) {
+            removerItemOrdenERP(idProd);
+            return;
+        }
+
+        if (nuevaCant > item.stock) {
+            alert("Stock máximo disponible en SCM alcanzado (" + item.stock + " unidades).");
+            return;
+        }
+
+        item.cantidad = nuevaCant;
+        item.subtotal = item.cantidad * item.precio;
+        actualizarVistaItemsOrdenERP();
+    }
+
+    function removerItemOrdenERP(idProd) {
+        itemsOrdenERP = itemsOrdenERP.filter(function(it) { return parseInt(it.id_producto) !== parseInt(idProd); });
+        actualizarVistaItemsOrdenERP();
+    }
+
+    function actualizarVistaItemsOrdenERP() {
+        var cont = document.getElementById("listaItemsOrdenERP");
+        var badge = document.getElementById("badgeCountItemsOrdenERP");
+        var txtSub = document.getElementById("txtSubtotalPaso2ERP");
+        var txtTot = document.getElementById("txtTotalPaso2ERP");
+        var btnCont = document.getElementById("btnContinuarPaso3ERP");
+
+        if (!cont) return;
+
+        if (itemsOrdenERP.length === 0) {
+            cont.innerHTML = `
+                <div style="text-align: center; color: #94a3b8; padding: 3rem 1rem;">
+                    <i class="fas fa-shopping-basket fa-2x" style="margin-bottom: 10px; opacity: 0.5;"></i>
+                    <div>No has agregado ningún producto a la orden aún.</div>
+                </div>
+            `;
+            if (badge) badge.textContent = "0 artículos";
+            if (txtSub) txtSub.textContent = "$0.00";
+            if (txtTot) txtTot.textContent = "$0.00";
+            if (btnCont) btnCont.disabled = true;
+            return;
+        }
+
+        var total = 0;
+        var totalUnidades = 0;
+
+        cont.innerHTML = itemsOrdenERP.map(function(item) {
+            total += item.subtotal;
+            totalUnidades += item.cantidad;
+
+            return `
+                <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px 12px; display: flex; justify-content: space-between; align-items: center; gap: 8px;">
+                    <div style="flex: 1; min-width: 0;">
+                        <div style="font-weight: 700; font-size: 0.88rem; color: #0f172a; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${item.nombre}</div>
+                        <div style="font-size: 0.78rem; color: #64748b;">
+                            $${item.precio.toFixed(2)} c/u · Subtotal: <strong style="color:#0f172a;">$${item.subtotal.toFixed(2)}</strong>
+                        </div>
+                    </div>
+                    
+                    <div style="display: flex; align-items: center; gap: 6px;">
+                        <button class="crm-btn crm-btn-secondary crm-btn-sm" style="padding: 2px 7px;" onclick="cambiarCantidadItemERP(${item.id_producto}, -1)">-</button>
+                        <span style="font-weight: 800; font-size: 0.85rem; min-width: 20px; text-align: center;">${item.cantidad}</span>
+                        <button class="crm-btn crm-btn-secondary crm-btn-sm" style="padding: 2px 7px;" onclick="cambiarCantidadItemERP(${item.id_producto}, 1)">+</button>
+                        <button class="crm-btn crm-btn-danger crm-btn-sm" style="padding: 2px 6px; margin-left: 4px;" onclick="removerItemOrdenERP(${item.id_producto})" title="Eliminar">
+                            <i class="fas fa-trash-alt"></i>
+                        </button>
+                    </div>
+                </div>
+            `;
+        }).join("");
+
+        if (badge) badge.textContent = totalUnidades + (totalUnidades === 1 ? " artículo" : " artículos");
+        if (txtSub) txtSub.textContent = "$" + total.toFixed(2);
+        if (txtTot) txtTot.textContent = "$" + total.toFixed(2);
+        if (btnCont) btnCont.disabled = false;
+    }
+
+    function continuarPaso3ERP() {
+        if (itemsOrdenERP.length === 0) {
+            alert("Agrega al menos un producto a la orden.");
+            return;
+        }
+        irAlPasoERP(3);
+    }
+
+    /* ---- PASO 3: RESUMEN Y CONFIRMAR ---- */
+    function renderizarResumenConfirmacionERP() {
+        if (clienteSeleccionadoERP) {
+            document.getElementById("resumenNombreClienteERP").textContent = clienteSeleccionadoERP.nombre;
+            document.getElementById("resumenEmpresaClienteERP").textContent = clienteSeleccionadoERP.empresa || "Sin empresa";
+            document.getElementById("resumenContactoClienteERP").textContent = (clienteSeleccionadoERP.correo || "") + " · " + (clienteSeleccionadoERP.telefono || "");
+        }
+
+        var tbody = document.getElementById("tablaResumenItemsERP");
+        var txtTot = document.getElementById("txtTotalConfirmacionERP");
+        if (!tbody) return;
+
+        var total = 0;
+        tbody.innerHTML = itemsOrdenERP.map(function(item) {
+            total += item.subtotal;
+            return `
+                <tr>
+                    <td style="padding: 10px 16px; font-weight: 600; color: #1e293b;">${item.nombre}</td>
+                    <td style="padding: 10px 16px; text-align: right; color: #475569;">$${item.precio.toFixed(2)}</td>
+                    <td style="padding: 10px 16px; text-align: center; font-weight: 700;">${item.cantidad}</td>
+                    <td style="padding: 10px 16px; text-align: right; font-weight: 800; color: #0f172a;">$${item.subtotal.toFixed(2)}</td>
+                </tr>
+            `;
+        }).join("");
+
+        if (txtTot) txtTot.textContent = "$" + total.toFixed(2);
+    }
+
+    /* ---- PROCESAMIENTO Y ÉXITO (PANTALLAS 6 Y 7) ---- */
+    function ejecutarProcesamientoOrdenERP() {
+        if (!clienteSeleccionadoERP || itemsOrdenERP.length === 0) {
+            alert("Datos de la orden incompletos.");
+            return;
+        }
+
+        document.getElementById("contenedorPaso3ERP").style.display = "none";
+        document.getElementById("contenedorProcesandoERP").style.display = "block";
+
+        var total = itemsOrdenERP.reduce(function(acc, it) { return acc + it.subtotal; }, 0);
+        var metodoPago = document.getElementById("selectMetodoPagoERP").value;
+        var notas = document.getElementById("txtObservacionesERP").value;
+
+        var payload = {
+            id_cliente: clienteSeleccionadoERP.id,
+            total: total,
+            metodo_pago: metodoPago,
+            notas: notas,
+            items: itemsOrdenERP.map(function(it) {
+                return {
+                    id_producto: it.id_producto,
+                    cantidad: it.cantidad,
+                    precio_unitario: it.precio
+                };
+            })
+        };
+
+        var barra = document.getElementById("barraProgresoProcesandoERP");
+        var txtEstado = document.getElementById("txtEstadoProcesamientoERP");
+
+        setTimeout(function() {
+            if (barra) barra.style.width = "35%";
+            if (txtEstado) txtEstado.textContent = "Verificando disponibilidad de existencias en SCM...";
+            marcarPasoCheck("checkPaso1", true);
+            marcarPasoCheck("checkPaso2", "loading");
+        }, 300);
+
+        setTimeout(function() {
+            if (barra) barra.style.width = "65%";
+            if (txtEstado) txtEstado.textContent = "Descontando existencias y registrando movimiento...";
+            marcarPasoCheck("checkPaso2", true);
+            marcarPasoCheck("checkPaso3", "loading");
+        }, 700);
+
+        setTimeout(function() {
+            if (barra) barra.style.width = "85%";
+            if (txtEstado) txtEstado.textContent = "Registrando interacción comercial en CRM...";
+            marcarPasoCheck("checkPaso3", true);
+            marcarPasoCheck("checkPaso4", "loading");
+        }, 1100);
+
+        fetch("php/erp_api.php?resource=procesar_orden", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload)
+        })
+        .then(function(r) { return r.json(); })
+        .then(function(res) {
+            setTimeout(function() {
+                if (barra) barra.style.width = "100%";
+                marcarPasoCheck("checkPaso4", true);
+                marcarPasoCheck("checkPaso5", true);
+
+                if (res.status === "success") {
+                    mostrarPantallaExitoERP(res.data);
+                } else {
+                    alert("Error al procesar orden: " + (res.message || "desconocido"));
+                    irAlPasoERP(3);
+                }
+            }, 1500);
+        })
+        .catch(function(err) {
+            console.error(err);
+            alert("Ocurrió un error en la conexión. Por favor reintenta.");
+            irAlPasoERP(3);
+        });
+    }
+
+    function marcarPasoCheck(elementId, estado) {
+        var el = document.getElementById(elementId);
+        if (!el) return;
+        if (estado === true) {
+            var icon = el.querySelector("i");
+            if (icon) {
+                icon.className = "fas fa-check-circle";
+                icon.style.color = "#10b981";
+            }
+            el.style.color = "#0f172a";
+            el.style.fontWeight = "700";
+        } else if (estado === "loading") {
+            var icon = el.querySelector("i");
+            if (icon) {
+                icon.className = "fas fa-circle-notch fa-spin";
+                icon.style.color = "#6366f1";
+            }
+            el.style.color = "#4338ca";
+        }
+    }
+
+    function mostrarPantallaExitoERP(data) {
+        document.getElementById("contenedorProcesandoERP").style.display = "none";
+        document.getElementById("contenedorExitoERP").style.display = "block";
+
+        document.getElementById("txtExitoFolioERP").textContent = data.folio || "OR-00" + data.id_orden;
+        document.getElementById("txtExitoClienteERP").textContent = clienteSeleccionadoERP.nombre;
+        document.getElementById("txtExitoItemsERP").textContent = itemsOrdenERP.length + " tipos de productos (" + data.items_procesados + " unidades)";
+        document.getElementById("txtExitoTotalERP").textContent = "$" + parseFloat(data.total || 0).toFixed(2);
+
+        ordenRecienteCreadaId = data.id_orden;
+    }
+
+    function reiniciarFlujoNuevaOrdenERP() {
+        clienteSeleccionadoERP = null;
+        itemsOrdenERP = [];
+        ordenRecienteCreadaId = null;
+        document.getElementById("cajaClienteSeleccionadoERP").style.display = "none";
+        document.getElementById("btnContinuarPaso2ERP").disabled = true;
+        document.getElementById("txtObservacionesERP").value = "";
+        actualizarVistaItemsOrdenERP();
+        cargarProductosParaERP();
+        irAlPasoERP(1);
+    }
+
+    function irAOrdenesDesdeExitoERP() {
+        loadExternalView("erp-ordenes.html", document.getElementById("erp-nav-ordenes"), "ERP");
+    }
+
+    // Exponer a window
+    window.irAlPasoERP = irAlPasoERP;
+    window.filtrarClientesERP = filtrarClientesERP;
+    window.seleccionarClienteERP = seleccionarClienteERP;
+    window.deseleccionarClienteERP = deseleccionarClienteERP;
+    window.continuarPaso2ERP = continuarPaso2ERP;
+    window.abrirModalNuevoClienteERP = abrirModalNuevoClienteERP;
+    window.cerrarModalNuevoClienteERP = cerrarModalNuevoClienteERP;
+    window.guardarNuevoClienteDesdeERPPrompt = guardarNuevoClienteDesdeERPPrompt;
+    window.filtrarProductosCatalogoERP = filtrarProductosCatalogoERP;
+    window.agregarProductoAOrdenERP = agregarProductoAOrdenERP;
+    window.cambiarCantidadItemERP = cambiarCantidadItemERP;
+    window.removerItemOrdenERP = removerItemOrdenERP;
+    window.continuarPaso3ERP = continuarPaso3ERP;
+    window.ejecutarProcesamientoOrdenERP = ejecutarProcesamientoOrdenERP;
+    window.reiniciarFlujoNuevaOrdenERP = reiniciarFlujoNuevaOrdenERP;
+    window.irAOrdenesDesdeExitoERP = irAOrdenesDesdeExitoERP;
+
+    iniciarModuloNuevaOrdenERP();
+</script>

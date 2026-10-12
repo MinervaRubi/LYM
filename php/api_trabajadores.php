@@ -17,11 +17,11 @@ $method = $_SERVER['REQUEST_METHOD'];
 
 try {
     if ($method === 'GET') {
-        // Listar usuarios con role = 'trabajador'
+        // Listar usuarios operativos (trabajador, ventas, logistica)
         $stmt = $pdo->query("
             SELECT id, username, email, role, created_at
             FROM usuarios
-            WHERE role = 'trabajador'
+            WHERE role IN ('trabajador', 'ventas', 'logistica')
             ORDER BY id DESC
         ");
         $trabajadores = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -104,25 +104,26 @@ try {
         }
 
         // ----------------------------------------------------
-        // ACCIÓN: REGRESAR ADMINISTRADOR A TRABAJADOR
+        // ACCIÓN: REGRESAR ADMINISTRADOR A ROL OPERATIVO (TRABAJADOR, VENTAS, LOGÍSTICA)
         // ----------------------------------------------------
-        if ($action === 'hacer_trabajador' || $action === 'revocar_admin' || (isset($input['role']) && $input['role'] === 'trabajador')) {
-            $adminId = isset($input['id']) ? (int)$input['id'] : 0;
+        if ($action === 'hacer_trabajador' || $action === 'revocar_admin' || $action === 'cambiar_rol' || (isset($input['role']) && in_array($input['role'], ['trabajador', 'ventas', 'logistica']))) {
+            $targetId = isset($input['id']) ? (int)$input['id'] : 0;
+            $targetRol = isset($input['role']) && in_array($input['role'], ['trabajador', 'ventas', 'logistica', 'admin']) ? $input['role'] : 'trabajador';
 
-            if ($adminId <= 0) {
+            if ($targetId <= 0) {
                 http_response_code(400);
                 echo json_encode(['success' => false, 'error' => 'ID de usuario no válido']);
                 exit();
             }
 
-            if ($adminId === (int)$_SESSION['user_id']) {
+            if ($targetId === (int)$_SESSION['user_id'] && $targetRol !== 'admin') {
                 http_response_code(400);
                 echo json_encode(['success' => false, 'error' => 'No puedes revocar tus propios privilegios de Administrador.']);
                 exit();
             }
 
             $stmtCheck = $pdo->prepare("SELECT id, username, email, role FROM usuarios WHERE id = ? LIMIT 1");
-            $stmtCheck->execute([$adminId]);
+            $stmtCheck->execute([$targetId]);
             $user = $stmtCheck->fetch();
 
             if (!$user) {
@@ -131,17 +132,17 @@ try {
                 exit();
             }
 
-            $stmtUpd = $pdo->prepare("UPDATE usuarios SET role = 'trabajador' WHERE id = ?");
-            $stmtUpd->execute([$adminId]);
+            $stmtUpd = $pdo->prepare("UPDATE usuarios SET role = ? WHERE id = ?");
+            $stmtUpd->execute([$targetRol, $targetId]);
 
             echo json_encode([
                 'success' => true,
-                'message' => "El usuario '{$user['username']}' ha sido cambiado al rol de Trabajador.",
+                'message' => "El usuario '{$user['username']}' ahora tiene el rol de " . ucfirst($targetRol) . ".",
                 'user' => [
-                    'id' => $adminId,
+                    'id' => $targetId,
                     'username' => $user['username'],
                     'email' => $user['email'],
-                    'role' => 'trabajador'
+                    'role' => $targetRol
                 ]
             ]);
             exit();
@@ -183,22 +184,23 @@ try {
 
         $password_hash = password_hash($password, PASSWORD_DEFAULT);
 
-        // Insertar usuario trabajador
+        // Insertar usuario con rol (trabajador, ventas, logistica)
+        $userRole = isset($input['role']) && in_array($input['role'], ['ventas', 'logistica', 'trabajador', 'admin']) ? $input['role'] : 'ventas';
         $stmtIns = $pdo->prepare("
             INSERT INTO usuarios (username, email, password_hash, role)
-            VALUES (?, ?, ?, 'trabajador')
+            VALUES (?, ?, ?, ?)
         ");
-        $stmtIns->execute([$username, $email, $password_hash]);
+        $stmtIns->execute([$username, $email, $password_hash, $userRole]);
         $workerId = (int)$pdo->lastInsertId();
 
         echo json_encode([
             'success' => true,
-            'message' => 'Trabajador registrado exitosamente',
+            'message' => 'Colaborador registrado exitosamente con rol ' . ucfirst($userRole),
             'trabajador' => [
                 'id' => $workerId,
                 'username' => $username,
                 'email' => $email,
-                'role' => 'trabajador'
+                'role' => $userRole
             ]
         ]);
         exit();
@@ -210,7 +212,7 @@ try {
 
         if ($id <= 0) {
             http_response_code(400);
-            echo json_encode(['success' => false, 'error' => 'ID de trabajador no válido']);
+            echo json_encode(['success' => false, 'error' => 'ID no válido']);
             exit();
         }
 
@@ -220,10 +222,10 @@ try {
             exit();
         }
 
-        $stmtDel = $pdo->prepare("DELETE FROM usuarios WHERE id = ? AND role = 'trabajador'");
+        $stmtDel = $pdo->prepare("DELETE FROM usuarios WHERE id = ? AND role IN ('trabajador', 'ventas', 'logistica')");
         $stmtDel->execute([$id]);
 
-        echo json_encode(['success' => true, 'message' => 'Trabajador eliminado correctamente']);
+        echo json_encode(['success' => true, 'message' => 'Usuario operativo eliminado correctamente']);
         exit();
     }
 

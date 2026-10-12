@@ -1,0 +1,277 @@
+<!-- ==============================================================
+     MÓDULO ERP: INICIO ERP (DASHBOARD GENERAL)
+     CUMPLE PANTALLA 1 DE LA GUÍA VISUAL ERP (ETAPA 3)
+     ARCHIVO: erp-inicio.html
+============================================================== -->
+
+<div style="display: flex; flex-direction: column; gap: 1.5rem;">
+    <!-- CABECERA -->
+    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+        <div>
+            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+                <span class="badge" style="background: rgba(99,102,241,0.15); color: #6366f1; font-weight:700; font-size:0.75rem; padding: 2px 8px; border-radius: 6px;">ERP</span>
+                <span style="font-size: 0.85rem; color: var(--text-muted);">Planificación de Recursos Empresariales</span>
+            </div>
+            <h2 style="font-size: 1.6rem; font-weight: 800; color: var(--text-heading); margin: 0;">Dashboard ERP</h2>
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 2px;">Vista integrada del negocio conectando CRM y SCM en tiempo real</p>
+        </div>
+        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+            <button class="crm-btn crm-btn-secondary crm-btn-sm" onclick="cargarDashboardERP()">
+                <i class="fas fa-sync-alt"></i> <span>Actualizar</span>
+            </button>
+            <button class="crm-btn crm-btn-primary" style="background: linear-gradient(135deg, #6366f1, #4f46e5); border:none; box-shadow: 0 4px 12px rgba(99, 102, 241, 0.25);" onclick="navegarDesdeERPHub('erp-nueva-orden.html', 'erp-nav-nueva-orden')">
+                <i class="fas fa-plus"></i> <span>+ Nueva orden</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- 3 TARJETAS KPIS PRINCIPALES (PANTALLA 1) -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1.25rem;">
+        <!-- 1. CLIENTES ACTIVOS -->
+        <div class="crm-card crm-metric-card" style="border-left: 4px solid #0d9488;">
+            <div>
+                <div class="crm-metric-value" id="kpiClientesActivos" style="color: #0f172a; font-size: 2.2rem;">0</div>
+                <div class="crm-metric-label" style="font-size: 0.95rem; font-weight: 700; color: #475569;">Clientes activos</div>
+                <div class="crm-metric-subtext positive" style="font-size: 0.78rem;">Sincronizado con CRM</div>
+            </div>
+            <div class="crm-icon-box" style="background: rgba(13,148,136,0.12); color: #0d9488;">
+                <i class="fas fa-users"></i>
+            </div>
+        </div>
+
+        <!-- 2. ÓRDENES DE CLIENTES -->
+        <div class="crm-card crm-metric-card" style="border-left: 4px solid #2563eb;">
+            <div>
+                <div class="crm-metric-value" id="kpiOrdenesClientes" style="color: #0f172a; font-size: 2.2rem;">0</div>
+                <div class="crm-metric-label" style="font-size: 0.95rem; font-weight: 700; color: #475569;">Órdenes de clientes</div>
+                <div class="crm-metric-subtext positive" style="font-size: 0.78rem;">Gestión centralizada ERP</div>
+            </div>
+            <div class="crm-icon-box" style="background: rgba(37,99,235,0.12); color: #2563eb;">
+                <i class="fas fa-clipboard-check"></i>
+            </div>
+        </div>
+
+        <!-- 3. VENTAS TOTALES -->
+        <div class="crm-card crm-metric-card" style="border-left: 4px solid #ea580c;">
+            <div>
+                <div class="crm-metric-value" id="kpiVentasTotales" style="color: #ea580c; font-size: 2.2rem;">$0.00</div>
+                <div class="crm-metric-label" style="font-size: 0.95rem; font-weight: 700; color: #475569;">Ventas totales</div>
+                <div class="crm-metric-subtext" style="font-size: 0.78rem; color:#64748b;">Ingresos empresariales</div>
+            </div>
+            <div class="crm-icon-box" style="background: rgba(234,88,12,0.12); color: #ea580c;">
+                <i class="fas fa-dollar-sign"></i>
+            </div>
+        </div>
+    </div>
+
+    <!-- PANELES DE GRÁFICAS: VENTAS 6 MESES & PRODUCTOS MÁS VENDIDOS (PANTALLA 1) -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(420px, 1fr)); gap: 1.5rem;">
+        
+        <!-- PANEL IZQUIERDO: VENTAS ÚLTIMOS 6 MESES -->
+        <div class="crm-card" style="padding: 1.5rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem;">
+                <h3 style="margin: 0; font-size: 1.1rem; font-weight: 800; color: #0f172a;">
+                    Ventas (últimos 6 meses)
+                </h3>
+                <span class="badge" style="background: rgba(99,102,241,0.12); color: #6366f1; font-weight:700; font-size:0.75rem;">
+                    MXN ($)
+                </span>
+            </div>
+            <div style="height: 220px; position: relative;">
+                <canvas id="chartVentas6MesesERP"></canvas>
+            </div>
+        </div>
+
+        <!-- PANEL DERECHO: PRODUCTOS MÁS VENDIDOS -->
+        <div class="crm-card" style="padding: 1.5rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem;">
+                <h3 style="margin: 0; font-size: 1.1rem; font-weight: 800; color: #0f172a;">
+                    Productos más vendidos
+                </h3>
+                <span style="font-size: 0.8rem; color: #64748b;">Unidades despachadas</span>
+            </div>
+            <div id="contenedorTopProductosERP" style="display: flex; flex-direction: column; gap: 14px;">
+                <div style="text-align: center; color: #94a3b8; padding: 2rem;">Cargando productos...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ACCESOS RÁPIDOS A MÓDULOS DEL ERP -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem;">
+        <div class="crm-card" style="padding: 1.25rem; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s;" onclick="navegarDesdeERPHub('erp-ordenes.html', 'erp-nav-ordenes')" onmouseover="this.style.transform='translateY(-3px)'" onmouseout="this.style.transform='none'">
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <div style="width: 44px; height: 44px; border-radius: 10px; background: rgba(37,99,235,0.12); color: #2563eb; display: flex; align-items: center; justify-content: center; font-size: 1.2rem;">
+                    <i class="fas fa-list-check"></i>
+                </div>
+                <div>
+                    <div style="font-weight: 800; color: #0f172a; font-size: 0.95rem;">Órdenes de clientes</div>
+                    <div style="font-size: 0.78rem; color: #64748b;">Consultar y gestionar pedidos</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="crm-card" style="padding: 1.25rem; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s;" onclick="navegarDesdeERPHub('erp-nueva-orden.html', 'erp-nav-nueva-orden')" onmouseover="this.style.transform='translateY(-3px)'" onmouseout="this.style.transform='none'">
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <div style="width: 44px; height: 44px; border-radius: 10px; background: rgba(99,102,241,0.12); color: #6366f1; display: flex; align-items: center; justify-content: center; font-size: 1.2rem;">
+                    <i class="fas fa-cart-plus"></i>
+                </div>
+                <div>
+                    <div style="font-weight: 800; color: #0f172a; font-size: 0.95rem;">Crear nueva orden</div>
+                    <div style="font-size: 0.78rem; color: #64748b;">Asistente en 3 pasos</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="crm-card" style="padding: 1.25rem; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s;" onclick="navegarDesdeERPHub('erp-madurez.html', 'erp-nav-madurez')" onmouseover="this.style.transform='translateY(-3px)'" onmouseout="this.style.transform='none'">
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <div style="width: 44px; height: 44px; border-radius: 10px; background: rgba(5,150,105,0.12); color: #059669; display: flex; align-items: center; justify-content: center; font-size: 1.2rem;">
+                    <i class="fas fa-layer-group"></i>
+                </div>
+                <div>
+                    <div style="font-weight: 800; color: #0f172a; font-size: 0.95rem;">Nivel de adopción ERP</div>
+                    <div style="font-size: 0.78rem; color: #64748b;">Evaluación del sistema</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="crm-card" style="padding: 1.25rem; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s;" onclick="navegarDesdeERPHub('erp-reportes.html', 'erp-nav-reportes')" onmouseover="this.style.transform='translateY(-3px)'" onmouseout="this.style.transform='none'">
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <div style="width: 44px; height: 44px; border-radius: 10px; background: rgba(234,88,12,0.12); color: #ea580c; display: flex; align-items: center; justify-content: center; font-size: 1.2rem;">
+                    <i class="fas fa-chart-pie"></i>
+                </div>
+                <div>
+                    <div style="font-weight: 800; color: #0f172a; font-size: 0.95rem;">Reportes empresariales</div>
+                    <div style="font-size: 0.78rem; color: #64748b;">Integración CRM-ERP-SCM</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    var chartVentasERPInstance = window.chartVentasERPInstance || null;
+
+    function navegarDesdeERPHub(viewUrl, navItemId) {
+        if (typeof abrirAcordeonERP === 'function') {
+            abrirAcordeonERP();
+        }
+        var navBtn = document.getElementById(navItemId);
+        if (typeof loadExternalView === 'function') {
+            loadExternalView(viewUrl, navBtn, 'ERP');
+        }
+    }
+
+    async function cargarDashboardERP() {
+        try {
+            var resp = await fetch("php/erp_api.php?resource=metricas");
+            if (!resp.ok) throw new Error("Error del servidor");
+
+            var data = await resp.json();
+            if (data.success && data.metricas) {
+                var m = data.metricas;
+                var elCli = document.getElementById("kpiClientesActivos");
+                if (elCli) elCli.textContent = m.clientes_activos || 0;
+
+                var elOrd = document.getElementById("kpiOrdenesClientes");
+                if (elOrd) elOrd.textContent = m.ordenes_total || 0;
+
+                var elVen = document.getElementById("kpiVentasTotales");
+                if (elVen) elVen.textContent = m.ventas_totales_formato || '$0.00';
+
+                renderizarTopProductosERP(m.top_productos);
+                renderizarGraficaVentas6Meses(m.ventas_meses);
+            }
+        } catch (e) {
+            console.error("Error al cargar dashboard ERP:", e);
+        }
+    }
+
+    function renderizarTopProductosERP(items) {
+        var c = document.getElementById("contenedorTopProductosERP");
+        if (!c) return;
+
+        if (!items || items.length === 0) {
+            c.innerHTML = '<div style="color:#64748b; font-size:0.85rem; padding:1.5rem; text-align:center;">No hay registros de ventas aún.</div>';
+            return;
+        }
+
+        c.innerHTML = items.map(function(it) {
+            return `
+                <div style="display:flex; flex-direction:column; gap:4px;">
+                    <div style="display:flex; justify-content:space-between; font-size:0.88rem; font-weight:700; color:#1e293b;">
+                        <span>${it.nombre}</span>
+                        <span style="color:#6366f1; font-weight:800;">${it.total_vendido}</span>
+                    </div>
+                    <div style="width:100%; height:8px; background:#f1f5f9; border-radius:999px; overflow:hidden;">
+                        <div style="width:${it.porcentaje}%; height:100%; background:linear-gradient(90deg, #6366f1, #818cf8); border-radius:999px; transition:width 0.6s ease;"></div>
+                    </div>
+                </div>
+            `;
+        }).join("");
+    }
+
+    function renderizarGraficaVentas6Meses(ventasData) {
+        var canvas = document.getElementById("chartVentas6MesesERP");
+        if (!canvas) return;
+
+        if (typeof Chart === 'undefined') {
+            var script = document.createElement("script");
+            script.src = "https://cdn.jsdelivr.net/npm/chart.js";
+            script.onload = function() { renderizarGraficaVentas6Meses(ventasData); };
+            document.head.appendChild(script);
+            return;
+        }
+
+        var ctx = canvas.getContext("2d");
+        if (window.chartVentasERPInstance) {
+            window.chartVentasERPInstance.destroy();
+            window.chartVentasERPInstance = null;
+        }
+
+        var labels = (ventasData && ventasData.labels) ? ventasData.labels : ["Nov", "Dic", "Ene", "Feb", "Mar", "Abr"];
+        var valores = (ventasData && ventasData.valores) ? ventasData.valores : [500, 750, 1200, 950, 2100, 1800];
+
+        window.chartVentasERPInstance = new Chart(ctx, {
+            type: "bar",
+            data: {
+                labels: labels,
+                datasets: [
+                    {
+                        label: "Ventas ($)",
+                        data: valores,
+                        backgroundColor: "#6366f1",
+                        borderRadius: 6,
+                        barPercentage: 0.55
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: function(ctx) { return " Ventas: $" + Number(ctx.raw).toLocaleString() + " MXN"; }
+                        }
+                    }
+                },
+                scales: {
+                    x: { grid: { display: false } },
+                    y: { 
+                        beginAtZero: true,
+                        grid: { color: "#f1f5f9" }
+                    }
+                }
+            }
+        });
+    }
+
+    // Exponer globalmente
+    window.cargarDashboardERP = cargarDashboardERP;
+    window.navegarDesdeERPHub = navegarDesdeERPHub;
+    window.renderizarTopProductosERP = renderizarTopProductosERP;
+    window.renderizarGraficaVentas6Meses = renderizarGraficaVentas6Meses;
+
+    cargarDashboardERP();
+</script>

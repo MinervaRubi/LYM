@@ -191,7 +191,37 @@
                     </div>
                 </div>
 
-                <!-- 4. USUARIOS -->
+                <!-- 4. ERP DESPLEGABLE (ETAPA 3 - UNIFICADO) -->
+                <div class="crm-accordion-wrapper" id="wrapperAccordionERP">
+                    <button class="crm-nav-item crm-nav-accordion-btn" id="btnAccordionERP" onclick="toggleAccordion('ERP')">
+                        <i class="fas fa-network-wired"></i>
+                        <span>ERP</span>
+                        <i class="fas fa-chevron-down crm-chevron" id="chevronERP"></i>
+                    </button>
+                    
+                    <div class="crm-nav-sublist" id="submenuERP">
+                        <button class="crm-nav-item crm-nav-subitem" id="erp-nav-inicio" onclick="loadExternalView('erp-inicio.html', this, 'ERP')">
+                            <i class="fas fa-chart-pie"></i> <span>Dashboard ERP</span>
+                        </button>
+                        <button class="crm-nav-item crm-nav-subitem" id="erp-nav-ordenes" onclick="loadExternalView('erp-ordenes.html', this, 'ERP')">
+                            <i class="fas fa-clipboard-list"></i> <span>Órdenes de Clientes</span>
+                        </button>
+                        <button class="crm-nav-item crm-nav-subitem" id="erp-nav-nueva-orden" onclick="loadExternalView('erp-nueva-orden.html', this, 'ERP')">
+                            <i class="fas fa-plus-circle"></i> <span>Nueva Orden</span>
+                        </button>
+                        <button class="crm-nav-item crm-nav-subitem" id="erp-nav-reportes" onclick="loadExternalView('erp-reportes.html', this, 'ERP')">
+                            <i class="fas fa-chart-line"></i> <span>Reportes y Métricas</span>
+                        </button>
+                        <button class="crm-nav-item crm-nav-subitem" id="erp-nav-madurez" onclick="loadExternalView('erp-madurez.html', this, 'ERP')">
+                            <i class="fas fa-layer-group"></i> <span>Nivel de Madurez</span>
+                        </button>
+                        <button class="crm-nav-item crm-nav-subitem" id="erp-nav-roles" onclick="loadExternalView('erp-roles.html', this, 'ERP')">
+                            <i class="fas fa-user-shield"></i> <span>Panel por Rol</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 5. USUARIOS -->
                 <button class="crm-nav-item" id="navItemUsuarios" onclick="loadExternalView('crm-usuarios.html', this, 'Usuarios')">
                     <i class="fas fa-user-shield"></i> <span>Usuarios</span>
                 </button>
@@ -507,30 +537,41 @@
             </div>
 
             <div style="padding: 1rem 0;">
-                <!-- FORMULARIO NUEVO TRABAJADOR -->
+                <!-- FORMULARIO NUEVO COLABORADOR / ROL -->
                 <form onsubmit="crearNuevoTrabajador(event)" style="background:#f8fafc; padding:16px; border-radius:12px; border:1px solid #e2e8f0; margin-bottom:20px;">
-                    <h4 style="margin:0 0 12px 0; font-size:0.95rem; color:#0f172a;"><i class="fas fa-user-plus"></i> Registrar Nuevo Trabajador</h4>
+                    <h4 style="margin:0 0 12px 0; font-size:0.95rem; color:#0f172a;"><i class="fas fa-user-plus"></i> Registrar Colaborador</h4>
                     <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
                         <div class="crm-form-group" style="margin:0;">
                             <label class="crm-form-label">Usuario:</label>
-                            <input type="text" class="crm-form-input" id="mTrabajadorUsername" placeholder="Ej. carlos_trabajador" required>
+                            <input type="text" class="crm-form-input" id="mTrabajadorUsername" placeholder="Ej. carlos_ventas" required>
                         </div>
                         <div class="crm-form-group" style="margin:0;">
                             <label class="crm-form-label">Correo:</label>
                             <input type="email" class="crm-form-input" id="mTrabajadorEmail" placeholder="correo@lym.com" required>
                         </div>
                     </div>
-                    <div class="crm-form-group" style="margin-top:10px;">
-                        <label class="crm-form-label">Contraseña de acceso:</label>
-                        <input type="password" class="crm-form-input" id="mTrabajadorPassword" placeholder="••••••••" minlength="6" required>
+                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:10px;">
+                        <div class="crm-form-group" style="margin:0;">
+                            <label class="crm-form-label">Rol del Sistema:</label>
+                            <select class="crm-form-select" id="mTrabajadorRol" required>
+                                <option value="ventas">💼 Ventas (CRM + Órdenes)</option>
+                                <option value="logistica">🚚 Logística (SCM Almacén)</option>
+                                <option value="trabajador">👷 Operativo (Trabajador)</option>
+                                <option value="admin">👑 Administrador Total</option>
+                            </select>
+                        </div>
+                        <div class="crm-form-group" style="margin:0;">
+                            <label class="crm-form-label">Contraseña de acceso:</label>
+                            <input type="password" class="crm-form-input" id="mTrabajadorPassword" placeholder="••••••••" minlength="6" required>
+                        </div>
                     </div>
                     <button type="submit" class="crm-btn crm-btn-primary" id="btnCrearTrabajador" style="margin-top:12px; width:100%;">
-                        <i class="fas fa-plus-circle"></i> Crear Cuenta de Trabajador
+                        <i class="fas fa-plus-circle"></i> Registrar Cuenta de Colaborador
                     </button>
                 </form>
 
-                <!-- LISTADO DE TRABAJADORES REGISTRADOS -->
-                <h4 style="margin:0 0 10px 0; font-size:0.95rem; color:#0f172a;"><i class="fas fa-id-badge" style="color:var(--primary);"></i> Trabajadores Actuales</h4>
+                <!-- LISTADO DE COLABORADORES OPERATIVOS -->
+                <h4 style="margin:0 0 10px 0; font-size:0.95rem; color:#0f172a;"><i class="fas fa-id-badge" style="color:var(--primary);"></i> Colaboradores Operativos (Ventas / Logística / Almacén)</h4>
                 <div id="tablaTrabajadoresContainer" style="max-height:220px; overflow-y:auto; border:1px solid #e2e8f0; border-radius:8px; margin-bottom:20px;">
                     <div style="padding:20px; text-align:center; color:#94a3b8;">Cargando lista de trabajadores...</div>
                 </div>
@@ -625,6 +666,34 @@
                         loadExternalView('scm-inicio.html', document.getElementById("scm-nav-inicio"), 'SCM');
                     }
                 }
+            } else if (module === 'ERP') {
+                const btn = document.getElementById("btnAccordionERP");
+                const sub = document.getElementById("submenuERP");
+                const isOpen = sub.classList.contains("show");
+
+                if (isOpen) {
+                    // CERRAR ERP
+                    btn.classList.remove("open");
+                    sub.classList.remove("show");
+                } else {
+                    // ABRIR ERP
+                    btn.classList.add("open");
+                    sub.classList.add("show");
+                    
+                    // Si no estamos viendo una pantalla de ERP, cargar el Dashboard de ERP
+                    if (!currentLoadedView || !currentLoadedView.startsWith('erp-')) {
+                        loadExternalView('erp-inicio.html', document.getElementById("erp-nav-inicio"), 'ERP');
+                    }
+                }
+            }
+        }
+
+        function abrirAcordeonERP() {
+            const btn = document.getElementById("btnAccordionERP");
+            const sub = document.getElementById("submenuERP");
+            if (btn && sub) {
+                btn.classList.add("open");
+                sub.classList.add("show");
             }
         }
 
@@ -684,7 +753,7 @@
                 button.classList.add("active");
                 label = button.querySelector("span")?.textContent || label;
 
-                // Detectar si está dentro de CRM o SCM
+                // Detectar si está dentro de CRM, SCM o ERP
                 if (button.closest("#submenuCRM") || moduleCategory === 'CRM') {
                     abrirAcordeonCRM();
                     if (bSection && bSep) {
@@ -699,11 +768,30 @@
                         bSection.style.display = "inline";
                         bSep.style.display = "inline";
                     }
+                } else if (button.closest("#submenuERP") || moduleCategory === 'ERP') {
+                    abrirAcordeonERP();
+                    if (bSection && bSep) {
+                        bSection.textContent = "ERP";
+                        bSection.style.display = "inline";
+                        bSep.style.display = "inline";
+                    }
                 } else {
                     if (bSection && bSep) {
                         bSection.style.display = "none";
                         bSep.style.display = "none";
                     }
+                }
+            } else if (moduleCategory === 'ERP' || viewUrl.startsWith('erp-')) {
+                abrirAcordeonERP();
+                if (bSection && bSep) {
+                    bSection.textContent = "ERP";
+                    bSection.style.display = "inline";
+                    bSep.style.display = "inline";
+                }
+                if (viewUrl === 'erp-inicio.html') {
+                    label = "Dashboard ERP";
+                    const navInicio = document.getElementById("erp-nav-inicio");
+                    if (navInicio) navInicio.classList.add("active");
                 }
             } else if (moduleCategory === 'SCM' || viewUrl.startsWith('scm-')) {
                 abrirAcordeonSCM();
@@ -1129,47 +1217,98 @@
                 }
 
                 const role = String(data.user.role || '').toLowerCase();
-                if (role !== 'admin' && role !== 'trabajador') {
-                    bloquearAccesoCRM("El panel de gestión CRM es de uso exclusivo para Administradores y Trabajadores.");
+                const rolesPermitidos = ['admin', 'trabajador', 'ventas', 'logistica'];
+                if (!rolesPermitidos.includes(role)) {
+                    bloquearAccesoCRM("El panel de gestión es exclusivo para Administradores, Ventas y Logística.");
                     return false;
                 }
 
                 currentUserCRM = data.user;
                 window.currentUserCRM = data.user;
                 document.getElementById("gestorName").textContent = data.user.username;
-                document.getElementById("gestorRole").textContent = role === 'admin' ? 'Administrador' : 'Trabajador';
+                
+                let nombreRolEtiqueta = 'Administrador';
+                if (role === 'ventas') nombreRolEtiqueta = 'Ventas / Comercial';
+                else if (role === 'logistica') nombreRolEtiqueta = 'Logística / Almacén';
+                else if (role === 'trabajador') nombreRolEtiqueta = 'Logística (Operativo)';
+                document.getElementById("gestorRole").textContent = nombreRolEtiqueta;
                 document.getElementById("topbarAvatar").textContent = data.user.username.charAt(0).toUpperCase();
 
-                // PERMISOS SEGÚN ROL:
-                if (role === 'trabajador') {
-                    // Los trabajadores solo pueden ver Clientes e Interacciones/Solicitudes
-                    const btnDashboard = document.querySelector("button[onclick*='crm-dashboard.html']");
-                    const btnUsuarios = document.getElementById("navItemUsuarios");
-                    const btnActividad = document.getElementById("navItemActividad");
-                    const btnReportes = document.getElementById("navItemReportes");
-                    const btnTrabajadores = document.getElementById("navItemTrabajadores");
-
-                    if (btnDashboard) btnDashboard.style.display = 'none';
-                    if (btnUsuarios) btnUsuarios.style.display = 'none';
-                    if (btnActividad) btnActividad.style.display = 'none';
-                    if (btnReportes) btnReportes.style.display = 'none';
-                    if (btnTrabajadores) btnTrabajadores.style.display = 'none';
-
-                    // Cargar vista inicial de Clientes para trabajador
-                    loadExternalView("crm-clientes.html", document.querySelector("button[onclick*='crm-clientes.html']"));
-                } else {
-                    // Administrador (Juanlalo): Mostrar botón de Gestión de Trabajadores
-                    const btnTrabajadores = document.getElementById("navItemTrabajadores");
-                    if (btnTrabajadores) btnTrabajadores.style.display = 'flex';
-
-                    // Cargar Dashboard por defecto
-                    loadExternalView("crm-dashboard.html", document.querySelector(".crm-nav-item.active"));
-                }
+                // APLICAR MATRIZ DE PERMISOS ESTRICTA SEGÚN ROL (PANTALLA 10 DE GUÍA VISUAL)
+                aplicarMatrizPermisosPorRol(role);
 
                 return true;
             } catch (e) {
+                console.error(e);
                 window.location.href = "index.php";
                 return false;
+            }
+        }
+
+        function aplicarMatrizPermisosPorRol(role) {
+            role = String(role || '').toLowerCase();
+
+            // Elementos del Sidebar
+            const btnInicio = document.getElementById("navItemInicio");
+            const btnWrapCRM = document.getElementById("btnAccordionCRM")?.closest(".crm-accordion-wrapper");
+            const btnWrapSCM = document.getElementById("btnAccordionSCM")?.closest(".crm-accordion-wrapper");
+            const btnWrapERP = document.getElementById("wrapperAccordionERP");
+            const btnUsuarios = document.getElementById("navItemUsuarios");
+            const btnTrabajadores = document.getElementById("navItemTrabajadores");
+
+            // Subitems SCM
+            const scmProv = document.getElementById("scm-nav-proveedores");
+            const scmMov = document.getElementById("scm-nav-movimientos");
+            const scmLog = document.getElementById("scm-nav-logistica");
+            const scmPed = document.getElementById("scm-nav-pedidos");
+
+            // Subitems ERP
+            const erpNuevaOrden = document.getElementById("erp-nav-nueva-orden");
+
+            // Resetear visibilidad por defecto
+            if (btnInicio) btnInicio.style.display = 'flex';
+            if (btnWrapCRM) btnWrapCRM.style.display = 'block';
+            if (btnWrapSCM) btnWrapSCM.style.display = 'block';
+            if (btnWrapERP) btnWrapERP.style.display = 'block';
+            if (btnUsuarios) btnUsuarios.style.display = 'flex';
+            if (btnTrabajadores) btnTrabajadores.style.display = 'flex';
+            if (scmProv) scmProv.style.display = 'flex';
+            if (scmMov) scmMov.style.display = 'flex';
+            if (scmLog) scmLog.style.display = 'flex';
+            if (scmPed) scmPed.style.display = 'flex';
+            if (erpNuevaOrden) erpNuevaOrden.style.display = 'flex';
+
+            if (role === 'ventas') {
+                // ROL VENTAS:
+                // Acceso: Inicio, CRM (completo), SCM (Solo Catálogo de Productos para vender), ERP (Órdenes, Nueva orden, Reportes, Nivel)
+                // Restringido: Usuarios de sistema, Gestión de trabajadores, Operaciones internas de almacén SCM (proveedores, movimientos, pedidos prov, logística)
+                if (btnUsuarios) btnUsuarios.style.display = 'none';
+                if (btnTrabajadores) btnTrabajadores.style.display = 'none';
+                if (scmProv) scmProv.style.display = 'none';
+                if (scmMov) scmMov.style.display = 'none';
+                if (scmLog) scmLog.style.display = 'none';
+                if (scmPed) scmPed.style.display = 'none';
+
+                // Cargar vista inicial de Ventas: CRM Clientes o ERP Órdenes
+                loadExternalView("crm-clientes.html", document.getElementById("navItemClientes"), "CRM");
+                abrirAcordeonCRM();
+
+            } else if (role === 'logistica' || role === 'trabajador') {
+                // ROL LOGÍSTICA / ALMACÉN (TRABAJADOR):
+                // Acceso: Inicio, SCM (completo: Catálogo, Inventario, Movimientos, Pedidos, Proveedores, Logística, Reportes), ERP (Órdenes lectura, Reportes, Madurez)
+                // Restringido: CRM (Clientes confidenciales), Usuarios de sistema, Gestión de trabajadores, Crear nueva orden de venta comercial directa
+                if (btnWrapCRM) btnWrapCRM.style.display = 'none';
+                if (btnUsuarios) btnUsuarios.style.display = 'none';
+                if (btnTrabajadores) btnTrabajadores.style.display = 'none';
+                if (erpNuevaOrden) erpNuevaOrden.style.display = 'none';
+
+                // Cargar vista inicial de Logística: Inventario SCM
+                loadExternalView("scm-inventario.html", document.getElementById("scm-nav-inventario"), "SCM");
+                abrirAcordeonSCM();
+
+            } else {
+                // ROL ADMINISTRADOR: Acceso Total
+                loadExternalView("crm-dashboard.html", document.querySelector(".crm-nav-item.active"));
             }
         }
 
@@ -1197,9 +1336,17 @@
                             <button type="submit" id="btnDirectLogin" style="background:linear-gradient(135deg, #6B46C1, #8B5CF6); color:#ffffff; padding:12px; border:none; border-radius:10px; font-weight:700; font-size:0.95rem; cursor:pointer; margin-top:6px; box-shadow:0 4px 14px rgba(107,70,193,0.35);">
                                 <i class="fas fa-sign-in-alt"></i> Iniciar Sesión en el Gestor
                             </button>
-                            <button type="button" onclick="loginRapidoAdminDirecto()" style="background:#f8fafc; color:#6B46C1; border:1px solid #e2e8f0; padding:10px; border-radius:10px; font-weight:700; font-size:0.88rem; cursor:pointer;">
-                                ⚡ Entrar con 1 Clic (admin / admin)
-                            </button>
+                            <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:6px; margin-top:4px;">
+                                <button type="button" onclick="loginRapidoDirecto('admin','admin')" style="background:#f8fafc; color:#6B46C1; border:1px solid #cbd5e1; padding:8px 4px; border-radius:8px; font-weight:700; font-size:0.75rem; cursor:pointer;" title="Acceso Total Administrador">
+                                    👑 Admin
+                                </button>
+                                <button type="button" onclick="loginRapidoDirecto('vendedor','123456')" style="background:#eff6ff; color:#2563eb; border:1px solid #bfdbfe; padding:8px 4px; border-radius:8px; font-weight:700; font-size:0.75rem; cursor:pointer;" title="Acceso Rol Ventas">
+                                    💼 Ventas
+                                </button>
+                                <button type="button" onclick="loginRapidoDirecto('almacen','123456')" style="background:#f0fdf4; color:#059669; border:1px solid #bbf7d0; padding:8px 4px; border-radius:8px; font-weight:700; font-size:0.75rem; cursor:pointer;" title="Acceso Rol Logística / Almacén">
+                                    🚚 Logística
+                                </button>
+                            </div>
                         </form>
 
                         <div style="margin-top:1.5rem; border-top:1px solid #f1f5f9; padding-top:1rem;">
@@ -1245,10 +1392,14 @@
             }
         }
 
-        async function loginRapidoAdminDirecto() {
-            document.getElementById("directGestorUser").value = "admin";
-            document.getElementById("directGestorPass").value = "admin";
+        async function loginRapidoDirecto(u, p) {
+            document.getElementById("directGestorUser").value = u;
+            document.getElementById("directGestorPass").value = p;
             document.getElementById("btnDirectLogin").click();
+        }
+
+        async function loginRapidoAdminDirecto() {
+            loginRapidoDirecto("admin", "admin");
         }
 
         /* GESTIÓN DE TRABAJADORES (ADMIN) */
@@ -1279,20 +1430,40 @@
                     container.innerHTML = '<div style="padding:20px; text-align:center; color:#94a3b8;"><i class="fas fa-info-circle"></i> No hay trabajadores con rol operativo actualmente.</div>';
                 } else {
                     let html = '<table style="width:100%; border-collapse:collapse; font-size:0.88rem;">';
-                    html += '<tr style="background:#f1f5f9; text-align:left; color:#475569;"><th style="padding:10px 12px;">Usuario</th><th style="padding:10px 12px;">Correo</th><th style="padding:10px 12px; text-align:right;">Acciones</th></tr>';
+                    html += '<tr style="background:#f1f5f9; text-align:left; color:#475569;"><th style="padding:10px 12px;">Usuario</th><th style="padding:10px 12px;">Correo</th><th style="padding:10px 12px;">Rol</th><th style="padding:10px 12px; text-align:right;">Acciones</th></tr>';
                     data.trabajadores.forEach(t => {
+                        let badgeColor = '#64748b';
+                        let badgeBg = '#f1f5f9';
+                        let rolLabel = 'Operativo';
+
+                        if (t.role === 'ventas') {
+                            badgeColor = '#2563eb';
+                            badgeBg = '#eff6ff';
+                            rolLabel = '💼 Ventas';
+                        } else if (t.role === 'logistica') {
+                            badgeColor = '#059669';
+                            badgeBg = '#f0fdf4';
+                            rolLabel = '🚚 Logística';
+                        } else if (t.role === 'trabajador') {
+                            badgeColor = '#d97706';
+                            badgeBg = '#fef3c7';
+                            rolLabel = '👷 Trabajador';
+                        }
+
                         html += `
                             <tr style="border-bottom:1px solid #f1f5f9;">
                                 <td style="padding:10px 12px; font-weight:600; color:#0f172a;">
                                     <i class="fas fa-id-badge" style="color:#64748b; margin-right:6px;"></i>${escapeHtml(t.username)}
-                                    <span class="badge badge-prospecto" style="font-size:0.68rem; margin-left:6px;"><span class="badge-dot"></span>Trabajador</span>
                                 </td>
                                 <td style="padding:10px 12px; color:#475569;">${escapeHtml(t.email)}</td>
+                                <td style="padding:10px 12px;">
+                                    <span class="badge" style="background:${badgeBg}; color:${badgeColor}; font-weight:700; font-size:0.75rem; padding:3px 8px; border-radius:6px;">${rolLabel}</span>
+                                </td>
                                 <td style="padding:10px 12px; text-align:right; white-space:nowrap;">
-                                    <button onclick="hacerTrabajadorAdmin(${t.id}, '${escapeHtml(t.username)}')" class="crm-btn crm-btn-sm" style="background:linear-gradient(135deg, #6B46C1, #8B5CF6); color:#ffffff; padding:5px 10px; margin-right:6px; font-weight:600; border-radius:6px;" title="Convertir a Administrador con todos los privilegios">
-                                        <i class="fas fa-user-shield"></i> Hacer Admin
+                                    <button onclick="hacerTrabajadorAdmin(${t.id}, '${escapeHtml(t.username)}')" class="crm-btn crm-btn-sm" style="background:linear-gradient(135deg, #6B46C1, #8B5CF6); color:#ffffff; padding:4px 8px; margin-right:4px; font-weight:600; font-size:0.75rem; border-radius:6px;" title="Convertir a Administrador con todos los privilegios">
+                                        <i class="fas fa-user-shield"></i> Admin
                                     </button>
-                                    <button onclick="eliminarTrabajador(${t.id}, '${escapeHtml(t.username)}')" class="crm-btn crm-btn-secondary crm-btn-sm" style="color:#ef4444; padding:5px 8px; border-radius:6px;" title="Eliminar cuenta de trabajador">
+                                    <button onclick="eliminarTrabajador(${t.id}, '${escapeHtml(t.username)}')" class="crm-btn crm-btn-secondary crm-btn-sm" style="color:#ef4444; padding:4px 6px; font-size:0.75rem; border-radius:6px;" title="Eliminar colaborador">
                                         <i class="fas fa-trash"></i>
                                     </button>
                                 </td>
@@ -1317,7 +1488,7 @@
                             let btnAccion = '';
                             if (!esPropio && !esRoot) {
                                 btnAccion = `
-                                    <button onclick="quitarAdminTrabajador(${a.id}, '${escapeHtml(a.username)}')" class="crm-btn crm-btn-secondary crm-btn-sm" style="color:#64748b; padding:3px 8px; font-size:0.75rem; border-radius:6px;" title="Regresar al rol de Trabajador">
+                                    <button onclick="quitarAdminTrabajador(${a.id}, '${escapeHtml(a.username)}')" class="crm-btn crm-btn-secondary crm-btn-sm" style="color:#64748b; padding:3px 8px; font-size:0.75rem; border-radius:6px;" title="Regresar al rol operativo">
                                         <i class="fas fa-user-minus"></i> Quitar Admin
                                     </button>
                                 `;
@@ -1345,12 +1516,12 @@
                     }
                 }
             } catch (e) {
-                container.innerHTML = '<div style="padding:20px; text-align:center; color:#ef4444;">Error al cargar trabajadores: ' + escapeHtml(e.message) + '</div>';
+                container.innerHTML = '<div style="padding:20px; text-align:center; color:#ef4444;">Error al cargar colaboradores: ' + escapeHtml(e.message) + '</div>';
             }
         }
 
         async function hacerTrabajadorAdmin(id, username) {
-            if (!confirm(`¿Estás seguro de hacer Administrador al trabajador "${username}"?\n\nAl confirmarlo, se le otorgarán de inmediato TODOS los privilegios de Administrador:\n• Acceso a métricas y reportes globales\n• Aprobación y rechazo de descuentos para clientes\n• Gestión de cuentas de usuarios y trabajadores\n• Eliminación de clientes y gestión de productos`)) {
+            if (!confirm(`¿Estás seguro de hacer Administrador al usuario "${username}"?\n\nAl confirmarlo, se le otorgarán de inmediato TODOS los privilegios de Administrador en CRM, SCM y ERP.`)) {
                 return;
             }
 
@@ -1377,7 +1548,7 @@
         }
 
         async function quitarAdminTrabajador(id, username) {
-            if (!confirm(`¿Deseas revocar los privilegios de Administrador al usuario "${username}" y regresarlo al rol de Trabajador?`)) {
+            if (!confirm(`¿Deseas revocar los privilegios de Administrador al usuario "${username}"?`)) {
                 return;
             }
 
@@ -1385,12 +1556,12 @@
                 const resp = await fetch("php/api_trabajadores.php", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ action: "hacer_trabajador", id: id })
+                    body: JSON.stringify({ action: "hacer_trabajador", id: id, role: "ventas" })
                 });
                 const data = await resp.json();
 
                 if (data.success) {
-                    showNotification(data.message || `Privilegios revocados a "${username}". Ahora es Trabajador.`);
+                    showNotification(data.message || `Privilegios revocados a "${username}".`);
                     await cargarTrabajadoresLista();
                     if (typeof cargarUsuarios === "function") {
                         cargarUsuarios();
@@ -1407,6 +1578,7 @@
             e.preventDefault();
             const username = document.getElementById("mTrabajadorUsername").value.trim();
             const email = document.getElementById("mTrabajadorEmail").value.trim();
+            const role = document.getElementById("mTrabajadorRol")?.value || 'ventas';
             const password = document.getElementById("mTrabajadorPassword").value;
             const btn = document.getElementById("btnCrearTrabajador");
 
@@ -1417,18 +1589,18 @@
                 const resp = await fetch("php/api_trabajadores.php", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ username, email, password })
+                    body: JSON.stringify({ username, email, password, role })
                 });
                 const data = await resp.json();
 
                 if (data.success) {
-                    showNotification("¡Cuenta de trabajador creada exitosamente!");
+                    showNotification("¡Cuenta de colaborador creada exitosamente!");
                     document.getElementById("mTrabajadorUsername").value = '';
                     document.getElementById("mTrabajadorEmail").value = '';
                     document.getElementById("mTrabajadorPassword").value = '';
                     await cargarTrabajadoresLista();
                 } else {
-                    alert(data.error || "No se pudo registrar al trabajador");
+                    alert(data.error || "No se pudo registrar al colaborador");
                 }
             } catch (err) {
                 alert("Error de red: " + err.message);

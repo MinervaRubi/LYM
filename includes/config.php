@@ -110,24 +110,38 @@ function isAdmin()
 
 
 // =====================================================
-// VERIFICAR TRABAJADOR
+// VERIFICAR TRABAJADOR / LOGÍSTICA
 // =====================================================
 
 function isWorker()
 {
-    return isLoggedIn()
-        && isset($_SESSION['user_role'])
-        && strtolower($_SESSION['user_role']) === 'trabajador';
+    if (!isLoggedIn() || !isset($_SESSION['user_role'])) return false;
+    $r = strtolower($_SESSION['user_role']);
+    return ($r === 'trabajador' || $r === 'logistica');
 }
 
 
 // =====================================================
-// VERIFICAR PERSONAL (ADMIN O TRABAJADOR)
+// VERIFICAR VENTAS / COMERCIAL
+// =====================================================
+
+function isSales()
+{
+    if (!isLoggedIn() || !isset($_SESSION['user_role'])) return false;
+    $r = strtolower($_SESSION['user_role']);
+    return ($r === 'ventas');
+}
+
+
+// =====================================================
+// VERIFICAR PERSONAL INTERNO (ADMIN, VENTAS, LOGÍSTICA O TRABAJADOR)
 // =====================================================
 
 function isStaff()
 {
-    return isAdmin() || isWorker();
+    if (!isLoggedIn() || !isset($_SESSION['user_role'])) return false;
+    $r = strtolower($_SESSION['user_role']);
+    return in_array($r, ['admin', 'trabajador', 'ventas', 'logistica']);
 }
 
 
