@@ -7,9 +7,11 @@
     <title>Método de pago | LYM Diseño e Impresión</title>
 
     <link rel="stylesheet" href="Proyecto.css">
+    <link rel="stylesheet" href="notifications.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap"
         rel="stylesheet">
+    <script src="notifications.js"></script>
     <script src="https://www.paypal.com/sdk/js?client-id=TU_CLIENT_ID&currency=MXN"></script>
 
     <style>
@@ -692,7 +694,7 @@
 
                 createOrder: function (data, actions) {
                     if (total <= 0) {
-                        alert("El carrito está vacío");
+                        mostrarNotificacion("El carrito está vacío. Agrega productos antes de pagar.", "warning");
                         return;
                     }
 
@@ -709,15 +711,17 @@
                 onApprove: function (data, actions) {
                     return actions.order.capture().then(function (orderData) {
                         const nombre = orderData.payer.name.given_name || "cliente";
-                        alert("¡Gracias por tu compra, " + nombre + "!");
+                        mostrarNotificacion("¡Gracias por tu compra, " + nombre + "! Procesando tu orden...", "success", "Pago Exitoso");
                         localStorage.removeItem("carrito");
-                        window.location.href = "index.html";
+                        setTimeout(() => {
+                            window.location.href = "index.html";
+                        }, 1800);
                     });
                 },
 
                 onError: function (err) {
                     console.error("Error en PayPal:", err);
-                    alert("Hubo un error con el pago. Revisa la consola para más detalles.");
+                    mostrarNotificacion("Hubo un error con el pago. Por favor intenta nuevamente o revisa tus fondos.", "error", "Error de Pago");
                 }
             }).render('#paypal-button-container');
         }

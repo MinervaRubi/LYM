@@ -601,12 +601,13 @@
 
             const data = await resp.json();
             if (data.success) {
+                mostrarNotificacion('Estado de actividad actualizado con éxito', 'success');
                 cargarMiActividadCRM();
             } else {
-                alert(data.error || 'No se pudo cambiar el estado');
+                mostrarNotificacion(data.error || 'No se pudo cambiar el estado', 'error');
             }
         } catch (e) {
-            alert('Error de conexión: ' + e.message);
+            mostrarNotificacion('Error de conexión: ' + e.message, 'error');
         }
     };
 

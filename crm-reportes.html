@@ -105,9 +105,12 @@
 
                 renderBarChart(data.interaccionesPorTipo || []);
                 renderPieChart(data.clientesPorEtapa || []);
+            } else {
+                if (typeof mostrarNotificacion === 'function') mostrarNotificacion(data.error || 'No se pudieron cargar los reportes', 'error');
             }
         } catch (e) {
             console.error("Error al cargar reportes CRM:", e);
+            if (typeof mostrarNotificacion === 'function') mostrarNotificacion('Error de conexión con reportes: ' + e.message, 'error');
         }
     };
 

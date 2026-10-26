@@ -107,9 +107,12 @@
 
                 renderChartActivosInactivos(m.clientesActivos, m.clientesInactivos);
                 renderClientesRiesgo(data.clientesRiesgo || []);
+            } else {
+                if (typeof mostrarNotificacion === 'function') mostrarNotificacion(data.error || 'No se pudieron cargar los datos del dashboard CRM', 'error');
             }
         } catch (e) {
             console.error("Error al cargar el dashboard CRM:", e);
+            if (typeof mostrarNotificacion === 'function') mostrarNotificacion('Error de conexión con el dashboard CRM: ' + e.message, 'error');
         }
     };
 

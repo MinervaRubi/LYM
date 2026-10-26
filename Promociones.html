@@ -6,9 +6,11 @@
     <title>Promociones</title>
 
     <link rel="stylesheet" href="Proyecto.css">
+    <link rel="stylesheet" href="notifications.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
         rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="notifications.js"></script>
 
     <style>
         body {
@@ -218,9 +220,6 @@
 
 <body>
 
-    <!-- 🔥 BANNER -->
-    <div id="bannerPromo" class="banner-promo"></div>
-
     <div class="container" style="padding-top:120px; padding-bottom:60px;">
 
         <div class="back-button">
@@ -279,26 +278,12 @@
         function aplicarPromocion() {
             const input = document.getElementById('cuponTexto');
             const codigo = input.value.trim();
-            const banner = document.getElementById('bannerPromo');
 
             if (codigo !== "") {
-                banner.textContent = "✔ Promoción aplicada: " + codigo.toUpperCase();
-                banner.style.background = "#27ae60";
-                banner.classList.add("show");
-
-                setTimeout(() => {
-                    banner.classList.remove("show");
-                }, 3000);
-
+                mostrarNotificacion("Promoción aplicada: " + codigo.toUpperCase(), "success", "Promoción Activa");
                 input.value = "";
             } else {
-                banner.textContent = "⚠ Escribe un código primero";
-                banner.style.background = "#e74c3c";
-                banner.classList.add("show");
-
-                setTimeout(() => {
-                    banner.classList.remove("show");
-                }, 3000);
+                mostrarNotificacion("Por favor escribe un código primero para aplicar la promoción.", "warning", "Código Vacío");
             }
         }
 

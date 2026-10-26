@@ -197,20 +197,32 @@
             const data = await response.json();
 
             if (data.success) {
-                msg.style.cssText = 'display: block; background: #d1fae5; color: #065f46; border: 1px solid #a7f3d0;';
-                msg.innerText = '✔ ' + data.message;
+                if (typeof mostrarNotificacion === 'function') {
+                    mostrarNotificacion(data.message || 'Evaluación registrada exitosamente.', 'success', 'Reseña Enviada');
+                } else {
+                    msg.style.cssText = 'display: block; background: #d1fae5; color: #065f46; border: 1px solid #a7f3d0;';
+                    msg.innerText = '✔ ' + data.message;
+                }
 
                 setTimeout(() => {
                     cerrarModalEvaluacion();
                     cargarPromediosProductos();
-                }, 1600);
+                }, 1000);
             } else {
-                msg.style.cssText = 'display: block; background: #fee2e2; color: #991b1b; border: 1px solid #fca5a5;';
-                msg.innerText = '❌ Error: ' + (data.error || 'No se pudo guardar la evaluación');
+                if (typeof mostrarNotificacion === 'function') {
+                    mostrarNotificacion(data.error || 'No se pudo guardar la evaluación', 'error', 'Error al Evaluar');
+                } else {
+                    msg.style.cssText = 'display: block; background: #fee2e2; color: #991b1b; border: 1px solid #fca5a5;';
+                    msg.innerText = '❌ Error: ' + (data.error || 'No se pudo guardar la evaluación');
+                }
             }
         } catch (err) {
-            msg.style.cssText = 'display: block; background: #fee2e2; color: #991b1b; border: 1px solid #fca5a5;';
-            msg.innerText = '❌ Error de conexión: ' + err.message;
+            if (typeof mostrarNotificacion === 'function') {
+                mostrarNotificacion('Error de conexión: ' + err.message, 'error');
+            } else {
+                msg.style.cssText = 'display: block; background: #fee2e2; color: #991b1b; border: 1px solid #fca5a5;';
+                msg.innerText = '❌ Error de conexión: ' + err.message;
+            }
         } finally {
             btn.disabled = false;
             btn.innerText = 'Enviar Evaluación';

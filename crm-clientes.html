@@ -148,7 +148,18 @@
     };
 
     window.eliminarClienteConfirm = async function(id) {
-        if (!confirm('¿Seguro que deseas eliminar este cliente de la base de datos?')) return;
+        const confirmed = await mostrarConfirmacion(
+            '¿Seguro que deseas eliminar este cliente de la base de datos?\nEsta acción no se puede deshacer.',
+            {
+                titulo: 'Eliminar Cliente',
+                tipo: 'danger',
+                esPeligroso: true,
+                textoConfirmar: 'Eliminar Cliente',
+                textoCancelar: 'Cancelar'
+            }
+        );
+        if (!confirmed) return;
+
         try {
             const resp = await fetch('php/crm_api.php?resource=eliminar_cliente', {
                 method: 'POST',
@@ -157,13 +168,13 @@
             });
             const data = await resp.json();
             if (data.success) {
-                if (typeof showNotification === 'function') showNotification('Cliente eliminado correctamente');
+                mostrarNotificacion('Cliente eliminado correctamente', 'success');
                 filtrarClientesTabla();
             } else {
-                alert(data.error || 'No se pudo eliminar el cliente');
+                mostrarNotificacion(data.error || 'No se pudo eliminar el cliente', 'error');
             }
         } catch (e) {
-            alert('Error al eliminar cliente: ' + e.message);
+            mostrarNotificacion('Error al eliminar cliente: ' + e.message, 'error');
         }
     };
 

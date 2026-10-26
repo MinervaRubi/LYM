@@ -7,9 +7,11 @@
     <title>LYM Diseño e Impresión - Personaliza tus regalos y promocionales</title>
 
     <link rel="stylesheet" href="Proyecto.css" />
+    <link rel="stylesheet" href="notifications.css" />
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
         rel="stylesheet" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <script src="notifications.js"></script>
 
     <style>
         /* Barra de búsqueda Navbar */
@@ -206,9 +208,6 @@
 </head>
 
 <body>
-    <!-- Banner de notificación -->
-    <div id="successBanner" class="success-banner">✔ Operación exitosa</div>
-
     <!-- Header -->
     <header class="header">
         <nav class="nav">
@@ -1068,13 +1067,21 @@
 
 
     <script>
-        // ========= Banner =========
-        function showSuccessBanner(texto = "Operación exitosa") {
-            const banner = document.getElementById("successBanner");
-            if (!banner) return;
-            banner.innerHTML = "✔ " + texto;
-            banner.classList.add("show");
-            setTimeout(() => banner.classList.remove("show"), 3000);
+        // ========= Notificaciones Toast Globales =========
+        function showSuccessBanner(texto = "Operación exitosa", tipo = null) {
+            if (!tipo) {
+                const lower = String(texto).toLowerCase();
+                if (lower.includes("error") || lower.includes("incorrecto") || lower.includes("completa") || lower.includes("fall") || lower.includes("no se pudo") || lower.includes("inválid") || lower.includes("falta")) {
+                    tipo = "error";
+                } else if (lower.includes("atención") || lower.includes("configura") || lower.includes("aviso") || lower.includes("advertencia")) {
+                    tipo = "warning";
+                } else {
+                    tipo = "success";
+                }
+            }
+            if (typeof mostrarNotificacion === 'function') {
+                mostrarNotificacion(texto, tipo);
+            }
         }
 
         // ========= Mobile menu toggle =========
@@ -1723,7 +1730,7 @@
                             showSuccessBanner("Ticket registrado con éxito en la agenda del administrador");
                             ticketForm.reset();
                         } else {
-                            alert(data.error || "No se pudo registrar el ticket");
+                            mostrarNotificacion(data.error || "No se pudo registrar el ticket", 'error');
                         }
                     });
                 } catch (e) {
@@ -1763,7 +1770,7 @@
                         showSuccessBanner("¡Mensaje enviado al Administrador! Te responderemos muy pronto.");
                         contactForm.reset();
                     } else {
-                        alert(data.error || "Error al enviar mensaje");
+                        mostrarNotificacion(data.error || "Error al enviar mensaje", 'error');
                     }
                 } catch (e) {
                     showSuccessBanner("Mensaje enviado");

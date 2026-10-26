@@ -130,6 +130,7 @@
             }
         } catch (e) {
             document.getElementById('detCardContainer').innerHTML = `<div style="color:var(--danger); padding:2rem;">Error al cargar detalle: ${e.message}</div>`;
+            if (typeof mostrarNotificacion === 'function') mostrarNotificacion('Error al cargar detalle del cliente: ' + e.message, 'error');
         }
     }
 

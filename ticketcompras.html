@@ -7,9 +7,11 @@
     <title>Ticket de compra | LYM</title>
 
     <link rel="stylesheet" href="Proyecto.css" />
+    <link rel="stylesheet" href="notifications.css" />
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap"
         rel="stylesheet" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <script src="notifications.js"></script>
 
     <style>
         :root {
@@ -272,11 +274,6 @@
 </head>
 
 <body>
-    <div class="download-banner" id="downloadBanner">
-        <i class="fas fa-circle-check"></i>
-        <span>Descarga exitosa</span>
-    </div>
-
     <div class="ticket-page">
         <div class="ticket-shell">
 
@@ -384,14 +381,8 @@
             ticketItems.appendChild(row);
         });
 
-        const downloadBanner = document.getElementById("downloadBanner");
-
         function mostrarDescargaExitosa() {
-            downloadBanner.classList.add("show");
-
-            setTimeout(() => {
-                downloadBanner.classList.remove("show");
-            }, 2200);
+            mostrarNotificacion("¡Ticket descargado con éxito en formato PDF!", "success", "Descarga Completada");
         }
     </script>
 </body>

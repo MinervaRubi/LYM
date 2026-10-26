@@ -94,9 +94,11 @@
                 renderListaEvaluaciones(todasLasEvaluaciones);
             } else {
                 container.innerHTML = `<div style="color: var(--danger); padding: 1.5rem;">Error: ${data.error || 'No se pudieron obtener las evaluaciones'}</div>`;
+                if (typeof mostrarNotificacion === 'function') mostrarNotificacion(data.error || 'No se pudieron obtener las evaluaciones', 'error');
             }
         } catch (e) {
             container.innerHTML = `<div style="color: var(--danger); padding: 1.5rem;">Error al conectar con la base de datos: ${e.message}</div>`;
+            if (typeof mostrarNotificacion === 'function') mostrarNotificacion('Error al conectar con la base de datos: ' + e.message, 'error');
         }
     };
 

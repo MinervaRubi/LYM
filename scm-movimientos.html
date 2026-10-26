@@ -364,7 +364,7 @@
         var usuario = document.getElementById("movFormUsuario").value;
 
         if (!productoId || cantidad <= 0 || !motivo) {
-            alert("Por favor completa todos los campos requeridos.");
+            mostrarNotificacion("Por favor completa todos los campos requeridos.", "warning");
             return;
         }
 
@@ -395,7 +395,7 @@
                         bannerTex.textContent = msjPush;
                         banner.style.display = "flex";
                     }
-                    alert(msjPush);
+                    mostrarNotificacion(msjPush, "success", "Regla PUSH Aplicada");
                 } else if (data.alerta_pull) {
                     // 2. REGLA PULL: Si la salida deja un producto PULL bajo el mínimo, mostrar ventana modal de alerta de stock bajo
                     var prodInfo = productosDisponiblesMov.find(p => p.id === productoId);
@@ -413,20 +413,16 @@
                         pullModal.style.display = "flex";
                     }
                 } else {
-                    if (typeof showNotification === 'function') {
-                        showNotification(data.message);
-                    } else {
-                        alert(data.message);
-                    }
+                    mostrarNotificacion(data.message || "Movimiento registrado con éxito", "success");
                 }
 
                 cargarMovimientosSCM();
                 cargarProductosParaFiltroMov();
             } else {
-                alert("Error al registrar movimiento:\n" + (data.error || "Operación no permitida"));
+                mostrarNotificacion("Error al registrar movimiento:\n" + (data.error || "Operación no permitida"), "error");
             }
         } catch (e) {
-            alert("Error de conexión: " + e.message);
+            mostrarNotificacion("Error de conexión: " + e.message, "error");
         }
     }
 

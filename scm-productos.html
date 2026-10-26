@@ -468,7 +468,7 @@
         var cantRep = Number(document.getElementById("prodFormCantidadReposicion").value) || 5;
 
         if (est === 'PUSH' && cantRep <= 0) {
-            alert("La cantidad de reposición es obligatoria y debe ser mayor a 0 para productos PUSH");
+            mostrarNotificacion("La cantidad de reposición es obligatoria y debe ser mayor a 0 para productos PUSH", "warning");
             return;
         }
 
@@ -495,27 +495,33 @@
             if (data.success) {
                 cerrarModalProductoSCM();
                 if (data.reposicion_push) {
-                    alert(`Producto guardado.\nRegla PUSH aplicada: pedido ${data.reposicion_push.folio} surtido, entrada de ${data.reposicion_push.cantidad} registrada. Stock actual: ${data.reposicion_push.stock_final}`);
-                } else if (typeof showNotification === 'function') {
-                    showNotification(data.message);
+                    mostrarNotificacion(`Producto guardado.\nRegla PUSH aplicada: pedido ${data.reposicion_push.folio} surtido, entrada de ${data.reposicion_push.cantidad} registrada. Stock actual: ${data.reposicion_push.stock_final}`, 'success', 'Regla PUSH Aplicada');
                 } else {
-                    alert(data.message);
+                    mostrarNotificacion(data.message || "Producto guardado con éxito.", "success");
                 }
                 cargarProductosSCM();
             } else {
-                alert("Error al guardar: " + (data.error || "Error desconocido"));
+                mostrarNotificacion("Error al guardar: " + (data.error || "Error desconocido"), "error");
             }
         } catch (e) {
-            alert("Error de conexión: " + e.message);
+            mostrarNotificacion("Error de conexión: " + e.message, "error");
         }
     }
 
     async function eliminarProductoSCM(id) {
         var prod = productosSCMList.find(p => p.id === id);
         var nombre = prod ? prod.name : 'producto';
-        if (!confirm(`¿Estás seguro de eliminar el producto "${nombre}" del catálogo e inventario?`)) {
-            return;
-        }
+        var confirmed = await mostrarConfirmacion(
+            `¿Estás seguro de eliminar el producto "${nombre}" del catálogo e inventario?`,
+            {
+                titulo: "Eliminar Producto",
+                tipo: "danger",
+                esPeligroso: true,
+                textoConfirmar: "Eliminar Producto",
+                textoCancelar: "Cancelar"
+            }
+        );
+        if (!confirmed) return;
 
         try {
             var resp = await fetch("php/scm_api.php?resource=eliminar_producto", {
@@ -525,17 +531,13 @@
             });
             var data = await resp.json();
             if (data.success) {
-                if (typeof showNotification === 'function') {
-                    showNotification(data.message);
-                } else {
-                    alert(data.message);
-                }
+                mostrarNotificacion(data.message || "Producto eliminado correctamente.", "success");
                 cargarProductosSCM();
             } else {
-                alert("Error al eliminar: " + (data.error || "Error desconocido"));
+                mostrarNotificacion("Error al eliminar: " + (data.error || "Error desconocido"), "error");
             }
         } catch (e) {
-            alert("Error de conexión: " + e.message);
+            mostrarNotificacion("Error de conexión: " + e.message, "error");
         }
     }
 

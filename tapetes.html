@@ -6,11 +6,13 @@
     <title>Tapete Afelpado | LYM</title>
 
     <link rel="stylesheet" href="Proyecto.css">
+    <link rel="stylesheet" href="notifications.css">
 
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
         rel="stylesheet">
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="notifications.js"></script>
 </head>
 
 <body>
@@ -76,10 +78,6 @@
 
                     <div id="resenasProductoDetalle" style="margin-top: 20px;"></div>
 
-                    <p id="mensajeAgregado" class="success-mini" style="display:none;">
-                        ✔ Producto agregado al carrito
-                    </p>
-
                 </div>
 
             </div>
@@ -125,12 +123,9 @@
 
             localStorage.setItem("carrito", JSON.stringify(carrito));
 
-            const msg = document.getElementById(mensajeId);
-            msg.style.display = "block";
-
-            setTimeout(() => {
-                msg.style.display = "none";
-            }, 2000);
+            // Notificación visual Toast
+            mostrarNotificacion(`"${descripcion}" agregado al carrito (${cantidad} pza${cantidad > 1 ? 's' : ''}).`, 'success', 'Producto Agregado');
+            if (cantidadInput) cantidadInput.value = 1;
         }
     </script>
 

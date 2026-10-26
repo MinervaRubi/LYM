@@ -355,26 +355,30 @@
             var data = await resp.json();
             if (data.success) {
                 cerrarModalProveedorSCM();
-                if (typeof showNotification === 'function') {
-                    showNotification(data.message);
-                } else {
-                    alert(data.message);
-                }
+                mostrarNotificacion(data.message || "Proveedor guardado exitosamente.", "success");
                 cargarProveedoresSCM();
             } else {
-                alert("Error: " + (data.error || "No se pudo guardar el proveedor"));
+                mostrarNotificacion("Error: " + (data.error || "No se pudo guardar el proveedor"), "error");
             }
         } catch (e) {
-            alert("Error de conexión: " + e.message);
+            mostrarNotificacion("Error de conexión: " + e.message, "error");
         }
     }
 
     async function eliminarProveedorSCM(id) {
         var prov = proveedoresSCMList.find(p => p.id === id);
         var nombre = prov ? prov.nombre : 'proveedor';
-        if (!confirm(`¿Estás seguro de eliminar al proveedor "${nombre}"?`)) {
-            return;
-        }
+        var confirmed = await mostrarConfirmacion(
+            `¿Estás seguro de eliminar al proveedor "${nombre}" del sistema?`,
+            {
+                titulo: "Eliminar Proveedor",
+                tipo: "danger",
+                esPeligroso: true,
+                textoConfirmar: "Eliminar Proveedor",
+                textoCancelar: "Cancelar"
+            }
+        );
+        if (!confirmed) return;
 
         try {
             var resp = await fetch("php/scm_api.php?resource=eliminar_proveedor", {
@@ -384,17 +388,13 @@
             });
             var data = await resp.json();
             if (data.success) {
-                if (typeof showNotification === 'function') {
-                    showNotification(data.message);
-                } else {
-                    alert(data.message);
-                }
+                mostrarNotificacion(data.message || "Proveedor eliminado correctamente.", "success");
                 cargarProveedoresSCM();
             } else {
-                alert("Error al eliminar: " + (data.error || "Error desconocido"));
+                mostrarNotificacion("Error al eliminar: " + (data.error || "Error desconocido"), "error");
             }
         } catch (e) {
-            alert("Error de conexión: " + e.message);
+            mostrarNotificacion("Error de conexión: " + e.message, "error");
         }
     }
 
