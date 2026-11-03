@@ -12,34 +12,112 @@
                 <span class="badge" style="background: rgba(99,102,241,0.15); color: #6366f1; font-weight:700; font-size:0.75rem; padding: 2px 8px; border-radius: 6px;">ERP - SEGURIDAD</span>
                 <span style="font-size: 0.85rem; color: var(--text-muted);">Gobernanza y Permisos del Sistema</span>
             </div>
-            <h2 style="font-size: 1.6rem; font-weight: 800; color: var(--text-heading); margin: 0;">Panel por Rol y Permisos ERP</h2>
-            <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 2px;">Vista diferenciada y control de accesos según la responsabilidad del usuario</p>
+            <h2 style="font-size: 1.6rem; font-weight: 800; color: var(--text-heading); margin: 0;">Panel por Rol (Menú Dinámico)</h2>
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 2px;">Vistas y accesos según rol de usuario en tiempo real</p>
         </div>
         <div style="display: flex; gap: 10px; align-items: center;">
             <label style="font-size: 0.85rem; font-weight: 700; color: #475569;">Simular Rol:</label>
-            <select id="selectCambiarRolSimulado" class="crm-form-select" style="width: auto; padding: 4px 12px; font-weight: 700;" onchange="cambiarRolSimuladoERP(this.value)">
+            <select id="selectCambiarRolSimulado" class="crm-form-select" style="width: auto; padding: 6px 14px; font-weight: 700; border-radius: 8px;" onchange="cambiarRolSimuladoERP(this.value)">
                 <option value="Administrador">👑 Administrador</option>
-                <option value="Ventas">💼 Ventas / Comercial</option>
-                <option value="Logística">🚚 Logística / Almacén</option>
+                <option value="Ventas">💼 Ventas</option>
+                <option value="Logística">🚚 Logística</option>
             </select>
         </div>
     </div>
 
+    <!-- TARJETAS COMPARATIVAS DE PANTALLAS SEGÚN ROL (PANTALLA 10 EXACTA) -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.25rem;">
+        
+        <!-- CARD 1: ADMINISTRADOR (9 PANTALLAS) -->
+        <div id="cardRolAdmin" class="crm-card" style="padding: 0; overflow: hidden; border: 2px solid #fda4af; box-shadow: 0 4px 15px rgba(244,63,94,0.08); transition: transform 0.2s, box-shadow 0.2s; display: flex; flex-direction: column;">
+            <div style="background: linear-gradient(135deg, #f43f5e, #fb7185); color: white; padding: 14px 18px; display: flex; align-items: center; justify-content: space-between;">
+                <div style="display: flex; align-items: center; gap: 10px; font-weight: 800; font-size: 1.15rem;">
+                    <i class="fas fa-user-circle" style="font-size: 1.3rem;"></i>
+                    <span>Administrador</span>
+                </div>
+                <span class="badge" style="background: rgba(255,255,255,0.25); color: white; font-weight: 800; font-size: 0.75rem; padding: 3px 8px; border-radius: 6px;">9 pantallas</span>
+            </div>
+            <div style="background: #fff5f7; padding: 1.25rem 1.5rem; flex-grow: 1; display: flex; flex-direction: column; gap: 9px;">
+                <div style="display: flex; align-items: center; gap: 10px; color: #1e293b; font-weight: 600; font-size: 0.93rem;"><i class="fas fa-check" style="color: #10b981; font-weight: 900;"></i> Inicio</div>
+                <div style="display: flex; align-items: center; gap: 10px; color: #1e293b; font-weight: 600; font-size: 0.93rem;"><i class="fas fa-check" style="color: #10b981; font-weight: 900;"></i> Clientes (CRM)</div>
+                <div style="display: flex; align-items: center; gap: 10px; color: #1e293b; font-weight: 600; font-size: 0.93rem;"><i class="fas fa-check" style="color: #10b981; font-weight: 900;"></i> Productos (SCM)</div>
+                <div style="display: flex; align-items: center; gap: 10px; color: #1e293b; font-weight: 600; font-size: 0.93rem;"><i class="fas fa-check" style="color: #10b981; font-weight: 900;"></i> Inventario (SCM)</div>
+                <div style="display: flex; align-items: center; gap: 10px; color: #1e293b; font-weight: 600; font-size: 0.93rem;"><i class="fas fa-check" style="color: #10b981; font-weight: 900;"></i> Órdenes (ERP)</div>
+                <div style="display: flex; align-items: center; gap: 10px; color: #1e293b; font-weight: 600; font-size: 0.93rem;"><i class="fas fa-check" style="color: #10b981; font-weight: 900;"></i> Reportes</div>
+                <div style="display: flex; align-items: center; gap: 10px; color: #1e293b; font-weight: 600; font-size: 0.93rem;"><i class="fas fa-check" style="color: #10b981; font-weight: 900;"></i> Nivel ERP</div>
+                <div style="display: flex; align-items: center; gap: 10px; color: #1e293b; font-weight: 600; font-size: 0.93rem;"><i class="fas fa-check" style="color: #10b981; font-weight: 900;"></i> Usuarios</div>
+                <div style="display: flex; align-items: center; gap: 10px; color: #1e293b; font-weight: 600; font-size: 0.93rem;"><i class="fas fa-check" style="color: #10b981; font-weight: 900;"></i> Configuración</div>
+            </div>
+            <div style="padding: 10px 1.5rem 1.25rem; background: #fff5f7;">
+                <button type="button" class="crm-btn crm-btn-sm" style="width: 100%; background: #f43f5e; color: white; border: none; font-weight: 700; padding: 8px 12px; border-radius: 8px; cursor: pointer;" onclick="cambiarRolSimuladoERP('Administrador')">
+                    <i class="fas fa-crown"></i> Activar Vista Administrador
+                </button>
+            </div>
+        </div>
+
+        <!-- CARD 2: VENTAS (6 PANTALLAS) -->
+        <div id="cardRolVentas" class="crm-card" style="padding: 0; overflow: hidden; border: 2px solid #bfdbfe; box-shadow: 0 4px 15px rgba(59,130,246,0.08); transition: transform 0.2s, box-shadow 0.2s; display: flex; flex-direction: column;">
+            <div style="background: linear-gradient(135deg, #3b82f6, #60a5fa); color: white; padding: 14px 18px; display: flex; align-items: center; justify-content: space-between;">
+                <div style="display: flex; align-items: center; gap: 10px; font-weight: 800; font-size: 1.15rem;">
+                    <i class="fas fa-user-circle" style="font-size: 1.3rem;"></i>
+                    <span>Ventas</span>
+                </div>
+                <span class="badge" style="background: rgba(255,255,255,0.25); color: white; font-weight: 800; font-size: 0.75rem; padding: 3px 8px; border-radius: 6px;">6 pantallas</span>
+            </div>
+            <div style="background: #f0f7ff; padding: 1.25rem 1.5rem; flex-grow: 1; display: flex; flex-direction: column; gap: 9px;">
+                <div style="display: flex; align-items: center; gap: 10px; color: #1e293b; font-weight: 600; font-size: 0.93rem;"><i class="fas fa-check" style="color: #10b981; font-weight: 900;"></i> Inicio</div>
+                <div style="display: flex; align-items: center; gap: 10px; color: #1e293b; font-weight: 600; font-size: 0.93rem;"><i class="fas fa-check" style="color: #10b981; font-weight: 900;"></i> Clientes (CRM)</div>
+                <div style="display: flex; align-items: center; gap: 10px; color: #1e293b; font-weight: 600; font-size: 0.93rem;"><i class="fas fa-check" style="color: #10b981; font-weight: 900;"></i> Productos (SCM)</div>
+                <div style="display: flex; align-items: center; gap: 10px; color: #1e293b; font-weight: 600; font-size: 0.93rem;"><i class="fas fa-check" style="color: #10b981; font-weight: 900;"></i> Órdenes (ERP)</div>
+                <div style="display: flex; align-items: center; gap: 10px; color: #1e293b; font-weight: 600; font-size: 0.93rem;"><i class="fas fa-check" style="color: #10b981; font-weight: 900;"></i> Reportes</div>
+                <div style="display: flex; align-items: center; gap: 10px; color: #1e293b; font-weight: 600; font-size: 0.93rem;"><i class="fas fa-check" style="color: #10b981; font-weight: 900;"></i> Mi actividad</div>
+            </div>
+            <div style="padding: 10px 1.5rem 1.25rem; background: #f0f7ff;">
+                <button type="button" class="crm-btn crm-btn-sm" style="width: 100%; background: #2563eb; color: white; border: none; font-weight: 700; padding: 8px 12px; border-radius: 8px; cursor: pointer;" onclick="cambiarRolSimuladoERP('Ventas')">
+                    <i class="fas fa-briefcase"></i> Activar Vista Ventas
+                </button>
+            </div>
+        </div>
+
+        <!-- CARD 3: LOGÍSTICA (5 PANTALLAS) -->
+        <div id="cardRolLogistica" class="crm-card" style="padding: 0; overflow: hidden; border: 2px solid #bbf7d0; box-shadow: 0 4px 15px rgba(16,185,129,0.08); transition: transform 0.2s, box-shadow 0.2s; display: flex; flex-direction: column;">
+            <div style="background: linear-gradient(135deg, #10b981, #34d399); color: white; padding: 14px 18px; display: flex; align-items: center; justify-content: space-between;">
+                <div style="display: flex; align-items: center; gap: 10px; font-weight: 800; font-size: 1.15rem;">
+                    <i class="fas fa-user-circle" style="font-size: 1.3rem;"></i>
+                    <span>Logística</span>
+                </div>
+                <span class="badge" style="background: rgba(255,255,255,0.25); color: white; font-weight: 800; font-size: 0.75rem; padding: 3px 8px; border-radius: 6px;">5 pantallas</span>
+            </div>
+            <div style="background: #f0fdf4; padding: 1.25rem 1.5rem; flex-grow: 1; display: flex; flex-direction: column; gap: 9px;">
+                <div style="display: flex; align-items: center; gap: 10px; color: #1e293b; font-weight: 600; font-size: 0.93rem;"><i class="fas fa-check" style="color: #10b981; font-weight: 900;"></i> Inicio</div>
+                <div style="display: flex; align-items: center; gap: 10px; color: #1e293b; font-weight: 600; font-size: 0.93rem;"><i class="fas fa-check" style="color: #10b981; font-weight: 900;"></i> Productos (SCM)</div>
+                <div style="display: flex; align-items: center; gap: 10px; color: #1e293b; font-weight: 600; font-size: 0.93rem;"><i class="fas fa-check" style="color: #10b981; font-weight: 900;"></i> Inventario (SCM)</div>
+                <div style="display: flex; align-items: center; gap: 10px; color: #1e293b; font-weight: 600; font-size: 0.93rem;"><i class="fas fa-check" style="color: #10b981; font-weight: 900;"></i> Órdenes (ERP)</div>
+                <div style="display: flex; align-items: center; gap: 10px; color: #1e293b; font-weight: 600; font-size: 0.93rem;"><i class="fas fa-check" style="color: #10b981; font-weight: 900;"></i> Reportes</div>
+            </div>
+            <div style="padding: 10px 1.5rem 1.25rem; background: #f0fdf4;">
+                <button type="button" class="crm-btn crm-btn-sm" style="width: 100%; background: #16a34a; color: white; border: none; font-weight: 700; padding: 8px 12px; border-radius: 8px; cursor: pointer;" onclick="cambiarRolSimuladoERP('Logística')">
+                    <i class="fas fa-truck"></i> Activar Vista Logística
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- TARJETA DEL ROL ACTIVO -->
-    <div class="crm-card" style="padding: 1.75rem; border-left: 4px solid #6366f1;">
+    <div class="crm-card" style="padding: 1.5rem; border-left: 4px solid #6366f1;">
         <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
             <div style="display: flex; align-items: center; gap: 14px;">
-                <div style="width: 52px; height: 52px; border-radius: 50%; background: #6366f1; color: white; display: flex; align-items: center; justify-content: center; font-size: 1.5rem;" id="badgeIconoRolActivo">
+                <div style="width: 50px; height: 50px; border-radius: 50%; background: #6366f1; color: white; display: flex; align-items: center; justify-content: center; font-size: 1.4rem;" id="badgeIconoRolActivo">
                     <i class="fas fa-user-shield"></i>
                 </div>
                 <div>
-                    <div style="font-size: 0.8rem; font-weight: 700; color: #64748b; text-transform: uppercase;">Rol Activo en Sesión</div>
-                    <div style="font-size: 1.4rem; font-weight: 900; color: #0f172a;" id="txtNombreRolActivo">Administrador</div>
+                    <div style="font-size: 0.78rem; font-weight: 700; color: #64748b; text-transform: uppercase;">Rol Activo en Sesión</div>
+                    <div style="font-size: 1.35rem; font-weight: 900; color: #0f172a;" id="txtNombreRolActivo">Administrador</div>
                     <div style="font-size: 0.85rem; color: #475569;" id="txtDescRolActivo">Control total sobre CRM, SCM, Configuración, Finanzas y Órdenes ERP.</div>
                 </div>
             </div>
             <span class="badge" style="background: rgba(16,185,129,0.15); color: #10b981; font-size: 0.85rem; font-weight: 800; padding: 6px 14px;" id="badgeStatusRolActivo">
-                Acceso Total Habilitado
+                Acceso Total Habilitado (9 pantallas)
             </span>
         </div>
     </div>
@@ -127,29 +205,49 @@
         var badge = document.getElementById("badgeStatusRolActivo");
         var icon = document.getElementById("badgeIconoRolActivo");
 
+        var sel = document.getElementById("selectCambiarRolSimulado");
+        if (sel) sel.value = rol;
+
+        var cardAdmin = document.getElementById("cardRolAdmin");
+        var cardVentas = document.getElementById("cardRolVentas");
+        var cardLog = document.getElementById("cardRolLogistica");
+
+        if (cardAdmin) {
+            cardAdmin.style.border = (rol === "Administrador") ? "3px solid #f43f5e" : "2px solid #fda4af";
+            cardAdmin.style.boxShadow = (rol === "Administrador") ? "0 8px 25px rgba(244,63,94,0.3)" : "none";
+        }
+        if (cardVentas) {
+            cardVentas.style.border = (rol === "Ventas") ? "3px solid #3b82f6" : "2px solid #bfdbfe";
+            cardVentas.style.boxShadow = (rol === "Ventas") ? "0 8px 25px rgba(59,130,246,0.3)" : "none";
+        }
+        if (cardLog) {
+            cardLog.style.border = (rol === "Logística") ? "3px solid #10b981" : "2px solid #bbf7d0";
+            cardLog.style.boxShadow = (rol === "Logística") ? "0 8px 25px rgba(16,185,129,0.3)" : "none";
+        }
+
         if (rol === "Administrador") {
             if (txtNom) txtNom.textContent = "Administrador";
             if (txtDesc) txtDesc.textContent = "Control total sobre CRM, SCM, Configuración, Finanzas y Órdenes ERP.";
             if (badge) {
-                badge.textContent = "Acceso Total Habilitado";
+                badge.textContent = "Acceso Total Habilitado (9 pantallas)";
                 badge.style.background = "rgba(16,185,129,0.15)";
                 badge.style.color = "#10b981";
             }
             if (icon) icon.innerHTML = '<i class="fas fa-user-shield"></i>';
         } else if (rol === "Ventas") {
-            if (txtNom) txtNom.textContent = "Ventas / Comercial";
-            if (txtDesc) txtDesc.textContent = "Gestión de clientes, registro de órdenes, cotizaciones y promociones.";
+            if (txtNom) txtNom.textContent = "Ventas";
+            if (txtDesc) txtDesc.textContent = "Gestión comercial: Clientes CRM, Productos SCM, Órdenes ERP, Reportes y Mi actividad.";
             if (badge) {
-                badge.textContent = "Perfil Comercial Activo";
+                badge.textContent = "Perfil Comercial Activo (6 pantallas)";
                 badge.style.background = "rgba(99,102,241,0.15)";
                 badge.style.color = "#6366f1";
             }
             if (icon) icon.innerHTML = '<i class="fas fa-briefcase"></i>';
         } else if (rol === "Logística") {
-            if (txtNom) txtNom.textContent = "Logística / Almacén";
-            if (txtDesc) txtDesc.textContent = "Control de existencias, recepción de proveedores, movimientos y despachos.";
+            if (txtNom) txtNom.textContent = "Logística";
+            if (txtDesc) txtDesc.textContent = "Control operativo: Productos SCM, Inventario SCM, Órdenes ERP y Reportes.";
             if (badge) {
-                badge.textContent = "Perfil Operativo Activo";
+                badge.textContent = "Perfil Operativo Activo (5 pantallas)";
                 badge.style.background = "rgba(59,130,246,0.15)";
                 badge.style.color = "#2563eb";
             }
@@ -179,4 +277,31 @@
 
     // Exponer a window
     window.cambiarRolSimuladoERP = cambiarRolSimuladoERP;
+
+    // Inicializar tarjeta activa según rol en sesión
+    (function initRolesView() {
+        var rolText = document.getElementById("gestorRole") ? document.getElementById("gestorRole").textContent : "";
+        var activeRole = "Administrador";
+        if (rolText.toLowerCase().includes("ventas")) activeRole = "Ventas";
+        else if (rolText.toLowerCase().includes("logística") || rolText.toLowerCase().includes("logistica") || rolText.toLowerCase().includes("operativo")) activeRole = "Logística";
+        
+        var sel = document.getElementById("selectCambiarRolSimulado");
+        if (sel) sel.value = activeRole;
+
+        var cardAdmin = document.getElementById("cardRolAdmin");
+        var cardVentas = document.getElementById("cardRolVentas");
+        var cardLog = document.getElementById("cardRolLogistica");
+        if (cardAdmin) {
+            cardAdmin.style.border = (activeRole === "Administrador") ? "3px solid #f43f5e" : "2px solid #fda4af";
+            cardAdmin.style.boxShadow = (activeRole === "Administrador") ? "0 8px 25px rgba(244,63,94,0.3)" : "none";
+        }
+        if (cardVentas) {
+            cardVentas.style.border = (activeRole === "Ventas") ? "3px solid #3b82f6" : "2px solid #bfdbfe";
+            cardVentas.style.boxShadow = (activeRole === "Ventas") ? "0 8px 25px rgba(59,130,246,0.3)" : "none";
+        }
+        if (cardLog) {
+            cardLog.style.border = (activeRole === "Logística") ? "3px solid #10b981" : "2px solid #bbf7d0";
+            cardLog.style.boxShadow = (activeRole === "Logística") ? "0 8px 25px rgba(16,185,129,0.3)" : "none";
+        }
+    })();
 </script>
