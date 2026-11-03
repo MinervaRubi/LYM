@@ -112,131 +112,96 @@
                 <div class="crm-brand-text">LYM <span class="crm-brand-tag" style="background:rgba(236,72,153,0.2); color:#f472b6; font-size:0.68rem; font-weight:700; padding:2px 7px; border-radius:4px; margin-left:6px; letter-spacing:0.04em;">GESTOR</span></div>
             </div>
 
-            <div class="crm-nav-group" style="overflow-y:auto; max-height:calc(100vh - 170px);">
-                <div class="crm-nav-label">Navegación Gestor</div>
+            <div class="crm-nav-group" style="overflow-y:auto; max-height:calc(100vh - 170px);" id="grupoNavegacionDinamicaERP">
+                <div class="crm-nav-label" id="labelMenuERP">Menú ERP por Rol</div>
 
-                <!-- 1. DASHBOARD PRINCIPAL -->
-                <button class="crm-nav-item active" id="navItemInicio" onclick="irAInicioGestor(this)">
-                    <i class="fas fa-chart-pie"></i> <span>Dashboard</span>
+                <!-- 1. INICIO (PANTALLA 1) -->
+                <button class="crm-nav-item active" id="erp-tab-inicio" onclick="cargarPestanaERP('inicio', this)">
+                    <i class="fas fa-home"></i> <span>Inicio</span>
                 </button>
 
-                <!-- 2. CRM DESPLEGABLE -->
-                <div class="crm-accordion-wrapper">
-                    <button class="crm-nav-item crm-nav-accordion-btn" id="btnAccordionCRM" onclick="toggleAccordion('CRM')">
-                        <i class="fas fa-briefcase"></i>
-                        <span>CRM</span>
-                        <i class="fas fa-chevron-down crm-chevron" id="chevronCRM"></i>
-                    </button>
-                    
-                    <div class="crm-nav-sublist" id="submenuCRM">
-                        <button class="crm-nav-item crm-nav-subitem" id="navItemClientes" onclick="loadExternalView('crm-clientes.html', this, 'CRM')">
-                            <i class="fas fa-users"></i> <span>Clientes</span>
-                        </button>
-                        <button class="crm-nav-item crm-nav-subitem" id="navItemInteracciones" onclick="loadExternalView('crm-interacciones.html', this, 'CRM')">
-                            <i class="fas fa-comments"></i> <span>Interacciones</span>
-                        </button>
-                        <button class="crm-nav-item crm-nav-subitem" id="navItemEvaluaciones" onclick="loadExternalView('crm-evaluaciones.html', this, 'CRM')">
-                            <i class="fas fa-star"></i> <span>Evaluaciones</span>
-                        </button>
-                        <button class="crm-nav-item crm-nav-subitem" id="navItemDescuentos" onclick="loadExternalView('crm-descuentos.html', this, 'CRM')">
-                            <i class="fas fa-tags"></i> <span>Descuentos y Promos</span>
-                            <span id="badgeDescuentosSidebar" class="crm-badge" style="display:none; background:#ef4444; color:white; font-size:0.7rem; padding:1px 6px; border-radius:10px; margin-left:auto; font-weight:700;">0</span>
-                        </button>
-                        <button class="crm-nav-item crm-nav-subitem" id="navItemActividad" onclick="loadExternalView('crm-actividad.html', this, 'CRM')">
-                            <i class="fas fa-clipboard-list"></i> <span>Mi Actividad</span>
-                        </button>
-                        <button class="crm-nav-item crm-nav-subitem" id="navItemReportes" onclick="loadExternalView('crm-reportes.html', this, 'CRM')">
-                            <i class="fas fa-chart-bar"></i> <span>Reportes y Métricas</span>
-                        </button>
-                    </div>
-                </div>
+                <!-- 2. CLIENTES CRM (PANTALLA 10) -->
+                <button class="crm-nav-item" id="navItemClientes" onclick="cargarPestanaERP('clientes', this)">
+                    <i class="fas fa-users"></i> <span>Clientes (CRM)</span>
+                </button>
 
-                <!-- 3. SCM DESPLEGABLE -->
-                <div class="crm-accordion-wrapper">
-                    <button class="crm-nav-item crm-nav-accordion-btn" id="btnAccordionSCM" onclick="toggleAccordion('SCM')">
-                        <i class="fas fa-cubes"></i>
-                        <span>SCM</span>
-                        <i class="fas fa-chevron-down crm-chevron" id="chevronSCM"></i>
-                    </button>
-                    
-                    <div class="crm-nav-sublist" id="submenuSCM">
-                        <button class="crm-nav-item crm-nav-subitem" id="scm-nav-inicio" onclick="loadExternalView('scm-inicio.html', this, 'SCM')">
-                            <i class="fas fa-th-large"></i> <span>Menú SCM</span>
-                        </button>
-                        <button class="crm-nav-item crm-nav-subitem" id="scm-nav-productos" onclick="loadExternalView('scm-productos.html', this, 'SCM')">
-                            <i class="fas fa-cube"></i> <span>Productos</span>
-                        </button>
-                        <button class="crm-nav-item crm-nav-subitem" id="scm-nav-proveedores" onclick="loadExternalView('scm-proveedores.html', this, 'SCM')">
-                            <i class="fas fa-user-group"></i> <span>Proveedores</span>
-                        </button>
-                        <button class="crm-nav-item crm-nav-subitem" id="scm-nav-inventario" onclick="loadExternalView('scm-inventario.html', this, 'SCM')">
-                            <i class="fas fa-dice-d6"></i> <span>Inventario</span>
-                        </button>
-                        <button class="crm-nav-item crm-nav-subitem" id="scm-nav-movimientos" onclick="loadExternalView('scm-movimientos.html', this, 'SCM')">
-                            <i class="fas fa-right-left"></i> <span>Movimientos</span>
-                        </button>
-                        <button class="crm-nav-item crm-nav-subitem" id="scm-nav-pedidos" onclick="loadExternalView('scm-pedidos.html', this, 'SCM')">
-                            <i class="fas fa-file-invoice"></i> <span>Pedidos</span>
-                        </button>
-                        <button class="crm-nav-item crm-nav-subitem" id="scm-nav-logistica" onclick="loadExternalView('scm-logistica.html', this, 'SCM')">
-                            <i class="fas fa-arrows-rotate"></i> <span>Logística</span>
-                        </button>
-                        <button class="crm-nav-item crm-nav-subitem" id="scm-nav-reportes" onclick="loadExternalView('scm-reportes.html', this, 'SCM')">
-                            <i class="fas fa-chart-column"></i> <span>Reportes</span>
-                        </button>
-                        <button class="crm-nav-item crm-nav-subitem" id="scm-nav-madurez" onclick="loadExternalView('scm-madurez.html', this, 'SCM')">
-                            <i class="fas fa-layer-group"></i> <span>Nivel de Madurez</span>
-                        </button>
-                    </div>
-                </div>
+                <!-- 3. PRODUCTOS SCM (PANTALLA 10) -->
+                <button class="crm-nav-item" id="scm-nav-productos" onclick="cargarPestanaERP('productos', this)">
+                    <i class="fas fa-box-open"></i> <span>Productos (SCM)</span>
+                </button>
 
-                <!-- 4. ERP DESPLEGABLE (ETAPA 3 - UNIFICADO) -->
-                <div class="crm-accordion-wrapper" id="wrapperAccordionERP">
-                    <button class="crm-nav-item crm-nav-accordion-btn" id="btnAccordionERP" onclick="toggleAccordion('ERP')">
-                        <i class="fas fa-network-wired"></i>
-                        <span>ERP</span>
-                        <i class="fas fa-chevron-down crm-chevron" id="chevronERP"></i>
-                    </button>
-                    
-                    <div class="crm-nav-sublist" id="submenuERP">
-                        <button class="crm-nav-item crm-nav-subitem" id="erp-nav-inicio" onclick="loadExternalView('erp-inicio.html', this, 'ERP')">
-                            <i class="fas fa-chart-pie"></i> <span>Dashboard ERP</span>
-                        </button>
-                        <button class="crm-nav-item crm-nav-subitem" id="erp-nav-ordenes" onclick="loadExternalView('erp-ordenes.html', this, 'ERP')">
-                            <i class="fas fa-clipboard-list"></i> <span>Órdenes de Clientes</span>
-                        </button>
-                        <button class="crm-nav-item crm-nav-subitem" id="erp-nav-nueva-orden" onclick="loadExternalView('erp-nueva-orden.html', this, 'ERP')">
-                            <i class="fas fa-plus-circle"></i> <span>Nueva Orden</span>
-                        </button>
-                        <button class="crm-nav-item crm-nav-subitem" id="erp-nav-reportes" onclick="loadExternalView('erp-reportes.html', this, 'ERP')">
-                            <i class="fas fa-chart-line"></i> <span>Reportes y Métricas</span>
-                        </button>
-                        <button class="crm-nav-item crm-nav-subitem" id="erp-nav-madurez" onclick="loadExternalView('erp-madurez.html', this, 'ERP')">
-                            <i class="fas fa-layer-group"></i> <span>Nivel de Madurez</span>
-                        </button>
-                        <button class="crm-nav-item crm-nav-subitem" id="erp-nav-roles" onclick="loadExternalView('erp-roles.html', this, 'ERP')">
-                            <i class="fas fa-user-shield"></i> <span>Panel por Rol</span>
-                        </button>
-                    </div>
-                </div>
+                <!-- 4. INVENTARIO SCM (PANTALLA 10) -->
+                <button class="crm-nav-item" id="scm-nav-inventario" onclick="cargarPestanaERP('inventario', this)">
+                    <i class="fas fa-boxes-stacked"></i> <span>Inventario (SCM)</span>
+                </button>
 
-                <!-- 5. USUARIOS -->
-                <button class="crm-nav-item" id="navItemUsuarios" onclick="loadExternalView('crm-usuarios.html', this, 'Usuarios')">
+                <!-- 5. ÓRDENES ERP (PANTALLA 2) -->
+                <button class="crm-nav-item" id="erp-nav-ordenes" onclick="cargarPestanaERP('ordenes', this)">
+                    <i class="fas fa-clipboard-list"></i> <span>Órdenes (ERP)</span>
+                </button>
+
+                <!-- 6. REPORTES (PANTALLA 9) -->
+                <button class="crm-nav-item" id="erp-nav-reportes" onclick="cargarPestanaERP('reportes', this)">
+                    <i class="fas fa-chart-line"></i> <span>Reportes</span>
+                </button>
+
+                <!-- 7. NIVEL ERP (PANTALLA 8) -->
+                <button class="crm-nav-item" id="erp-nav-madurez" onclick="cargarPestanaERP('madurez', this)">
+                    <i class="fas fa-layer-group"></i> <span>Nivel ERP</span>
+                </button>
+
+                <!-- 8. USUARIOS (PANTALLA 10) -->
+                <button class="crm-nav-item" id="navItemUsuarios" onclick="cargarPestanaERP('usuarios', this)">
                     <i class="fas fa-user-shield"></i> <span>Usuarios</span>
                 </button>
 
-                <!-- 6. TRABAJADORES (ADMIN) -->
-                <button class="crm-nav-item" id="navItemTrabajadores" onclick="abrirModalGestionTrabajadores()">
-                    <i class="fas fa-id-badge"></i> <span>Trabajadores</span>
-                </button>
-            </div>
-
-            <!-- CUENTA Y CONFIGURACIÓN -->
-            <div class="crm-nav-group" style="margin-top: auto;">
-                <div class="crm-nav-label">Sistema y Cuenta</div>
-                <button class="crm-nav-item" id="navItemConfiguracion" onclick="abrirModalCambiarPassCRM()">
+                <!-- 9. CONFIGURACIÓN (PANTALLA 10) -->
+                <button class="crm-nav-item" id="navItemConfiguracion" onclick="cargarPestanaERP('configuracion', this)">
                     <i class="fas fa-cog"></i> <span>Configuración</span>
                 </button>
+
+                <!-- 10. MI ACTIVIDAD (PANTALLA 10 - EXCLUSIVO VENTAS) -->
+                <button class="crm-nav-item" id="navItemActividad" onclick="cargarPestanaERP('actividad', this)" style="display:none;">
+                    <i class="fas fa-calendar-check"></i> <span>Mi actividad</span>
+                </button>
+
+                <!-- 11. PANEL POR ROL (PANTALLA 10 - GUÍA VISUAL) -->
+                <button class="crm-nav-item" id="erp-nav-roles" onclick="cargarPestanaERP('roles', this)">
+                    <i class="fas fa-id-badge"></i> <span>Panel por Rol</span>
+                </button>
+
+                <!-- SECCIÓN COMPLEMENTARIA DE HERRAMIENTAS COMPLETAS (ADMINISTRADOR) -->
+                <div id="seccionHerramientasAvanzadasAdmin" style="margin-top: 15px; padding-top: 10px; border-top: 1px solid rgba(226,232,240,0.15);">
+                    <div class="crm-nav-label" style="font-size: 0.68rem; opacity: 0.75; text-transform: uppercase;">Más Herramientas (Admin)</div>
+                    <button class="crm-nav-item" id="navItemInteracciones" onclick="loadExternalView('crm-interacciones.html', this, 'CRM')">
+                        <i class="fas fa-comments"></i> <span>Interacciones CRM</span>
+                    </button>
+                    <button class="crm-nav-item" id="navItemEvaluaciones" onclick="loadExternalView('crm-evaluaciones.html', this, 'CRM')">
+                        <i class="fas fa-star"></i> <span>Evaluaciones CRM</span>
+                    </button>
+                    <button class="crm-nav-item" id="navItemDescuentos" onclick="loadExternalView('crm-descuentos.html', this, 'CRM')">
+                        <i class="fas fa-tags"></i> <span>Descuentos y Promos</span>
+                    </button>
+                    <button class="crm-nav-item" id="scm-nav-proveedores" onclick="loadExternalView('scm-proveedores.html', this, 'SCM')">
+                        <i class="fas fa-user-group"></i> <span>Proveedores SCM</span>
+                    </button>
+                    <button class="crm-nav-item" id="scm-nav-movimientos" onclick="loadExternalView('scm-movimientos.html', this, 'SCM')">
+                        <i class="fas fa-right-left"></i> <span>Movimientos SCM</span>
+                    </button>
+                    <button class="crm-nav-item" id="scm-nav-pedidos" onclick="loadExternalView('scm-pedidos.html', this, 'SCM')">
+                        <i class="fas fa-file-invoice"></i> <span>Pedidos SCM</span>
+                    </button>
+                    <button class="crm-nav-item" id="scm-nav-logistica" onclick="loadExternalView('scm-logistica.html', this, 'SCM')">
+                        <i class="fas fa-truck-fast"></i> <span>Rutas y Despacho</span>
+                    </button>
+                    <button class="crm-nav-item" id="navItemTrabajadores" onclick="abrirModalGestionTrabajadores()">
+                        <i class="fas fa-id-badge"></i> <span>Trabajadores</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- CUENTA -->
+            <div class="crm-nav-group" style="margin-top: auto;">
                 <button class="crm-nav-item" onclick="logoutGestor()">
                     <i class="fas fa-sign-out-alt"></i> <span>Cerrar Sesión</span>
                 </button>
@@ -1242,44 +1207,68 @@
             }
         }
 
+        function cargarPestanaERP(clave, btn) {
+            document.querySelectorAll(".crm-nav-item").forEach(function(el) {
+                el.classList.remove("active");
+            });
+            if (btn) btn.classList.add("active");
+
+            switch(clave) {
+                case 'inicio':
+                    loadExternalView('erp-inicio.html', btn, 'ERP');
+                    break;
+                case 'clientes':
+                    loadExternalView('crm-clientes.html', btn, 'CRM');
+                    break;
+                case 'productos':
+                    loadExternalView('scm-productos.html', btn, 'SCM');
+                    break;
+                case 'inventario':
+                    loadExternalView('scm-inventario.html', btn, 'SCM');
+                    break;
+                case 'ordenes':
+                    loadExternalView('erp-ordenes.html', btn, 'ERP');
+                    break;
+                case 'reportes':
+                    loadExternalView('erp-reportes.html', btn, 'ERP');
+                    break;
+                case 'madurez':
+                    loadExternalView('erp-madurez.html', btn, 'ERP');
+                    break;
+                case 'usuarios':
+                    loadExternalView('crm-usuarios.html', btn, 'Usuarios');
+                    break;
+                case 'actividad':
+                    loadExternalView('crm-actividad.html', btn, 'CRM');
+                    break;
+                case 'roles':
+                    loadExternalView('erp-roles.html', btn, 'ERP');
+                    break;
+                case 'configuracion':
+                    abrirModalCambiarPassCRM();
+                    break;
+                default:
+                    loadExternalView('erp-inicio.html', btn, 'ERP');
+            }
+        }
+        window.cargarPestanaERP = cargarPestanaERP;
+
         function aplicarMatrizPermisosPorRol(role) {
             role = String(role || '').toLowerCase();
 
-            // 1. Acceso a elementos base del Sidebar
-            const btnInicio = document.getElementById("navItemInicio");
-            const btnWrapCRM = document.getElementById("btnAccordionCRM")?.closest(".crm-accordion-wrapper");
-            const btnWrapSCM = document.getElementById("btnAccordionSCM")?.closest(".crm-accordion-wrapper");
-            const btnWrapERP = document.getElementById("wrapperAccordionERP");
-            const btnUsuarios = document.getElementById("navItemUsuarios");
-            const btnTrabajadores = document.getElementById("navItemTrabajadores");
-            const btnConfiguracion = document.getElementById("navItemConfiguracion");
-
-            // Subitems CRM
-            const crmClientes = document.getElementById("navItemClientes");
-            const crmInteracciones = document.getElementById("navItemInteracciones");
-            const crmEvaluaciones = document.getElementById("navItemEvaluaciones");
-            const crmDescuentos = document.getElementById("navItemDescuentos");
-            const crmActividad = document.getElementById("navItemActividad");
-            const crmReportes = document.getElementById("navItemReportes");
-
-            // Subitems SCM
-            const scmInicio = document.getElementById("scm-nav-inicio");
-            const scmProd = document.getElementById("scm-nav-productos");
-            const scmProv = document.getElementById("scm-nav-proveedores");
-            const scmInv = document.getElementById("scm-nav-inventario");
-            const scmMov = document.getElementById("scm-nav-movimientos");
-            const scmPed = document.getElementById("scm-nav-pedidos");
-            const scmLog = document.getElementById("scm-nav-logistica");
-            const scmRep = document.getElementById("scm-nav-reportes");
-            const scmMad = document.getElementById("scm-nav-madurez");
-
-            // Subitems ERP
-            const erpInicio = document.getElementById("erp-nav-inicio");
-            const erpOrdenes = document.getElementById("erp-nav-ordenes");
-            const erpNuevaOrden = document.getElementById("erp-nav-nueva-orden");
-            const erpReportes = document.getElementById("erp-nav-reportes");
-            const erpMadurez = document.getElementById("erp-nav-madurez");
-            const erpRoles = document.getElementById("erp-nav-roles");
+            // Pestañas ERP exactas de la Guía Visual (Pantalla 10)
+            const tabInicio = document.getElementById("erp-tab-inicio");
+            const tabClientes = document.getElementById("navItemClientes");
+            const tabProductos = document.getElementById("scm-nav-productos");
+            const tabInventario = document.getElementById("scm-nav-inventario");
+            const tabOrdenes = document.getElementById("erp-nav-ordenes");
+            const tabReportes = document.getElementById("erp-nav-reportes");
+            const tabMadurez = document.getElementById("erp-nav-madurez");
+            const tabUsuarios = document.getElementById("navItemUsuarios");
+            const tabConfiguracion = document.getElementById("navItemConfiguracion");
+            const tabActividad = document.getElementById("navItemActividad");
+            const tabRoles = document.getElementById("erp-nav-roles");
+            const wrapAvanzado = document.getElementById("seccionHerramientasAvanzadasAdmin");
 
             // Helper para visibilidad
             const setVisible = (el, show, displayType = 'flex') => {
@@ -1287,11 +1276,11 @@
             };
 
             // ==============================================================
-            // CONFIGURACIÓN DINÁMICA POR ROL (PANTALLA 10 DE GUÍA VISUAL)
+            // REPLICACIÓN EXACTA DE PESTAÑAS SEGÚN ROL (PANTALLA 10)
             // ==============================================================
             if (role === 'ventas') {
                 // ----------------------------------------------------------
-                // 💼 ROL VENTAS (6 PANTALLAS EXACTAS):
+                // 💼 ROL VENTAS (6 PESTAÑAS EXACTAS):
                 // 1. Inicio
                 // 2. Clientes (CRM)
                 // 3. Productos (SCM)
@@ -1299,140 +1288,86 @@
                 // 5. Reportes
                 // 6. Mi actividad
                 // ----------------------------------------------------------
-                setVisible(btnInicio, true, 'flex');
-                setVisible(btnWrapCRM, true, 'block');
-                setVisible(btnWrapSCM, true, 'block');
-                setVisible(btnWrapERP, true, 'block');
+                setVisible(tabInicio, true, 'flex');
+                setVisible(tabClientes, true, 'flex');
+                setVisible(tabProductos, true, 'flex');
+                setVisible(tabOrdenes, true, 'flex');
+                setVisible(tabReportes, true, 'flex');
+                setVisible(tabActividad, true, 'flex');
+                setVisible(tabRoles, true, 'flex');
 
-                // En CRM: Solo Clientes, Reportes y Mi Actividad
-                setVisible(crmClientes, true, 'flex');
-                setVisible(crmActividad, true, 'flex');
-                setVisible(crmReportes, true, 'flex');
-                setVisible(crmInteracciones, false);
-                setVisible(crmEvaluaciones, false);
-                setVisible(crmDescuentos, false);
+                // Ocultar pestañas no correspondientes a Ventas
+                setVisible(tabInventario, false);
+                setVisible(tabMadurez, false);
+                setVisible(tabUsuarios, false);
+                setVisible(tabConfiguracion, false);
+                setVisible(wrapAvanzado, false);
 
-                // En SCM: Solo Productos (SCM)
-                setVisible(scmProd, true, 'flex');
-                setVisible(scmInicio, false);
-                setVisible(scmProv, false);
-                setVisible(scmInv, false);
-                setVisible(scmMov, false);
-                setVisible(scmPed, false);
-                setVisible(scmLog, false);
-                setVisible(scmRep, false);
-                setVisible(scmMad, false);
-
-                // En ERP: Solo Órdenes (ERP) y Reportes
-                setVisible(erpOrdenes, true, 'flex');
-                setVisible(erpNuevaOrden, true, 'flex');
-                setVisible(erpReportes, true, 'flex');
-                setVisible(erpInicio, false);
-                setVisible(erpMadurez, false);
-                setVisible(erpRoles, true, 'flex'); // Permite ver la matriz o simular
-
-                // Ocultar Usuarios, Trabajadores y Configuración del sistema
-                setVisible(btnUsuarios, false);
-                setVisible(btnTrabajadores, false);
-                setVisible(btnConfiguracion, false);
-
-                // Abrir por defecto vista de Ventas y desplegar acordeones permitidos
-                loadExternalView("crm-clientes.html", crmClientes, "CRM");
-                abrirAcordeonCRM();
-                abrirAcordeonSCM();
-                abrirAcordeonERP();
+                // Si no hay vista cargada actualmente, cargar inicio
+                if (!currentLoadedView) {
+                    cargarPestanaERP('inicio', tabInicio);
+                }
 
             } else if (role === 'logistica' || role === 'trabajador') {
                 // ----------------------------------------------------------
-                // 🚚 ROL LOGÍSTICA (5 PANTALLAS EXACTAS):
+                // 🚚 ROL LOGÍSTICA (5 PESTAÑAS EXACTAS):
                 // 1. Inicio
                 // 2. Productos (SCM)
                 // 3. Inventario (SCM)
                 // 4. Órdenes (ERP)
                 // 5. Reportes
                 // ----------------------------------------------------------
-                setVisible(btnInicio, true, 'flex');
-                setVisible(btnWrapCRM, false); // No tiene acceso a CRM de clientes
-                setVisible(btnWrapSCM, true, 'block');
-                setVisible(btnWrapERP, true, 'block');
+                setVisible(tabInicio, true, 'flex');
+                setVisible(tabProductos, true, 'flex');
+                setVisible(tabInventario, true, 'flex');
+                setVisible(tabOrdenes, true, 'flex');
+                setVisible(tabReportes, true, 'flex');
+                setVisible(tabRoles, true, 'flex');
 
-                // En SCM: Solo Productos, Inventario y Reportes
-                setVisible(scmProd, true, 'flex');
-                setVisible(scmInv, true, 'flex');
-                setVisible(scmRep, true, 'flex');
-                setVisible(scmInicio, false);
-                setVisible(scmProv, false);
-                setVisible(scmMov, false);
-                setVisible(scmPed, false);
-                setVisible(scmLog, false);
-                setVisible(scmMad, false);
+                // Ocultar pestañas no correspondientes a Logística
+                setVisible(tabClientes, false);
+                setVisible(tabActividad, false);
+                setVisible(tabMadurez, false);
+                setVisible(tabUsuarios, false);
+                setVisible(tabConfiguracion, false);
+                setVisible(wrapAvanzado, false);
 
-                // En ERP: Solo Órdenes y Reportes
-                setVisible(erpOrdenes, true, 'flex');
-                setVisible(erpReportes, true, 'flex');
-                setVisible(erpNuevaOrden, false);
-                setVisible(erpInicio, false);
-                setVisible(erpMadurez, false);
-                setVisible(erpRoles, true, 'flex'); // Permite ver la matriz o simular
-
-                // Ocultar Usuarios, Trabajadores y Configuración administrativa
-                setVisible(btnUsuarios, false);
-                setVisible(btnTrabajadores, false);
-                setVisible(btnConfiguracion, false);
-
-                // Abrir por defecto vista de Logística (Inventario) y desplegar acordeones permitidos
-                loadExternalView("scm-inventario.html", scmInv, "SCM");
-                abrirAcordeonSCM();
-                abrirAcordeonERP();
+                // Si no hay vista cargada actualmente, cargar inicio
+                if (!currentLoadedView) {
+                    cargarPestanaERP('inicio', tabInicio);
+                }
 
             } else {
                 // ----------------------------------------------------------
-                // 👑 ROL ADMINISTRADOR (ACCESO TOTAL A TODO EL SISTEMA):
-                // Acceso irrestricto a CRM, SCM, ERP, Usuarios, Trabajadores y Configuración
+                // 👑 ROL ADMINISTRADOR (9 PESTAÑAS EXACTAS + HERRAMIENTAS COMPLETAS):
+                // 1. Inicio
+                // 2. Clientes (CRM)
+                // 3. Productos (SCM)
+                // 4. Inventario (SCM)
+                // 5. Órdenes (ERP)
+                // 6. Reportes
+                // 7. Nivel ERP
+                // 8. Usuarios
+                // 9. Configuración
                 // ----------------------------------------------------------
-                setVisible(btnInicio, true, 'flex');
-                setVisible(btnWrapCRM, true, 'block');
-                setVisible(btnWrapSCM, true, 'block');
-                setVisible(btnWrapERP, true, 'block');
-                setVisible(btnUsuarios, true, 'flex');
-                setVisible(btnTrabajadores, true, 'flex');
-                setVisible(btnConfiguracion, true, 'flex');
+                setVisible(tabInicio, true, 'flex');
+                setVisible(tabClientes, true, 'flex');
+                setVisible(tabProductos, true, 'flex');
+                setVisible(tabInventario, true, 'flex');
+                setVisible(tabOrdenes, true, 'flex');
+                setVisible(tabReportes, true, 'flex');
+                setVisible(tabMadurez, true, 'flex');
+                setVisible(tabUsuarios, true, 'flex');
+                setVisible(tabConfiguracion, true, 'flex');
+                setVisible(tabRoles, true, 'flex');
+                setVisible(wrapAvanzado, true, 'block');
 
-                // En CRM: TODO HABILITADO
-                setVisible(crmClientes, true, 'flex');
-                setVisible(crmInteracciones, true, 'flex');
-                setVisible(crmEvaluaciones, true, 'flex');
-                setVisible(crmDescuentos, true, 'flex');
-                setVisible(crmActividad, true, 'flex');
-                setVisible(crmReportes, true, 'flex');
+                // Mi actividad es exclusiva del flujo de Ventas
+                setVisible(tabActividad, false);
 
-                // En SCM: TODO HABILITADO
-                setVisible(scmInicio, true, 'flex');
-                setVisible(scmProd, true, 'flex');
-                setVisible(scmProv, true, 'flex');
-                setVisible(scmInv, true, 'flex');
-                setVisible(scmMov, true, 'flex');
-                setVisible(scmPed, true, 'flex');
-                setVisible(scmLog, true, 'flex');
-                setVisible(scmRep, true, 'flex');
-                setVisible(scmMad, true, 'flex');
-
-                // En ERP: TODO HABILITADO
-                setVisible(erpInicio, true, 'flex');
-                setVisible(erpOrdenes, true, 'flex');
-                setVisible(erpNuevaOrden, true, 'flex');
-                setVisible(erpReportes, true, 'flex');
-                setVisible(erpMadurez, true, 'flex');
-                setVisible(erpRoles, true, 'flex');
-
-                // Desplegar automáticamente todos los acordeones para acceso inmediato a todas las pantallas
-                abrirAcordeonCRM();
-                abrirAcordeonSCM();
-                abrirAcordeonERP();
-
-                // Si no hay vista cargada actualmente, cargar el dashboard general
+                // Si no hay vista cargada actualmente, cargar inicio
                 if (!currentLoadedView) {
-                    loadExternalView("crm-dashboard.html", btnInicio, "Dashboard");
+                    cargarPestanaERP('inicio', tabInicio);
                 }
             }
         }
