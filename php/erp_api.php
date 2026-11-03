@@ -586,6 +586,24 @@ try {
         $rawInput = file_get_contents('php://input');
         $input = json_decode($rawInput, true) ?: [];
 
+        // CAMBIAR ROL EN SESIÓN ERP
+        if ($resource === 'cambiar_rol') {
+            $nuevoRol = strtolower(cleanInput($input['rol'] ?? 'admin'));
+            if ($nuevoRol === 'administrador') $nuevoRol = 'admin';
+            if (in_array($nuevoRol, ['admin', 'ventas', 'logistica', 'trabajador'])) {
+                $_SESSION['erp_rol_activo'] = $nuevoRol;
+                $_SESSION['rol'] = $nuevoRol;
+                echo json_encode([
+                    'success' => true,
+                    'message' => 'Rol cambiado exitosamente',
+                    'rol' => $nuevoRol
+                ]);
+            } else {
+                echo json_encode(['success' => false, 'error' => 'Rol no válido']);
+            }
+            exit();
+        }
+
         // A. PROCESAR / CREAR NUEVA ORDEN DE CLIENTE (PANTALLAS 3, 4, 5, 6 Y 7)
         if ($resource === 'procesar_orden' || $resource === 'crear_orden') {
             $clienteId = isset($input['cliente_id']) ? (int)$input['cliente_id'] : (isset($input['id_cliente']) ? (int)$input['id_cliente'] : 0);

@@ -1564,6 +1564,10 @@
                 loadExternalView("crm-dashboard.html", btnInicio, "Dashboard");
             }
 
+            // Sincronizar selector en erp-inicio si está presente en el DOM
+            const selInicio = document.getElementById("erpInicioSelectRol");
+            if (selInicio) selInicio.value = (role === 'trabajador' ? 'logistica' : role);
+
             // Actualizar la barra superior de pestañas dinámicas del ERP
             actualizarPestanasERP(currentLoadedView, role);
         }

@@ -15,7 +15,22 @@
             <h2 style="font-size: 1.6rem; font-weight: 800; color: var(--text-heading); margin: 0;">Dashboard ERP</h2>
             <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 2px;">Vista integrada del negocio conectando CRM y SCM en tiempo real</p>
         </div>
-        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+        <div style="display: flex; gap: 10px; flex-wrap: wrap; align-items: center;">
+            <!-- BOTÓN Y SELECTOR PARA CAMBIAR DE ROL EN ERP -->
+            <div style="display: flex; align-items: center; gap: 8px; background: #ffffff; padding: 4px 10px; border-radius: 10px; border: 1.5px solid #e0e7ff; box-shadow: 0 2px 6px rgba(99,102,241,0.08);">
+                <span style="font-size: 0.82rem; font-weight: 700; color: #4338ca; display: flex; align-items: center; gap: 6px;">
+                    <i class="fas fa-id-badge"></i> Rol ERP:
+                </span>
+                <select id="erpInicioSelectRol" class="crm-form-select" style="width: auto; padding: 5px 12px; font-weight: 700; font-size: 0.82rem; border-radius: 8px; border: 1px solid #c7d2fe; color: #1e1b4b; background: #f8fafc; cursor: pointer;" onchange="cambiarRolDesdeERPInicio(this.value)">
+                    <option value="admin">👑 Administrador</option>
+                    <option value="ventas">💼 Ventas</option>
+                    <option value="logistica">🚚 Logística</option>
+                </select>
+                <button class="crm-btn crm-btn-secondary crm-btn-sm" type="button" onclick="abrirModalCambiarRolERPInicio()" title="Elegir rol detallado" style="padding: 5px 10px; font-size: 0.82rem; font-weight: 700; border-radius: 8px; border: 1px solid #cbd5e1; background: #ffffff;">
+                    <i class="fas fa-arrows-rotate" style="color: #6366f1;"></i> Cambiar
+                </button>
+            </div>
+
             <button class="crm-btn crm-btn-secondary crm-btn-sm" onclick="cargarDashboardERP()">
                 <i class="fas fa-sync-alt"></i> <span>Actualizar</span>
             </button>
@@ -145,6 +160,77 @@
                 </div>
             </div>
         </div>
+
+        <!-- 5. BOTÓN DIRECTO PARA CAMBIAR DE ROL -->
+        <div class="crm-card" style="padding: 1.25rem; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; border: 1.5px dashed #a5b4fc; background: #faf5ff;" onclick="abrirModalCambiarRolERPInicio()" onmouseover="this.style.transform='translateY(-3px)'" onmouseout="this.style.transform='none'">
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <div style="width: 44px; height: 44px; border-radius: 10px; background: rgba(99,102,241,0.15); color: #6366f1; display: flex; align-items: center; justify-content: center; font-size: 1.2rem;">
+                    <i class="fas fa-user-gear"></i>
+                </div>
+                <div>
+                    <div style="font-weight: 800; color: #4338ca; font-size: 0.95rem;">Cambiar de Rol ERP</div>
+                    <div style="font-size: 0.78rem; color: #64748b;">Alternar entre Admin, Ventas y Logística</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL FLOTANTE: CAMBIAR ROL EN ERP -->
+<div class="crm-modal-overlay" id="modalCambiarRolERPInicio" style="display:none; align-items:center; justify-content:center; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(15,23,42,0.6); z-index:9999; backdrop-filter:blur(3px);">
+    <div class="crm-modal-dialog" style="max-width: 680px; width:92%; background:#fff; border-radius:16px; box-shadow:0 25px 50px -12px rgba(0,0,0,0.25); overflow:hidden;">
+        <div style="display:flex; justify-content:space-between; align-items:center; padding:18px 24px; border-bottom:1px solid #f1f5f9; background:linear-gradient(135deg, #1e1b4b, #312e81); color:#fff;">
+            <div style="display:flex; align-items:center; gap:10px;">
+                <i class="fas fa-id-card-clip" style="color:#a5b4fc; font-size:1.3rem;"></i>
+                <h3 style="margin:0; font-size:1.15rem; font-weight:800; color:#fff;">Cambiar Rol de Acceso en el ERP</h3>
+            </div>
+            <button type="button" onclick="cerrarModalCambiarRolERPInicio()" style="background:transparent; border:none; color:#cbd5e1; font-size:1.4rem; cursor:pointer; line-height:1;">&times;</button>
+        </div>
+
+        <div style="padding:22px 24px;">
+            <p style="margin:0 0 16px 0; font-size:0.88rem; color:#475569;">
+                Selecciona el rol con el que deseas operar. Al hacer clic, las pantallas del apartado ERP y la barra superior se actualizarán de inmediato conforme a la <strong>Pantalla 10</strong>:
+            </p>
+
+            <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(180px, 1fr)); gap:14px;">
+                <!-- ROL ADMIN -->
+                <div onclick="seleccionarRolYRefrescar('admin')" style="background:#fff5f7; border:2px solid #fda4af; border-radius:12px; padding:16px; cursor:pointer; transition:all 0.2s; text-align:center;" onmouseover="this.style.transform='scale(1.02)'; this.style.borderColor='#f43f5e';" onmouseout="this.style.transform='none'; this.style.borderColor='#fda4af';">
+                    <div style="width:48px; height:48px; border-radius:50%; background:#f43f5e; color:#fff; display:flex; align-items:center; justify-content:center; margin:0 auto 10px; font-size:1.3rem;">
+                        <i class="fas fa-crown"></i>
+                    </div>
+                    <div style="font-weight:800; font-size:1rem; color:#881337;">👑 Administrador</div>
+                    <div style="font-size:0.75rem; color:#9f1239; margin-top:4px; font-weight:600;">9 Pantallas ERP</div>
+                    <div style="font-size:0.72rem; color:#64748b; margin-top:6px; line-height:1.3;">Acceso completo e ilimitado a todos los módulos.</div>
+                    <button type="button" class="crm-btn crm-btn-sm" style="margin-top:10px; width:100%; background:#f43f5e; color:#fff; border:none; font-weight:700;">Activar Admin</button>
+                </div>
+
+                <!-- ROL VENTAS -->
+                <div onclick="seleccionarRolYRefrescar('ventas')" style="background:#eff6ff; border:2px solid #bfdbfe; border-radius:12px; padding:16px; cursor:pointer; transition:all 0.2s; text-align:center;" onmouseover="this.style.transform='scale(1.02)'; this.style.borderColor='#3b82f6';" onmouseout="this.style.transform='none'; this.style.borderColor='#bfdbfe';">
+                    <div style="width:48px; height:48px; border-radius:50%; background:#3b82f6; color:#fff; display:flex; align-items:center; justify-content:center; margin:0 auto 10px; font-size:1.3rem;">
+                        <i class="fas fa-briefcase"></i>
+                    </div>
+                    <div style="font-weight:800; font-size:1rem; color:#1e3a8a;">💼 Ventas</div>
+                    <div style="font-size:0.75rem; color:#1d4ed8; margin-top:4px; font-weight:600;">6 Pantallas ERP</div>
+                    <div style="font-size:0.72rem; color:#64748b; margin-top:6px; line-height:1.3;">Clientes, Productos, Órdenes, Reportes y Mi actividad.</div>
+                    <button type="button" class="crm-btn crm-btn-sm" style="margin-top:10px; width:100%; background:#3b82f6; color:#fff; border:none; font-weight:700;">Activar Ventas</button>
+                </div>
+
+                <!-- ROL LOGÍSTICA -->
+                <div onclick="seleccionarRolYRefrescar('logistica')" style="background:#f0fdf4; border:2px solid #bbf7d0; border-radius:12px; padding:16px; cursor:pointer; transition:all 0.2s; text-align:center;" onmouseover="this.style.transform='scale(1.02)'; this.style.borderColor='#10b981';" onmouseout="this.style.transform='none'; this.style.borderColor='#bbf7d0';">
+                    <div style="width:48px; height:48px; border-radius:50%; background:#10b981; color:#fff; display:flex; align-items:center; justify-content:center; margin:0 auto 10px; font-size:1.3rem;">
+                        <i class="fas fa-truck"></i>
+                    </div>
+                    <div style="font-weight:800; font-size:1rem; color:#064e3b;">🚚 Logística</div>
+                    <div style="font-size:0.75rem; color:#047857; margin-top:4px; font-weight:600;">5 Pantallas ERP</div>
+                    <div style="font-size:0.72rem; color:#64748b; margin-top:6px; line-height:1.3;">Productos, Inventario, Órdenes y Reportes.</div>
+                    <button type="button" class="crm-btn crm-btn-sm" style="margin-top:10px; width:100%; background:#10b981; color:#fff; border:none; font-weight:700;">Activar Logística</button>
+                </div>
+            </div>
+        </div>
+
+        <div style="padding:14px 24px; background:#f8fafc; border-top:1px solid #f1f5f9; display:flex; justify-content:flex-end;">
+            <button type="button" class="crm-btn crm-btn-secondary" onclick="cerrarModalCambiarRolERPInicio()">Cerrar</button>
+        </div>
     </div>
 </div>
 
@@ -267,11 +353,75 @@
         });
     }
 
+    // FUNCIONES DE CAMBIO DE ROL EN EL INICIO DE ERP
+    function abrirModalCambiarRolERPInicio() {
+        var modal = document.getElementById("modalCambiarRolERPInicio");
+        if (modal) modal.style.display = "flex";
+    }
+
+    function cerrarModalCambiarRolERPInicio() {
+        var modal = document.getElementById("modalCambiarRolERPInicio");
+        if (modal) modal.style.display = "none";
+    }
+
+    function seleccionarRolYRefrescar(rol) {
+        cambiarRolDesdeERPInicio(rol);
+        cerrarModalCambiarRolERPInicio();
+    }
+
+    function cambiarRolDesdeERPInicio(nuevoRol) {
+        var rolSlug = String(nuevoRol || 'admin').toLowerCase();
+        if (rolSlug.includes('vent')) rolSlug = 'ventas';
+        else if (rolSlug.includes('log') || rolSlug.includes('tra')) rolSlug = 'logistica';
+        else rolSlug = 'admin';
+
+        // 1. Aplicar matriz en gestor (actualiza sidebar ERP y visibilidad sin tocar otros apartados)
+        if (typeof window.aplicarMatrizPermisosPorRol === 'function') {
+            window.aplicarMatrizPermisosPorRol(rolSlug);
+        }
+
+        // 2. Actualizar texto de rol en topbar del gestor
+        var gestorRoleElem = document.getElementById("gestorRole");
+        if (gestorRoleElem) {
+            gestorRoleElem.textContent = (rolSlug === "ventas" ? "Ventas / Comercial" : (rolSlug === "logistica" ? "Logística / Almacén" : "Administrador"));
+        }
+
+        // 3. Sincronizar select en erp-inicio
+        var sel = document.getElementById("erpInicioSelectRol");
+        if (sel) sel.value = rolSlug;
+
+        // 4. Notificar al backend para guardar en sesión
+        fetch("php/erp_api.php?resource=cambiar_rol", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ rol: rolSlug })
+        }).catch(function(err) { console.error(err); });
+
+        // 5. Notificación al usuario
+        var nombreLabel = (rolSlug === 'ventas' ? 'Ventas' : (rolSlug === 'logistica' ? 'Logística' : 'Administrador'));
+        if (typeof mostrarNotificacion === 'function') {
+            mostrarNotificacion("Rol de ERP actualizado a: " + nombreLabel, "success");
+        } else if (typeof showNotification === 'function') {
+            showNotification("Rol de ERP actualizado a: " + nombreLabel);
+        }
+    }
+
+    // Inicializar select con el rol activo en sesión
+    (function initSelectRolERP() {
+        var rolActual = window.rolActivoERP || 'admin';
+        var sel = document.getElementById("erpInicioSelectRol");
+        if (sel) sel.value = rolActual;
+    })();
+
     // Exponer globalmente
     window.cargarDashboardERP = cargarDashboardERP;
     window.navegarDesdeERPHub = navegarDesdeERPHub;
     window.renderizarTopProductosERP = renderizarTopProductosERP;
     window.renderizarGraficaVentas6Meses = renderizarGraficaVentas6Meses;
+    window.abrirModalCambiarRolERPInicio = abrirModalCambiarRolERPInicio;
+    window.cerrarModalCambiarRolERPInicio = cerrarModalCambiarRolERPInicio;
+    window.seleccionarRolYRefrescar = seleccionarRolYRefrescar;
+    window.cambiarRolDesdeERPInicio = cambiarRolDesdeERPInicio;
 
     cargarDashboardERP();
 </script>
