@@ -632,11 +632,34 @@ try {
                 $invId = $stmtInvCheck->fetchColumn();
 
                 if ($invId) {
+                    $stmtPrev = $pdo->prepare("SELECT stock_actual FROM scm_inventario WHERE id = ?");
+                    $stmtPrev->execute([$invId]);
+                    $prevStock = (int)$stmtPrev->fetchColumn();
+                    $diff = $stockActual - $prevStock;
+
                     $pdo->prepare("
                         UPDATE scm_inventario 
                         SET nombre = ?, stock_actual = ?, stock_minimo = ?, stock_maximo = ?
                         WHERE id = ?
                     ")->execute([$name, $stockActual, $stockMin, max($stockMin * 5, 25), $invId]);
+
+                    if ($diff != 0) {
+                        $folioMov = 'MOV-' . rand(10000, 99999);
+                        $tipoMov = ($diff > 0) ? 'entrada' : 'salida';
+                        $pdo->prepare("
+                            INSERT INTO scm_movimientos (folio, tipo, producto_id, producto_nombre, cantidad, origen, destino, usuario, motivo, fecha)
+                            VALUES (?, ?, ?, ?, ?, ?, 'Almacén Central', ?, ?, NOW())
+                        ")->execute([
+                            $folioMov,
+                            $tipoMov,
+                            $id,
+                            $name,
+                            abs($diff),
+                            'Edición de producto',
+                            $currentUsername,
+                            "Ajuste en catálogo (De {$prevStock} a {$stockActual} pzas)"
+                        ]);
+                    }
                 } else {
                     $sku = sprintf("SCM-%04d", $id);
                     $pdo->prepare("

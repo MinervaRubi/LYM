@@ -936,7 +936,8 @@
                 </div>
             `;
 
-            fetch(viewUrl)
+            const cacheBusterUrl = viewUrl + (viewUrl.includes('?') ? '&' : '?') + '_t=' + Date.now();
+            fetch(cacheBusterUrl)
                 .then(response => {
                     if (!response.ok) throw new Error("No se pudo cargar " + viewUrl);
                     return response.text();
@@ -1408,57 +1409,170 @@
             };
 
             // ==============================================================
-            // PRESERVAR TODOS LOS APARTADOS ORIGINALES DEL SIDEBAR INTACTOS
-            // ("No quitar apartados que ya se tenían, solo replicar pestañas en ERP")
+            // PANEL POR ROL: MENÚ DINÁMICO EXACTO (PANTALLA 10 DE LA GUÍA)
+            // Administrador: 9 pantallas | Ventas: 6 pantallas | Logística: 5 pantallas
             // ==============================================================
-            setVisible(btnInicio, true, 'flex');
-            setVisible(btnWrapCRM, true, 'block');
-            setVisible(btnWrapSCM, true, 'block');
-            setVisible(btnWrapERP, true, 'block');
-            setVisible(btnUsuarios, true, 'flex');
-            setVisible(btnTrabajadores, (role === 'admin' || role === 'administrador'), 'flex');
-            setVisible(btnConfiguracion, true, 'flex');
-
-            // Subitems CRM todos preservados
-            setVisible(crmClientes, true, 'flex');
-            setVisible(crmInteracciones, true, 'flex');
-            setVisible(crmEvaluaciones, true, 'flex');
-            setVisible(crmDescuentos, true, 'flex');
-            setVisible(crmActividad, true, 'flex');
-            setVisible(crmReportes, true, 'flex');
-
-            // Subitems SCM todos preservados
-            setVisible(scmInicio, true, 'flex');
-            setVisible(scmProd, true, 'flex');
-            setVisible(scmProv, true, 'flex');
-            setVisible(scmInv, true, 'flex');
-            setVisible(scmMov, true, 'flex');
-            setVisible(scmPed, true, 'flex');
-            setVisible(scmLog, true, 'flex');
-            setVisible(scmRep, true, 'flex');
-            setVisible(scmMad, true, 'flex');
-
-            // Subitems ERP todos preservados
-            setVisible(erpInicio, true, 'flex');
-            setVisible(erpOrdenes, true, 'flex');
-            setVisible(erpNuevaOrden, true, 'flex');
-            setVisible(erpReportes, true, 'flex');
-            setVisible(erpMadurez, true, 'flex');
-            setVisible(erpRoles, true, 'flex');
-
-            // Desplegar acordeones para acceso fluido a todos los módulos
-            abrirAcordeonCRM();
-            abrirAcordeonSCM();
-            abrirAcordeonERP();
-
-            // Guardar rol activo y actualizar la barra de pestañas replicadas del ERP
             window.rolActivoERP = role;
-            actualizarPestanasERP(currentLoadedView, role);
 
-            // Si no hay vista cargada actualmente, cargar el dashboard general
-            if (!currentLoadedView) {
-                loadExternalView("crm-dashboard.html", btnInicio, "Dashboard");
+            if (role === 'ventas') {
+                // ----------------------------------------------------------
+                // 💼 ROL VENTAS (6 PANTALLAS EXACTAS SEGÚN GUÍA PANTALLA 10):
+                // 1. Inicio
+                // 2. Clientes (CRM)
+                // 3. Productos (SCM)
+                // 4. Órdenes (ERP)
+                // 5. Reportes
+                // 6. Mi actividad
+                // ----------------------------------------------------------
+                setVisible(btnInicio, true, 'flex');
+                setVisible(btnWrapCRM, true, 'block');
+                setVisible(btnWrapSCM, true, 'block');
+                setVisible(btnWrapERP, true, 'block');
+
+                // En CRM: Solo Clientes, Reportes y Mi Actividad
+                setVisible(crmClientes, true, 'flex');
+                setVisible(crmActividad, true, 'flex');
+                setVisible(crmReportes, true, 'flex');
+                setVisible(crmInteracciones, false);
+                setVisible(crmEvaluaciones, false);
+                setVisible(crmDescuentos, false);
+
+                // En SCM: Solo Productos (SCM)
+                setVisible(scmProd, true, 'flex');
+                setVisible(scmInicio, false);
+                setVisible(scmProv, false);
+                setVisible(scmInv, false);
+                setVisible(scmMov, false);
+                setVisible(scmPed, false);
+                setVisible(scmLog, false);
+                setVisible(scmRep, false);
+                setVisible(scmMad, false);
+
+                // En ERP: Solo Órdenes (ERP), Reportes y Panel por Rol
+                setVisible(erpOrdenes, true, 'flex');
+                setVisible(erpNuevaOrden, true, 'flex');
+                setVisible(erpReportes, true, 'flex');
+                setVisible(erpRoles, true, 'flex');
+                setVisible(erpInicio, false);
+                setVisible(erpMadurez, false);
+
+                // Ocultar Usuarios, Trabajadores y Configuración
+                setVisible(btnUsuarios, false);
+                setVisible(btnTrabajadores, false);
+                setVisible(btnConfiguracion, false);
+
+                // Desplegar acordeones con opciones permitidas
+                abrirAcordeonCRM();
+                abrirAcordeonSCM();
+                abrirAcordeonERP();
+
+                // Validar que la vista actual esté permitida para Ventas
+                const vistasVentas = ['crm-dashboard.html', 'erp-inicio.html', 'crm-clientes.html', 'scm-productos.html', 'erp-ordenes.html', 'erp-nueva-orden.html', 'erp-reportes.html', 'crm-reportes.html', 'crm-actividad.html', 'erp-roles.html'];
+                if (!currentLoadedView || !vistasVentas.includes(currentLoadedView)) {
+                    loadExternalView("crm-clientes.html", crmClientes, "CRM");
+                }
+
+            } else if (role === 'logistica' || role === 'trabajador') {
+                // ----------------------------------------------------------
+                // 🚚 ROL LOGÍSTICA (5 PANTALLAS EXACTAS SEGÚN GUÍA PANTALLA 10):
+                // 1. Inicio
+                // 2. Productos (SCM)
+                // 3. Inventario (SCM)
+                // 4. Órdenes (ERP)
+                // 5. Reportes
+                // ----------------------------------------------------------
+                setVisible(btnInicio, true, 'flex');
+                setVisible(btnWrapCRM, false); // No tiene acceso a CRM de clientes
+                setVisible(btnWrapSCM, true, 'block');
+                setVisible(btnWrapERP, true, 'block');
+
+                // En SCM: Solo Productos, Inventario y Reportes
+                setVisible(scmProd, true, 'flex');
+                setVisible(scmInv, true, 'flex');
+                setVisible(scmRep, true, 'flex');
+                setVisible(scmInicio, false);
+                setVisible(scmProv, false);
+                setVisible(scmMov, false);
+                setVisible(scmPed, false);
+                setVisible(scmLog, false);
+                setVisible(scmMad, false);
+
+                // En ERP: Solo Órdenes, Reportes y Panel por Rol
+                setVisible(erpOrdenes, true, 'flex');
+                setVisible(erpReportes, true, 'flex');
+                setVisible(erpRoles, true, 'flex');
+                setVisible(erpInicio, false);
+                setVisible(erpNuevaOrden, false);
+                setVisible(erpMadurez, false);
+
+                // Ocultar Usuarios, Trabajadores y Configuración
+                setVisible(btnUsuarios, false);
+                setVisible(btnTrabajadores, false);
+                setVisible(btnConfiguracion, false);
+
+                // Desplegar acordeones permitidos
+                abrirAcordeonSCM();
+                abrirAcordeonERP();
+
+                // Validar que la vista actual esté permitida para Logística
+                const vistasLogistica = ['scm-inicio.html', 'erp-inicio.html', 'scm-productos.html', 'scm-inventario.html', 'erp-ordenes.html', 'erp-reportes.html', 'scm-reportes.html', 'erp-roles.html'];
+                if (!currentLoadedView || !vistasLogistica.includes(currentLoadedView)) {
+                    loadExternalView("scm-inventario.html", scmInv, "SCM");
+                }
+
+            } else {
+                // ----------------------------------------------------------
+                // 👑 ROL ADMINISTRADOR (ACCESO TOTAL A TODO EL SISTEMA):
+                // 9 Pantallas de la guía + acceso irrestricto a todas las herramientas
+                // ----------------------------------------------------------
+                setVisible(btnInicio, true, 'flex');
+                setVisible(btnWrapCRM, true, 'block');
+                setVisible(btnWrapSCM, true, 'block');
+                setVisible(btnWrapERP, true, 'block');
+                setVisible(btnUsuarios, true, 'flex');
+                setVisible(btnTrabajadores, true, 'flex');
+                setVisible(btnConfiguracion, true, 'flex');
+
+                // Subitems CRM todos visibles
+                setVisible(crmClientes, true, 'flex');
+                setVisible(crmInteracciones, true, 'flex');
+                setVisible(crmEvaluaciones, true, 'flex');
+                setVisible(crmDescuentos, true, 'flex');
+                setVisible(crmActividad, true, 'flex');
+                setVisible(crmReportes, true, 'flex');
+
+                // Subitems SCM todos visibles
+                setVisible(scmInicio, true, 'flex');
+                setVisible(scmProd, true, 'flex');
+                setVisible(scmProv, true, 'flex');
+                setVisible(scmInv, true, 'flex');
+                setVisible(scmMov, true, 'flex');
+                setVisible(scmPed, true, 'flex');
+                setVisible(scmLog, true, 'flex');
+                setVisible(scmRep, true, 'flex');
+                setVisible(scmMad, true, 'flex');
+
+                // Subitems ERP todos visibles
+                setVisible(erpInicio, true, 'flex');
+                setVisible(erpOrdenes, true, 'flex');
+                setVisible(erpNuevaOrden, true, 'flex');
+                setVisible(erpReportes, true, 'flex');
+                setVisible(erpMadurez, true, 'flex');
+                setVisible(erpRoles, true, 'flex');
+
+                // Desplegar acordeones para acceso completo
+                abrirAcordeonCRM();
+                abrirAcordeonSCM();
+                abrirAcordeonERP();
+
+                // Si no hay vista cargada actualmente, cargar el dashboard general
+                if (!currentLoadedView) {
+                    loadExternalView("crm-dashboard.html", btnInicio, "Dashboard");
+                }
             }
+
+            // Actualizar la barra superior de pestañas dinámicas del ERP
+            actualizarPestanasERP(currentLoadedView, role);
         }
 
         function bloquearAccesoCRM(mensaje) {
