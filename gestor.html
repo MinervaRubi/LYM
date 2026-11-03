@@ -225,17 +225,17 @@
                     <i class="fas fa-user-shield"></i> <span>Usuarios</span>
                 </button>
 
-                <!-- 5. TRABAJADORES (ADMIN) -->
-                <button class="crm-nav-item" id="navItemTrabajadores" onclick="abrirModalGestionTrabajadores()" style="display:none;">
+                <!-- 6. TRABAJADORES (ADMIN) -->
+                <button class="crm-nav-item" id="navItemTrabajadores" onclick="abrirModalGestionTrabajadores()">
                     <i class="fas fa-id-badge"></i> <span>Trabajadores</span>
                 </button>
             </div>
 
             <!-- CUENTA Y CONFIGURACIÓN -->
             <div class="crm-nav-group" style="margin-top: auto;">
-                <div class="crm-nav-label">Cuenta</div>
+                <div class="crm-nav-label">Sistema y Cuenta</div>
                 <button class="crm-nav-item" id="navItemConfiguracion" onclick="abrirModalCambiarPassCRM()">
-                    <i class="fas fa-key"></i> <span>Cambiar Contraseña</span>
+                    <i class="fas fa-cog"></i> <span>Configuración</span>
                 </button>
                 <button class="crm-nav-item" onclick="logoutGestor()">
                     <i class="fas fa-sign-out-alt"></i> <span>Cerrar Sesión</span>
@@ -1387,16 +1387,8 @@
 
             } else {
                 // ----------------------------------------------------------
-                // 👑 ROL ADMINISTRADOR (9 PANTALLAS EXACTAS):
-                // 1. Inicio
-                // 2. Clientes (CRM)
-                // 3. Productos (SCM)
-                // 4. Inventario (SCM)
-                // 5. Órdenes (ERP)
-                // 6. Reportes
-                // 7. Nivel ERP
-                // 8. Usuarios
-                // 9. Configuración
+                // 👑 ROL ADMINISTRADOR (ACCESO TOTAL A TODO EL SISTEMA):
+                // Acceso irrestricto a CRM, SCM, ERP, Usuarios, Trabajadores y Configuración
                 // ----------------------------------------------------------
                 setVisible(btnInicio, true, 'flex');
                 setVisible(btnWrapCRM, true, 'block');
@@ -1406,7 +1398,7 @@
                 setVisible(btnTrabajadores, true, 'flex');
                 setVisible(btnConfiguracion, true, 'flex');
 
-                // En CRM: Completo
+                // En CRM: TODO HABILITADO
                 setVisible(crmClientes, true, 'flex');
                 setVisible(crmInteracciones, true, 'flex');
                 setVisible(crmEvaluaciones, true, 'flex');
@@ -1414,7 +1406,7 @@
                 setVisible(crmActividad, true, 'flex');
                 setVisible(crmReportes, true, 'flex');
 
-                // En SCM: Completo
+                // En SCM: TODO HABILITADO
                 setVisible(scmInicio, true, 'flex');
                 setVisible(scmProd, true, 'flex');
                 setVisible(scmProv, true, 'flex');
@@ -1425,7 +1417,7 @@
                 setVisible(scmRep, true, 'flex');
                 setVisible(scmMad, true, 'flex');
 
-                // En ERP: Completo (incluyendo Nivel ERP y Panel por Rol)
+                // En ERP: TODO HABILITADO
                 setVisible(erpInicio, true, 'flex');
                 setVisible(erpOrdenes, true, 'flex');
                 setVisible(erpNuevaOrden, true, 'flex');
@@ -1433,8 +1425,15 @@
                 setVisible(erpMadurez, true, 'flex');
                 setVisible(erpRoles, true, 'flex');
 
-                // Cargar vista inicial de Administrador
-                loadExternalView("crm-dashboard.html", document.querySelector(".crm-nav-item.active"));
+                // Desplegar automáticamente todos los acordeones para acceso inmediato a todas las pantallas
+                abrirAcordeonCRM();
+                abrirAcordeonSCM();
+                abrirAcordeonERP();
+
+                // Si no hay vista cargada actualmente, cargar el dashboard general
+                if (!currentLoadedView) {
+                    loadExternalView("crm-dashboard.html", btnInicio, "Dashboard");
+                }
             }
         }
 
