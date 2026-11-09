@@ -1,0 +1,473 @@
+/* ==========================================================================
+   LYM DESIGN SYSTEM - TOAST NOTIFICATIONS & CUSTOM DIALOG MODALS
+   Archivo: notifications.css
+   Diseño UX/UI profesional, accesible y adaptativo para la plataforma LYM
+   ========================================================================== */
+
+:root {
+    --lym-toast-font: 'Poppins', 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    --lym-toast-zindex: 999999;
+    --lym-toast-radius: 12px;
+    --lym-toast-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.12), 0 8px 10px -6px rgba(15, 23, 42, 0.06);
+
+    /* Paleta de estados (Fondos suaves, bordes vivos, texto de alto contraste) */
+    --lym-success-bg: #F0FDF4;
+    --lym-success-border: #BBF7D0;
+    --lym-success-accent: #10B981;
+    --lym-success-text: #14532D;
+    --lym-success-title: #166534;
+
+    --lym-error-bg: #FEF2F2;
+    --lym-error-border: #FECACA;
+    --lym-error-accent: #EF4444;
+    --lym-error-text: #7F1D1D;
+    --lym-error-title: #991B1B;
+
+    --lym-warning-bg: #FFFBEB;
+    --lym-warning-border: #FDE68A;
+    --lym-warning-accent: #F59E0B;
+    --lym-warning-text: #78350F;
+    --lym-warning-title: #92400E;
+
+    --lym-info-bg: #F5F3FF;
+    --lym-info-border: #DDD6FE;
+    --lym-info-accent: #6B46C1;
+    --lym-info-text: #3B0764;
+    --lym-info-title: #581C87;
+}
+
+/* CONTENEDOR FLOTANTE DE NOTIFICACIONES */
+#lymToastContainer {
+    position: fixed;
+    top: 24px;
+    right: 24px;
+    z-index: var(--lym-toast-zindex);
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    width: 380px;
+    max-width: calc(100vw - 32px);
+    pointer-events: none;
+}
+
+/* TARJETA TOAST INDIVIDUAL */
+.lym-toast {
+    position: relative;
+    pointer-events: auto;
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 14px 16px 14px 16px;
+    background: #FFFFFF;
+    border-radius: var(--lym-toast-radius);
+    box-shadow: var(--lym-toast-shadow);
+    border: 1px solid #E2E8F0;
+    font-family: var(--lym-toast-font);
+    overflow: hidden;
+    transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1),
+                opacity 0.25s ease,
+                max-height 0.3s ease,
+                margin 0.3s ease,
+                padding 0.3s ease;
+    animation: lymToastSlideIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    cursor: default;
+}
+
+.lym-toast.lym-toast-hiding {
+    animation: lymToastSlideOut 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* ICONO DE ESTADO */
+.lym-toast-icon-wrap {
+    flex-shrink: 0;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.05rem;
+    margin-top: 1px;
+}
+
+.lym-toast-icon-wrap svg {
+    width: 18px;
+    height: 18px;
+}
+
+/* CUERPO DEL TOAST */
+.lym-toast-body {
+    flex: 1;
+    min-width: 0;
+}
+
+.lym-toast-title {
+    font-size: 0.88rem;
+    font-weight: 700;
+    line-height: 1.3;
+    margin-bottom: 3px;
+    letter-spacing: -0.01em;
+}
+
+.lym-toast-message {
+    font-size: 0.84rem;
+    font-weight: 500;
+    line-height: 1.45;
+    word-break: break-word;
+}
+
+/* BOTÓN DE CIERRE */
+.lym-toast-close {
+    flex-shrink: 0;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 4px;
+    margin: -4px -4px 0 0;
+    border-radius: 6px;
+    color: #94A3B8;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.15s ease, color 0.15s ease;
+    font-size: 1.1rem;
+    line-height: 1;
+}
+
+.lym-toast-close:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+    color: #475569;
+}
+
+/* BARRA DE PROGRESO DE AUTO-CIERRE */
+.lym-toast-progress-bar {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    height: 3px;
+    width: 100%;
+    transform-origin: left;
+    background: currentColor;
+    opacity: 0.35;
+}
+
+.lym-toast:hover .lym-toast-progress-bar {
+    animation-play-state: paused !important;
+}
+
+/* ==========================================================================
+   VARIANTES DE ESTADO
+   ========================================================================== */
+
+/* ÉXITO */
+.lym-toast-success {
+    background: var(--lym-success-bg);
+    border-color: var(--lym-success-border);
+    border-left: 4px solid var(--lym-success-accent);
+}
+.lym-toast-success .lym-toast-icon-wrap {
+    background: rgba(16, 185, 129, 0.15);
+    color: var(--lym-success-accent);
+}
+.lym-toast-success .lym-toast-title {
+    color: var(--lym-success-title);
+}
+.lym-toast-success .lym-toast-message {
+    color: var(--lym-success-text);
+}
+.lym-toast-success .lym-toast-progress-bar {
+    color: var(--lym-success-accent);
+}
+
+/* ERROR / CRÍTICO */
+.lym-toast-error {
+    background: var(--lym-error-bg);
+    border-color: var(--lym-error-border);
+    border-left: 4px solid var(--lym-error-accent);
+}
+.lym-toast-error .lym-toast-icon-wrap {
+    background: rgba(239, 68, 68, 0.15);
+    color: var(--lym-error-accent);
+}
+.lym-toast-error .lym-toast-title {
+    color: var(--lym-error-title);
+}
+.lym-toast-error .lym-toast-message {
+    color: var(--lym-error-text);
+}
+.lym-toast-error .lym-toast-progress-bar {
+    color: var(--lym-error-accent);
+}
+
+/* ADVERTENCIA / WARNING */
+.lym-toast-warning {
+    background: var(--lym-warning-bg);
+    border-color: var(--lym-warning-border);
+    border-left: 4px solid var(--lym-warning-accent);
+}
+.lym-toast-warning .lym-toast-icon-wrap {
+    background: rgba(245, 158, 11, 0.18);
+    color: var(--lym-warning-accent);
+}
+.lym-toast-warning .lym-toast-title {
+    color: var(--lym-warning-title);
+}
+.lym-toast-warning .lym-toast-message {
+    color: var(--lym-warning-text);
+}
+.lym-toast-warning .lym-toast-progress-bar {
+    color: var(--lym-warning-accent);
+}
+
+/* INFORMACIÓN */
+.lym-toast-info {
+    background: var(--lym-info-bg);
+    border-color: var(--lym-info-border);
+    border-left: 4px solid var(--lym-info-accent);
+}
+.lym-toast-info .lym-toast-icon-wrap {
+    background: rgba(107, 70, 193, 0.15);
+    color: var(--lym-info-accent);
+}
+.lym-toast-info .lym-toast-title {
+    color: var(--lym-info-title);
+}
+.lym-toast-info .lym-toast-message {
+    color: var(--lym-info-text);
+}
+.lym-toast-info .lym-toast-progress-bar {
+    color: var(--lym-info-accent);
+}
+
+/* ==========================================================================
+   MODAL DIALOG PERSONALIZADO (CONFIRM / PROMPT)
+   ========================================================================== */
+.lym-dialog-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(15, 23, 42, 0.55);
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+    z-index: calc(var(--lym-toast-zindex) + 10);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    animation: lymDialogFadeIn 0.2s ease-out forwards;
+}
+
+.lym-dialog-card {
+    background: #FFFFFF;
+    border-radius: 16px;
+    box-shadow: 0 20px 35px -10px rgba(15, 23, 42, 0.25), 0 0 0 1px rgba(15, 23, 42, 0.05);
+    width: 100%;
+    max-width: 440px;
+    padding: 24px;
+    font-family: var(--lym-toast-font);
+    animation: lymDialogScaleIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    position: relative;
+}
+
+.lym-dialog-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 14px;
+}
+
+.lym-dialog-icon {
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.3rem;
+    flex-shrink: 0;
+}
+
+.lym-dialog-icon.danger {
+    background: #FEE2E2;
+    color: #DC2626;
+}
+
+.lym-dialog-icon.warning {
+    background: #FEF3C7;
+    color: #D97706;
+}
+
+.lym-dialog-icon.info {
+    background: #EDE9FE;
+    color: #6B46C1;
+}
+
+.lym-dialog-title {
+    font-size: 1.12rem;
+    font-weight: 700;
+    color: #0F172A;
+    margin: 0;
+    line-height: 1.3;
+}
+
+.lym-dialog-body {
+    color: #475569;
+    font-size: 0.92rem;
+    line-height: 1.5;
+    margin-bottom: 20px;
+}
+
+.lym-dialog-input {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 10px 14px;
+    border: 1px solid #CBD5E1;
+    border-radius: 10px;
+    font-size: 0.92rem;
+    font-family: inherit;
+    margin-bottom: 20px;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    outline: none;
+}
+
+.lym-dialog-input:focus {
+    border-color: #6B46C1;
+    box-shadow: 0 0 0 3px rgba(107, 70, 193, 0.15);
+}
+
+.lym-dialog-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+.lym-dialog-btn {
+    padding: 9px 18px;
+    border-radius: 10px;
+    font-size: 0.88rem;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: 1px solid transparent;
+}
+
+.lym-dialog-btn-cancel {
+    background: #F1F5F9;
+    color: #475569;
+    border-color: #E2E8F0;
+}
+
+.lym-dialog-btn-cancel:hover {
+    background: #E2E8F0;
+    color: #0F172A;
+}
+
+.lym-dialog-btn-confirm {
+    background: linear-gradient(135deg, #6B46C1, #8B5CF6);
+    color: #FFFFFF;
+    box-shadow: 0 4px 12px rgba(107, 70, 193, 0.25);
+}
+
+.lym-dialog-btn-confirm:hover {
+    opacity: 0.92;
+    transform: translateY(-1px);
+}
+
+.lym-dialog-btn-danger {
+    background: linear-gradient(135deg, #EF4444, #DC2626);
+    color: #FFFFFF;
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.25);
+}
+
+.lym-dialog-btn-danger:hover {
+    opacity: 0.92;
+    transform: translateY(-1px);
+}
+
+/* ==========================================================================
+   ANIMACIONES
+   ========================================================================== */
+@keyframes lymToastSlideIn {
+    from {
+        opacity: 0;
+        transform: translateX(110%);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes lymToastSlideOut {
+    from {
+        opacity: 1;
+        transform: translateX(0);
+        max-height: 140px;
+        margin-bottom: 12px;
+    }
+    to {
+        opacity: 0;
+        transform: translateX(110%);
+        max-height: 0;
+        margin-bottom: 0;
+        padding-top: 0;
+        padding-bottom: 0;
+    }
+}
+
+@keyframes lymDialogFadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes lymDialogScaleIn {
+    from {
+        opacity: 0;
+        transform: scale(0.92);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+@keyframes lymProgressBar {
+    from { transform: scaleX(1); }
+    to { transform: scaleX(0); }
+}
+
+/* ==========================================================================
+   RESPONSIVE DESIGN (MÓVILES)
+   ========================================================================== */
+@media (max-width: 640px) {
+    #lymToastContainer {
+        top: 12px;
+        right: 12px;
+        left: 12px;
+        width: auto;
+        max-width: none;
+    }
+
+    .lym-toast {
+        padding: 12px 14px;
+        gap: 10px;
+    }
+
+    .lym-dialog-card {
+        padding: 20px;
+        max-width: 95vw;
+    }
+
+    .lym-dialog-actions {
+        flex-direction: column-reverse;
+    }
+
+    .lym-dialog-btn {
+        width: 100%;
+        text-align: center;
+        padding: 11px;
+    }
+}

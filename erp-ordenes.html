@@ -1,0 +1,339 @@
+<!-- ==============================================================
+     MÓDULO ERP: ÓRDENES DE CLIENTES (LISTADO)
+     CUMPLE PANTALLA 2 DE LA GUÍA VISUAL ERP (ETAPA 3)
+     ARCHIVO: erp-ordenes.html
+============================================================== -->
+
+<div style="display: flex; flex-direction: column; gap: 1.5rem;">
+    <!-- CABECERA -->
+    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+        <div>
+            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+                <span class="badge" style="background: rgba(99,102,241,0.15); color: #6366f1; font-weight:700; font-size:0.75rem; padding: 2px 8px; border-radius: 6px;">ERP</span>
+                <span style="font-size: 0.85rem; color: var(--text-muted);">Planificación de Recursos Empresariales</span>
+            </div>
+            <h2 style="font-size: 1.6rem; font-weight: 800; color: var(--text-heading); margin: 0;">Órdenes de clientes</h2>
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 2px;">Consulta y seguimiento de órdenes empresariales registradas</p>
+        </div>
+        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+            <button class="crm-btn crm-btn-secondary crm-btn-sm" onclick="cargarOrdenesERP()">
+                <i class="fas fa-sync-alt"></i> <span>Actualizar</span>
+            </button>
+            <button class="crm-btn crm-btn-primary" style="background: linear-gradient(135deg, #0d9488, #059669); border:none; box-shadow: 0 4px 12px rgba(13, 148, 136, 0.25);" onclick="abrirPantallaNuevaOrden()">
+                <i class="fas fa-plus"></i> <span>+ Nueva orden</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- BARRA DE BÚSQUEDA Y FILTROS -->
+    <div class="crm-card" style="display: flex; align-items: center; justify-content: space-between; gap: 1.25rem; flex-wrap: wrap; padding: 1rem 1.25rem;">
+        <div class="crm-input-group" style="flex: 1; min-width: 260px;">
+            <i class="fas fa-search"></i>
+            <input type="text" class="crm-input" id="inputBuscarOrdenERP" placeholder="Buscar por folio, cliente, empresa o correo..." oninput="filtrarOrdenesERP()">
+        </div>
+        <div style="display: flex; align-items: center; gap: 10px;">
+            <label style="font-size: 0.85rem; font-weight: 700; color: var(--text-muted);">Estado:</label>
+            <select class="crm-select" id="filtroEstadoOrdenERP" onchange="filtrarOrdenesERP()" style="min-width: 140px;">
+                <option value="Todos">Todos</option>
+                <option value="Procesada">Procesada</option>
+                <option value="Procesando">Procesando</option>
+                <option value="Pendiente">Pendiente</option>
+                <option value="Cancelada">Cancelada</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- TABLA DE ÓRDENES (PANTALLA 2) -->
+    <div class="crm-table-container">
+        <table class="crm-table">
+            <thead>
+                <tr>
+                    <th style="width: 130px;">Folio</th>
+                    <th style="width: 130px;">Fecha</th>
+                    <th>Cliente</th>
+                    <th style="text-align: right; width: 140px;">Total</th>
+                    <th style="text-align: center; width: 140px;">Estado</th>
+                    <th style="text-align: right; width: 90px;">Acciones</th>
+                </tr>
+            </thead>
+            <tbody id="tbodyOrdenesERP">
+                <tr>
+                    <td colspan="6" style="text-align: center; padding: 3rem; color: #94a3b8;">
+                        <i class="fas fa-spinner fa-spin fa-2x" style="color:#6366f1; margin-bottom: 10px;"></i>
+                        <div>Cargando órdenes de clientes desde la base de datos...</div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- ==============================================================
+     MODAL DE DETALLE DE LA ORDEN
+============================================================== -->
+<div class="crm-modal-backdrop" id="modalDetalleOrdenERP" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(15,23,42,0.6); backdrop-filter:blur(4px); z-index:9999; justify-content:center; align-items:center;">
+    <div class="crm-modal" style="background:#ffffff; border-radius:18px; padding:24px; max-width:650px; width:95%; max-height:90vh; overflow-y:auto; box-shadow:0 20px 45px rgba(0,0,0,0.25);">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.25rem; border-bottom:1px solid #e2e8f0; padding-bottom:12px;">
+            <div>
+                <span id="detOrdenFolio" style="font-size:1.35rem; font-weight:800; color:#0f172a; font-family:monospace;">OR-000</span>
+                <span id="detOrdenEstadoBadge" class="badge" style="margin-left:10px; font-size:0.75rem; padding:4px 10px; border-radius:6px;">Estado</span>
+            </div>
+            <button onclick="cerrarModalDetalleOrdenERP()" style="background:none; border:none; font-size:1.4rem; cursor:pointer; color:#64748b; line-height:1;">&times;</button>
+        </div>
+
+        <!-- TARJETA DEL CLIENTE -->
+        <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:12px; padding:14px; margin-bottom:1.25rem;">
+            <div style="font-size:0.75rem; font-weight:800; color:#64748b; text-transform:uppercase; letter-spacing:0.04em; margin-bottom:6px;">Datos del Cliente (CRM)</div>
+            <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:8px;">
+                <div>
+                    <div id="detOrdenClienteNombre" style="font-size:1.05rem; font-weight:800; color:#0f172a;">Juan Pérez</div>
+                    <div id="detOrdenClienteEmpresa" style="font-size:0.85rem; color:#475569;">Empresa: Artesanías del Sur</div>
+                </div>
+                <div style="font-size:0.82rem; color:#64748b;">
+                    <div><i class="fas fa-envelope" style="color:#94a3b8; margin-right:4px;"></i><span id="detOrdenClienteCorreo">correo@ejemplo.com</span></div>
+                    <div><i class="fas fa-phone" style="color:#94a3b8; margin-right:4px;"></i><span id="detOrdenClienteTelefono">55 1234 5678</span></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TABLA DE ARTÍCULOS -->
+        <div style="margin-bottom:1.25rem;">
+            <div style="font-size:0.75rem; font-weight:800; color:#64748b; text-transform:uppercase; letter-spacing:0.04em; margin-bottom:8px;">Artículos suministrados (SCM)</div>
+            <table class="crm-table" style="font-size:0.88rem;">
+                <thead>
+                    <tr>
+                        <th>Producto</th>
+                        <th style="text-align:center; width:80px;">Cantidad</th>
+                        <th style="text-align:right; width:110px;">Precio Unit.</th>
+                        <th style="text-align:right; width:110px;">Subtotal</th>
+                    </tr>
+                </thead>
+                <tbody id="detOrdenTbodyItems">
+                    <!-- Items dinámicos -->
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <td colspan="3" style="text-align:right; font-weight:800; font-size:1.05rem; color:#0f172a;">Total General:</td>
+                        <td id="detOrdenTotal" style="text-align:right; font-weight:800; font-size:1.15rem; color:#059669;">$0.00</td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+
+        <div id="detOrdenNotasBox" style="background:#fffbeb; border:1px solid #fef3c7; border-radius:8px; padding:10px 14px; font-size:0.82rem; color:#92400e; margin-bottom:1.25rem; display:none;">
+            <strong>Notas:</strong> <span id="detOrdenNotasTexto"></span>
+        </div>
+
+        <div style="display:flex; justify-content:space-between; align-items:center; border-top:1px solid #e2e8f0; padding-top:14px;">
+            <div id="detOrdenFechaTexto" style="font-size:0.8rem; color:#64748b;">Fecha: 10/04/2025</div>
+            <div style="display:flex; gap:10px;">
+                <button type="button" class="crm-btn crm-btn-secondary" onclick="cerrarModalDetalleOrdenERP()">Cerrar</button>
+                <button type="button" id="btnCancelarOrdenModal" class="crm-btn" style="background:#fee2e2; color:#b91c1c; border:none; display:none;" onclick="cancelarOrdenDesdeModal()">
+                    <i class="fas fa-ban"></i> Cancelar orden
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    var ordenesERPList = window.ordenesERPList || [];
+    var ordenSeleccionadaId = 0;
+
+    function abrirPantallaNuevaOrden() {
+        if (typeof loadExternalView === 'function') {
+            loadExternalView('erp-nueva-orden.html', document.getElementById('erp-nav-nueva-orden'), 'ERP');
+        }
+    }
+
+    async function cargarOrdenesERP() {
+        var tbody = document.getElementById("tbodyOrdenesERP");
+        if (tbody) {
+            tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:2rem; color:#64748b;"><i class="fas fa-spinner fa-spin"></i> Cargando órdenes desde MySQL...</td></tr>`;
+        }
+
+        try {
+            var resp = await fetch("php/erp_api.php?resource=ordenes");
+            if (!resp.ok) throw new Error("Error en el servidor");
+
+            var data = await resp.json();
+            if (data.success && Array.isArray(data.ordenes)) {
+                ordenesERPList = data.ordenes;
+                window.ordenesERPList = ordenesERPList;
+                filtrarOrdenesERP();
+            } else {
+                throw new Error(data.error || "No se recibieron órdenes");
+            }
+        } catch (err) {
+            if (tbody) {
+                tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:2rem; color:#ef4444;"><i class="fas fa-exclamation-triangle"></i> Error al conectar con órdenes ERP: ${err.message}</td></tr>`;
+            }
+        }
+    }
+
+    function renderizarTablaOrdenesERP(items) {
+        var tbody = document.getElementById("tbodyOrdenesERP");
+        if (!tbody) return;
+
+        if (!items || items.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:2rem; color:#64748b;">No se encontraron órdenes con los filtros seleccionados.</td></tr>`;
+            return;
+        }
+
+        tbody.innerHTML = items.map(function(o) {
+            var estado = o.estado || 'Procesada';
+            var badgeBg = 'rgba(5,150,105,0.12)';
+            var badgeColor = '#059669';
+
+            if (estado === 'Procesando') {
+                badgeBg = 'rgba(217,119,6,0.12)';
+                badgeColor = '#d97706';
+            } else if (estado === 'Pendiente') {
+                badgeBg = 'rgba(37,99,235,0.12)';
+                badgeColor = '#2563eb';
+            } else if (estado === 'Cancelada') {
+                badgeBg = 'rgba(239,68,68,0.12)';
+                badgeColor = '#ef4444';
+            }
+
+            return `
+                <tr>
+                    <td style="font-weight: 800; color: #0f172a; font-family: monospace; font-size: 0.95rem;">${o.folio}</td>
+                    <td style="color:#64748b; font-size:0.85rem; font-weight:500;">${o.fecha_formato}</td>
+                    <td style="font-weight:700; color:#0f172a;">
+                        <div>${o.cliente_nombre || 'Cliente sin nombre'}</div>
+                        <div style="font-size:0.75rem; color:#94a3b8; font-weight:normal;">${o.cliente_empresa || o.cliente_correo || ''}</div>
+                    </td>
+                    <td style="text-align:right; font-weight:800; color:#0f172a; font-size:0.95rem;">${o.total_formato}</td>
+                    <td style="text-align:center;">
+                        <span class="badge" style="background:${badgeBg}; color:${badgeColor}; font-weight:700; font-size:0.78rem; padding:4px 10px; border-radius:6px;">
+                            ${estado}
+                        </span>
+                    </td>
+                    <td style="text-align: right;">
+                        <button class="crm-btn crm-btn-secondary crm-btn-sm" title="Ver detalle de la orden" onclick="verDetalleOrdenERP(${o.id})" style="padding:5px 9px; color:#2563eb;">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </td>
+                </tr>
+            `;
+        }).join("");
+    }
+
+    function filtrarOrdenesERP() {
+        var queryInput = document.getElementById("inputBuscarOrdenERP");
+        var estSelect = document.getElementById("filtroEstadoOrdenERP");
+        var query = queryInput ? queryInput.value.toLowerCase().trim() : '';
+        var est = estSelect ? estSelect.value : 'Todos';
+
+        var filtrados = (window.ordenesERPList || []).filter(function(o) {
+            var matchEst = (est === "Todos") || (o.estado && o.estado.toLowerCase() === est.toLowerCase());
+            var matchQuery = !query ||
+                (o.folio && o.folio.toLowerCase().includes(query)) ||
+                (o.cliente_nombre && o.cliente_nombre.toLowerCase().includes(query)) ||
+                (o.cliente_empresa && o.cliente_empresa.toLowerCase().includes(query)) ||
+                (o.cliente_correo && o.cliente_correo.toLowerCase().includes(query));
+            return matchEst && matchQuery;
+        });
+
+        renderizarTablaOrdenesERP(filtrados);
+    }
+
+    async function verDetalleOrdenERP(id) {
+        ordenSeleccionadaId = id;
+        try {
+            var resp = await fetch("php/erp_api.php?resource=orden&id=" + id);
+            var data = await resp.json();
+            if (data.success && data.orden) {
+                var o = data.orden;
+                document.getElementById("detOrdenFolio").textContent = o.folio;
+                
+                var b = document.getElementById("detOrdenEstadoBadge");
+                b.textContent = o.estado;
+                b.style.background = (o.estado === 'Procesada') ? 'rgba(5,150,105,0.12)' : (o.estado === 'Procesando' ? 'rgba(217,119,6,0.12)' : 'rgba(239,68,68,0.12)');
+                b.style.color = (o.estado === 'Procesada') ? '#059669' : (o.estado === 'Procesando' ? '#d97706' : '#ef4444');
+
+                document.getElementById("detOrdenClienteNombre").textContent = o.cliente_nombre;
+                document.getElementById("detOrdenClienteEmpresa").textContent = "Empresa: " + (o.cliente_empresa || "Particular");
+                document.getElementById("detOrdenClienteCorreo").textContent = o.cliente_correo;
+                document.getElementById("detOrdenClienteTelefono").textContent = o.cliente_telefono || "No registrado";
+                document.getElementById("detOrdenTotal").textContent = o.total_formato;
+                document.getElementById("detOrdenFechaTexto").textContent = "Fecha de registro: " + o.fecha_formato;
+
+                var nBox = document.getElementById("detOrdenNotasBox");
+                var nTxt = document.getElementById("detOrdenNotasTexto");
+                if (o.notas) {
+                    nTxt.textContent = o.notas;
+                    nBox.style.display = "block";
+                } else {
+                    nBox.style.display = "none";
+                }
+
+                var btnCanc = document.getElementById("btnCancelarOrdenModal");
+                if (btnCanc) {
+                    btnCanc.style.display = (o.estado !== 'Cancelada') ? 'inline-flex' : 'none';
+                }
+
+                var tbItems = document.getElementById("detOrdenTbodyItems");
+                if (tbItems && Array.isArray(o.items)) {
+                    tbItems.innerHTML = o.items.map(function(it) {
+                        return `
+                            <tr>
+                                <td style="font-weight:700; color:#0f172a;">${it.nombre_producto}</td>
+                                <td style="text-align:center; font-weight:700;">${it.cantidad}</td>
+                                <td style="text-align:right; color:#64748b;">$${Number(it.precio_unitario).toFixed(2)}</td>
+                                <td style="text-align:right; font-weight:800; color:#0f172a;">$${Number(it.subtotal).toFixed(2)}</td>
+                            </tr>
+                        `;
+                    }).join("");
+                }
+
+                document.getElementById("modalDetalleOrdenERP").style.display = "flex";
+            }
+        } catch (e) {
+            alert("Error al obtener detalle de la orden: " + e.message);
+        }
+    }
+
+    function cerrarModalDetalleOrdenERP() {
+        document.getElementById("modalDetalleOrdenERP").style.display = "none";
+    }
+
+    async function cancelarOrdenDesdeModal() {
+        if (!confirm("¿Deseas cancelar esta orden empresarial? Si ya fue procesada, los artículos se reingresarán automáticamente al inventario SCM.")) {
+            return;
+        }
+
+        try {
+            var resp = await fetch("php/erp_api.php?resource=cambiar_estado", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ id: ordenSeleccionadaId, estado: "Cancelada" })
+            });
+            var data = await resp.json();
+            if (data.success) {
+                cerrarModalDetalleOrdenERP();
+                if (typeof showNotification === 'function') {
+                    showNotification(data.message);
+                } else {
+                    alert(data.message);
+                }
+                cargarOrdenesERP();
+            } else {
+                alert("Error: " + data.error);
+            }
+        } catch (e) {
+            alert("Error de conexión: " + e.message);
+        }
+    }
+
+    // Exponer a window
+    window.cargarOrdenesERP = cargarOrdenesERP;
+    window.filtrarOrdenesERP = filtrarOrdenesERP;
+    window.verDetalleOrdenERP = verDetalleOrdenERP;
+    window.cerrarModalDetalleOrdenERP = cerrarModalDetalleOrdenERP;
+    window.cancelarOrdenDesdeModal = cancelarOrdenDesdeModal;
+    window.abrirPantallaNuevaOrden = abrirPantallaNuevaOrden;
+
+    cargarOrdenesERP();
+</script>

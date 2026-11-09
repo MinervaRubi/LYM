@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Mis Publicaciones - LYM</title>
+
+    <link rel="stylesheet" href="Proyecto.css" />
+    <link rel="stylesheet" href="notifications.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <script src="notifications.js"></script>
+
+    <style>
+        .preview-img {
+            width: 100%;
+            max-width: 220px;
+            border-radius: 12px;
+            margin: 10px auto 0;
+            display: block;
+            object-fit: cover;
+        }
+
+        .producto-img {
+            width: 100%;
+            height: 220px;
+            object-fit: cover;
+            border-radius: 14px 14px 0 0;
+        }
+
+        .producto-card {
+            background: #fff;
+            border-radius: 14px;
+            overflow: hidden;
+            box-shadow: 0 8px 18px rgba(0, 0, 0, 0.08);
+        }
+
+        .producto-content {
+            padding: 18px;
+        }
+
+        .precio-post {
+            font-weight: 700;
+            color: #b3002d;
+            margin-top: 8px;
+            font-size: 1.1rem;
+        }
+
+        .acciones-post {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+
+        #imagenActualTexto {
+            font-size: 14px;
+            color: #666;
+            margin-top: 6px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- HEADER -->
+    <header class="header">
+        <nav class="nav">
+            <div class="nav-container">
+
+                <div class="logo">
+                    <h1>LYM</h1>
+                    <span>diseño e impresión</span>
+                </div>
+
+                <ul class="nav-menu">
+                    <li><a href="sistema.html">Inicio</a></li>
+                    <li><a href="sistema.html#productos">Productos</a></li>
+                    <li><a href="sistema.html#paquetes">Paquetes</a></li>
+                    <li><a href="sistema.html#contacto">Contacto</a></li>
+                </ul>
+
+                <div class="auth-buttons">
+                    <a href="carrito.html" class="btn btn-outline btn-cart">
+                        <i class="fas fa-shopping-cart"></i>
+                        <span class="cart-text">Carrito</span>
+                        <span class="cart-badge">0</span>
+                    </a>
+                </div>
+
+            </div>
+        </nav>
+    </header>
+
+    <!-- CONTENIDO -->
+    <section class="productos" style="padding-top:120px;">
+        <div class="container">
+
+            <h2 class="section-title">Mis Publicaciones</h2>
+            <p class="section-subtitle">Crea, edita y administra tus publicaciones</p>
+
+            <!-- FORM -->
+            <div class="contacto-form" style="max-width:600px; margin:auto;">
+                <input type="text" id="titulo" placeholder="Título" style="margin-bottom:10px;">
+
+                <input type="text" id="contenido" placeholder="Contenido" style="margin-bottom:10px;">
+
+                <input type="number" id="precio" placeholder="Precio" style="margin-bottom:10px;">
+
+                <input type="file" id="imagen" accept="image/*" style="margin-bottom:10px;">
+                <div id="imagenActualTexto"></div>
+                <img id="previewImagen" class="preview-img" style="display:none;" alt="Vista previa">
+
+                <button onclick="agregarPost()" class="btn btn-primary" style="margin-top:15px; width:100%;">
+                    Publicar
+                </button>
+            </div>
+
+            <!-- POSTS -->
+            <div class="productos-grid" id="listaPosts" style="margin-top:40px;"></div>
+
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-bottom">
+                <p>&copy; 2025 LYM Diseño e Impresión</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        let posts = [];
+        let editando = null;
+
+        const STORAGE_KEY = "lmy_posts";
+
+        function obtenerPublicacionInicial() {
+            return {
+                titulo: "Taza personalizada LYM",
+                contenido: "Diseño especial listo para personalizar con nombre, frase o fotografía.",
+                precio: "120",
+                imagen: "imagen/taza.jpeg"
+
+            };
+        }
+
+        async function cargarDesdeBD() {
+            const contenedor = document.getElementById("listaPosts");
+            contenedor.innerHTML = '<p style="text-align:center; width:100%; color:#64748b;"><i class="fas fa-spinner fa-spin"></i> Cargando publicaciones desde la base de datos...</p>';
+            try {
+                const resp = await fetch('php/api_publicaciones.php');
+                const data = await resp.json();
+                if (data.success && Array.isArray(data.posts)) {
+                    posts = data.posts;
+                } else {
+                    posts = [obtenerPublicacionInicial()];
+                }
+            } catch (e) {
+                console.warn("Error de conexión, usando respaldo:", e);
+                posts = [obtenerPublicacionInicial()];
+            }
+            renderPosts();
+        }
+
+        function renderPosts() {
+            const contenedor = document.getElementById("listaPosts");
+            contenedor.innerHTML = "";
+
+            if (posts.length === 0) {
+                contenedor.innerHTML = `
+                    <p style="text-align:center; width:100%; color:#64748b;">No hay publicaciones en la base de datos todavía. ¡Sé el primero en crear una!</p>
+                `;
+                return;
+            }
+
+            posts.forEach((post, index) => {
+                contenedor.innerHTML += `
+                    <div class="producto-card">
+                        <img src="${post.imagen || 'imagenes/default.png'}" alt="${escapeHtml(post.titulo)}" class="producto-img"
+                             onerror="this.src='https://via.placeholder.com/400x220?text=LYM+Personalizado'">
+
+                        <div class="producto-content">
+                            <h3>${escapeHtml(post.titulo)}</h3>
+                            <p>${escapeHtml(post.contenido)}</p>
+                            <p class="precio-post">$${parseFloat(post.precio).toFixed(2)}</p>
+
+                            <div class="acciones-post">
+                                <button class="btn btn-outline" onclick="editarPost(${index})">
+                                    <i class="fas fa-edit"></i> Editar
+                                </button>
+
+                                <button class="btn btn-outline" style="border-color:#ef4444; color:#ef4444;"
+                                    onclick="eliminarPost(${post.id || index}, ${index})">
+                                    <i class="fas fa-trash"></i> Eliminar
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        function escapeHtml(str) {
+            return String(str || '').replace(/[&<>"']/g, function(m) {
+                return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[m];
+            });
+        }
+
+        function convertirImagenABase64(file) {
+            return new Promise((resolve, reject) => {
+                if (!file) {
+                    resolve(null);
+                    return;
+                }
+
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    resolve(e.target.result);
+                };
+                reader.onerror = function () {
+                    reject("No se pudo leer la imagen.");
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+
+        async function agregarPost() {
+            const titulo = document.getElementById("titulo").value.trim();
+            const contenido = document.getElementById("contenido").value.trim();
+            const precio = parseFloat(document.getElementById("precio").value.trim());
+            const imagenInput = document.getElementById("imagen");
+            const archivoImagen = imagenInput.files[0];
+
+            if (titulo === "" || contenido === "" || isNaN(precio) || precio <= 0) {
+                mostrarNotificacion("Llena título, contenido y un precio válido.", "warning");
+                return;
+            }
+
+            try {
+                let imagenBase64 = null;
+                if (archivoImagen) {
+                    imagenBase64 = await convertirImagenABase64(archivoImagen);
+                }
+
+                if (editando !== null) {
+                    const postActual = posts[editando];
+                    const resp = await fetch('php/api_publicaciones.php', {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            id: postActual.id,
+                            titulo,
+                            contenido,
+                            precio,
+                            imagen: imagenBase64 || postActual.imagen
+                        })
+                    });
+                    const resData = await resp.json();
+                    if (!resData.success) {
+                        mostrarNotificacion(resData.error || "No se pudo actualizar la publicación", "error");
+                        return;
+                    }
+                    mostrarNotificacion("Publicación actualizada correctamente.", "success");
+                    editando = null;
+                } else {
+                    const resp = await fetch('php/api_publicaciones.php', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            titulo,
+                            contenido,
+                            precio,
+                            imagen: imagenBase64 || 'imagenes/default.png'
+                        })
+                    });
+                    const resData = await resp.json();
+                    if (!resData.success) {
+                        mostrarNotificacion(resData.error || "No se pudo guardar la publicación", "error");
+                        return;
+                    }
+                    mostrarNotificacion("Publicación creada correctamente.", "success");
+                }
+
+                limpiarFormulario();
+                await cargarDesdeBD();
+            } catch (error) {
+                mostrarNotificacion("Ocurrió un error al guardar en la base de datos.", "error");
+                console.error(error);
+            }
+        }
+
+        function editarPost(index) {
+            const post = posts[index];
+
+            document.getElementById("titulo").value = post.titulo;
+            document.getElementById("contenido").value = post.contenido;
+            document.getElementById("precio").value = post.precio;
+
+            document.getElementById("imagenActualTexto").textContent =
+                "Si seleccionas otra imagen, se reemplazará la actual. Si no, se conserva la misma.";
+
+            const preview = document.getElementById("previewImagen");
+            preview.src = post.imagen;
+            preview.style.display = "block";
+
+            editando = index;
+            window.scrollTo({ top: 0, behavior: "smooth" });
+        }
+
+        async function eliminarPost(id, index) {
+            const confirmed = await mostrarConfirmacion(
+                "¿Seguro que quieres eliminar esta publicación de la base de datos?",
+                {
+                    titulo: "Eliminar Publicación",
+                    tipo: "danger",
+                    esPeligroso: true,
+                    textoConfirmar: "Eliminar",
+                    textoCancelar: "Cancelar"
+                }
+            );
+            if (!confirmed) return;
+
+            try {
+                const resp = await fetch('php/api_publicaciones.php', {
+                    method: 'DELETE',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ id: id })
+                });
+                const data = await resp.json();
+                if (data.success) {
+                    mostrarNotificacion("Publicación eliminada correctamente.", "success");
+                    await cargarDesdeBD();
+                } else {
+                    mostrarNotificacion(data.error || "No se pudo eliminar", "error");
+                }
+            } catch (e) {
+                mostrarNotificacion("Error de conexión al eliminar: " + e.message, "error");
+            }
+        }
+
+        function limpiarFormulario() {
+            document.getElementById("titulo").value = "";
+            document.getElementById("contenido").value = "";
+            document.getElementById("precio").value = "";
+            document.getElementById("imagen").value = "";
+            document.getElementById("imagenActualTexto").textContent = "";
+
+            const preview = document.getElementById("previewImagen");
+            preview.src = "";
+            preview.style.display = "none";
+            editando = null;
+        }
+
+        document.getElementById("imagen").addEventListener("change", function () {
+            const file = this.files[0];
+            const preview = document.getElementById("previewImagen");
+
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    preview.src = e.target.result;
+                    preview.style.display = "block";
+                };
+                reader.readAsDataURL(file);
+            } else {
+                preview.src = "";
+                preview.style.display = "none";
+            }
+        });
+
+        cargarDesdeBD();
+    </script>
+
+</body>
+
+</html>

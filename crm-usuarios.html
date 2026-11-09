@@ -1,0 +1,189 @@
+<!-- ==============================================================
+     PANTALLA DE USUARIOS (LYM CRM)
+     ARCHIVO: crm-usuarios.html
+============================================================== -->
+
+<div style="display: flex; flex-direction: column; gap: 1.5rem;">
+    <!-- HEADER -->
+    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+        <div>
+            <h2 style="font-size: 1.6rem; font-weight: 800; color: var(--text-heading); margin: 0;">Gestión de Usuarios</h2>
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 2px;">Cuentas registradas en la tabla <code>usuarios</code> de MariaDB/MySQL</p>
+        </div>
+        <button class="crm-btn crm-btn-secondary crm-btn-sm" onclick="cargarUsuarios()">
+            <i class="fas fa-sync-alt"></i> <span>Actualizar</span>
+        </button>
+    </div>
+
+    <!-- TABLA DE USUARIOS -->
+    <div class="crm-table-container">
+        <table class="crm-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Nombre de Usuario</th>
+                    <th>Correo Electrónico</th>
+                    <th>Rol</th>
+                    <th>Fecha de Registro</th>
+                    <th style="text-align: right;">Acciones</th>
+                </tr>
+            </thead>
+            <tbody id="tbodyUsuarios">
+                <tr>
+                    <td colspan="6" style="text-align: center; padding: 2.5rem; color: var(--text-muted);">
+                        <i class="fas fa-spinner fa-spin fa-2x" style="color:var(--primary); margin-bottom:8px;"></i>
+                        <div>Cargando usuarios del sistema...</div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>   
+(function initUsuariosView() {
+    window.cargarUsuarios = async function() {
+        const tbody = document.getElementById('tbodyUsuarios');
+        try {
+            const resp = await fetch('php/crm_api.php?resource=usuarios');
+            const data = await resp.json();
+
+            if (data.success && Array.isArray(data.usuarios)) {
+                const currentId = window.currentUserCRM ? Number(window.currentUserCRM.id) : 0;
+                tbody.innerHTML = data.usuarios.map(u => {
+                    const role = String(u.role).toLowerCase();
+                    const isAdmin = role === 'admin';
+                    const isVentas = role === 'ventas';
+                    const isLogistica = role === 'logistica';
+                    const isTrabajador = role === 'trabajador';
+
+                    let rolBadge = '';
+                    if (isAdmin) {
+                        rolBadge = `<span class="badge badge-activo"><span class="badge-dot"></span>Administrador</span>`;
+                    } else if (isVentas) {
+                        rolBadge = `<span class="badge" style="background:#eff6ff; color:#2563eb; font-weight:700;"><span class="badge-dot" style="background:#2563eb;"></span>Ventas</span>`;
+                    } else if (isLogistica) {
+                        rolBadge = `<span class="badge" style="background:#f0fdf4; color:#059669; font-weight:700;"><span class="badge-dot" style="background:#059669;"></span>Logística</span>`;
+                    } else if (isTrabajador) {
+                        rolBadge = `<span class="badge badge-prospecto"><span class="badge-dot"></span>Trabajador</span>`;
+                    } else {
+                        rolBadge = `<span class="badge badge-inactivo"><span class="badge-dot"></span>Cliente</span>`;
+                    }
+
+                    let accionHtml = '';
+                    if (isTrabajador || isVentas || isLogistica) {
+                        accionHtml = `
+                            <button class="crm-btn crm-btn-sm" style="background:linear-gradient(135deg, #6B46C1, #8B5CF6); color:white; padding:4px 10px; font-size:0.78rem; font-weight:600; border-radius:6px;" onclick="promoverAdminDesdeUsuarios(${u.id}, '${escapeHtml(u.username)}')">
+                                <i class="fas fa-user-shield"></i> Hacer Admin
+                            </button>
+                        `;
+                    } else if (isAdmin) {
+                        const esPropio = (Number(u.id) === currentId);
+                        const esRoot = (Number(u.id) === 1 || String(u.username).toLowerCase() === 'admin');
+                        if (!esPropio && !esRoot) {
+                            accionHtml = `
+                                <button class="crm-btn crm-btn-secondary crm-btn-sm" style="color:#64748b; padding:3px 8px; font-size:0.75rem; border-radius:6px;" onclick="revocarAdminDesdeUsuarios(${u.id}, '${escapeHtml(u.username)}')" title="Regresar al rol de Ventas/Operativo">
+                                    <i class="fas fa-user-minus"></i> Quitar Admin
+                                </button>
+                            `;
+                        } else {
+                            accionHtml = `<span style="color:#10b981; font-weight:700; font-size:0.78rem;"><i class="fas fa-check-circle"></i> Principal</span>`;
+                        }
+                    } else {
+                        accionHtml = `<span style="color:var(--text-muted); font-size:0.8rem;">Cuenta Cliente</span>`;
+                    }
+
+                    return `
+                        <tr>
+                            <td><strong style="color:var(--text-muted);">#${u.id}</strong></td>
+                            <td><strong style="color:var(--text-heading); font-size:0.92rem;">${escapeHtml(u.username)}</strong></td>
+                            <td>${escapeHtml(u.email)}</td>
+                            <td>${rolBadge}</td>
+                            <td>${formatearFechaUser(u.created_at)}</td>
+                            <td style="text-align: right; white-space: nowrap;">${accionHtml}</td>
+                        </tr>
+                    `;
+                }).join('');
+            } else {
+                tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:var(--danger); padding:1.5rem;">${data.error || 'Acceso restringido a administradores'}</td></tr>`;
+            }
+        } catch (e) {
+            tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:var(--danger); padding:1.5rem;">Error al cargar usuarios: ${e.message}</td></tr>`;
+        }
+    };
+
+    window.promoverAdminDesdeUsuarios = async function(id, username) {
+        const confirmed = await mostrarConfirmacion(
+            `¿Estás seguro de hacer Administrador al trabajador "${username}"?\n\nTendrá todos los privilegios administrativos en el CRM.`,
+            {
+                titulo: "Promover a Administrador",
+                tipo: "warning",
+                textoConfirmar: "Otorgar Permisos",
+                textoCancelar: "Cancelar"
+            }
+        );
+        if (!confirmed) return;
+
+        try {
+            const resp = await fetch('php/api_trabajadores.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'hacer_admin', id: id })
+            });
+            const data = await resp.json();
+
+            if (data.success) {
+                mostrarNotificacion(data.message || `¡"${username}" ahora es Administrador!`, 'success');
+                cargarUsuarios();
+            } else {
+                mostrarNotificacion(data.error || 'No se pudo otorgar el rol de Administrador', 'error');
+            }
+        } catch (err) {
+            mostrarNotificacion('Error de red: ' + err.message, 'error');
+        }
+    };
+
+    window.revocarAdminDesdeUsuarios = async function(id, username) {
+        const confirmed = await mostrarConfirmacion(
+            `¿Deseas revocar los privilegios de Administrador a "${username}" y regresarlo a Trabajador?`,
+            {
+                titulo: "Revocar Privilegios",
+                tipo: "warning",
+                textoConfirmar: "Revocar Rol",
+                textoCancelar: "Cancelar"
+            }
+        );
+        if (!confirmed) return;
+
+        try {
+            const resp = await fetch('php/api_trabajadores.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'hacer_trabajador', id: id })
+            });
+            const data = await resp.json();
+
+            if (data.success) {
+                mostrarNotificacion(data.message || `Privilegios revocados a "${username}".`, 'success');
+                cargarUsuarios();
+            } else {
+                mostrarNotificacion(data.error || 'No se pudo revocar el rol de Administrador', 'error');
+            }
+        } catch (err) {
+            mostrarNotificacion('Error de red: ' + err.message, 'error');
+        }
+    };
+
+    function formatearFechaUser(f) {
+        if (!f) return '';
+        const d = new Date(String(f).replace(' ', 'T'));
+        return isNaN(d) ? f : d.toLocaleDateString('es-MX', { day: '2-digit', month: '2-digit', year: 'numeric' });
+    }
+
+    function escapeHtml(str) {
+        return String(str || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+
+    cargarUsuarios();
+})();
+</script>

@@ -1,0 +1,2024 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LYM - Gestor</title>
+
+    <!-- FUENTE GOOGLE PLUS JAKARTA SANS -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- FONT AWESOME ICONS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+    <!-- HOJA DE ESTILOS MODERNA MINIMALISTA DEL CRM (CON CACHE BUSTER) -->
+    <link rel="stylesheet" href="crm-style.css?v=2.3">
+    <link rel="stylesheet" href="notifications.css">
+    <script src="notifications.js"></script>
+
+    <!-- ESTILOS DIRECTOS Y APEGADOS A LA PANTALLA PARA EL SIDEBAR -->
+    <style>
+        .crm-accordion-wrapper {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+        }
+
+        .crm-nav-accordion-btn {
+            display: flex;
+            align-items: center;
+            width: 100%;
+            cursor: pointer;
+        }
+
+        .crm-chevron {
+            margin-left: auto;
+            font-size: 0.7rem;
+            color: #64748b;
+            transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), color 0.2s ease;
+        }
+
+        .crm-nav-accordion-btn:hover .crm-chevron {
+            color: #ffffff;
+        }
+
+        .crm-nav-accordion-btn.open .crm-chevron {
+            transform: rotate(180deg);
+            color: #ffffff;
+        }
+
+        .crm-nav-sublist {
+            display: none;
+            flex-direction: column;
+            gap: 2px;
+            padding-left: 0.75rem;
+            margin: 4px 0 6px 0;
+            border-left: 1px solid rgba(255, 255, 255, 0.08);
+            margin-left: 1.25rem;
+        }
+
+        .crm-nav-sublist.show {
+            display: flex !important;
+        }
+
+        .crm-nav-subitem {
+            font-size: 0.84rem !important;
+            padding: 0.55rem 0.75rem !important;
+            color: #94a3b8 !important;
+            border-radius: 8px !important;
+        }
+
+        .crm-nav-subitem i {
+            font-size: 0.85rem !important;
+            width: 18px !important;
+            text-align: center;
+            color: #64748b;
+            transition: color 0.2s ease;
+        }
+
+        .crm-nav-subitem:hover {
+            color: #ffffff !important;
+            background-color: var(--sidebar-hover) !important;
+        }
+
+        .crm-nav-subitem:hover i {
+            color: #ffffff !important;
+        }
+
+        .crm-nav-subitem.active {
+            background: linear-gradient(135deg, var(--primary), #7c3aed) !important;
+            color: #ffffff !important;
+            font-weight: 600 !important;
+            box-shadow: 0 4px 12px rgba(107, 70, 193, 0.3) !important;
+        }
+
+        .crm-nav-subitem.active i {
+            color: #ffffff !important;
+        }
+    </style>
+
+    <!-- CHART.JS PARA GRÁFICAS DEL CRM -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body>
+
+    <div class="crm-layout">
+        <!-- SIDEBAR ELEGANTE Y SLIM -->
+        <aside class="crm-sidebar">
+            <div class="crm-sidebar-brand">
+                <div class="crm-brand-logo">L</div>
+                <div class="crm-brand-text">LYM <span class="crm-brand-tag" style="background:rgba(236,72,153,0.2); color:#f472b6; font-size:0.68rem; font-weight:700; padding:2px 7px; border-radius:4px; margin-left:6px; letter-spacing:0.04em;">GESTOR</span></div>
+            </div>
+
+            <div class="crm-nav-group" style="overflow-y:auto; max-height:calc(100vh - 170px);">
+                <div class="crm-nav-label">Navegación Gestor</div>
+
+                <!-- 1. DASHBOARD PRINCIPAL -->
+                <button class="crm-nav-item active" id="navItemInicio" onclick="irAInicioGestor(this)">
+                    <i class="fas fa-chart-pie"></i> <span>Dashboard</span>
+                </button>
+
+                <!-- 2. CRM DESPLEGABLE -->
+                <div class="crm-accordion-wrapper">
+                    <button class="crm-nav-item crm-nav-accordion-btn" id="btnAccordionCRM" onclick="toggleAccordion('CRM')">
+                        <i class="fas fa-briefcase"></i>
+                        <span>CRM</span>
+                        <i class="fas fa-chevron-down crm-chevron" id="chevronCRM"></i>
+                    </button>
+                    
+                    <div class="crm-nav-sublist" id="submenuCRM">
+                        <button class="crm-nav-item crm-nav-subitem" id="navItemClientes" onclick="loadExternalView('crm-clientes.html', this, 'CRM')">
+                            <i class="fas fa-users"></i> <span>Clientes</span>
+                        </button>
+                        <button class="crm-nav-item crm-nav-subitem" id="navItemInteracciones" onclick="loadExternalView('crm-interacciones.html', this, 'CRM')">
+                            <i class="fas fa-comments"></i> <span>Interacciones</span>
+                        </button>
+                        <button class="crm-nav-item crm-nav-subitem" id="navItemEvaluaciones" onclick="loadExternalView('crm-evaluaciones.html', this, 'CRM')">
+                            <i class="fas fa-star"></i> <span>Evaluaciones</span>
+                        </button>
+                        <button class="crm-nav-item crm-nav-subitem" id="navItemDescuentos" onclick="loadExternalView('crm-descuentos.html', this, 'CRM')">
+                            <i class="fas fa-tags"></i> <span>Descuentos y Promos</span>
+                            <span id="badgeDescuentosSidebar" class="crm-badge" style="display:none; background:#ef4444; color:white; font-size:0.7rem; padding:1px 6px; border-radius:10px; margin-left:auto; font-weight:700;">0</span>
+                        </button>
+                        <button class="crm-nav-item crm-nav-subitem" id="navItemActividad" onclick="loadExternalView('crm-actividad.html', this, 'CRM')">
+                            <i class="fas fa-clipboard-list"></i> <span>Mi Actividad</span>
+                        </button>
+                        <button class="crm-nav-item crm-nav-subitem" id="navItemReportes" onclick="loadExternalView('crm-reportes.html', this, 'CRM')">
+                            <i class="fas fa-chart-bar"></i> <span>Reportes y Métricas</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 3. SCM DESPLEGABLE -->
+                <div class="crm-accordion-wrapper">
+                    <button class="crm-nav-item crm-nav-accordion-btn" id="btnAccordionSCM" onclick="toggleAccordion('SCM')">
+                        <i class="fas fa-cubes"></i>
+                        <span>SCM</span>
+                        <i class="fas fa-chevron-down crm-chevron" id="chevronSCM"></i>
+                    </button>
+                    
+                    <div class="crm-nav-sublist" id="submenuSCM">
+                        <button class="crm-nav-item crm-nav-subitem" id="scm-nav-inicio" onclick="loadExternalView('scm-inicio.html', this, 'SCM')">
+                            <i class="fas fa-th-large"></i> <span>Menú SCM</span>
+                        </button>
+                        <button class="crm-nav-item crm-nav-subitem" id="scm-nav-productos" onclick="loadExternalView('scm-productos.html', this, 'SCM')">
+                            <i class="fas fa-cube"></i> <span>Productos</span>
+                        </button>
+                        <button class="crm-nav-item crm-nav-subitem" id="scm-nav-proveedores" onclick="loadExternalView('scm-proveedores.html', this, 'SCM')">
+                            <i class="fas fa-user-group"></i> <span>Proveedores</span>
+                        </button>
+                        <button class="crm-nav-item crm-nav-subitem" id="scm-nav-inventario" onclick="loadExternalView('scm-inventario.html', this, 'SCM')">
+                            <i class="fas fa-dice-d6"></i> <span>Inventario</span>
+                        </button>
+                        <button class="crm-nav-item crm-nav-subitem" id="scm-nav-movimientos" onclick="loadExternalView('scm-movimientos.html', this, 'SCM')">
+                            <i class="fas fa-right-left"></i> <span>Movimientos</span>
+                        </button>
+                        <button class="crm-nav-item crm-nav-subitem" id="scm-nav-pedidos" onclick="loadExternalView('scm-pedidos.html', this, 'SCM')">
+                            <i class="fas fa-file-invoice"></i> <span>Pedidos</span>
+                        </button>
+                        <button class="crm-nav-item crm-nav-subitem" id="scm-nav-logistica" onclick="loadExternalView('scm-logistica.html', this, 'SCM')">
+                            <i class="fas fa-arrows-rotate"></i> <span>Logística</span>
+                        </button>
+                        <button class="crm-nav-item crm-nav-subitem" id="scm-nav-reportes" onclick="loadExternalView('scm-reportes.html', this, 'SCM')">
+                            <i class="fas fa-chart-column"></i> <span>Reportes</span>
+                        </button>
+                        <button class="crm-nav-item crm-nav-subitem" id="scm-nav-madurez" onclick="loadExternalView('scm-madurez.html', this, 'SCM')">
+                            <i class="fas fa-layer-group"></i> <span>Nivel de Madurez</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 4. ERP DESPLEGABLE (ETAPA 3 - UNIFICADO) -->
+                <div class="crm-accordion-wrapper" id="wrapperAccordionERP">
+                    <button class="crm-nav-item crm-nav-accordion-btn" id="btnAccordionERP" onclick="toggleAccordion('ERP')">
+                        <i class="fas fa-network-wired"></i>
+                        <span>ERP</span>
+                        <i class="fas fa-chevron-down crm-chevron" id="chevronERP"></i>
+                    </button>
+                    
+                    <div class="crm-nav-sublist" id="submenuERP">
+                        <!-- 1. INICIO -->
+                        <button class="crm-nav-item crm-nav-subitem" id="erp-nav-inicio" onclick="loadExternalView('erp-inicio.html', this, 'ERP')">
+                            <i class="fas fa-chart-pie"></i> <span>Inicio</span>
+                        </button>
+                        <!-- 2. CLIENTES (CRM) -->
+                        <button class="crm-nav-item crm-nav-subitem" id="erp-nav-clientes" onclick="loadExternalView('crm-clientes.html', this, 'ERP')">
+                            <i class="fas fa-users"></i> <span>Clientes (CRM)</span>
+                        </button>
+                        <!-- 3. PRODUCTOS (SCM) -->
+                        <button class="crm-nav-item crm-nav-subitem" id="erp-nav-productos" onclick="loadExternalView('scm-productos.html', this, 'ERP')">
+                            <i class="fas fa-cube"></i> <span>Productos (SCM)</span>
+                        </button>
+                        <!-- 4. INVENTARIO (SCM) -->
+                        <button class="crm-nav-item crm-nav-subitem" id="erp-nav-inventario" onclick="loadExternalView('scm-inventario.html', this, 'ERP')">
+                            <i class="fas fa-dice-d6"></i> <span>Inventario (SCM)</span>
+                        </button>
+                        <!-- 5. ÓRDENES (ERP) -->
+                        <button class="crm-nav-item crm-nav-subitem" id="erp-nav-ordenes" onclick="loadExternalView('erp-ordenes.html', this, 'ERP')">
+                            <i class="fas fa-clipboard-list"></i> <span>Órdenes (ERP)</span>
+                        </button>
+                        <!-- 6. NUEVA ORDEN -->
+                        <button class="crm-nav-item crm-nav-subitem" id="erp-nav-nueva-orden" onclick="loadExternalView('erp-nueva-orden.html', this, 'ERP')">
+                            <i class="fas fa-plus-circle"></i> <span>Nueva Orden</span>
+                        </button>
+                        <!-- 7. REPORTES -->
+                        <button class="crm-nav-item crm-nav-subitem" id="erp-nav-reportes" onclick="loadExternalView('erp-reportes.html', this, 'ERP')">
+                            <i class="fas fa-chart-line"></i> <span>Reportes</span>
+                        </button>
+                        <!-- 8. MI ACTIVIDAD (VENTAS) -->
+                        <button class="crm-nav-item crm-nav-subitem" id="erp-nav-actividad" onclick="loadExternalView('crm-actividad.html', this, 'ERP')">
+                            <i class="fas fa-calendar-check"></i> <span>Mi actividad</span>
+                        </button>
+                        <!-- 9. NIVEL ERP -->
+                        <button class="crm-nav-item crm-nav-subitem" id="erp-nav-madurez" onclick="loadExternalView('erp-madurez.html', this, 'ERP')">
+                            <i class="fas fa-layer-group"></i> <span>Nivel ERP</span>
+                        </button>
+                        <!-- 10. USUARIOS -->
+                        <button class="crm-nav-item crm-nav-subitem" id="erp-nav-usuarios" onclick="loadExternalView('crm-usuarios.html', this, 'ERP')">
+                            <i class="fas fa-user-shield"></i> <span>Usuarios</span>
+                        </button>
+                        <!-- 11. CONFIGURACIÓN -->
+                        <button class="crm-nav-item crm-nav-subitem" id="erp-nav-config" onclick="abrirModalCambiarPassCRM()">
+                            <i class="fas fa-cog"></i> <span>Configuración</span>
+                        </button>
+                        <!-- 12. PANEL POR ROL -->
+                        <button class="crm-nav-item crm-nav-subitem" id="erp-nav-roles" onclick="loadExternalView('erp-roles.html', this, 'ERP')">
+                            <i class="fas fa-id-card-clip"></i> <span>Panel por Rol</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 5. USUARIOS -->
+                <button class="crm-nav-item" id="navItemUsuarios" onclick="loadExternalView('crm-usuarios.html', this, 'Usuarios')">
+                    <i class="fas fa-user-shield"></i> <span>Usuarios</span>
+                </button>
+
+                <!-- 6. TRABAJADORES (ADMIN) -->
+                <button class="crm-nav-item" id="navItemTrabajadores" onclick="abrirModalGestionTrabajadores()">
+                    <i class="fas fa-id-badge"></i> <span>Trabajadores</span>
+                </button>
+            </div>
+
+            <!-- CUENTA Y CONFIGURACIÓN -->
+            <div class="crm-nav-group" style="margin-top: auto;">
+                <div class="crm-nav-label">Sistema y Cuenta</div>
+                <button class="crm-nav-item" id="navItemConfiguracion" onclick="abrirModalCambiarPassCRM()">
+                    <i class="fas fa-cog"></i> <span>Configuración</span>
+                </button>
+                <button class="crm-nav-item" onclick="logoutGestor()">
+                    <i class="fas fa-sign-out-alt"></i> <span>Cerrar Sesión</span>
+                </button>
+            </div>
+        </aside>
+
+        <!-- CONTENIDO PRINCIPAL -->
+        <main class="crm-main">
+            <!-- TOPBAR MINIMALISTA -->
+            <header class="crm-topbar">
+                <div class="crm-breadcrumb">
+                    <span id="breadcrumbModule" style="font-weight:700; color:#0f172a;">LYM Gestor</span>
+                    <i class="fas fa-chevron-right" style="font-size:0.7rem; color:#94a3b8;"></i>
+                    <span id="breadcrumbSection" style="color:#64748b; font-weight:600; display:none;">CRM</span>
+                    <i class="fas fa-chevron-right" id="breadcrumbSeparator" style="font-size:0.7rem; color:#94a3b8; display:none;"></i>
+                    <span class="current" id="topbarCurrentView">Dashboard</span>
+                </div>
+
+                <div class="crm-user-profile">
+                    <button class="crm-btn crm-btn-primary crm-btn-sm" onclick="abrirModalGlobalInteraccion()">
+                        <i class="fas fa-plus"></i> <span>+ Interacción</span>
+                    </button>
+                    
+                    <div style="display:flex; align-items:center; gap:10px; margin-left:15px; padding-left:15px; border-left:1px solid #e2e8f0;">
+                        <div class="crm-avatar" id="topbarAvatar">A</div>
+                        <div style="display:flex; flex-direction:column;">
+                            <span style="font-weight:700; font-size:0.85rem; color:#0f172a;" id="gestorName">Juan Lalo</span>
+                            <span style="font-size:0.72rem; color:#64748b;" id="gestorRole">Administrador</span>
+                        </div>
+                        <button class="crm-btn crm-btn-secondary crm-btn-sm" onclick="abrirModalCambiarPassCRM()" title="Cambiar Contraseña" style="margin-left:6px; padding:5px 9px;">
+                            <i class="fas fa-key"></i>
+                        </button>
+                    </div>
+                </div>
+            </header>
+
+            <!-- VISTA DINÁMICA DEL CRM / ERP -->
+            <div class="crm-content">
+                <!-- BARRA DE PESTAÑAS DEL ERP (REPLICADAS SEGÚN ROL: ADMIN (9), VENTAS (6), LOGÍSTICA (5)) -->
+                <div id="barraPestanasERP" style="display:none; margin-bottom:1.25rem; background:#ffffff; border:1px solid #e2e8f0; border-radius:12px; padding:8px 12px; box-shadow:0 2px 8px rgba(0,0,0,0.03); overflow-x:auto;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap;">
+                        <div id="contenedorPestanasDinamicasERP" style="display:inline-flex; gap:6px; align-items:center; flex-wrap:wrap;"></div>
+                        <span id="badgeRolPestanasERP" class="badge" style="background:rgba(99,102,241,0.12); color:#6366f1; font-weight:700; font-size:0.75rem; padding:4px 10px; border-radius:6px;"></span>
+                    </div>
+                </div>
+
+                <div id="contenedor-vistas-crm"></div>
+            </div>
+        </main>
+    </div>
+
+    <!-- ==============================================================
+         GLOBAL FLOATING MODAL 1: REGISTRAR INTERACCIÓN
+         ============================================================== -->
+    <div class="crm-modal-overlay" id="modalGlobalInteraccion">
+        <div class="crm-modal-dialog">
+            <div class="crm-modal-header">
+                <div class="crm-modal-title">
+                    <i class="fas fa-comments" style="color:var(--primary);"></i>
+                    <span>Nueva Interacción</span>
+                </div>
+                <button class="crm-modal-close" onclick="cerrarModalGlobalInteraccion()">&times;</button>
+            </div>
+
+            <form onsubmit="guardarInteraccionGlobal(event)">
+                <div class="crm-form-group">
+                    <label class="crm-form-label">Cliente:</label>
+                    <select class="crm-form-select" id="mGlobalInteraccionCliente" required>
+                        <option value="">-- Selecciona un cliente --</option>
+                    </select>
+                </div>
+
+                <div class="crm-form-group">
+                    <label class="crm-form-label">Tipo de Interacción:</label>
+                    <select class="crm-form-select" id="mGlobalInteraccionTipo" required>
+                        <option value="llamada">📞 Llamada telefónica</option>
+                        <option value="correo">✉️ Correo electrónico</option>
+                        <option value="whatsapp">💬 WhatsApp</option>
+                        <option value="reunion">🤝 Reunión / Cita</option>
+                        <option value="nota">📝 Nota interna</option>
+                    </select>
+                </div>
+
+                <div class="crm-form-group">
+                    <label class="crm-form-label">Resumen / Detalles:</label>
+                    <textarea class="crm-form-textarea" id="mGlobalInteraccionDesc" rows="4" placeholder="Describe los acuerdos, comentarios o seguimiento..." required></textarea>
+                </div>
+
+                <div class="crm-modal-footer">
+                    <button type="button" class="crm-btn crm-btn-secondary" onclick="cerrarModalGlobalInteraccion()">Cancelar</button>
+                    <button type="submit" class="crm-btn crm-btn-primary" id="btnGuardarInteraccionGlobal">
+                        <i class="fas fa-save"></i> Guardar Interacción
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ==============================================================
+         GLOBAL FLOATING MODAL 2: NUEVO CLIENTE
+         ============================================================== -->
+    <div class="crm-modal-overlay" id="modalGlobalCliente">
+        <div class="crm-modal-dialog">
+            <div class="crm-modal-header">
+                <div class="crm-modal-title">
+                    <i class="fas fa-user-plus" style="color:var(--success);"></i>
+                    <span>Registrar Nuevo Cliente</span>
+                </div>
+                <button class="crm-modal-close" onclick="cerrarModalGlobalCliente()">&times;</button>
+            </div>
+
+            <form onsubmit="guardarClienteGlobal(event)">
+                <div class="crm-form-group">
+                    <label class="crm-form-label">Nombre completo:</label>
+                    <input type="text" class="crm-form-input" id="mGlobalClienteNombre" placeholder="Ej. María López" required>
+                </div>
+
+                <div class="crm-form-group">
+                    <label class="crm-form-label">Empresa / Negocio:</label>
+                    <input type="text" class="crm-form-input" id="mGlobalClienteEmpresa" placeholder="Particular / Empresa">
+                </div>
+
+                <div class="crm-form-group">
+                    <label class="crm-form-label">Correo electrónico:</label>
+                    <input type="email" class="crm-form-input" id="mGlobalClienteCorreo" placeholder="correo@ejemplo.com" required>
+                </div>
+
+                <div class="crm-form-group">
+                    <label class="crm-form-label">Teléfono:</label>
+                    <input type="text" class="crm-form-input" id="mGlobalClienteTelefono" placeholder="555-123-4567">
+                </div>
+
+                <div class="crm-form-group">
+                    <label class="crm-form-label">Etapa inicial CRM:</label>
+                    <select class="crm-form-select" id="mGlobalClienteEtapa">
+                        <option value="Prospecto">Prospecto</option>
+                        <option value="Activo">Activo</option>
+                        <option value="Frecuente">Frecuente</option>
+                    </select>
+                </div>
+
+                <div class="crm-modal-footer">
+                    <button type="button" class="crm-btn crm-btn-secondary" onclick="cerrarModalGlobalCliente()">Cancelar</button>
+                    <button type="submit" class="crm-btn crm-btn-primary" style="background:linear-gradient(135deg, #10b981, #059669);">
+                        <i class="fas fa-check"></i> Guardar Cliente
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ==============================================================
+         GLOBAL FLOATING MODAL 3: EDITAR ETAPA CRM
+         ============================================================== -->
+    <div class="crm-modal-overlay" id="modalGlobalEtapa">
+        <div class="crm-modal-dialog">
+            <div class="crm-modal-header">
+                <div class="crm-modal-title">
+                    <i class="fas fa-tags" style="color:var(--warning);"></i>
+                    <span id="mGlobalEtapaTitulo">Cambiar Etapa CRM</span>
+                </div>
+                <button class="crm-modal-close" onclick="cerrarModalGlobalEtapa()">&times;</button>
+            </div>
+
+            <form onsubmit="guardarEtapaGlobal(event)">
+                <input type="hidden" id="mGlobalEtapaClienteId">
+
+                <div class="crm-form-group">
+                    <label class="crm-form-label">Selecciona la nueva etapa:</label>
+                    <select class="crm-form-select" id="mGlobalEtapaSelect">
+                        <option value="Prospecto">Prospecto</option>
+                        <option value="Activo">Activo</option>
+                        <option value="Frecuente">Frecuente</option>
+                        <option value="Inactivo">Inactivo</option>
+                    </select>
+                </div>
+
+                <div style="background:#fffbeb; border:1px solid #fde68a; color:#b45309; padding:12px; border-radius:8px; font-size:0.8rem; margin-top:10px;">
+                    <i class="fas fa-info-circle"></i> Los cambios en la etapa ayudan a clasificar y dar seguimiento prioritario a tus clientes.
+                </div>
+
+                <div class="crm-modal-footer">
+                    <button type="button" class="crm-btn crm-btn-secondary" onclick="cerrarModalGlobalEtapa()">Cancelar</button>
+                    <button type="submit" class="crm-btn crm-btn-primary">
+                        <i class="fas fa-sync"></i> Actualizar Etapa
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ==============================================================
+         GLOBAL FLOATING MODAL 4: EDITAR DATOS CLIENTE
+         ============================================================== -->
+    <div class="crm-modal-overlay" id="modalGlobalEditarCliente">
+        <div class="crm-modal-dialog">
+            <div class="crm-modal-header">
+                <div class="crm-modal-title">
+                    <i class="fas fa-edit" style="color:var(--primary);"></i>
+                    <span>Editar Información del Cliente</span>
+                </div>
+                <button class="crm-modal-close" onclick="cerrarModalGlobalEditarCliente()">&times;</button>
+            </div>
+
+            <form onsubmit="guardarEditarClienteGlobal(event)">
+                <input type="hidden" id="mGlobalEditClienteId">
+
+                <div class="crm-form-group">
+                    <label class="crm-form-label">Nombre completo:</label>
+                    <input type="text" class="crm-form-input" id="mGlobalEditClienteNombre" required>
+                </div>
+
+                <div class="crm-form-group">
+                    <label class="crm-form-label">Empresa / Negocio:</label>
+                    <input type="text" class="crm-form-input" id="mGlobalEditClienteEmpresa">
+                </div>
+
+                <div class="crm-form-group">
+                    <label class="crm-form-label">Correo electrónico:</label>
+                    <input type="email" class="crm-form-input" id="mGlobalEditClienteCorreo" required>
+                </div>
+
+                <div class="crm-form-group">
+                    <label class="crm-form-label">Teléfono:</label>
+                    <input type="text" class="crm-form-input" id="mGlobalEditClienteTelefono">
+                </div>
+
+                <div class="crm-form-group">
+                    <label class="crm-form-label">Estado del cliente:</label>
+                    <select class="crm-form-select" id="mGlobalEditClienteEstado">
+                        <option value="activo">Activo</option>
+                        <option value="inactivo">Inactivo</option>
+                    </select>
+                </div>
+
+                <div class="crm-modal-footer">
+                    <button type="button" class="crm-btn crm-btn-secondary" onclick="cerrarModalGlobalEditarCliente()">Cancelar</button>
+                    <button type="submit" class="crm-btn crm-btn-primary">
+                        <i class="fas fa-save"></i> Guardar Cambios
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ==============================================================
+         GLOBAL FLOATING MODAL: SUGERIR DESCUENTO PARA CLIENTE
+         ============================================================== -->
+    <div class="crm-modal-overlay" id="modalGlobalSugerirDescuento">
+        <div class="crm-modal-dialog" style="max-width: 520px;">
+            <div class="crm-modal-header">
+                <div class="crm-modal-title">
+                    <i class="fas fa-tags" style="color:var(--primary);"></i>
+                    <span>Sugerir Descuento para Cliente</span>
+                </div>
+                <button class="crm-modal-close" onclick="cerrarModalGlobalSugerirDescuento()">&times;</button>
+            </div>
+
+            <form onsubmit="guardarSugerirDescuentoGlobal(event)">
+                <div class="crm-form-group">
+                    <label class="crm-form-label">Cliente Seleccionado:</label>
+                    <select class="crm-form-select" id="mSugerirDescuentoClienteSelect" required>
+                        <option value="">-- Selecciona un cliente --</option>
+                    </select>
+                </div>
+
+                <div class="crm-form-group">
+                    <label class="crm-form-label">Porcentaje de Descuento (%):</label>
+                    <div style="display:flex; align-items:center; gap:10px;">
+                        <input type="number" class="crm-form-input" id="mSugerirDescuentoPorcentaje" min="1" max="90" step="1" placeholder="Ej. 10, 15, 20" required style="font-size:1.1rem; font-weight:700; color:#4338ca;">
+                        <span style="font-weight:800; font-size:1.1rem; color:#64748b;">%</span>
+                    </div>
+                    <small style="color:#64748b; font-size:0.75rem;">Sugerencias habituales: 5% (primera compra), 10% (frecuente), 15% (fidelización), 20% (compensación/VIP).</small>
+                </div>
+
+                <div class="crm-form-group">
+                    <label class="crm-form-label">Motivo o Justificación para el Administrador:</label>
+                    <textarea class="crm-form-textarea" id="mSugerirDescuentoMotivo" rows="3" placeholder="Ej: Cliente frecuente que ha realizado varias compras. Solicita descuento para su próximo pedido." required></textarea>
+                </div>
+
+                <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:10px 14px; margin-bottom:15px; font-size:0.8rem; color:#475569; display:flex; gap:8px;">
+                    <i class="fas fa-info-circle" style="color:#6366f1; margin-top:2px;"></i>
+                    <span>Al enviar esta sugerencia, el <strong>Administrador</strong> la evaluará. Si la aprueba, el sistema generará un cupón y enviará una <strong>notificación inmediata al cliente</strong>.</span>
+                </div>
+
+                <div class="crm-modal-footer">
+                    <button type="button" class="crm-btn crm-btn-secondary" onclick="cerrarModalGlobalSugerirDescuento()">Cancelar</button>
+                    <button type="submit" class="crm-btn crm-btn-primary" id="btnEnviarSugerenciaDescuento">
+                        <i class="fas fa-paper-plane"></i> Enviar al Administrador
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL 3: GESTIÓN DE TRABAJADORES Y ADMINISTRADORES -->
+    <div class="crm-modal-overlay" id="modalGestionTrabajadores">
+        <div class="crm-modal-dialog" style="max-width: 720px;">
+            <div class="crm-modal-header">
+                <div class="crm-modal-title">
+                    <i class="fas fa-users-cog" style="color:var(--primary);"></i>
+                    <span>Gestión de Trabajadores y Administradores</span>
+                </div>
+                <button class="crm-modal-close" onclick="cerrarModalGestionTrabajadores()">&times;</button>
+            </div>
+
+            <div style="padding: 1rem 0;">
+                <!-- FORMULARIO NUEVO COLABORADOR / ROL -->
+                <form onsubmit="crearNuevoTrabajador(event)" style="background:#f8fafc; padding:16px; border-radius:12px; border:1px solid #e2e8f0; margin-bottom:20px;">
+                    <h4 style="margin:0 0 12px 0; font-size:0.95rem; color:#0f172a;"><i class="fas fa-user-plus"></i> Registrar Colaborador</h4>
+                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+                        <div class="crm-form-group" style="margin:0;">
+                            <label class="crm-form-label">Usuario:</label>
+                            <input type="text" class="crm-form-input" id="mTrabajadorUsername" placeholder="Ej. carlos_ventas" required>
+                        </div>
+                        <div class="crm-form-group" style="margin:0;">
+                            <label class="crm-form-label">Correo:</label>
+                            <input type="email" class="crm-form-input" id="mTrabajadorEmail" placeholder="correo@lym.com" required>
+                        </div>
+                    </div>
+                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:10px;">
+                        <div class="crm-form-group" style="margin:0;">
+                            <label class="crm-form-label">Rol del Sistema:</label>
+                            <select class="crm-form-select" id="mTrabajadorRol" required>
+                                <option value="ventas">💼 Ventas (CRM + Órdenes)</option>
+                                <option value="logistica">🚚 Logística (SCM Almacén)</option>
+                                <option value="trabajador">👷 Operativo (Trabajador)</option>
+                                <option value="admin">👑 Administrador Total</option>
+                            </select>
+                        </div>
+                        <div class="crm-form-group" style="margin:0;">
+                            <label class="crm-form-label">Contraseña de acceso:</label>
+                            <input type="password" class="crm-form-input" id="mTrabajadorPassword" placeholder="••••••••" minlength="6" required>
+                        </div>
+                    </div>
+                    <button type="submit" class="crm-btn crm-btn-primary" id="btnCrearTrabajador" style="margin-top:12px; width:100%;">
+                        <i class="fas fa-plus-circle"></i> Registrar Cuenta de Colaborador
+                    </button>
+                </form>
+
+                <!-- LISTADO DE COLABORADORES OPERATIVOS -->
+                <h4 style="margin:0 0 10px 0; font-size:0.95rem; color:#0f172a;"><i class="fas fa-id-badge" style="color:var(--primary);"></i> Colaboradores Operativos (Ventas / Logística / Almacén)</h4>
+                <div id="tablaTrabajadoresContainer" style="max-height:220px; overflow-y:auto; border:1px solid #e2e8f0; border-radius:8px; margin-bottom:20px;">
+                    <div style="padding:20px; text-align:center; color:#94a3b8;">Cargando lista de trabajadores...</div>
+                </div>
+
+                <!-- LISTADO DE ADMINISTRADORES -->
+                <h4 style="margin:0 0 10px 0; font-size:0.95rem; color:#0f172a;"><i class="fas fa-user-shield" style="color:#6B46C1;"></i> Administradores con Privilegios Completos</h4>
+                <div id="tablaAdministradoresContainer" style="max-height:200px; overflow-y:auto; border:1px solid #e2e8f0; border-radius:8px;">
+                    <div style="padding:20px; text-align:center; color:#94a3b8;">Cargando lista de administradores...</div>
+                </div>
+            </div>
+
+            <div class="crm-modal-footer">
+                <button type="button" class="crm-btn crm-btn-secondary" onclick="cerrarModalGestionTrabajadores()">Cerrar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL 4: CAMBIAR CONTRASEÑA EN CRM -->
+    <div class="crm-modal-overlay" id="modalCambiarPassCRM">
+        <div class="crm-modal-dialog" style="max-width: 440px;">
+            <div class="crm-modal-header">
+                <div class="crm-modal-title">
+                    <i class="fas fa-key" style="color:var(--primary);"></i>
+                    <span>Cambiar mi Contraseña</span>
+                </div>
+                <button class="crm-modal-close" onclick="cerrarModalCambiarPassCRM()">&times;</button>
+            </div>
+
+            <form onsubmit="guardarPassCRM(event)">
+                <div class="crm-form-group">
+                    <label class="crm-form-label">Contraseña Actual:</label>
+                    <input type="password" class="crm-form-input" id="mPassActualCRM" placeholder="••••••••" required>
+                </div>
+
+                <div class="crm-form-group">
+                    <label class="crm-form-label">Nueva Contraseña:</label>
+                    <input type="password" class="crm-form-input" id="mPassNuevaCRM" placeholder="••••••••" minlength="6" required>
+                </div>
+
+                <div id="mPassCRMMsg" style="display:none; padding:10px; border-radius:8px; font-size:0.88rem; font-weight:600; margin-top:10px;"></div>
+
+                <div class="crm-modal-footer">
+                    <button type="button" class="crm-btn crm-btn-secondary" onclick="cerrarModalCambiarPassCRM()">Cancelar</button>
+                    <button type="submit" class="crm-btn crm-btn-primary" id="btnGuardarPassCRM">
+                        <i class="fas fa-save"></i> Actualizar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- JAVASCRIPT PRINCIPAL -->
+    <script>
+        let currentLoadedView = 'crm-dashboard.html';
+
+        /* MANEJO DE ACORDEONES CRM Y SCM */
+        function toggleAccordion(module) {
+            if (module === 'CRM') {
+                const btn = document.getElementById("btnAccordionCRM");
+                const sub = document.getElementById("submenuCRM");
+                const isOpen = sub.classList.contains("show");
+                
+                if (isOpen) {
+                    btn.classList.remove("open");
+                    sub.classList.remove("show");
+                } else {
+                    btn.classList.add("open");
+                    sub.classList.add("show");
+                }
+            } else if (module === 'SCM') {
+                const btn = document.getElementById("btnAccordionSCM");
+                const sub = document.getElementById("submenuSCM");
+                const isOpen = sub.classList.contains("show");
+
+                if (isOpen) {
+                    // CERRAR SCM
+                    btn.classList.remove("open");
+                    sub.classList.remove("show");
+                } else {
+                    // ABRIR SCM
+                    btn.classList.add("open");
+                    sub.classList.add("show");
+                    
+                    // Si no estamos viendo una pantalla de SCM, cargar el menú de inicio SCM
+                    if (!currentLoadedView || !currentLoadedView.startsWith('scm-')) {
+                        loadExternalView('scm-inicio.html', document.getElementById("scm-nav-inicio"), 'SCM');
+                    }
+                }
+            } else if (module === 'ERP') {
+                const btn = document.getElementById("btnAccordionERP");
+                const sub = document.getElementById("submenuERP");
+                const isOpen = sub.classList.contains("show");
+
+                if (isOpen) {
+                    // CERRAR ERP
+                    btn.classList.remove("open");
+                    sub.classList.remove("show");
+                } else {
+                    // ABRIR ERP
+                    btn.classList.add("open");
+                    sub.classList.add("show");
+                    
+                    // Si no estamos viendo una pantalla de ERP, cargar el Dashboard de ERP
+                    if (!currentLoadedView || !currentLoadedView.startsWith('erp-')) {
+                        loadExternalView('erp-inicio.html', document.getElementById("erp-nav-inicio"), 'ERP');
+                    }
+                }
+            }
+        }
+
+        function abrirAcordeonERP() {
+            const btn = document.getElementById("btnAccordionERP");
+            const sub = document.getElementById("submenuERP");
+            if (btn && sub) {
+                btn.classList.add("open");
+                sub.classList.add("show");
+            }
+        }
+
+        function abrirAcordeonSCM() {
+            const btn = document.getElementById("btnAccordionSCM");
+            const sub = document.getElementById("submenuSCM");
+            if (btn && sub) {
+                btn.classList.add("open");
+                sub.classList.add("show");
+            }
+        }
+
+        function abrirAcordeonCRM() {
+            const btn = document.getElementById("btnAccordionCRM");
+            const sub = document.getElementById("submenuCRM");
+            if (btn && sub) {
+                btn.classList.add("open");
+                sub.classList.add("show");
+            }
+        }
+
+        function irAInicioGestor(btn) {
+            document.querySelectorAll(".crm-nav-item, .crm-nav-subitem").forEach(el => el.classList.remove("active"));
+            if (btn) btn.classList.add("active");
+            
+            const bSection = document.getElementById("breadcrumbSection");
+            const bSep = document.getElementById("breadcrumbSeparator");
+            const bCur = document.getElementById("topbarCurrentView");
+            if (bSection) bSection.style.display = "none";
+            if (bSep) bSep.style.display = "none";
+            if (bCur) bCur.textContent = "Dashboard";
+
+            loadExternalView('crm-dashboard.html', null);
+        }
+
+        /* ==============================================================
+           REPLICACIÓN DE PESTAÑAS EN EL ERP SEGÚN ROL (PANTALLA 10)
+           Admin: 9 pestañas | Ventas: 6 pestañas | Logística: 5 pestañas
+           ============================================================== */
+        window.rolActivoERP = 'admin';
+        window.enModuloERP = false;
+
+        const PESTANAS_ERP_CONFIG = {
+            admin: [
+                { id: 'tab-erp-inicio', label: 'Inicio', icon: 'fas fa-chart-pie', view: 'erp-inicio.html' },
+                { id: 'tab-erp-clientes', label: 'Clientes (CRM)', icon: 'fas fa-users', view: 'crm-clientes.html' },
+                { id: 'tab-erp-productos', label: 'Productos (SCM)', icon: 'fas fa-box-open', view: 'scm-productos.html' },
+                { id: 'tab-erp-inventario', label: 'Inventario (SCM)', icon: 'fas fa-warehouse', view: 'scm-inventario.html' },
+                { id: 'tab-erp-ordenes', label: 'Órdenes (ERP)', icon: 'fas fa-clipboard-list', view: 'erp-ordenes.html' },
+                { id: 'tab-erp-reportes', label: 'Reportes', icon: 'fas fa-chart-line', view: 'erp-reportes.html' },
+                { id: 'tab-erp-madurez', label: 'Nivel ERP', icon: 'fas fa-layer-group', view: 'erp-madurez.html' },
+                { id: 'tab-erp-usuarios', label: 'Usuarios', icon: 'fas fa-user-shield', view: 'crm-usuarios.html' },
+                { id: 'tab-erp-config', label: 'Configuración', icon: 'fas fa-cog', action: 'config' }
+            ],
+            ventas: [
+                { id: 'tab-erp-inicio', label: 'Inicio', icon: 'fas fa-chart-pie', view: 'erp-inicio.html' },
+                { id: 'tab-erp-clientes', label: 'Clientes (CRM)', icon: 'fas fa-users', view: 'crm-clientes.html' },
+                { id: 'tab-erp-productos', label: 'Productos (SCM)', icon: 'fas fa-box-open', view: 'scm-productos.html' },
+                { id: 'tab-erp-ordenes', label: 'Órdenes (ERP)', icon: 'fas fa-clipboard-list', view: 'erp-ordenes.html' },
+                { id: 'tab-erp-reportes', label: 'Reportes', icon: 'fas fa-chart-line', view: 'erp-reportes.html' },
+                { id: 'tab-erp-actividad', label: 'Mi actividad', icon: 'fas fa-calendar-check', view: 'crm-actividad.html' }
+            ],
+            logistica: [
+                { id: 'tab-erp-inicio', label: 'Inicio', icon: 'fas fa-chart-pie', view: 'erp-inicio.html' },
+                { id: 'tab-erp-productos', label: 'Productos (SCM)', icon: 'fas fa-box-open', view: 'scm-productos.html' },
+                { id: 'tab-erp-inventario', label: 'Inventario (SCM)', icon: 'fas fa-warehouse', view: 'scm-inventario.html' },
+                { id: 'tab-erp-ordenes', label: 'Órdenes (ERP)', icon: 'fas fa-clipboard-list', view: 'erp-ordenes.html' },
+                { id: 'tab-erp-reportes', label: 'Reportes', icon: 'fas fa-chart-line', view: 'erp-reportes.html' }
+            ]
+        };
+
+        function actualizarPestanasERP(viewUrl, overrideRol, forzarMostrar) {
+            const barra = document.getElementById("barraPestanasERP");
+            const contenedor = document.getElementById("contenedorPestanasDinamicasERP");
+            const badge = document.getElementById("badgeRolPestanasERP");
+            if (!barra || !contenedor) return;
+
+            if (overrideRol) {
+                window.rolActivoERP = String(overrideRol).toLowerCase();
+            }
+            let rol = window.rolActivoERP || 'admin';
+            if (rol === 'trabajador') rol = 'logistica';
+            if (rol !== 'ventas' && rol !== 'logistica') rol = 'admin';
+
+            const esVistaERP = (viewUrl && (viewUrl.startsWith('erp-') || viewUrl.includes('erp-'))) || forzarMostrar || (window.enModuloERP === true);
+
+            if (!esVistaERP) {
+                window.enModuloERP = false;
+                barra.style.display = 'none';
+                return;
+            }
+
+            window.enModuloERP = true;
+            barra.style.display = 'block';
+
+            const pestanas = PESTANAS_ERP_CONFIG[rol] || PESTANAS_ERP_CONFIG.admin;
+
+            if (badge) {
+                if (rol === 'ventas') {
+                    badge.style.background = 'rgba(59,130,246,0.12)';
+                    badge.style.color = '#2563eb';
+                    badge.innerHTML = '<i class="fas fa-briefcase"></i> Rol: Ventas (6 pestañas)';
+                } else if (rol === 'logistica') {
+                    badge.style.background = 'rgba(16,185,129,0.12)';
+                    badge.style.color = '#059669';
+                    badge.innerHTML = '<i class="fas fa-truck"></i> Rol: Logística (5 pestañas)';
+                } else {
+                    badge.style.background = 'rgba(99,102,241,0.12)';
+                    badge.style.color = '#6366f1';
+                    badge.innerHTML = '<i class="fas fa-crown"></i> Rol: Administrador (9 pestañas)';
+                }
+            }
+
+            let html = '';
+            pestanas.forEach(p => {
+                const esActiva = (p.view && p.view === viewUrl);
+                const estiloPestana = esActiva
+                    ? 'background:#6366f1; color:#ffffff; border:1px solid #6366f1; font-weight:700; box-shadow:0 2px 6px rgba(99,102,241,0.3);'
+                    : 'background:#f8fafc; color:#475569; border:1px solid #e2e8f0; font-weight:600;';
+
+                if (p.action === 'config') {
+                    html += `
+                        <button type="button" onclick="abrirModalCambiarPassCRM()" style="${estiloPestana} padding:6px 12px; border-radius:8px; cursor:pointer; font-size:0.82rem; display:inline-flex; align-items:center; gap:6px; transition:all 0.15s ease;">
+                            <i class="${p.icon}"></i> <span>${p.label}</span>
+                        </button>
+                    `;
+                } else {
+                    html += `
+                        <button type="button" onclick="navegarPestanaERP('${p.view}')" style="${estiloPestana} padding:6px 12px; border-radius:8px; cursor:pointer; font-size:0.82rem; display:inline-flex; align-items:center; gap:6px; transition:all 0.15s ease;">
+                            <i class="${p.icon}"></i> <span>${p.label}</span>
+                        </button>
+                    `;
+                }
+            });
+
+            contenedor.innerHTML = html;
+        }
+
+        function navegarPestanaERP(viewUrl) {
+            window.enModuloERP = true;
+            loadExternalView(viewUrl, null, 'ERP');
+            actualizarPestanasERP(viewUrl, window.rolActivoERP, true);
+        }
+
+        /* NAVEGACIÓN ENTRE VISTAS */
+        function loadExternalView(viewUrl, button, moduleCategory) {
+            const container = document.getElementById("contenedor-vistas-crm");
+            currentLoadedView = viewUrl;
+
+            // Actualizar barra dinámica de pestañas del ERP
+            const esERP = (moduleCategory === 'ERP' || (viewUrl && viewUrl.startsWith('erp-')));
+            actualizarPestanasERP(viewUrl, window.rolActivoERP, esERP);
+
+            // Resolver si button es ID en string
+            if (typeof button === 'string') {
+                button = document.getElementById(button);
+            }
+
+            // Actualizar clases activas en sidebar
+            document.querySelectorAll(".crm-nav-item, .crm-nav-subitem").forEach(el => el.classList.remove("active"));
+
+            // Breadcrumb elements
+            const bSection = document.getElementById("breadcrumbSection");
+            const bSep = document.getElementById("breadcrumbSeparator");
+            const bCur = document.getElementById("topbarCurrentView");
+
+            let label = "Dashboard";
+
+            if (button) {
+                button.classList.add("active");
+                label = button.querySelector("span")?.textContent || label;
+
+                // Detectar si está dentro de CRM, SCM o ERP
+                if (button.closest("#submenuCRM") || moduleCategory === 'CRM') {
+                    abrirAcordeonCRM();
+                    if (bSection && bSep) {
+                        bSection.textContent = "CRM";
+                        bSection.style.display = "inline";
+                        bSep.style.display = "inline";
+                    }
+                } else if (button.closest("#submenuSCM") || moduleCategory === 'SCM') {
+                    abrirAcordeonSCM();
+                    if (bSection && bSep) {
+                        bSection.textContent = "SCM";
+                        bSection.style.display = "inline";
+                        bSep.style.display = "inline";
+                    }
+                } else if (button.closest("#submenuERP") || moduleCategory === 'ERP') {
+                    abrirAcordeonERP();
+                    if (bSection && bSep) {
+                        bSection.textContent = "ERP";
+                        bSection.style.display = "inline";
+                        bSep.style.display = "inline";
+                    }
+                } else {
+                    if (bSection && bSep) {
+                        bSection.style.display = "none";
+                        bSep.style.display = "none";
+                    }
+                }
+            } else if (moduleCategory === 'ERP' || viewUrl.startsWith('erp-')) {
+                abrirAcordeonERP();
+                if (bSection && bSep) {
+                    bSection.textContent = "ERP";
+                    bSection.style.display = "inline";
+                    bSep.style.display = "inline";
+                }
+                if (viewUrl === 'erp-inicio.html') {
+                    label = "Dashboard ERP";
+                    const navInicio = document.getElementById("erp-nav-inicio");
+                    if (navInicio) navInicio.classList.add("active");
+                }
+            } else if (moduleCategory === 'SCM' || viewUrl.startsWith('scm-')) {
+                abrirAcordeonSCM();
+                if (bSection && bSep) {
+                    bSection.textContent = "SCM";
+                    bSection.style.display = "inline";
+                    bSep.style.display = "inline";
+                }
+                if (viewUrl === 'scm-inicio.html') {
+                    label = "Menú SCM";
+                    const navInicio = document.getElementById("scm-nav-inicio");
+                    if (navInicio) navInicio.classList.add("active");
+                }
+            } else if (moduleCategory === 'CRM' || viewUrl.startsWith('crm-')) {
+                if (bSection && bSep) {
+                    bSection.textContent = "CRM";
+                    bSection.style.display = "inline";
+                    bSep.style.display = "inline";
+                }
+            }
+
+            if (bCur) bCur.textContent = label;
+
+            container.innerHTML = `
+                <div style="padding: 3rem; text-align: center; color: #94a3b8;">
+                    <i class="fas fa-spinner fa-spin fa-2x" style="color:var(--primary); margin-bottom:12px;"></i>
+                    <div>Cargando módulo...</div>
+                </div>
+            `;
+
+            const cacheBusterUrl = viewUrl + (viewUrl.includes('?') ? '&' : '?') + '_t=' + Date.now();
+            fetch(cacheBusterUrl)
+                .then(response => {
+                    if (!response.ok) throw new Error("No se pudo cargar " + viewUrl);
+                    return response.text();
+                })
+                .then(html => {
+                    container.innerHTML = html;
+
+                    // Ejecutar scripts internos de la vista cargada
+                    const scripts = container.querySelectorAll("script");
+                    scripts.forEach(oldScript => {
+                        const newScript = document.createElement("script");
+                        Array.from(oldScript.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value));
+                        newScript.appendChild(document.createTextNode(oldScript.innerHTML));
+                        oldScript.parentNode.replaceChild(newScript, oldScript);
+                    });
+                })
+                .catch(err => {
+                    container.innerHTML = `<div style="color: #ef4444; padding: 2rem; background:#fee2e2; border-radius:12px;">Error al cargar la vista (${err.message}). Revisa la ruta de conexión.</div>`;
+                });
+        }
+
+        /* MODAL GLOBAL 1: REGISTRAR INTERACCIÓN */
+        async function abrirModalGlobalInteraccion(preselectedClienteId) {
+            const modal = document.getElementById("modalGlobalInteraccion");
+            const selectCliente = document.getElementById("mGlobalInteraccionCliente");
+            modal.classList.add("active");
+
+            try {
+                selectCliente.innerHTML = '<option value="">Cargando clientes de MySQL...</option>';
+                let clientes = [];
+
+                const resp = await fetch("php/crm_api.php?resource=clientes", { credentials: "same-origin" });
+                if (resp.ok) {
+                    const data = await resp.json();
+                    if (data.success && Array.isArray(data.clientes)) {
+                        clientes = data.clientes;
+                    }
+                }
+
+                if (clientes.length === 0) {
+                    const respDrop = await fetch("php/api_clientes_dropdown.php", { credentials: "same-origin" });
+                    if (respDrop.ok) {
+                        const dataDrop = await respDrop.json();
+                        if (dataDrop.success && Array.isArray(dataDrop.clientes)) {
+                            clientes = dataDrop.clientes;
+                        }
+                    }
+                }
+
+                if (clientes.length === 0) {
+                    const resp2 = await fetch("php/clientes.php", { credentials: "same-origin" });
+                    if (resp2.ok) {
+                        const data2 = await resp2.json();
+                        if (data2.success && Array.isArray(data2.clientes)) {
+                            clientes = data2.clientes;
+                        }
+                    }
+                }
+
+                if (clientes.length > 0) {
+                    selectCliente.innerHTML = '<option value="">-- Selecciona un cliente --</option>';
+                    clientes.forEach(c => {
+                        const opt = document.createElement("option");
+                        opt.value = c.id;
+                        opt.textContent = `${c.nombre || c.username || 'Cliente'} (${c.empresa && c.empresa !== 'Sin Empresa' ? c.empresa : 'Particular'}) - ${c.correo || ''}`;
+                        if (preselectedClienteId && String(c.id) === String(preselectedClienteId)) {
+                            opt.selected = true;
+                        }
+                        selectCliente.appendChild(opt);
+                    });
+                } else {
+                    selectCliente.innerHTML = '<option value="">No hay clientes en MySQL</option>';
+                }
+            } catch (e) {
+                selectCliente.innerHTML = '<option value="">Error al cargar clientes</option>';
+            }
+        }
+
+        function cerrarModalGlobalInteraccion() {
+            document.getElementById("modalGlobalInteraccion").classList.remove("active");
+        }
+
+        async function guardarInteraccionGlobal(e) {
+            e.preventDefault();
+            const cliente_id = document.getElementById("mGlobalInteraccionCliente").value;
+            const tipo = document.getElementById("mGlobalInteraccionTipo").value;
+            const descripcion = document.getElementById("mGlobalInteraccionDesc").value;
+            const btn = document.getElementById("btnGuardarInteraccionGlobal");
+
+            if (!cliente_id) {
+                mostrarNotificacion("Selecciona un cliente de la lista.", "warning");
+                return;
+            }
+
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...';
+
+            try {
+                const resp = await fetch("php/crm_api.php?resource=interacciones", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ cliente_id, tipo, descripcion })
+                });
+
+                const data = await resp.json();
+                if (data.success) {
+                    mostrarNotificacion("¡Interacción registrada con éxito!", "success");
+                    cerrarModalGlobalInteraccion();
+                    document.getElementById("mGlobalInteraccionDesc").value = "";
+                    
+                    window.dispatchEvent(new CustomEvent("crm-interaction-updated"));
+                    if (typeof loadExternalView === "function" && currentLoadedView) {
+                        loadExternalView(currentLoadedView, null);
+                    }
+                } else {
+                    mostrarNotificacion("Error: " + (data.error || "No se pudo guardar"), "error");
+                }
+            } catch (err) {
+                mostrarNotificacion("Error de conexión: " + err.message, "error");
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-save"></i> Guardar Interacción';
+            }
+        }
+
+        /* MODAL GLOBAL 2: NUEVO CLIENTE */
+        function abrirModalGlobalCliente() {
+            document.getElementById("modalGlobalCliente").classList.add("active");
+        }
+
+        function cerrarModalGlobalCliente() {
+            document.getElementById("modalGlobalCliente").classList.remove("active");
+        }
+
+        async function guardarClienteGlobal(e) {
+            e.preventDefault();
+            const nombre = document.getElementById("mGlobalClienteNombre").value;
+            const empresa = document.getElementById("mGlobalClienteEmpresa").value;
+            const correo = document.getElementById("mGlobalClienteCorreo").value;
+            const telefono = document.getElementById("mGlobalClienteTelefono").value;
+            const etapa_crm = document.getElementById("mGlobalClienteEtapa").value;
+
+            try {
+                const resp = await fetch("php/crm_api.php?resource=crear_cliente", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ nombre, empresa, correo, telefono, etapa_crm })
+                });
+
+                const data = await resp.json();
+                if (data.success) {
+                    showNotification("¡Cliente guardado exitosamente en MySQL!");
+                    cerrarModalGlobalCliente();
+                    
+                    if (currentLoadedView.includes("crm-clientes")) {
+                        loadExternalView(currentLoadedView, null);
+                    }
+                } else {
+                    mostrarNotificacion("Error: " + data.error, "error");
+                }
+            } catch (err) {
+                mostrarNotificacion("Error de conexión: " + err.message, "error");
+            }
+        }
+
+        /* MODAL GLOBAL 3: EDITAR ETAPA CRM */
+        function abrirModalGlobalEtapa(clienteId, clienteNombre, etapaActual) {
+            document.getElementById("mGlobalEtapaClienteId").value = clienteId;
+            document.getElementById("mGlobalEtapaTitulo").textContent = `Cambiar Etapa - ${clienteNombre}`;
+            document.getElementById("mGlobalEtapaSelect").value = etapaActual || 'Prospecto';
+            document.getElementById("modalGlobalEtapa").classList.add("active");
+        }
+
+        function cerrarModalGlobalEtapa() {
+            document.getElementById("modalGlobalEtapa").classList.remove("active");
+        }
+
+        async function guardarEtapaGlobal(e) {
+            e.preventDefault();
+            const id = document.getElementById("mGlobalEtapaClienteId").value;
+            const etapa_crm = document.getElementById("mGlobalEtapaSelect").value;
+
+            try {
+                const resp = await fetch("php/crm_api.php?resource=editar_etapa", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ id, etapa_crm })
+                });
+
+                const data = await resp.json();
+                if (data.success) {
+                    mostrarNotificacion("Etapa CRM actualizada", "success");
+                    cerrarModalGlobalEtapa();
+                    loadExternalView(currentLoadedView, null);
+                } else {
+                    mostrarNotificacion(data.error || "Error al actualizar etapa", "error");
+                }
+            } catch (err) {
+                mostrarNotificacion("Error de conexión: " + err.message, "error");
+            }
+        }
+
+        /* MODAL GLOBAL 4: EDITAR DATOS CLIENTE */
+        function abrirModalGlobalEditarCliente(id, nombre, correo, telefono, empresa, estado) {
+            document.getElementById("mGlobalEditClienteId").value = id;
+            document.getElementById("mGlobalEditClienteNombre").value = nombre || '';
+            document.getElementById("mGlobalEditClienteCorreo").value = correo || '';
+            document.getElementById("mGlobalEditClienteTelefono").value = telefono || '';
+            document.getElementById("mGlobalEditClienteEmpresa").value = empresa || '';
+            document.getElementById("mGlobalEditClienteEstado").value = estado || 'activo';
+            document.getElementById("modalGlobalEditarCliente").classList.add("active");
+        }
+
+        function cerrarModalGlobalEditarCliente() {
+            document.getElementById("modalGlobalEditarCliente").classList.remove("active");
+        }
+
+        async function guardarEditarClienteGlobal(e) {
+            e.preventDefault();
+            const id = document.getElementById("mGlobalEditClienteId").value;
+            const nombre = document.getElementById("mGlobalEditClienteNombre").value;
+            const correo = document.getElementById("mGlobalEditClienteCorreo").value;
+            const telefono = document.getElementById("mGlobalEditClienteTelefono").value;
+            const empresa = document.getElementById("mGlobalEditClienteEmpresa").value;
+            const estado = document.getElementById("mGlobalEditClienteEstado").value;
+
+            try {
+                const resp = await fetch("php/crm_api.php?resource=editar_cliente", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ id, nombre, correo, telefono, empresa, estado })
+                });
+
+                const data = await resp.json();
+                if (data.success) {
+                    mostrarNotificacion("¡Datos del cliente actualizados!", "success");
+                    cerrarModalGlobalEditarCliente();
+                    loadExternalView(currentLoadedView, null);
+                } else {
+                    mostrarNotificacion(data.error || "No se pudo actualizar los datos del cliente", "error");
+                }
+            } catch (err) {
+                mostrarNotificacion("Error de conexión: " + err.message, "error");
+            }
+        }
+
+        /* MODAL GLOBAL: SUGERIR DESCUENTO */
+        async function abrirModalGlobalSugerirDescuento(preselectedClienteId) {
+            const modal = document.getElementById("modalGlobalSugerirDescuento");
+            const selectCliente = document.getElementById("mSugerirDescuentoClienteSelect");
+            modal.classList.add("active");
+
+            try {
+                selectCliente.innerHTML = '<option value="">Cargando clientes de MySQL...</option>';
+                let clientes = [];
+
+                const resp = await fetch("php/crm_api.php?resource=clientes", { credentials: "same-origin" });
+                if (resp.ok) {
+                    const data = await resp.json();
+                    if (data.success && Array.isArray(data.clientes)) {
+                        clientes = data.clientes;
+                    }
+                }
+
+                if (clientes.length === 0) {
+                    const resp2 = await fetch("php/clientes.php", { credentials: "same-origin" });
+                    if (resp2.ok) {
+                        const data2 = await resp2.json();
+                        if (data2.success && Array.isArray(data2.clientes)) {
+                            clientes = data2.clientes;
+                        }
+                    }
+                }
+
+                if (clientes.length > 0) {
+                    selectCliente.innerHTML = '<option value="">-- Selecciona un cliente --</option>';
+                    clientes.forEach(c => {
+                        const opt = document.createElement("option");
+                        opt.value = c.id;
+                        opt.textContent = `${c.nombre || c.username || 'Cliente'} (${c.empresa && c.empresa !== 'Sin Empresa' ? c.empresa : 'Particular'}) - ${c.correo || ''}`;
+                        if (preselectedClienteId && String(c.id) === String(preselectedClienteId)) {
+                            opt.selected = true;
+                        }
+                        selectCliente.appendChild(opt);
+                    });
+                } else {
+                    selectCliente.innerHTML = '<option value="">No hay clientes en MySQL</option>';
+                }
+            } catch (e) {
+                selectCliente.innerHTML = '<option value="">Error al cargar clientes</option>';
+            }
+        }
+
+        function cerrarModalGlobalSugerirDescuento() {
+            document.getElementById("modalGlobalSugerirDescuento").classList.remove("active");
+            document.getElementById("mSugerirDescuentoPorcentaje").value = '';
+            document.getElementById("mSugerirDescuentoMotivo").value = '';
+        }
+
+        async function guardarSugerirDescuentoGlobal(e) {
+            e.preventDefault();
+            const cliente_id = document.getElementById("mSugerirDescuentoClienteSelect").value;
+            const porcentaje = document.getElementById("mSugerirDescuentoPorcentaje").value;
+            const motivo = document.getElementById("mSugerirDescuentoMotivo").value.trim();
+            const btn = document.getElementById("btnEnviarSugerenciaDescuento");
+
+            if (!cliente_id) {
+                mostrarNotificacion("Por favor selecciona un cliente de la lista.", "warning");
+                return;
+            }
+            if (!porcentaje || porcentaje <= 0 || porcentaje > 90) {
+                mostrarNotificacion("Introduce un porcentaje válido entre 1% y 90%.", "warning");
+                return;
+            }
+            if (!motivo) {
+                mostrarNotificacion("Escribe el motivo o justificación de la sugerencia.", "warning");
+                return;
+            }
+
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Enviando...';
+
+            try {
+                const resp = await fetch("php/crm_api.php?resource=sugerir_descuento", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ cliente_id, porcentaje, motivo })
+                });
+
+                const data = await resp.json();
+                if (data.success) {
+                    mostrarNotificacion("¡Sugerencia de descuento enviada al Administrador!", "success");
+                    cerrarModalGlobalSugerirDescuento();
+                    refrescarContadorDescuentosPendientes();
+                    if (currentLoadedView && (currentLoadedView.includes("crm-descuentos") || currentLoadedView.includes("crm-detalle-cliente"))) {
+                        loadExternalView(currentLoadedView, null);
+                    }
+                } else {
+                    mostrarNotificacion("Error: " + (data.error || "No se pudo registrar la sugerencia"), "error");
+                }
+            } catch (err) {
+                mostrarNotificacion("Error de red: " + err.message, "error");
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-paper-plane"></i> Enviar al Administrador';
+            }
+        }
+
+        async function refrescarContadorDescuentosPendientes() {
+            try {
+                const resp = await fetch("php/crm_api.php?resource=descuentos&estado=pendiente");
+                const data = await resp.json();
+                const badge = document.getElementById("badgeDescuentosSidebar");
+                if (badge && data.success && typeof data.pendientes_count === "number") {
+                    if (data.pendientes_count > 0) {
+                        badge.textContent = data.pendientes_count;
+                        badge.style.display = "inline-block";
+                    } else {
+                        badge.style.display = "none";
+                    }
+                }
+            } catch (e) {
+                // Silencioso
+            }
+        }
+
+        /* TOAST NOTIFICATION */
+        function showNotification(message, type = 'success') {
+            if (typeof mostrarNotificacion === 'function') {
+                return mostrarNotificacion(message, type);
+            }
+        }
+
+        async function logoutGestor() {
+            const confirmar = await mostrarConfirmacion("¿Seguro que deseas cerrar la sesión actual en LYM CRM?", {
+                titulo: "Cerrar Sesión",
+                tipo: "warning",
+                textoConfirmar: "Cerrar Sesión",
+                textoCancelar: "Permanecer"
+            });
+            if (confirmar) {
+                window.location.href = "php/logout.php";
+            }
+        }
+
+        let currentUserCRM = null;
+
+        async function verificarPermisosAdminGestor() {
+            try {
+                const resp = await fetch("php/check_session.php", { credentials: "same-origin" });
+                const data = await resp.json();
+
+                if (!data.authenticated || !data.user) {
+                    bloquearAccesoCRM("Debes iniciar sesión para acceder al CRM.");
+                    return false;
+                }
+
+                const role = String(data.user.role || '').toLowerCase();
+                const rolesPermitidos = ['admin', 'trabajador', 'ventas', 'logistica'];
+                if (!rolesPermitidos.includes(role)) {
+                    bloquearAccesoCRM("El panel de gestión es exclusivo para Administradores, Ventas y Logística.");
+                    return false;
+                }
+
+                currentUserCRM = data.user;
+                window.currentUserCRM = data.user;
+                document.getElementById("gestorName").textContent = data.user.username;
+                
+                let nombreRolEtiqueta = 'Administrador';
+                if (role === 'ventas') nombreRolEtiqueta = 'Ventas / Comercial';
+                else if (role === 'logistica') nombreRolEtiqueta = 'Logística / Almacén';
+                else if (role === 'trabajador') nombreRolEtiqueta = 'Logística (Operativo)';
+                document.getElementById("gestorRole").textContent = nombreRolEtiqueta;
+                document.getElementById("topbarAvatar").textContent = data.user.username.charAt(0).toUpperCase();
+
+                // APLICAR MATRIZ DE PERMISOS ESTRICTA SEGÚN ROL (PANTALLA 10 DE GUÍA VISUAL)
+                aplicarMatrizPermisosPorRol(role);
+
+                return true;
+            } catch (e) {
+                console.error("Error al verificar sesión:", e);
+                bloquearAccesoCRM("Inicia sesión para continuar en el Gestor.");
+                return false;
+            }
+        }
+
+        function aplicarMatrizPermisosPorRol(role) {
+            role = String(role || '').toLowerCase();
+
+            // 1. Acceso a elementos base del Sidebar
+            const btnInicio = document.getElementById("navItemInicio");
+            const btnWrapCRM = document.getElementById("btnAccordionCRM")?.closest(".crm-accordion-wrapper");
+            const btnWrapSCM = document.getElementById("btnAccordionSCM")?.closest(".crm-accordion-wrapper");
+            const btnWrapERP = document.getElementById("wrapperAccordionERP");
+            const btnUsuarios = document.getElementById("navItemUsuarios");
+            const btnTrabajadores = document.getElementById("navItemTrabajadores");
+            const btnConfiguracion = document.getElementById("navItemConfiguracion");
+
+            // Subitems CRM
+            const crmClientes = document.getElementById("navItemClientes");
+            const crmInteracciones = document.getElementById("navItemInteracciones");
+            const crmEvaluaciones = document.getElementById("navItemEvaluaciones");
+            const crmDescuentos = document.getElementById("navItemDescuentos");
+            const crmActividad = document.getElementById("navItemActividad");
+            const crmReportes = document.getElementById("navItemReportes");
+
+            // Subitems SCM
+            const scmInicio = document.getElementById("scm-nav-inicio");
+            const scmProd = document.getElementById("scm-nav-productos");
+            const scmProv = document.getElementById("scm-nav-proveedores");
+            const scmInv = document.getElementById("scm-nav-inventario");
+            const scmMov = document.getElementById("scm-nav-movimientos");
+            const scmPed = document.getElementById("scm-nav-pedidos");
+            const scmLog = document.getElementById("scm-nav-logistica");
+            const scmRep = document.getElementById("scm-nav-reportes");
+            const scmMad = document.getElementById("scm-nav-madurez");
+
+            // Subitems ERP (Clonados según Pantalla 10 por cada Rol)
+            const erpInicio = document.getElementById("erp-nav-inicio");
+            const erpClientes = document.getElementById("erp-nav-clientes");
+            const erpProductos = document.getElementById("erp-nav-productos");
+            const erpInventario = document.getElementById("erp-nav-inventario");
+            const erpOrdenes = document.getElementById("erp-nav-ordenes");
+            const erpNuevaOrden = document.getElementById("erp-nav-nueva-orden");
+            const erpReportes = document.getElementById("erp-nav-reportes");
+            const erpActividad = document.getElementById("erp-nav-actividad");
+            const erpMadurez = document.getElementById("erp-nav-madurez");
+            const erpUsuarios = document.getElementById("erp-nav-usuarios");
+            const erpConfig = document.getElementById("erp-nav-config");
+            const erpRoles = document.getElementById("erp-nav-roles");
+
+            // Helper para visibilidad
+            const setVisible = (el, show, displayType = 'flex') => {
+                if (el) el.style.display = show ? displayType : 'none';
+            };
+
+            // ==============================================================
+            // PRESERVAR ÍNTEGROS TODOS LOS APARTADOS PREVIOS DEL SIDEBAR
+            // (Dashboard, CRM con todos sus subitems, SCM con todos sus subitems,
+            // Usuarios, Trabajadores y Configuración)
+            // ==============================================================
+            setVisible(btnInicio, true, 'flex');
+            setVisible(btnWrapCRM, true, 'block');
+            setVisible(btnWrapSCM, true, 'block');
+            setVisible(btnWrapERP, true, 'block');
+            setVisible(btnUsuarios, true, 'flex');
+            setVisible(btnTrabajadores, true, 'flex');
+            setVisible(btnConfiguracion, true, 'flex');
+
+            // Subitems originales CRM (todos visibles e intactos)
+            setVisible(crmClientes, true, 'flex');
+            setVisible(crmInteracciones, true, 'flex');
+            setVisible(crmEvaluaciones, true, 'flex');
+            setVisible(crmDescuentos, true, 'flex');
+            setVisible(crmActividad, true, 'flex');
+            setVisible(crmReportes, true, 'flex');
+
+            // Subitems originales SCM (todos visibles e intactos)
+            setVisible(scmInicio, true, 'flex');
+            setVisible(scmProd, true, 'flex');
+            setVisible(scmProv, true, 'flex');
+            setVisible(scmInv, true, 'flex');
+            setVisible(scmMov, true, 'flex');
+            setVisible(scmPed, true, 'flex');
+            setVisible(scmLog, true, 'flex');
+            setVisible(scmRep, true, 'flex');
+            setVisible(scmMad, true, 'flex');
+
+            // ==============================================================
+            // APARTADO ERP: SUBITEMS CLONADOS SEGÚN ROL (PANTALLA 10)
+            // Admin: 9 pantallas | Ventas: 6 pantallas | Logística: 5 pantallas
+            // ==============================================================
+            window.rolActivoERP = role;
+
+            if (role === 'ventas') {
+                // 💼 ROL VENTAS (6 pantallas exactas Pantalla 10 + Nueva Orden + Panel por Rol):
+                // 1. Inicio
+                // 2. Clientes (CRM)
+                // 3. Productos (SCM)
+                // 4. Órdenes (ERP)
+                // 5. Reportes
+                // 6. Mi actividad
+                setVisible(erpInicio, true, 'flex');
+                setVisible(erpClientes, true, 'flex');
+                setVisible(erpProductos, true, 'flex');
+                setVisible(erpOrdenes, true, 'flex');
+                setVisible(erpNuevaOrden, true, 'flex');
+                setVisible(erpReportes, true, 'flex');
+                setVisible(erpActividad, true, 'flex');
+                setVisible(erpRoles, true, 'flex');
+
+                // En ERP no aplican para Ventas:
+                setVisible(erpInventario, false);
+                setVisible(erpMadurez, false);
+                setVisible(erpUsuarios, false);
+                setVisible(erpConfig, false);
+
+            } else if (role === 'logistica' || role === 'trabajador') {
+                // 🚚 ROL LOGÍSTICA (5 pantallas exactas Pantalla 10 + Panel por Rol):
+                // 1. Inicio
+                // 2. Productos (SCM)
+                // 3. Inventario (SCM)
+                // 4. Órdenes (ERP)
+                // 5. Reportes
+                setVisible(erpInicio, true, 'flex');
+                setVisible(erpProductos, true, 'flex');
+                setVisible(erpInventario, true, 'flex');
+                setVisible(erpOrdenes, true, 'flex');
+                setVisible(erpReportes, true, 'flex');
+                setVisible(erpRoles, true, 'flex');
+
+                // En ERP no aplican para Logística:
+                setVisible(erpClientes, false);
+                setVisible(erpNuevaOrden, false);
+                setVisible(erpActividad, false);
+                setVisible(erpMadurez, false);
+                setVisible(erpUsuarios, false);
+                setVisible(erpConfig, false);
+
+            } else {
+                // 👑 ROL ADMINISTRADOR (9 pantallas exactas Pantalla 10 + Nueva Orden + Panel por Rol):
+                // 1. Inicio
+                // 2. Clientes (CRM)
+                // 3. Productos (SCM)
+                // 4. Inventario (SCM)
+                // 5. Órdenes (ERP)
+                // 6. Reportes
+                // 7. Nivel ERP
+                // 8. Usuarios
+                // 9. Configuración
+                setVisible(erpInicio, true, 'flex');
+                setVisible(erpClientes, true, 'flex');
+                setVisible(erpProductos, true, 'flex');
+                setVisible(erpInventario, true, 'flex');
+                setVisible(erpOrdenes, true, 'flex');
+                setVisible(erpNuevaOrden, true, 'flex');
+                setVisible(erpReportes, true, 'flex');
+                setVisible(erpMadurez, true, 'flex');
+                setVisible(erpUsuarios, true, 'flex');
+                setVisible(erpConfig, true, 'flex');
+                setVisible(erpRoles, true, 'flex');
+
+                // Mi actividad es exclusiva de Ventas
+                setVisible(erpActividad, false);
+            }
+
+            // Desplegar acordeones
+            abrirAcordeonCRM();
+            abrirAcordeonSCM();
+            abrirAcordeonERP();
+
+            // Si no hay vista cargada actualmente, cargar el dashboard general
+            if (!currentLoadedView) {
+                loadExternalView("crm-dashboard.html", btnInicio, "Dashboard");
+            }
+
+            // Sincronizar selector en erp-inicio si está presente en el DOM
+            const selInicio = document.getElementById("erpInicioSelectRol");
+            if (selInicio) selInicio.value = (role === 'trabajador' ? 'logistica' : role);
+
+            // Actualizar la barra superior de pestañas dinámicas del ERP
+            actualizarPestanasERP(currentLoadedView, role);
+        }
+
+        function bloquearAccesoCRM(mensaje) {
+            document.body.innerHTML = `
+                <div style="min-height:100vh; display:flex; align-items:center; justify-content:center; background:#f1f5f9; font-family:'Plus Jakarta Sans', sans-serif; padding:20px;">
+                    <div style="background:#ffffff; padding:2.5rem; border-radius:18px; border:1px solid #e2e8f0; width:100%; max-width:440px; box-shadow:0 20px 40px rgba(0,0,0,0.08); text-align:center;">
+                        <div style="width:60px; height:60px; background:linear-gradient(135deg, #6B46C1, #8B5CF6); color:#fff; border-radius:16px; display:flex; align-items:center; justify-content:center; font-size:1.6rem; margin:0 auto 1.25rem; box-shadow:0 8px 20px rgba(107, 70, 193, 0.3);">
+                            <i class="fas fa-shield-alt"></i>
+                        </div>
+                        <h2 style="color:#0f172a; margin-bottom:6px; font-weight:800; font-size:1.5rem;">Gestor LYM (CRM / SCM)</h2>
+                        <p style="color:#64748b; font-size:0.88rem; margin-bottom:1.5rem;">Conexión directa a base de datos MariaDB/MySQL. Inicia sesión para continuar:</p>
+                        
+                        <form onsubmit="handleLoginDirectoGestor(event)" style="display:flex; flex-direction:column; gap:12px; text-align:left;">
+                            <div>
+                                <label style="font-size:0.8rem; font-weight:700; color:#334155; margin-bottom:4px; display:block;">Usuario</label>
+                                <input type="text" id="directGestorUser" value="admin" required style="width:100%; padding:10px 14px; border:1px solid #cbd5e1; border-radius:8px; font-size:0.95rem; box-sizing:border-box;">
+                            </div>
+                            <div>
+                                <label style="font-size:0.8rem; font-weight:700; color:#334155; margin-bottom:4px; display:block;">Contraseña</label>
+                                <input type="password" id="directGestorPass" value="admin" required style="width:100%; padding:10px 14px; border:1px solid #cbd5e1; border-radius:8px; font-size:0.95rem; box-sizing:border-box;">
+                            </div>
+                            <div id="directGestorError" style="display:none; color:#ef4444; font-size:0.82rem; font-weight:600; text-align:center;"></div>
+                            
+                            <button type="submit" id="btnDirectLogin" style="background:linear-gradient(135deg, #6B46C1, #8B5CF6); color:#ffffff; padding:12px; border:none; border-radius:10px; font-weight:700; font-size:0.95rem; cursor:pointer; margin-top:6px; box-shadow:0 4px 14px rgba(107,70,193,0.35);">
+                                <i class="fas fa-sign-in-alt"></i> Iniciar Sesión en el Gestor
+                            </button>
+                            <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:6px; margin-top:4px;">
+                                <button type="button" onclick="loginRapidoDirecto('admin','admin')" style="background:#f8fafc; color:#6B46C1; border:1px solid #cbd5e1; padding:8px 4px; border-radius:8px; font-weight:700; font-size:0.75rem; cursor:pointer;" title="Acceso Total Administrador">
+                                    👑 Admin
+                                </button>
+                                <button type="button" onclick="loginRapidoDirecto('vendedor','123456')" style="background:#eff6ff; color:#2563eb; border:1px solid #bfdbfe; padding:8px 4px; border-radius:8px; font-weight:700; font-size:0.75rem; cursor:pointer;" title="Acceso Rol Ventas">
+                                    💼 Ventas
+                                </button>
+                                <button type="button" onclick="loginRapidoDirecto('almacen','123456')" style="background:#f0fdf4; color:#059669; border:1px solid #bbf7d0; padding:8px 4px; border-radius:8px; font-weight:700; font-size:0.75rem; cursor:pointer;" title="Acceso Rol Logística / Almacén">
+                                    🚚 Logística
+                                </button>
+                            </div>
+                        </form>
+
+                        <div style="margin-top:1.5rem; border-top:1px solid #f1f5f9; padding-top:1rem;">
+                            <a href="sistema.html" style="color:#64748b; font-size:0.85rem; text-decoration:none;">
+                                <i class="fas fa-arrow-left"></i> Ir a la Tienda Pública
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        async function handleLoginDirectoGestor(e) {
+            e.preventDefault();
+            const u = document.getElementById("directGestorUser").value.trim();
+            const p = document.getElementById("directGestorPass").value;
+            const btn = document.getElementById("btnDirectLogin");
+            const err = document.getElementById("directGestorError");
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Conectando con MySQL...';
+            err.style.display = 'none';
+
+            try {
+                const resp = await fetch("php/login.php", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ username: u, password: p }),
+                    credentials: "same-origin"
+                });
+                const data = await resp.json();
+                if (data.success) {
+                    window.location.reload();
+                } else {
+                    err.style.display = 'block';
+                    err.textContent = data.error || 'Credenciales incorrectas';
+                }
+            } catch (ex) {
+                err.style.display = 'block';
+                err.textContent = 'Error de conexión: ' + ex.message;
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Iniciar Sesión en el Gestor';
+            }
+        }
+
+        async function loginRapidoDirecto(u, p) {
+            document.getElementById("directGestorUser").value = u;
+            document.getElementById("directGestorPass").value = p;
+            document.getElementById("btnDirectLogin").click();
+        }
+
+        async function loginRapidoAdminDirecto() {
+            loginRapidoDirecto("admin", "admin");
+        }
+
+        /* GESTIÓN DE TRABAJADORES (ADMIN) */
+        async function abrirModalGestionTrabajadores() {
+            document.getElementById("modalGestionTrabajadores").classList.add("active");
+            await cargarTrabajadoresLista();
+        }
+
+        function cerrarModalGestionTrabajadores() {
+            document.getElementById("modalGestionTrabajadores").classList.remove("active");
+        }
+
+        async function cargarTrabajadoresLista() {
+            const container = document.getElementById("tablaTrabajadoresContainer");
+            const containerAdmins = document.getElementById("tablaAdministradoresContainer");
+            try {
+                const resp = await fetch("php/api_trabajadores.php");
+                const data = await resp.json();
+
+                if (!data.success) {
+                    container.innerHTML = `<div style="padding:20px; text-align:center; color:#ef4444;">${escapeHtml(data.error || 'Error al cargar lista')}</div>`;
+                    if (containerAdmins) containerAdmins.innerHTML = '';
+                    return;
+                }
+
+                // 1. LISTA DE TRABAJADORES
+                if (!Array.isArray(data.trabajadores) || data.trabajadores.length === 0) {
+                    container.innerHTML = '<div style="padding:20px; text-align:center; color:#94a3b8;"><i class="fas fa-info-circle"></i> No hay trabajadores con rol operativo actualmente.</div>';
+                } else {
+                    let html = '<table style="width:100%; border-collapse:collapse; font-size:0.88rem;">';
+                    html += '<tr style="background:#f1f5f9; text-align:left; color:#475569;"><th style="padding:10px 12px;">Usuario</th><th style="padding:10px 12px;">Correo</th><th style="padding:10px 12px;">Rol</th><th style="padding:10px 12px; text-align:right;">Acciones</th></tr>';
+                    data.trabajadores.forEach(t => {
+                        let badgeColor = '#64748b';
+                        let badgeBg = '#f1f5f9';
+                        let rolLabel = 'Operativo';
+
+                        if (t.role === 'ventas') {
+                            badgeColor = '#2563eb';
+                            badgeBg = '#eff6ff';
+                            rolLabel = '💼 Ventas';
+                        } else if (t.role === 'logistica') {
+                            badgeColor = '#059669';
+                            badgeBg = '#f0fdf4';
+                            rolLabel = '🚚 Logística';
+                        } else if (t.role === 'trabajador') {
+                            badgeColor = '#d97706';
+                            badgeBg = '#fef3c7';
+                            rolLabel = '👷 Trabajador';
+                        }
+
+                        html += `
+                            <tr style="border-bottom:1px solid #f1f5f9;">
+                                <td style="padding:10px 12px; font-weight:600; color:#0f172a;">
+                                    <i class="fas fa-id-badge" style="color:#64748b; margin-right:6px;"></i>${escapeHtml(t.username)}
+                                </td>
+                                <td style="padding:10px 12px; color:#475569;">${escapeHtml(t.email)}</td>
+                                <td style="padding:10px 12px;">
+                                    <span class="badge" style="background:${badgeBg}; color:${badgeColor}; font-weight:700; font-size:0.75rem; padding:3px 8px; border-radius:6px;">${rolLabel}</span>
+                                </td>
+                                <td style="padding:10px 12px; text-align:right; white-space:nowrap;">
+                                    <button onclick="hacerTrabajadorAdmin(${t.id}, '${escapeHtml(t.username)}')" class="crm-btn crm-btn-sm" style="background:linear-gradient(135deg, #6B46C1, #8B5CF6); color:#ffffff; padding:4px 8px; margin-right:4px; font-weight:600; font-size:0.75rem; border-radius:6px;" title="Convertir a Administrador con todos los privilegios">
+                                        <i class="fas fa-user-shield"></i> Admin
+                                    </button>
+                                    <button onclick="eliminarTrabajador(${t.id}, '${escapeHtml(t.username)}')" class="crm-btn crm-btn-secondary crm-btn-sm" style="color:#ef4444; padding:4px 6px; font-size:0.75rem; border-radius:6px;" title="Eliminar colaborador">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        `;
+                    });
+                    html += '</table>';
+                    container.innerHTML = html;
+                }
+
+                // 2. LISTA DE ADMINISTRADORES
+                if (containerAdmins) {
+                    if (!Array.isArray(data.administradores) || data.administradores.length === 0) {
+                        containerAdmins.innerHTML = '<div style="padding:20px; text-align:center; color:#94a3b8;">No se encontraron administradores.</div>';
+                    } else {
+                        let htmlAdm = '<table style="width:100%; border-collapse:collapse; font-size:0.88rem;">';
+                        htmlAdm += '<tr style="background:#f1f5f9; text-align:left; color:#475569;"><th style="padding:10px 12px;">Administrador</th><th style="padding:10px 12px;">Correo</th><th style="padding:10px 12px;">Privilegios</th><th style="padding:10px 12px; text-align:right;">Acción</th></tr>';
+                        const currentId = window.currentUserCRM ? Number(window.currentUserCRM.id) : 0;
+                        data.administradores.forEach(a => {
+                            const esPropio = (Number(a.id) === currentId);
+                            const esRoot = (Number(a.id) === 1 || String(a.username).toLowerCase() === 'admin');
+                            let btnAccion = '';
+                            if (!esPropio && !esRoot) {
+                                btnAccion = `
+                                    <button onclick="quitarAdminTrabajador(${a.id}, '${escapeHtml(a.username)}')" class="crm-btn crm-btn-secondary crm-btn-sm" style="color:#64748b; padding:3px 8px; font-size:0.75rem; border-radius:6px;" title="Regresar al rol operativo">
+                                        <i class="fas fa-user-minus"></i> Quitar Admin
+                                    </button>
+                                `;
+                            } else {
+                                btnAccion = `<span style="color:#10b981; font-size:0.75rem; font-weight:700;"><i class="fas fa-check-circle"></i> Principal / Activo</span>`;
+                            }
+
+                            htmlAdm += `
+                                <tr style="border-bottom:1px solid #f1f5f9;">
+                                    <td style="padding:10px 12px; font-weight:700; color:#0f172a;">
+                                        <i class="fas fa-crown" style="color:#f59e0b; margin-right:6px;"></i>${escapeHtml(a.username)}
+                                    </td>
+                                    <td style="padding:10px 12px; color:#475569;">${escapeHtml(a.email)}</td>
+                                    <td style="padding:10px 12px;">
+                                        <span class="badge badge-activo" style="font-size:0.7rem;"><span class="badge-dot"></span>Acceso Total</span>
+                                    </td>
+                                    <td style="padding:10px 12px; text-align:right; white-space:nowrap;">
+                                        ${btnAccion}
+                                    </td>
+                                </tr>
+                            `;
+                        });
+                        htmlAdm += '</table>';
+                        containerAdmins.innerHTML = htmlAdm;
+                    }
+                }
+            } catch (e) {
+                container.innerHTML = '<div style="padding:20px; text-align:center; color:#ef4444;">Error al cargar colaboradores: ' + escapeHtml(e.message) + '</div>';
+            }
+        }
+
+        async function hacerTrabajadorAdmin(id, username) {
+            const confirmed = (typeof mostrarConfirmacion === 'function') 
+                ? await mostrarConfirmacion(
+                    `¿Estás seguro de hacer Administrador al usuario "${username}"?\n\nAl confirmarlo, se le otorgarán de inmediato TODOS los privilegios de Administrador en CRM, SCM y ERP.`,
+                    {
+                        titulo: "Promover a Administrador",
+                        tipo: "warning",
+                        textoConfirmar: "Otorgar Permisos",
+                        textoCancelar: "Cancelar"
+                    }
+                )
+                : confirm(`¿Estás seguro de hacer Administrador al usuario "${username}"?\n\nAl confirmarlo, se le otorgarán de inmediato TODOS los privilegios de Administrador en CRM, SCM y ERP.`);
+            
+            if (!confirmed) return;
+
+            try {
+                const resp = await fetch("php/api_trabajadores.php", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ action: "hacer_admin", id: id })
+                });
+                const data = await resp.json();
+
+                if (data.success) {
+                    if (typeof mostrarNotificacion === 'function') {
+                        mostrarNotificacion(data.message || `¡"${username}" ahora es Administrador y tiene acceso total!`, "success");
+                    } else {
+                        showNotification(data.message || `¡"${username}" ahora es Administrador y tiene acceso total!`);
+                    }
+                    await cargarTrabajadoresLista();
+                    if (typeof cargarUsuarios === "function") {
+                        cargarUsuarios();
+                    }
+                } else {
+                    if (typeof mostrarNotificacion === 'function') {
+                        mostrarNotificacion(data.error || "No se pudo otorgar el rol de Administrador", "error");
+                    } else {
+                        alert(data.error || "No se pudo otorgar el rol de Administrador");
+                    }
+                }
+            } catch (err) {
+                if (typeof mostrarNotificacion === 'function') {
+                    mostrarNotificacion("Error de red: " + err.message, "error");
+                } else {
+                    alert("Error de red: " + err.message);
+                }
+            }
+        }
+
+        async function quitarAdminTrabajador(id, username) {
+            const confirmed = (typeof mostrarConfirmacion === 'function')
+                ? await mostrarConfirmacion(
+                    `¿Deseas revocar los privilegios de Administrador al usuario "${username}"?`,
+                    {
+                        titulo: "Revocar Privilegios",
+                        tipo: "warning",
+                        textoConfirmar: "Revocar Rol",
+                        textoCancelar: "Cancelar"
+                    }
+                )
+                : confirm(`¿Deseas revocar los privilegios de Administrador al usuario "${username}"?`);
+            
+            if (!confirmed) return;
+
+            try {
+                const resp = await fetch("php/api_trabajadores.php", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ action: "hacer_trabajador", id: id, role: "ventas" })
+                });
+                const data = await resp.json();
+
+                if (data.success) {
+                    if (typeof mostrarNotificacion === 'function') {
+                        mostrarNotificacion(data.message || `Privilegios revocados a "${username}".`, "success");
+                    } else {
+                        showNotification(data.message || `Privilegios revocados a "${username}".`);
+                    }
+                    await cargarTrabajadoresLista();
+                    if (typeof cargarUsuarios === "function") {
+                        cargarUsuarios();
+                    }
+                } else {
+                    if (typeof mostrarNotificacion === 'function') {
+                        mostrarNotificacion(data.error || "No se pudo revocar el rol de Administrador", "error");
+                    } else {
+                        alert(data.error || "No se pudo revocar el rol de Administrador");
+                    }
+                }
+            } catch (err) {
+                if (typeof mostrarNotificacion === 'function') {
+                    mostrarNotificacion("Error de red: " + err.message, "error");
+                } else {
+                    alert("Error de red: " + err.message);
+                }
+            }
+        }
+
+        async function crearNuevoTrabajador(e) {
+            e.preventDefault();
+            const username = document.getElementById("mTrabajadorUsername").value.trim();
+            const email = document.getElementById("mTrabajadorEmail").value.trim();
+            const role = document.getElementById("mTrabajadorRol")?.value || 'ventas';
+            const password = document.getElementById("mTrabajadorPassword").value;
+            const btn = document.getElementById("btnCrearTrabajador");
+
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creando...';
+
+            try {
+                const resp = await fetch("php/api_trabajadores.php", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ username, email, password, role })
+                });
+                const data = await resp.json();
+
+                if (data.success) {
+                    if (typeof mostrarNotificacion === 'function') {
+                        mostrarNotificacion("¡Cuenta de colaborador creada exitosamente!", "success");
+                    } else {
+                        showNotification("¡Cuenta de colaborador creada exitosamente!");
+                    }
+                    document.getElementById("mTrabajadorUsername").value = '';
+                    document.getElementById("mTrabajadorEmail").value = '';
+                    document.getElementById("mTrabajadorPassword").value = '';
+                    await cargarTrabajadoresLista();
+                } else {
+                    if (typeof mostrarNotificacion === 'function') {
+                        mostrarNotificacion(data.error || "No se pudo registrar al colaborador", "error");
+                    } else {
+                        alert(data.error || "No se pudo registrar al colaborador");
+                    }
+                }
+            } catch (err) {
+                if (typeof mostrarNotificacion === 'function') {
+                    mostrarNotificacion("Error de red: " + err.message, "error");
+                } else {
+                    alert("Error de red: " + err.message);
+                }
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-plus-circle"></i> Registrar Cuenta de Colaborador';
+            }
+        }
+
+        async function eliminarTrabajador(id, username) {
+            const confirmed = await mostrarConfirmacion(
+                `¿Seguro que deseas eliminar permanentemente la cuenta del trabajador "${username}"?`,
+                {
+                    titulo: "Eliminar Trabajador",
+                    tipo: "danger",
+                    esPeligroso: true,
+                    textoConfirmar: "Eliminar Cuenta",
+                    textoCancelar: "Cancelar"
+                }
+            );
+            if (!confirmed) return;
+
+            try {
+                const resp = await fetch("php/api_trabajadores.php", {
+                    method: "DELETE",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ id })
+                });
+                const data = await resp.json();
+                if (data.success) {
+                    mostrarNotificacion("Trabajador eliminado correctamente.", "success");
+                    await cargarTrabajadoresLista();
+                } else {
+                    mostrarNotificacion(data.error || "Error al eliminar", "error");
+                }
+            } catch (e) {
+                mostrarNotificacion("Error: " + e.message, "error");
+            }
+        }
+
+        /* CAMBIAR CONTRASEÑA EN CRM */
+        function abrirModalCambiarPassCRM() {
+            document.getElementById("modalCambiarPassCRM").classList.add("active");
+            document.getElementById("mPassCRMMsg").style.display = "none";
+        }
+
+        function cerrarModalCambiarPassCRM() {
+            document.getElementById("modalCambiarPassCRM").classList.remove("active");
+        }
+
+        async function guardarPassCRM(e) {
+            e.preventDefault();
+            const passActual = document.getElementById("mPassActualCRM").value;
+            const passNueva = document.getElementById("mPassNuevaCRM").value;
+            const btn = document.getElementById("btnGuardarPassCRM");
+            const msg = document.getElementById("mPassCRMMsg");
+
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...';
+
+            try {
+                const resp = await fetch("php/api_cambiar_password.php", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        password_actual: passActual,
+                        password_nueva: passNueva
+                    })
+                });
+
+                const data = await resp.json();
+                msg.style.display = "block";
+
+                if (data.success) {
+                    msg.style.background = "#dcfce7";
+                    msg.style.color = "#15803d";
+                    msg.textContent = "✔ " + data.message;
+                    document.getElementById("mPassActualCRM").value = '';
+                    document.getElementById("mPassNuevaCRM").value = '';
+                    setTimeout(() => cerrarModalCambiarPassCRM(), 1500);
+                } else {
+                    msg.style.background = "#fee2e2";
+                    msg.style.color = "#b91c1c";
+                    msg.textContent = "✖ " + (data.error || "Error al cambiar contraseña");
+                }
+            } catch (err) {
+                msg.style.display = "block";
+                msg.style.background = "#fee2e2";
+                msg.style.color = "#b91c1c";
+                msg.textContent = "✖ Error de servidor";
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-save"></i> Actualizar';
+            }
+        }
+
+        document.addEventListener("DOMContentLoaded", async function () {
+            await verificarPermisosAdminGestor();
+            await refrescarContadorDescuentosPendientes();
+            setInterval(refrescarContadorDescuentosPendientes, 60000);
+        });
+    </script>
+</body>
+
+</html>

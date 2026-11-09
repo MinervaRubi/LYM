@@ -1,0 +1,556 @@
+<!-- ==============================================================
+     MÓDULO SCM: PRODUCTOS (LISTADO Y FORMULARIO MODAL)
+     CUMPLE PANTALLAS 2 Y 3 DE LA GUÍA VISUAL SCM
+     ARCHIVO: scm-productos.html
+============================================================== -->
+
+<div style="display: flex; flex-direction: column; gap: 1.5rem;">
+    <!-- CABECERA -->
+    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+        <div>
+            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+                <span class="badge" style="background: rgba(13,148,136,0.15); color: #0d9488; font-weight:700; font-size:0.75rem; padding: 2px 8px; border-radius: 6px;">SCM</span>
+                <span style="font-size: 0.85rem; color: var(--text-muted);">Cadena de Suministros</span>
+            </div>
+            <h2 style="font-size: 1.6rem; font-weight: 800; color: var(--text-heading); margin: 0;">Productos</h2>
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 2px;">Visualiza, busca y administra productos en el catálogo de suministro</p>
+        </div>
+        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+            <button class="crm-btn crm-btn-secondary crm-btn-sm" onclick="cargarProductosSCM()">
+                <i class="fas fa-sync-alt"></i> <span>Actualizar</span>
+            </button>
+            <button class="crm-btn crm-btn-primary" style="background: linear-gradient(135deg, #0d9488, #059669); border:none; box-shadow: 0 4px 12px rgba(13, 148, 136, 0.25);" onclick="abrirModalNuevoProductoSCM()">
+                <i class="fas fa-plus"></i> <span>+ Nuevo producto</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- TARJETAS DE RESUMEN RÁPIDO SCM -->
+    <div class="crm-grid-4">
+        <div class="crm-card crm-metric-card">
+            <div>
+                <div class="crm-metric-label">Total en Catálogo</div>
+                <div class="crm-metric-value" id="scmTotalProductos">0</div>
+                <div class="crm-metric-subtext">Productos registrados</div>
+            </div>
+            <div class="crm-icon-box" style="background: rgba(13,148,136,0.12); color: #0d9488;">
+                <i class="fas fa-cube"></i>
+            </div>
+        </div>
+
+        <div class="crm-card crm-metric-card">
+            <div>
+                <div class="crm-metric-label">Estrategia PUSH</div>
+                <div class="crm-metric-value" id="scmTotalPush" style="color: #059669;">0</div>
+                <div class="crm-metric-subtext positive">Reposición automática</div>
+            </div>
+            <div class="crm-icon-box crm-icon-emerald">
+                <i class="fas fa-boxes-stacked"></i>
+            </div>
+        </div>
+
+        <div class="crm-card crm-metric-card">
+            <div>
+                <div class="crm-metric-label">Estrategia PULL</div>
+                <div class="crm-metric-value" id="scmTotalPull" style="color: #2563eb;">0</div>
+                <div class="crm-metric-subtext">Bajo demanda manual</div>
+            </div>
+            <div class="crm-icon-box" style="background: rgba(37,99,235,0.12); color: #2563eb;">
+                <i class="fas fa-hand-holding-hand"></i>
+            </div>
+        </div>
+
+        <div class="crm-card crm-metric-card">
+            <div>
+                <div class="crm-metric-label">Stock Crítico</div>
+                <div class="crm-metric-value" id="scmProductosBajoStock" style="color: var(--danger);">0</div>
+                <div class="crm-metric-subtext warning">Estrictamente menor al mín.</div>
+            </div>
+            <div class="crm-icon-box crm-icon-amber">
+                <i class="fas fa-triangle-exclamation"></i>
+            </div>
+        </div>
+    </div>
+
+    <!-- BARRA DE BÚSQUEDA Y FILTROS -->
+    <div class="crm-card" style="display: flex; align-items: center; justify-content: space-between; gap: 1.25rem; flex-wrap: wrap; padding: 1rem 1.25rem;">
+        <div class="crm-input-group" style="flex: 1; min-width: 260px;">
+            <i class="fas fa-search"></i>
+            <input type="text" class="crm-input" id="inputBuscarProductoSCM" placeholder="Buscar producto por nombre, SKU o categoría..." oninput="filtrarProductosSCM()">
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;">
+            <div style="display: flex; align-items: center; gap: 8px; font-size: 0.85rem; font-weight: 600; color: var(--text-heading);">
+                <label>Categoría:</label>
+                <select class="crm-select" id="filtroCategoriaSCM" onchange="filtrarProductosSCM()">
+                    <option value="todas">Todas</option>
+                </select>
+            </div>
+
+            <div style="display: flex; align-items: center; gap: 8px; font-size: 0.85rem; font-weight: 600; color: var(--text-heading);">
+                <label>Estrategia:</label>
+                <select class="crm-select" id="filtroEstrategiaSCM" onchange="filtrarProductosSCM()">
+                    <option value="todas">Todas</option>
+                    <option value="PUSH">PUSH</option>
+                    <option value="PULL">PULL</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <!-- TABLA DE PRODUCTOS (PANTALLA 2) -->
+    <div class="crm-table-container">
+        <table class="crm-table">
+            <thead>
+                <tr>
+                    <th style="width: 60px;">Imagen</th>
+                    <th>Nombre</th>
+                    <th>Categoría</th>
+                    <th style="text-align: center;">Stock</th>
+                    <th style="text-align: center;">Stock mín.</th>
+                    <th style="text-align: center;">Cant. reposición</th>
+                    <th style="text-align: center;">Estrategia</th>
+                    <th style="text-align: right;">Acciones</th>
+                </tr>
+            </thead>
+            <tbody id="tbodyProductosSCM">
+                <tr>
+                    <td colspan="8" style="text-align: center; padding: 3rem; color: #94a3b8;">
+                        <i class="fas fa-spinner fa-spin fa-2x" style="color:#0d9488; margin-bottom: 10px;"></i>
+                        <div>Cargando catálogo de productos SCM desde MySQL...</div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- ==============================================================
+     MODAL DE ALTA / EDICIÓN DE PRODUCTO (PANTALLA 3)
+============================================================== -->
+<div class="crm-modal-backdrop" id="modalProductoSCM" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(15,23,42,0.6); backdrop-filter:blur(4px); z-index:9999; justify-content:center; align-items:center;">
+    <div class="crm-modal" style="background:#ffffff; border-radius:16px; padding:24px; max-width:540px; width:95%; max-height:90vh; overflow-y:auto; box-shadow:0 20px 40px rgba(0,0,0,0.25);">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.25rem; border-bottom:1px solid #e2e8f0; padding-bottom:10px;">
+            <h3 id="modalProductoTitulo" style="margin:0; font-size:1.3rem; font-weight:800; color:#0f172a;">
+                <i class="fas fa-cube" style="color:#0d9488; margin-right:8px;"></i> Nuevo producto
+            </h3>
+            <button onclick="cerrarModalProductoSCM()" style="background:none; border:none; font-size:1.4rem; cursor:pointer; color:#64748b; line-height:1;">&times;</button>
+        </div>
+
+        <form id="formProductoSCM" onsubmit="guardarProductoSCM(event)">
+            <input type="hidden" id="prodFormId" value="0">
+
+            <div style="margin-bottom: 1rem;">
+                <label style="display:block; font-size:0.85rem; font-weight:700; color:#334155; margin-bottom:4px;">Nombre *</label>
+                <input type="text" id="prodFormNombre" class="crm-input" placeholder="Nombre del producto" required>
+            </div>
+
+            <div style="margin-bottom: 1rem;">
+                <label style="display:block; font-size:0.85rem; font-weight:700; color:#334155; margin-bottom:4px;">Descripción</label>
+                <textarea id="prodFormDescripcion" class="crm-input" style="height:70px; resize:vertical;" placeholder="Descripción de materiales, origen o especificaciones..."></textarea>
+            </div>
+
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px; margin-bottom: 1rem;">
+                <div>
+                    <label style="display:block; font-size:0.85rem; font-weight:700; color:#334155; margin-bottom:4px;">Categoría *</label>
+                    <select id="prodFormCategoria" class="crm-select" style="width:100%;" required>
+                        <option value="Cerámica">Cerámica</option>
+                        <option value="Textil">Textil</option>
+                        <option value="Decoración">Decoración</option>
+                        <option value="Joyería">Joyería</option>
+                        <option value="General">General</option>
+                    </select>
+                </div>
+                <div>
+                    <label style="display:block; font-size:0.85rem; font-weight:700; color:#334155; margin-bottom:4px;">Proveedor *</label>
+                    <select id="prodFormProveedor" class="crm-select" style="width:100%;" required>
+                        <option value="">Selecciona un proveedor</option>
+                    </select>
+                </div>
+            </div>
+
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px; margin-bottom: 1rem;">
+                <div>
+                    <label style="display:block; font-size:0.85rem; font-weight:700; color:#334155; margin-bottom:4px;">Stock actual</label>
+                    <input type="number" id="prodFormStockActual" class="crm-input" value="0" min="0" required>
+                </div>
+                <div>
+                    <label style="display:block; font-size:0.85rem; font-weight:700; color:#334155; margin-bottom:4px;">Stock mínimo</label>
+                    <input type="number" id="prodFormStockMin" class="crm-input" value="5" min="1" required>
+                </div>
+            </div>
+
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px; margin-bottom: 1rem;">
+                <div>
+                    <label style="display:block; font-size:0.85rem; font-weight:700; color:#334155; margin-bottom:4px;">Estrategia logística *</label>
+                    <select id="prodFormEstrategia" class="crm-select" style="width:100%;" required onchange="toggleCamposEstrategia()">
+                        <option value="PUSH">PUSH (Producción anticipada)</option>
+                        <option value="PULL">PULL (Según demanda real)</option>
+                    </select>
+                </div>
+                <div>
+                    <label style="display:block; font-size:0.85rem; font-weight:700; color:#334155; margin-bottom:4px;">Costo unitario ($ MXN)</label>
+                    <input type="number" id="prodFormCosto" class="crm-input" step="0.01" value="0.00" min="0" required>
+                </div>
+            </div>
+
+            <!-- Cantidad de reposición: Visible y obligatoria solo si la estrategia es PUSH -->
+            <div id="wrapCantidadReposicion" style="margin-bottom: 1.25rem; display:none; background:#f0fdf4; border:1px solid #bbf7d0; border-radius:10px; padding:12px;">
+                <label style="display:block; font-size:0.85rem; font-weight:700; color:#059669; margin-bottom:4px;">
+                    <i class="fas fa-boxes-stacked"></i> Cantidad de reposición * (Obligatoria para PUSH)
+                </label>
+                <input type="number" id="prodFormCantidadReposicion" class="crm-input" value="5" min="1" placeholder="Ej. 5">
+                <small style="color:#15803d; font-size:0.75rem; display:block; margin-top:4px;">
+                    Unidades que se ordenarán y recibirán automáticamente al caer por debajo del mínimo.
+                </small>
+            </div>
+
+            <div style="display:flex; justify-content:flex-end; gap:12px; border-top:1px solid #e2e8f0; padding-top:14px;">
+                <button type="button" class="crm-btn crm-btn-secondary" onclick="cerrarModalProductoSCM()">Cancelar</button>
+                <button type="submit" class="crm-btn crm-btn-primary" style="background:#0d9488;"><i class="fas fa-save"></i> Guardar</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    var productosSCMList = productosSCMList || [];
+    var proveedoresSCMList = proveedoresSCMList || [];
+
+    function toggleCamposEstrategia() {
+        var est = document.getElementById("prodFormEstrategia").value;
+        var wrap = document.getElementById("wrapCantidadReposicion");
+        var input = document.getElementById("prodFormCantidadReposicion");
+        if (est === 'PUSH') {
+            if (wrap) wrap.style.display = 'block';
+            if (input) input.required = true;
+        } else {
+            if (wrap) wrap.style.display = 'none';
+            if (input) input.required = false;
+        }
+    }
+
+    function verMovimientosProducto(productoId) {
+        window.scmFiltroProductoId = productoId;
+        if (typeof loadExternalView === 'function') {
+            loadExternalView('scm-movimientos.html', document.getElementById('scm-nav-movimientos'), 'SCM');
+        }
+    }
+
+    // Iconos para simular imágenes según la categoría/nombre como en la referencia visual
+    function obtenerIconoProductoSCM(nombre, categoria) {
+        var n = (nombre || '').toLowerCase();
+        var c = (categoria || '').toLowerCase();
+        if (n.includes('vasija') || n.includes('barro') || c.includes('ceramica')) {
+            return '<div style="width:36px; height:36px; border-radius:8px; background:rgba(217,119,6,0.12); color:#d97706; display:flex; align-items:center; justify-content:center; font-size:1.1rem;"><i class="fas fa-mug-hot"></i></div>';
+        }
+        if (n.includes('textil') || n.includes('rebozo') || n.includes('camisa') || c.includes('textil')) {
+            return '<div style="width:36px; height:36px; border-radius:8px; background:rgba(239,68,68,0.12); color:#ef4444; display:flex; align-items:center; justify-content:center; font-size:1.1rem;"><i class="fas fa-vest"></i></div>';
+        }
+        if (n.includes('alebrije') || c.includes('decoracion')) {
+            return '<div style="width:36px; height:36px; border-radius:8px; background:rgba(147,51,234,0.12); color:#9333ea; display:flex; align-items:center; justify-content:center; font-size:1.1rem;"><i class="fas fa-dragon"></i></div>';
+        }
+        if (n.includes('collar') || n.includes('aretes') || c.includes('joyeria') || c.includes('accesorios')) {
+            return '<div style="width:36px; height:36px; border-radius:8px; background:rgba(245,158,11,0.12); color:#f59e0b; display:flex; align-items:center; justify-content:center; font-size:1.1rem;"><i class="fas fa-gem"></i></div>';
+        }
+        return '<div style="width:36px; height:36px; border-radius:8px; background:rgba(13,148,136,0.12); color:#0d9488; display:flex; align-items:center; justify-content:center; font-size:1.1rem;"><i class="fas fa-cube"></i></div>';
+    }
+
+    async function cargarProveedoresParaSelectSCM() {
+        try {
+            var resp = await fetch('php/scm_api.php?resource=proveedores&activos=1');
+            var data = await resp.json();
+            if (data.success && Array.isArray(data.proveedores)) {
+                // Filtrar solo activos y existentes
+                proveedoresSCMList = data.proveedores.filter(pr => pr.activo);
+                var select = document.getElementById('prodFormProveedor');
+                if (select) {
+                    var curVal = select.value;
+                    select.innerHTML = '<option value="">Selecciona un proveedor</option>' + 
+                        proveedoresSCMList.map(pr => `<option value="${pr.id}">${pr.nombre}</option>`).join('');
+                    if (curVal) select.value = curVal;
+                }
+            }
+        } catch (e) {
+            console.warn('Error cargando proveedores para select:', e);
+        }
+    }
+
+    function actualizarSelectoresCategoriasSCM(items) {
+        var fSel = document.getElementById('filtroCategoriaSCM');
+        var mSel = document.getElementById('prodFormCategoria');
+        var cats = Array.from(new Set(items.map(p => p.category).filter(Boolean))).sort();
+
+        if (fSel) {
+            var currentFiltro = fSel.value || 'todas';
+            var options = '<option value="todas">Todas</option>';
+            cats.forEach(c => {
+                options += `<option value="${c}">${c}</option>`;
+            });
+            fSel.innerHTML = options;
+            if (cats.map(c => c.toLowerCase()).includes(currentFiltro.toLowerCase())) {
+                fSel.value = currentFiltro;
+            } else {
+                fSel.value = 'todas';
+            }
+        }
+
+        if (mSel) {
+            var currentModalCat = mSel.value || 'Cerámica';
+            var defaultCats = ['Cerámica', 'Textil', 'Decoración', 'Joyería', 'General'];
+            var unionCats = Array.from(new Set([...defaultCats, ...cats])).sort();
+            mSel.innerHTML = unionCats.map(c => `<option value="${c}">${c}</option>`).join('');
+            if (currentModalCat && unionCats.includes(currentModalCat)) {
+                mSel.value = currentModalCat;
+            }
+        }
+    }
+
+    async function cargarProductosSCM() {
+        var tbody = document.getElementById("tbodyProductosSCM");
+        if (tbody) {
+            tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; padding:2rem; color:#64748b;"><i class="fas fa-spinner fa-spin"></i> Cargando catálogo de productos SCM...</td></tr>`;
+        }
+
+        try {
+            await cargarProveedoresParaSelectSCM();
+            var resp = await fetch("php/scm_api.php?resource=productos");
+            if (!resp.ok) throw new Error("Error de conexión al servidor");
+
+            var data = await resp.json();
+            if (data.success && Array.isArray(data.productos)) {
+                productosSCMList = data.productos;
+
+                actualizarSelectoresCategoriasSCM(productosSCMList);
+
+                // Métricas (Regla estricta: Stock bajo = stock_actual < stock_minimo)
+                var total = productosSCMList.length;
+                var pushCount = productosSCMList.filter(p => p.estrategia_logistica === 'PUSH').length;
+                var pullCount = productosSCMList.filter(p => p.estrategia_logistica === 'PULL').length;
+                var bajoStock = productosSCMList.filter(p => Number(p.stock_actual) < Number(p.stock_minimo)).length;
+
+                var elTot = document.getElementById("scmTotalProductos");
+                var elPush = document.getElementById("scmTotalPush");
+                var elPull = document.getElementById("scmTotalPull");
+                var elBajo = document.getElementById("scmProductosBajoStock");
+
+                if (elTot) elTot.textContent = total;
+                if (elPush) elPush.textContent = pushCount;
+                if (elPull) elPull.textContent = pullCount;
+                if (elBajo) elBajo.textContent = bajoStock;
+
+                renderizarTablaProductosSCM(productosSCMList);
+            } else {
+                throw new Error(data.error || "No se recibieron productos");
+            }
+        } catch (err) {
+            if (tbody) {
+                tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; padding:2rem; color:#ef4444;"><i class="fas fa-exclamation-triangle"></i> Error al conectar con SCM: ${err.message}</td></tr>`;
+            }
+        }
+    }
+
+    function renderizarTablaProductosSCM(items) {
+        var tbody = document.getElementById("tbodyProductosSCM");
+        if (!tbody) return;
+        if (!items || items.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; padding:2rem; color:#64748b;">No se encontraron productos coincidentes.</td></tr>`;
+            return;
+        }
+
+        tbody.innerHTML = items.map(p => {
+            var esPush = (p.estrategia_logistica === 'PUSH');
+            // Regla estricta: stock_actual < stock_minimo
+            var stockBajo = (Number(p.stock_actual) < Number(p.stock_minimo));
+            var iconHtml = obtenerIconoProductoSCM(p.name, p.category);
+
+            return `
+                <tr>
+                    <td style="text-align:center;">${iconHtml}</td>
+                    <td style="font-weight: 700; color: #0f172a;">
+                        <div>${p.name || 'Sin nombre'}</div>
+                        <div style="font-size:0.75rem; color:#94a3b8; font-weight:normal;">SKU: ${p.sku || ('SCM-' + String(p.id).padStart(4, '0'))} | Prov: ${p.proveedor_nombre}</div>
+                    </td>
+                    <td><span class="badge" style="background:#f1f5f9; color:#475569; font-size:0.75rem; font-weight:600;">${p.category || 'General'}</span></td>
+                    <td style="text-align: center; font-weight: 700; color: ${stockBajo ? '#ef4444' : '#0f172a'};">${p.stock_actual}</td>
+                    <td style="text-align: center; font-weight: 600; color: #64748b;">${p.stock_minimo}</td>
+                    <td style="text-align: center; font-weight: 600; color: #0d9488;">${p.cantidad_reposicion || 5}</td>
+                    <td style="text-align: center;">
+                        <span class="badge" style="background:${esPush ? 'rgba(5,150,105,0.15)' : 'rgba(37,99,235,0.15)'}; color:${esPush ? '#059669' : '#2563eb'}; font-weight:800; font-size:0.75rem; padding:4px 10px; border-radius:6px;">
+                            ${esPush ? 'PUSH' : 'PULL'}
+                        </span>
+                    </td>
+                    <td style="text-align: right;">
+                        <div style="display:flex; justify-content:flex-end; gap:6px;">
+                            <button class="crm-btn crm-btn-secondary crm-btn-sm" title="Ver movimientos de este producto" onclick="verMovimientosProducto(${p.id})" style="padding:4px 8px; color:#0d9488; font-weight:600;">
+                                <i class="fas fa-right-left"></i> Movimientos
+                            </button>
+                            <button class="crm-btn crm-btn-secondary crm-btn-sm" title="Editar producto" onclick="abrirModalEditarProductoSCM(${p.id})" style="padding:4px 8px; color:#2563eb;">
+                                <i class="fas fa-pencil"></i>
+                            </button>
+                            <button class="crm-btn crm-btn-secondary crm-btn-sm" title="Eliminar producto" onclick="eliminarProductoSCM(${p.id})" style="padding:4px 8px; color:#ef4444;">
+                                <i class="fas fa-trash-can"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            `;
+        }).join("");
+    }
+
+    function filtrarProductosSCM() {
+        var queryInput = document.getElementById("inputBuscarProductoSCM");
+        var catSelect = document.getElementById("filtroCategoriaSCM");
+        var estSelect = document.getElementById("filtroEstrategiaSCM");
+
+        var query = queryInput ? queryInput.value.toLowerCase().trim() : '';
+        var cat = catSelect ? catSelect.value : 'todas';
+        var est = estSelect ? estSelect.value : 'todas';
+
+        var filtrados = productosSCMList.filter(p => {
+            var matchQuery = !query || 
+                (p.name && p.name.toLowerCase().includes(query)) || 
+                (p.sku && p.sku.toLowerCase().includes(query)) ||
+                (p.category && p.category.toLowerCase().includes(query));
+            var matchCat = (cat === "todas") || (p.category && p.category.toLowerCase() === cat.toLowerCase());
+            var matchEst = (est === "todas") || (p.estrategia_logistica === est);
+            return matchQuery && matchCat && matchEst;
+        });
+
+        renderizarTablaProductosSCM(filtrados);
+    }
+
+    function abrirModalNuevoProductoSCM() {
+        document.getElementById("modalProductoTitulo").innerHTML = '<i class="fas fa-plus" style="color:#0d9488; margin-right:8px;"></i> Nuevo producto';
+        document.getElementById("prodFormId").value = "0";
+        document.getElementById("prodFormNombre").value = "";
+        document.getElementById("prodFormDescripcion").value = "";
+        document.getElementById("prodFormCategoria").value = "Cerámica";
+        document.getElementById("prodFormProveedor").value = "";
+        document.getElementById("prodFormStockActual").value = "0";
+        document.getElementById("prodFormStockMin").value = "5";
+        document.getElementById("prodFormEstrategia").value = "PUSH";
+        document.getElementById("prodFormCantidadReposicion").value = "5";
+        document.getElementById("prodFormCosto").value = "0.00";
+
+        toggleCamposEstrategia();
+        document.getElementById("modalProductoSCM").style.display = "flex";
+    }
+
+    function abrirModalEditarProductoSCM(id) {
+        var prod = productosSCMList.find(p => p.id === id);
+        if (!prod) return;
+
+        document.getElementById("modalProductoTitulo").innerHTML = '<i class="fas fa-pencil" style="color:#0d9488; margin-right:8px;"></i> Editar producto';
+        document.getElementById("prodFormId").value = prod.id;
+        document.getElementById("prodFormNombre").value = prod.name || '';
+        document.getElementById("prodFormDescripcion").value = prod.description || '';
+        document.getElementById("prodFormCategoria").value = prod.category || 'General';
+        document.getElementById("prodFormProveedor").value = prod.proveedor_id || '';
+        document.getElementById("prodFormStockActual").value = prod.stock_actual || 0;
+        document.getElementById("prodFormStockMin").value = prod.stock_minimo || 5;
+        document.getElementById("prodFormEstrategia").value = prod.estrategia_logistica || 'PULL';
+        document.getElementById("prodFormCantidadReposicion").value = prod.cantidad_reposicion || 5;
+        document.getElementById("prodFormCosto").value = prod.costo_unitario || 0.00;
+
+        toggleCamposEstrategia();
+        document.getElementById("modalProductoSCM").style.display = "flex";
+    }
+
+    function cerrarModalProductoSCM() {
+        var modal = document.getElementById("modalProductoSCM");
+        if (modal) modal.style.display = "none";
+    }
+
+    async function guardarProductoSCM(ev) {
+        ev.preventDefault();
+        var est = document.getElementById("prodFormEstrategia").value;
+        var cantRep = Number(document.getElementById("prodFormCantidadReposicion").value) || 5;
+
+        if (est === 'PUSH' && cantRep <= 0) {
+            mostrarNotificacion("La cantidad de reposición es obligatoria y debe ser mayor a 0 para productos PUSH", "warning");
+            return;
+        }
+
+        var payload = {
+            id: Number(document.getElementById("prodFormId").value),
+            name: document.getElementById("prodFormNombre").value.trim(),
+            description: document.getElementById("prodFormDescripcion").value.trim(),
+            category: document.getElementById("prodFormCategoria").value,
+            proveedor_id: document.getElementById("prodFormProveedor").value ? Number(document.getElementById("prodFormProveedor").value) : null,
+            stock_actual: Number(document.getElementById("prodFormStockActual").value),
+            stock_minimo: Number(document.getElementById("prodFormStockMin").value),
+            estrategia_logistica: est,
+            cantidad_reposicion: cantRep,
+            costo_unitario: Number(document.getElementById("prodFormCosto").value)
+        };
+
+        try {
+            var resp = await fetch("php/scm_api.php?resource=guardar_producto", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload)
+            });
+            var data = await resp.json();
+            if (data.success) {
+                cerrarModalProductoSCM();
+                if (data.reposicion_push) {
+                    mostrarNotificacion(`Producto guardado.\nRegla PUSH aplicada: pedido ${data.reposicion_push.folio} surtido, entrada de ${data.reposicion_push.cantidad} registrada. Stock actual: ${data.reposicion_push.stock_final}`, 'success', 'Regla PUSH Aplicada');
+                } else {
+                    mostrarNotificacion(data.message || "Producto guardado con éxito.", "success");
+                }
+                cargarProductosSCM();
+            } else {
+                mostrarNotificacion("Error al guardar: " + (data.error || "Error desconocido"), "error");
+            }
+        } catch (e) {
+            mostrarNotificacion("Error de conexión: " + e.message, "error");
+        }
+    }
+
+    async function eliminarProductoSCM(id) {
+        var prod = productosSCMList.find(p => p.id === id);
+        var nombre = prod ? prod.name : 'producto';
+        var confirmed = await mostrarConfirmacion(
+            `¿Estás seguro de eliminar el producto "${nombre}" del catálogo e inventario?`,
+            {
+                titulo: "Eliminar Producto",
+                tipo: "danger",
+                esPeligroso: true,
+                textoConfirmar: "Eliminar Producto",
+                textoCancelar: "Cancelar"
+            }
+        );
+        if (!confirmed) return;
+
+        try {
+            var resp = await fetch("php/scm_api.php?resource=eliminar_producto", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ id: id })
+            });
+            var data = await resp.json();
+            if (data.success) {
+                mostrarNotificacion(data.message || "Producto eliminado correctamente.", "success");
+                cargarProductosSCM();
+            } else {
+                mostrarNotificacion("Error al eliminar: " + (data.error || "Error desconocido"), "error");
+            }
+        } catch (e) {
+            mostrarNotificacion("Error de conexión: " + e.message, "error");
+        }
+    }
+
+    // Exponer a window para asegurar disponibilidad en inline onclicks
+    window.cargarProductosSCM = cargarProductosSCM;
+    window.abrirModalNuevoProductoSCM = abrirModalNuevoProductoSCM;
+    window.abrirModalEditarProductoSCM = abrirModalEditarProductoSCM;
+    window.cerrarModalProductoSCM = cerrarModalProductoSCM;
+    window.guardarProductoSCM = guardarProductoSCM;
+    window.eliminarProductoSCM = eliminarProductoSCM;
+    window.filtrarProductosSCM = filtrarProductosSCM;
+    window.toggleCamposEstrategia = toggleCamposEstrategia;
+    window.verMovimientosProducto = verMovimientosProducto;
+
+    cargarProductosSCM();
+</script>

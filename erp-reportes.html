@@ -1,0 +1,284 @@
+<!-- ==============================================================
+     MÓDULO ERP: REPORTES Y MÉTRICAS GLOBALES
+     CUMPLE PANTALLA 9 DE LA GUÍA VISUAL ERP (ETAPA 3)
+     ARCHIVO: erp-reportes.html
+============================================================== -->
+
+<div style="display: flex; flex-direction: column; gap: 1.5rem;">
+    <!-- CABECERA -->
+    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+        <div>
+            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+                <span class="badge" style="background: rgba(99,102,241,0.15); color: #6366f1; font-weight:700; font-size:0.75rem; padding: 2px 8px; border-radius: 6px;">ERP - ANALÍTICA</span>
+                <span style="font-size: 0.85rem; color: var(--text-muted);">Inteligencia de Negocios Unificada</span>
+            </div>
+            <h2 style="font-size: 1.6rem; font-weight: 800; color: var(--text-heading); margin: 0;">Reportes y Métricas Globales</h2>
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 2px;">Correlación de datos comerciales CRM, logísticos SCM y financieros ERP</p>
+        </div>
+        <div style="display: flex; gap: 10px;">
+            <button class="crm-btn crm-btn-secondary crm-btn-sm" onclick="cargarReportesERP()">
+                <i class="fas fa-sync-alt"></i> <span>Actualizar Datos</span>
+            </button>
+            <button class="crm-btn crm-btn-secondary crm-btn-sm" onclick="window.print()">
+                <i class="fas fa-file-pdf"></i> <span>Exportar / Imprimir</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- 4 TARJETAS DE INDICADORES CLAVE (PANTALLA 9) -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 1.25rem;">
+        <!-- 1. VENTAS TOTALES -->
+        <div class="crm-card crm-metric-card" style="border-left: 4px solid #ea580c;">
+            <div>
+                <div class="crm-metric-value" id="repVentasTotales" style="color: #ea580c; font-size: 1.9rem;">$0.00</div>
+                <div class="crm-metric-label" style="font-size: 0.9rem; font-weight: 700; color: #475569;">Ventas Globales</div>
+                <div class="crm-metric-subtext positive" style="font-size: 0.75rem;">Facturación acumulada</div>
+            </div>
+            <div class="crm-icon-box" style="background: rgba(234,88,12,0.12); color: #ea580c;">
+                <i class="fas fa-coins"></i>
+            </div>
+        </div>
+
+        <!-- 2. PEDIDOS PROCESADOS -->
+        <div class="crm-card crm-metric-card" style="border-left: 4px solid #2563eb;">
+            <div>
+                <div class="crm-metric-value" id="repTotalOrdenes" style="color: #2563eb; font-size: 1.9rem;">0</div>
+                <div class="crm-metric-label" style="font-size: 0.9rem; font-weight: 700; color: #475569;">Órdenes Atendidas</div>
+                <div class="crm-metric-subtext positive" style="font-size: 0.75rem;">Sin quiebres de stock</div>
+            </div>
+            <div class="crm-icon-box" style="background: rgba(37,99,235,0.12); color: #2563eb;">
+                <i class="fas fa-boxes-packing"></i>
+            </div>
+        </div>
+
+        <!-- 3. UNIDADES VENDIDAS -->
+        <div class="crm-card crm-metric-card" style="border-left: 4px solid #8b5cf6;">
+            <div>
+                <div class="crm-metric-value" id="repUnidadesVendidas" style="color: #8b5cf6; font-size: 1.9rem;">0</div>
+                <div class="crm-metric-label" style="font-size: 0.9rem; font-weight: 700; color: #475569;">Unidades Despachadas</div>
+                <div class="crm-metric-subtext" style="font-size: 0.75rem; color:#64748b;">Descontadas de SCM</div>
+            </div>
+            <div class="crm-icon-box" style="background: rgba(139,92,246,0.12); color: #8b5cf6;">
+                <i class="fas fa-dolly"></i>
+            </div>
+        </div>
+
+        <!-- 4. STOCK DISPONIBLE -->
+        <div class="crm-card crm-metric-card" style="border-left: 4px solid #10b981;">
+            <div>
+                <div class="crm-metric-value" id="repInventarioDisponible" style="color: #10b981; font-size: 1.9rem;">0</div>
+                <div class="crm-metric-label" style="font-size: 0.9rem; font-weight: 700; color: #475569;">Stock Actual SCM</div>
+                <div class="crm-metric-subtext positive" style="font-size: 0.75rem;">Disponible en almacén</div>
+            </div>
+            <div class="crm-icon-box" style="background: rgba(16,185,129,0.12); color: #10b981;">
+                <i class="fas fa-warehouse"></i>
+            </div>
+        </div>
+    </div>
+
+    <!-- PANELES DE GRÁFICAS: COMPARATIVA Y ROTACIÓN (PANTALLA 9) -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(420px, 1fr)); gap: 1.5rem;">
+        
+        <!-- GRÁFICA 1: TENDENCIA MENSUAL DE VENTAS -->
+        <div class="crm-card" style="padding: 1.5rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem;">
+                <div>
+                    <h3 style="margin: 0; font-size: 1.1rem; font-weight: 800; color: #0f172a;">Historial de Ingresos Mensuales</h3>
+                    <p style="margin: 2px 0 0 0; font-size: 0.8rem; color: #64748b;">Facturación neta generada en el ERP</p>
+                </div>
+                <span class="badge" style="background: rgba(99,102,241,0.12); color: #6366f1; font-weight: 700;">MXN</span>
+            </div>
+            <div style="height: 240px; position: relative;">
+                <canvas id="chartTendenciaVentasERP"></canvas>
+            </div>
+        </div>
+
+        <!-- GRÁFICA 2: ROTACIÓN DE INVENTARIO Y CATEGORÍAS -->
+        <div class="crm-card" style="padding: 1.5rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem;">
+                <div>
+                    <h3 style="margin: 0; font-size: 1.1rem; font-weight: 800; color: #0f172a;">Proporción y Rotación de Inventario</h3>
+                    <p style="margin: 2px 0 0 0; font-size: 0.8rem; color: #64748b;">Distribución de stock por categorías en almacén</p>
+                </div>
+                <span class="badge" style="background: rgba(16,185,129,0.12); color: #10b981; font-weight: 700;">Unidades</span>
+            </div>
+            <div style="height: 240px; position: relative; display: flex; align-items: center; justify-content: center;">
+                <canvas id="chartRotacionInventarioERP"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- DIAGRAMA VISUAL INTERACTIVO DE INTEGRACIÓN ERP (PANTALLA 9) -->
+    <div class="crm-card" style="padding: 2rem;">
+        <div style="margin-bottom: 1.5rem; text-align: center;">
+            <h3 style="margin: 0; font-size: 1.3rem; font-weight: 800; color: #0f172a;">
+                <i class="fas fa-project-diagram" style="color: #6366f1; margin-right: 8px;"></i>Mapa de Integración de Flujos de Negocio
+            </h3>
+            <p style="font-size: 0.85rem; color: #64748b; margin: 4px 0 0 0;">
+                Cómo interactúan los módulos en cada transacción para asegurar consistencia atómica
+            </p>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr auto 1fr auto 1fr; align-items: center; gap: 1rem; max-width: 950px; margin: 0 auto; text-align: center;">
+            
+            <!-- NODO 1: CRM -->
+            <div style="background: #f0fdf4; border: 2px solid #10b981; border-radius: 12px; padding: 1.5rem 1rem;">
+                <div style="width: 50px; height: 50px; border-radius: 50%; background: #10b981; color: white; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; margin: 0 auto 10px auto;">
+                    <i class="fas fa-users"></i>
+                </div>
+                <h4 style="margin: 0 0 4px 0; font-size: 1.05rem; font-weight: 800; color: #065f46;">CRM (Clientes)</h4>
+                <div style="font-size: 0.78rem; color: #047857;">Captura prospecto, historial y acuerdos comerciales</div>
+            </div>
+
+            <!-- FLECHA 1 -->
+            <div style="color: #6366f1; font-size: 1.5rem;">
+                <i class="fas fa-arrow-right"></i>
+            </div>
+
+            <!-- NODO 2: ERP CENTRAL -->
+            <div style="background: #e0e7ff; border: 2px solid #6366f1; border-radius: 12px; padding: 1.75rem 1rem; box-shadow: 0 6px 18px rgba(99,102,241,0.2);">
+                <div style="width: 56px; height: 56px; border-radius: 50%; background: #6366f1; color: white; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; margin: 0 auto 10px auto;">
+                    <i class="fas fa-network-wired"></i>
+                </div>
+                <h4 style="margin: 0 0 4px 0; font-size: 1.15rem; font-weight: 800; color: #312e81;">ERP Central</h4>
+                <div style="font-size: 0.8rem; color: #3730a3; font-weight: 600;">Valida, factura, orquesta y emite folio único</div>
+            </div>
+
+            <!-- FLECHA 2 -->
+            <div style="color: #6366f1; font-size: 1.5rem;">
+                <i class="fas fa-arrow-right"></i>
+            </div>
+
+            <!-- NODO 3: SCM -->
+            <div style="background: #eff6ff; border: 2px solid #3b82f6; border-radius: 12px; padding: 1.5rem 1rem;">
+                <div style="width: 50px; height: 50px; border-radius: 50%; background: #3b82f6; color: white; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; margin: 0 auto 10px auto;">
+                    <i class="fas fa-truck-ramp-box"></i>
+                </div>
+                <h4 style="margin: 0 0 4px 0; font-size: 1.05rem; font-weight: 800; color: #1e40af;">SCM (Cadena)</h4>
+                <div style="font-size: 0.78rem; color: #1d4ed8;">Descuenta stock, registra salida y evalúa PUSH</div>
+            </div>
+        </div>
+
+        <div style="display: flex; justify-content: center; gap: 2rem; margin-top: 2rem; flex-wrap: wrap;">
+            <div style="display: flex; align-items: center; gap: 8px; font-size: 0.85rem; color: #475569;">
+                <i class="fas fa-shield-alt" style="color: #10b981;"></i> Integridad relacional (Foreign Keys)
+            </div>
+            <div style="display: flex; align-items: center; gap: 8px; font-size: 0.85rem; color: #475569;">
+                <i class="fas fa-bolt" style="color: #ea580c;"></i> Cero redundancia de inventario
+            </div>
+            <div style="display: flex; align-items: center; gap: 8px; font-size: 0.85rem; color: #475569;">
+                <i class="fas fa-history" style="color: #6366f1;"></i> Auditoría transaccional de movimientos
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ==============================================================
+     JAVASCRIPT DE REPORTES
+     ============================================================== -->
+<script>
+    var chartTendenciaInstanceERP = null;
+    var chartRotacionInstanceERP = null;
+
+    function cargarReportesERP() {
+        fetch("php/erp_api.php?resource=metricas")
+            .then(function(r) { return r.json(); })
+            .then(function(res) {
+                if (res.status === "success") {
+                    renderizarMetricasReportesERP(res.data);
+                }
+            })
+            .catch(function(err) {
+                console.error("Error al cargar reportes ERP:", err);
+            });
+    }
+
+    function renderizarMetricasReportesERP(data) {
+        var kpis = data.kpis || {};
+        var vTot = document.getElementById("repVentasTotales");
+        var tOrd = document.getElementById("repTotalOrdenes");
+        var uVen = document.getElementById("repUnidadesVendidas");
+        var iDis = document.getElementById("repInventarioDisponible");
+
+        if (vTot) vTot.textContent = "$" + parseFloat(kpis.ventas_totales || 0).toLocaleString("es-MX", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        if (tOrd) tOrd.textContent = kpis.total_ordenes || 0;
+        if (uVen) uVen.textContent = kpis.productos_vendidos || 0;
+        if (iDis) iDis.textContent = kpis.inventario_disponible || 0;
+
+        renderizarGraficaTendenciaERP(data.ventas_por_mes || []);
+        renderizarGraficaRotacionERP(data.rotacion_inventario || []);
+    }
+
+    function renderizarGraficaTendenciaERP(mensual) {
+        var ctx = document.getElementById("chartTendenciaVentasERP");
+        if (!ctx) return;
+
+        var labels = mensual.map(function(m) { return m.mes; });
+        var totals = mensual.map(function(m) { return parseFloat(m.total || 0); });
+
+        if (chartTendenciaInstanceERP) chartTendenciaInstanceERP.destroy();
+
+        chartTendenciaInstanceERP = new Chart(ctx, {
+            type: "line",
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: "Facturación ($)",
+                    data: totals,
+                    borderColor: "#6366f1",
+                    backgroundColor: "rgba(99, 102, 241, 0.1)",
+                    fill: true,
+                    tension: 0.35,
+                    pointBackgroundColor: "#6366f1",
+                    pointRadius: 5
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: function(v) { return "$" + v.toLocaleString(); }
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    function renderizarGraficaRotacionERP(rotacion) {
+        var ctx = document.getElementById("chartRotacionInventarioERP");
+        if (!ctx) return;
+
+        var labels = rotacion.map(function(r) { return r.categoria; });
+        var counts = rotacion.map(function(r) { return parseInt(r.total_stock || 0); });
+
+        if (chartRotacionInstanceERP) chartRotacionInstanceERP.destroy();
+
+        chartRotacionInstanceERP = new Chart(ctx, {
+            type: "doughnut",
+            data: {
+                labels: labels,
+                datasets: [{
+                    data: counts,
+                    backgroundColor: ["#6366f1", "#10b981", "#3b82f6", "#f59e0b", "#ec4899", "#8b5cf6"]
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: "bottom" }
+                }
+            }
+        });
+    }
+
+    // Exponer a window
+    window.cargarReportesERP = cargarReportesERP;
+
+    cargarReportesERP();
+</script>

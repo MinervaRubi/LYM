@@ -1,0 +1,205 @@
+<!-- ==============================================================
+     PANTALLA 4: DETALLE DE CLIENTE (LYM CRM)
+     ARCHIVO: crm-detalle-cliente.html
+============================================================== -->
+
+<div style="display: flex; flex-direction: column; gap: 1.5rem;">
+    <!-- VOLVER Y HEADER -->
+    <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;">
+        <button class="crm-btn crm-btn-secondary crm-btn-sm" onclick="loadExternalView('crm-clientes.html', null)">
+            <i class="fas fa-arrow-left"></i> <span>Volver a clientes</span>
+        </button>
+    </div>
+
+    <!-- TARJETA PRINCIPAL DEL CLIENTE -->
+    <div class="crm-card" id="detCardContainer" style="padding: 2rem;">
+        <div style="text-align: center; color: var(--text-muted); padding: 2rem;">
+            <i class="fas fa-spinner fa-spin fa-2x" style="color:var(--primary); margin-bottom:10px;"></i>
+            <div>Cargando información completa del cliente...</div>
+        </div>
+    </div>
+
+    <!-- PESTAÑAS INFERIORES DE NAVEGACIÓN -->
+    <div style="display: flex; gap: 1rem; border-bottom: 2px solid var(--border-color);">
+        <button class="crm-btn crm-btn-secondary active" id="tabBtnInfo" onclick="switchTab('infoTab', this)" style="border-radius: var(--radius-sm) var(--radius-sm) 0 0;">Información</button>
+        <button class="crm-btn crm-btn-secondary" id="tabBtnInt" onclick="switchTab('interaccionesTab', this)" style="border-radius: var(--radius-sm) var(--radius-sm) 0 0;">Interacciones</button>
+        <button class="crm-btn crm-btn-secondary" id="tabBtnEval" onclick="switchTab('evaluacionesTab', this)" style="border-radius: var(--radius-sm) var(--radius-sm) 0 0;">Evaluaciones</button>
+    </div>
+
+    <!-- PESTAÑA 1: INFORMACIÓN DETALLADA -->
+    <div id="infoTab" class="tab-content-panel" style="display: block;">
+        <div class="crm-card">
+            <h4 style="color:var(--text-heading); margin-bottom:12px;">Seguimiento y Registro</h4>
+            <p style="color:var(--text-body); font-size:0.9rem;">
+                Todos los movimientos, interacciones y cambios de etapa de este cliente son procesados en tiempo real y almacenados en la base de datos MySQL <code>lym</code>.
+            </p>
+        </div>
+    </div>
+
+    <!-- PESTAÑA 2: INTERACCIONES -->
+    <div id="interaccionesTab" class="tab-content-panel" style="display: none;">
+        <div class="crm-card" id="tabInteraccionesContent">
+            <div style="text-align:center; color:var(--text-muted); padding:1.5rem;">
+                <i class="fas fa-spinner fa-spin"></i> Cargando interacciones...
+            </div>
+        </div>
+    </div>
+
+    <!-- PESTAÑA 3: EVALUACIONES -->
+    <div id="evaluacionesTab" class="tab-content-panel" style="display: none;">
+        <div class="crm-card" id="tabEvaluacionesContent">
+            <div style="text-align:center; color:var(--text-muted); padding:1.5rem;">
+                <i class="fas fa-spinner fa-spin"></i> Cargando evaluaciones de satisfacción...
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+(function initClienteDetalle() {
+    const clienteObj = window.clienteSeleccionadoCRM || JSON.parse(sessionStorage.getItem('clienteSeleccionadoCRM') || '{}');
+
+    async function cargarDetalle() {
+        if (!clienteObj || !clienteObj.id) {
+            document.getElementById('detCardContainer').innerHTML = `<div style="color:var(--danger); padding:2rem;">No se especificó un cliente válido. Por favor regresa a la lista de clientes.</div>`;
+            return;
+        }
+
+        try {
+            const resp = await fetch(`php/crm_api.php?resource=cliente_detalle&id=${clienteObj.id}`);
+            const data = await resp.json();
+
+            if (data.success && data.cliente) {
+                const c = data.cliente;
+                const iniciales = obtenerIniciales(c.nombre);
+                const isActivo = String(c.estado).toLowerCase() === 'activo';
+
+                document.getElementById('detCardContainer').innerHTML = `
+                    <div style="display:flex; align-items:center; justify-content:space-between; gap:1.5rem; flex-wrap:wrap; margin-bottom:1.5rem;">
+                        <div style="display:flex; align-items:center; gap:1.25rem;">
+                            <div class="crm-avatar" style="width:64px; height:64px; font-size:1.5rem; background:linear-gradient(135deg, var(--primary), var(--secondary)); color:#ffffff;">
+                                ${iniciales}
+                            </div>
+                            <div>
+                                <h2 style="font-size:1.8rem; font-weight:800; color:var(--text-heading); margin:0;">${escapeHtml(c.nombre)}</h2>
+                                <div style="display:flex; align-items:center; gap:8px; margin-top:4px;">
+                                    <span class="badge ${isActivo ? 'badge-activo' : 'badge-inactivo'}"><span class="badge-dot"></span>${isActivo ? 'Activo' : 'Inactivo'}</span>
+                                    <span class="badge badge-prospecto">${escapeHtml(c.etapa_crm)}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                            <button class="crm-btn crm-btn-secondary" onclick="abrirModalGlobalEditarCliente(${c.id}, '${escapeHtml(c.nombre)}', '${escapeHtml(c.correo)}', '${escapeHtml(c.telefono)}', '${escapeHtml(c.empresa)}', '${escapeHtml(c.estado)}')">
+                                <i class="fas fa-edit"></i> <span>Editar cliente</span>
+                            </button>
+                            <button class="crm-btn crm-btn-secondary" onclick="abrirModalGlobalEtapa(${c.id}, '${escapeHtml(c.nombre)}', '${escapeHtml(c.etapa_crm)}')">
+                                <i class="fas fa-tags"></i> <span>Cambiar etapa</span>
+                            </button>
+                            <button class="crm-btn crm-btn-secondary" style="background:#eef2ff; color:#4f46e5; border-color:#c7d2fe;" onclick="abrirModalGlobalSugerirDescuento(${c.id})">
+                                <i class="fas fa-gift"></i> <span>Sugerir Descuento</span>
+                            </button>
+                            <button class="crm-btn crm-btn-primary" onclick="abrirModalGlobalInteraccion(${c.id})">
+                                <i class="fas fa-comment-plus"></i> <span>+ Nueva Interacción</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap:1.25rem; background:#f8fafc; padding:1.25rem; border-radius:var(--radius-md); border:1px solid var(--border-color);">
+                        <div>
+                            <span style="font-size:0.75rem; text-transform:uppercase; color:var(--text-muted); font-weight:700;">Empresa</span>
+                            <div style="font-weight:600; color:var(--text-heading); margin-top:2px;">${escapeHtml(c.empresa || 'Particular')}</div>
+                        </div>
+                        <div>
+                            <span style="font-size:0.75rem; text-transform:uppercase; color:var(--text-muted); font-weight:700;">Correo Electrónico</span>
+                            <div style="font-weight:600; color:var(--text-heading); margin-top:2px;">${escapeHtml(c.correo)}</div>
+                        </div>
+                        <div>
+                            <span style="font-size:0.75rem; text-transform:uppercase; color:var(--text-muted); font-weight:700;">Teléfono</span>
+                            <div style="font-weight:600; color:var(--text-heading); margin-top:2px;">${escapeHtml(c.telefono || 'Sin teléfono')}</div>
+                        </div>
+                        <div>
+                            <span style="font-size:0.75rem; text-transform:uppercase; color:var(--text-muted); font-weight:700;">Fecha de Registro</span>
+                            <div style="font-weight:600; color:var(--text-heading); margin-top:2px;">${formatearFechaSimple(c.fecha_registro || c.created_at)}</div>
+                        </div>
+                    </div>
+                `;
+
+                renderTabInteracciones(data.interacciones || []);
+                renderTabEvaluaciones(data.evaluaciones || []);
+            }
+        } catch (e) {
+            document.getElementById('detCardContainer').innerHTML = `<div style="color:var(--danger); padding:2rem;">Error al cargar detalle: ${e.message}</div>`;
+            if (typeof mostrarNotificacion === 'function') mostrarNotificacion('Error al cargar detalle del cliente: ' + e.message, 'error');
+        }
+    }
+
+    function renderTabInteracciones(lista) {
+        const cont = document.getElementById('tabInteraccionesContent');
+        if (lista.length === 0) {
+            cont.innerHTML = '<div style="color:var(--text-muted); padding:1rem; text-align:center;">No hay interacciones registradas para este cliente aún.</div>';
+            return;
+        }
+
+        cont.innerHTML = `
+            <div style="display:flex; flex-direction:column; gap:12px;">
+                ${lista.map(i => `
+                    <div style="padding:12px 16px; background:#f8fafc; border-radius:var(--radius-sm); border:1px solid var(--border-color); display:flex; justify-content:space-between; align-items:center;">
+                        <div>
+                            <strong style="text-transform:capitalize; color:var(--primary); font-size:0.92rem;">${escapeHtml(i.tipo)}</strong>
+                            <p style="margin:4px 0 0 0; color:var(--text-heading); font-size:0.88rem;">${escapeHtml(i.descripcion)}</p>
+                            <span style="font-size:0.75rem; color:var(--text-muted);">Registrado por: <strong>${escapeHtml(i.responsable)}</strong></span>
+                        </div>
+                        <span style="font-size:0.78rem; color:var(--text-muted); font-weight:600;">${formatearFechaSimple(i.fecha)}</span>
+                    </div>
+                `).join('')}
+            </div>
+        `;
+    }
+
+    function renderTabEvaluaciones(lista) {
+        const cont = document.getElementById('tabEvaluacionesContent');
+        if (lista.length === 0) {
+            cont.innerHTML = '<div style="color:var(--text-muted); padding:1rem; text-align:center;">No se registran evaluaciones de satisfacción para este cliente.</div>';
+            return;
+        }
+
+        cont.innerHTML = `
+            <div style="display:flex; flex-direction:column; gap:12px;">
+                ${lista.map(e => `
+                    <div style="padding:12px 16px; background:#f8fafc; border-radius:var(--radius-sm); border:1px solid var(--border-color);">
+                        <div style="font-weight:700; color:var(--warning);">Puntuación: ⭐ ${e.puntuacion_satisfaccion || 5} / 5</div>
+                        <p style="margin:6px 0; color:var(--text-body); font-size:0.88rem;">${escapeHtml(e.comentarios || 'Sin comentarios adicionales')}</p>
+                        <span style="font-size:0.75rem; color:var(--text-muted);">${formatearFechaSimple(e.fecha_evaluacion)}</span>
+                    </div>
+                `).join('')}
+            </div>
+        `;
+    }
+
+    window.switchTab = function(tabId, btn) {
+        document.querySelectorAll('.tab-content-panel').forEach(p => p.style.display = 'none');
+        document.querySelectorAll('#tabBtnInfo, #tabBtnInt, #tabBtnEval').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        document.getElementById(tabId).style.display = 'block';
+    };
+
+    function obtenerIniciales(nombre) {
+        const partes = String(nombre || 'CL').trim().split(' ');
+        if (partes.length >= 2) return (partes[0][0] + partes[1][0]).toUpperCase();
+        return String(nombre || 'CL').substring(0, 2).toUpperCase();
+    }
+
+    function formatearFechaSimple(f) {
+        if (!f) return '';
+        const d = new Date(String(f).replace(' ', 'T'));
+        return isNaN(d) ? f : d.toLocaleDateString('es-MX', { day: '2-digit', month: '2-digit', year: 'numeric' });
+    }
+
+    function escapeHtml(str) {
+        return String(str || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/'/g, "&#039;");
+    }
+
+    cargarDetalle();
+})();
+</script>

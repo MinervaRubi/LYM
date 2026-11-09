@@ -1,0 +1,190 @@
+<!-- ==============================================================
+     PANTALLA 2: DASHBOARD GENERAL DE CRM (LYM)
+     ARCHIVO: crm-dashboard.html
+============================================================== -->
+
+<div style="display: flex; flex-direction: column; gap: 1.75rem;">
+    <!-- HEADER -->
+    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+        <div>
+            <h2 style="font-size: 1.6rem; font-weight: 800; color: var(--text-heading); margin: 0;">Resumen CRM</h2>
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 2px;">Indicadores clave de rendimiento y clientes en tiempo real</p>
+        </div>
+        <button class="crm-btn crm-btn-secondary crm-btn-sm" onclick="cargarDashboard()">
+            <i class="fas fa-sync-alt"></i> <span>Actualizar</span>
+        </button>
+    </div>
+
+    <!-- TARJETAS SUPERIORES (4 COLUMNAS METRICAS) -->
+    <div class="crm-grid-4">
+        <div class="crm-card crm-metric-card">
+            <div>
+                <div class="crm-metric-label">Total de Clientes</div>
+                <div class="crm-metric-value" id="dashTotalClientes">-</div>
+                <div class="crm-metric-subtext">Todos los clientes</div>
+            </div>
+            <div class="crm-icon-box crm-icon-purple">
+                <i class="fas fa-users"></i>
+            </div>
+        </div>
+
+        <div class="crm-card crm-metric-card">
+            <div>
+                <div class="crm-metric-label">Clientes Activos</div>
+                <div class="crm-metric-value" id="dashClientesActivos" style="color: var(--success);">-</div>
+                <div class="crm-metric-subtext positive" id="dashPctActivos">-</div>
+            </div>
+            <div class="crm-icon-box crm-icon-emerald">
+                <i class="fas fa-user-check"></i>
+            </div>
+        </div>
+
+        <div class="crm-card crm-metric-card">
+            <div>
+                <div class="crm-metric-label">Interacciones (este mes)</div>
+                <div class="crm-metric-value" id="dashInteraccionesMes" style="color: var(--primary);">-</div>
+                <div class="crm-metric-subtext positive"><i class="fas fa-arrow-up"></i> +12% vs mes anterior</div>
+            </div>
+            <div class="crm-icon-box crm-icon-pink">
+                <i class="fas fa-comments"></i>
+            </div>
+        </div>
+
+        <div class="crm-card crm-metric-card">
+            <div>
+                <div class="crm-metric-label">Sin Interacción</div>
+                <div class="crm-metric-value" id="dashClientesSinInteraccion" style="color: var(--warning);">-</div>
+                <div class="crm-metric-subtext warning">Últimos 30 días</div>
+            </div>
+            <div class="crm-icon-box crm-icon-amber">
+                <i class="fas fa-exclamation-triangle"></i>
+            </div>
+        </div>
+    </div>
+
+    <!-- DOS PANELES INFERIORES: GRÁFICA DONA + CLIENTES EN RIESGO -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.5rem;">
+        <!-- GRÁFICA DE DONA -->
+        <div class="crm-card">
+            <h3 style="font-size: 1.1rem; font-weight: 700; color: var(--text-heading); margin-bottom: 1rem;">Clientes Activos vs Inactivos</h3>
+            <div style="position: relative; height: 240px; width: 100%; display: flex; align-items: center; justify-content: center;">
+                <canvas id="chartActivosInactivos"></canvas>
+            </div>
+        </div>
+
+        <!-- LISTA DE CLIENTES EN RIESGO -->
+        <div class="crm-card">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                <h3 style="font-size: 1.1rem; font-weight: 700; color: var(--text-heading); margin: 0;">Clientes en Riesgo</h3>
+                <button class="crm-btn crm-btn-secondary crm-btn-sm" onclick="loadExternalView('crm-clientes.html', null)">Ver todos</button>
+            </div>
+
+            <div id="riskClientsContainer" style="display: flex; flex-direction: column; gap: 10px;">
+                <div style="text-align: center; color: var(--text-muted); padding: 2rem;">
+                    <i class="fas fa-spinner fa-spin"></i> Cargando clientes en riesgo...
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+(function initCRMDashboard() {
+    let donutChartInstance = null;
+
+    window.cargarDashboard = async function() {
+        try {
+            const resp = await fetch('php/crm_api.php?resource=dashboard');
+            const data = await resp.json();
+
+            if (data.success && data.metrics) {
+                const m = data.metrics;
+                document.getElementById('dashTotalClientes').textContent = m.totalClientes;
+                document.getElementById('dashClientesActivos').textContent = m.clientesActivos;
+                document.getElementById('dashPctActivos').textContent = `${m.pctActivos}% del total`;
+                document.getElementById('dashInteraccionesMes').textContent = m.interaccionesMes;
+                document.getElementById('dashClientesSinInteraccion').textContent = m.sinInteraccionCount;
+
+                renderChartActivosInactivos(m.clientesActivos, m.clientesInactivos);
+                renderClientesRiesgo(data.clientesRiesgo || []);
+            } else {
+                if (typeof mostrarNotificacion === 'function') mostrarNotificacion(data.error || 'No se pudieron cargar los datos del dashboard CRM', 'error');
+            }
+        } catch (e) {
+            console.error("Error al cargar el dashboard CRM:", e);
+            if (typeof mostrarNotificacion === 'function') mostrarNotificacion('Error de conexión con el dashboard CRM: ' + e.message, 'error');
+        }
+    };
+
+    
+    function renderChartActivosInactivos(activos, inactivos) {
+        const ctx = document.getElementById('chartActivosInactivos');
+        if (!ctx) return;
+
+        if (donutChartInstance) {
+            donutChartInstance.destroy();
+        }
+
+        donutChartInstance = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Activos', 'Inactivos'],
+                datasets: [{
+                    data: [activos, inactivos],
+                    backgroundColor: ['#10b981', '#f59e0b'],
+                    borderWidth: 0,
+                    hoverOffset: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'right',
+                        labels: { font: { family: 'Plus Jakarta Sans', size: 12 }, usePointStyle: true }
+                    }
+                },
+                cutout: '72%'
+            }
+        });
+    }
+
+    function renderClientesRiesgo(lista) {
+        const container = document.getElementById('riskClientsContainer');
+        if (!container) return;
+
+        if (lista.length === 0) {
+            container.innerHTML = `
+                <div style="text-align: center; color: var(--success); padding: 1.5rem; font-weight: 600;">
+                    <i class="fas fa-check-circle" style="font-size:1.4rem; margin-bottom:6px; display:block;"></i>
+                    Todos los clientes cuentan con seguimiento reciente.
+                </div>
+            `;
+            return;
+        }
+
+        container.innerHTML = lista.map(c => `
+            <div style="display:flex; justify-content:space-between; align-items:center; padding:10px 14px; background:#f8fafc; border:1px solid var(--border-color); border-radius:var(--radius-sm); cursor:pointer; transition:all 0.2s ease;" onclick="verDetalleClienteDirecto(${c.id}, '${escapeHtml(c.nombre)}')">
+                <div>
+                    <strong style="color:var(--text-heading); font-size:0.9rem; display:block;">${escapeHtml(c.nombre)}</strong>
+                    <span style="font-size:0.78rem; color:var(--warning);">Sin contacto desde hace ${c.dias} días</span>
+                </div>
+                <i class="fas fa-chevron-right" style="color:var(--text-muted); font-size:0.8rem;"></i>
+            </div>
+        `).join('');
+    }
+
+    window.verDetalleClienteDirecto = function(id, nombre) {
+        window.clienteSeleccionadoCRM = { id: id, nombre: nombre };
+        sessionStorage.setItem("clienteSeleccionadoCRM", JSON.stringify(window.clienteSeleccionadoCRM));
+        loadExternalView('crm-detalle-cliente.html', null);
+    };
+
+    function escapeHtml(str) {
+        return String(str || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/'/g, "&#039;");
+    }
+
+    cargarDashboard();
+})();
+</script>

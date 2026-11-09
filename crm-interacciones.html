@@ -1,0 +1,294 @@
+<!-- ==============================================================
+     PANTALLA 5: HISTORIAL DE INTERACCIONES (LYM CRM)
+     ARCHIVO: crm-interacciones.html
+============================================================== -->
+
+<div style="display: flex; flex-direction: column; gap: 1.5rem;">
+    <!-- HEADER -->
+    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+        <div>
+            <button class="crm-btn crm-btn-secondary crm-btn-sm" onclick="volverNavegacionTimeline()" style="margin-bottom: 8px;">
+                <i class="fas fa-arrow-left"></i> <span>Volver</span>
+            </button>
+            <h2 style="font-size: 1.6rem; font-weight: 800; color: var(--text-heading); margin:0;" id="timelineTituloCliente">Historial de Interacciones</h2>
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin-top:2px;">Línea de tiempo de comunicación y seguimiento en tiempo real</p>
+        </div>
+
+        <button class="crm-btn crm-btn-primary" onclick="abrirModalGlobalInteraccion(obtenerClienteIdActual())">
+            <i class="fas fa-plus"></i> <span>+ Nueva Interacción</span>
+        </button>
+    </div>
+
+    <!-- BARRA DE BÚSQUEDA Y SELECCIÓN DE CLIENTE DE LA BASE DE DATOS -->
+    <div class="crm-card" style="display: flex; align-items: center; justify-content: space-between; gap: 1.25rem; flex-wrap: wrap; padding: 1rem 1.25rem;">
+        <!-- SELECTOR DE CLIENTE MYSQL -->
+        <div style="display: flex; align-items: center; gap: 8px; font-size: 0.85rem; font-weight: 600; color: var(--text-heading); flex: 1; min-width: 240px;">
+            <i class="fas fa-user-check" style="color:var(--primary);"></i>
+            <label style="white-space:nowrap;">Cliente DB:</label>
+            <select class="crm-select" id="selectFiltroClienteTimeline" onchange="cambiarClienteFiltroTimeline(this.value)" style="width:100%;">
+                <option value="">Cargando clientes de MySQL...</option>
+            </select>
+        </div>
+
+        <!-- SELECTOR DE TIPO -->
+        <div style="display: flex; align-items: center; gap: 8px; font-size: 0.85rem; font-weight: 600; color: var(--text-heading);">
+            <label style="white-space:nowrap;">Tipo:</label>
+            <select class="crm-select" id="selectFiltroTipoTimeline" onchange="aplicarFiltrosLocalesTimeline()">
+                <option value="todos">Todos los tipos</option>
+                <option value="llamada">📞 Llamada</option>
+                <option value="correo">✉️ Correo</option>
+                <option value="whatsapp">💬 WhatsApp</option>
+                <option value="reunion">🤝 Reunión</option>
+                <option value="nota">📝 Nota</option>
+            </select>
+        </div>
+
+        <!-- BÚSQUEDA DE TEXTO -->
+        <div class="crm-input-group" style="flex: 1; min-width: 200px;">
+            <i class="fas fa-search"></i>
+            <input type="text" class="crm-input" id="inputBuscarTimeline" placeholder="Buscar en la línea de tiempo..." oninput="aplicarFiltrosLocalesTimeline()">
+        </div>
+    </div>
+
+    <!-- TIMELINE CONTAINER -->
+    <div class="crm-card" style="padding: 1.75rem;">
+        <div class="crm-timeline" id="timelineListContainer">
+            <div style="text-align: center; color: var(--text-muted); padding: 2.5rem;">
+                <i class="fas fa-spinner fa-spin fa-2x" style="color:var(--primary); margin-bottom:10px;"></i>
+                <div>Cargando historial de interacciones en tiempo real...</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+(function initTimelineInteracciones() {
+    const API = "php/crm_api.php";
+    let autoRefreshInterval = null;
+    let rawInteracciones = [];
+    let selectedClienteId = null;
+
+    function obtenerClienteSeleccionado() {
+        if (window.clienteSeleccionadoCRM && window.clienteSeleccionadoCRM.id) {
+            return window.clienteSeleccionadoCRM;
+        }
+        const guardado = sessionStorage.getItem("clienteSeleccionadoCRM");
+        if (guardado) {
+            try {
+                const cliente = JSON.parse(guardado);
+                if (cliente && cliente.id) {
+                    window.clienteSeleccionadoCRM = cliente;
+                    return cliente;
+                }
+            } catch (e) {}
+        }
+        return null;
+    }
+
+    const clienteInicial = obtenerClienteSeleccionado();
+    if (clienteInicial && clienteInicial.id) {
+        selectedClienteId = clienteInicial.id;
+    }
+
+    window.obtenerClienteIdActual = function() {
+        return selectedClienteId;
+    };
+
+    // 1. CARGAR LISTA DE CLIENTES EN EL DROPDOWN DESDE MYSQL
+    async function cargarClientesEnDropdown() {
+        const select = document.getElementById("selectFiltroClienteTimeline");
+        if (!select) return;
+
+        try {
+            let lista = [];
+            const resp = await fetch(API + "?resource=clientes");
+            if (resp.ok) {
+                const data = await resp.json();
+                if (data.success && Array.isArray(data.clientes)) {
+                    lista = data.clientes;
+                }
+            }
+
+            if (lista.length === 0) {
+                const respDrop = await fetch("php/api_clientes_dropdown.php");
+                if (respDrop.ok) {
+                    const dataDrop = await respDrop.json();
+                    if (dataDrop.success && Array.isArray(dataDrop.clientes)) {
+                        lista = dataDrop.clientes;
+                    }
+                }
+            }
+
+            if (lista.length > 0) {
+                select.innerHTML = '<option value="">-- Todos los Clientes --</option>';
+                lista.forEach(c => {
+                    const opt = document.createElement("option");
+                    opt.value = c.id;
+                    opt.textContent = `${c.nombre} (${c.empresa || 'Particular'})`;
+                    if (selectedClienteId && String(c.id) === String(selectedClienteId)) {
+                        opt.selected = true;
+                    }
+                    select.appendChild(opt);
+                });
+            } else {
+                select.innerHTML = '<option value="">No hay clientes en MySQL</option>';
+            }
+        } catch (e) {
+            select.innerHTML = '<option value="">Error al cargar clientes</option>';
+        }
+    }
+
+    window.cambiarClienteFiltroTimeline = function(val) {
+        selectedClienteId = val ? val : null;
+        const select = document.getElementById("selectFiltroClienteTimeline");
+        const selectedText = select.options[select.selectedIndex]?.text || '';
+
+        const titulo = document.getElementById("timelineTituloCliente");
+        if (selectedClienteId) {
+            titulo.textContent = `Historial de Interacciones - ${selectedText.split(' (')[0]}`;
+            window.clienteSeleccionadoCRM = { id: selectedClienteId, nombre: selectedText.split(' (')[0] };
+            sessionStorage.setItem("clienteSeleccionadoCRM", JSON.stringify(window.clienteSeleccionadoCRM));
+        } else {
+            titulo.textContent = "Historial General de Interacciones";
+            window.clienteSeleccionadoCRM = null;
+            sessionStorage.removeItem("clienteSeleccionadoCRM");
+        }
+
+        cargarInteracciones();
+    };
+
+    // 2. CARGAR INTERACCIONES DE MYSQL
+    async function cargarInteracciones() {
+        const container = document.getElementById("timelineListContainer");
+        try {
+            let url = API + "?resource=interacciones";
+            if (selectedClienteId) {
+                url += "&cliente_id=" + encodeURIComponent(selectedClienteId);
+            }
+
+            const respuesta = await fetch(url, { credentials: "same-origin" });
+            const datos = await respuesta.json();
+
+            if (!respuesta.ok) throw new Error(datos.error || "No se pudieron cargar las interacciones.");
+
+            rawInteracciones = Array.isArray(datos.interacciones) ? datos.interacciones : [];
+            aplicarFiltrosLocalesTimeline();
+
+        } catch (error) {
+            container.innerHTML = `
+                <div style="text-align: center; color: var(--danger); padding: 2rem;">
+                    <i class="fas fa-exclamation-circle fa-2x"></i>
+                    <div style="margin-top:8px;">${escaparHTML(error.message)}</div>
+                </div>
+            `;
+            if (typeof mostrarNotificacion === 'function') mostrarNotificacion(error.message, 'error');
+        }
+    }
+
+    // 3. FILTRAR INTERACCIONES EN TIEMPO REAL
+    window.aplicarFiltrosLocalesTimeline = function() {
+        const container = document.getElementById("timelineListContainer");
+        const tipoFiltro = document.getElementById("selectFiltroTipoTimeline")?.value || 'todos';
+        const busquedaText = (document.getElementById("inputBuscarTimeline")?.value || '').toLowerCase().trim();
+
+        let filtradas = rawInteracciones;
+
+        if (tipoFiltro !== 'todos') {
+            filtradas = filtradas.filter(i => String(i.tipo || '').toLowerCase().includes(tipoFiltro.replace('reunion', 'reuni')));
+        }
+
+        if (busquedaText) {
+            filtradas = filtradas.filter(i => 
+                String(i.descripcion || '').toLowerCase().includes(busquedaText) ||
+                String(i.cliente || '').toLowerCase().includes(busquedaText) ||
+                String(i.tipo || '').toLowerCase().includes(busquedaText)
+            );
+        }
+
+        if (filtradas.length === 0) {
+            container.innerHTML = `
+                <div style="text-align: center; color: var(--text-muted); padding: 2.5rem;">
+                    <i class="fas fa-comments fa-2x" style="color:var(--primary); margin-bottom:12px;"></i>
+                    <h4 style="color:var(--text-heading); font-size:1.1rem; margin-bottom:4px;">No hay interacciones coincidentes</h4>
+                    <p style="font-size:0.88rem;">Prueba cambiando el cliente o los filtros, o crea una <strong>+ Nueva Interacción</strong>.</p>
+                </div>
+            `;
+            return;
+        }
+
+        container.innerHTML = filtradas.map(item => {
+            const visual = obtenerVisualInteraccion(item.tipo);
+            return `
+                <div class="crm-timeline-item">
+                    <div class="crm-timeline-icon" style="background-color: ${visual.bg};">
+                        <i class="fas ${visual.icono}"></i>
+                    </div>
+                    <div class="crm-timeline-card">
+                        <div class="crm-timeline-header">
+                            <div class="crm-timeline-title">
+                                <span style="text-transform: capitalize; color:var(--text-heading); font-weight:700;">${escaparHTML(item.tipo)}</span>
+                                ${item.cliente ? `<span style="font-weight:600; color:var(--primary); margin-left:8px;">— ${escaparHTML(item.cliente)}</span>` : ''}
+                            </div>
+                            <div class="crm-timeline-date">
+                                <i class="far fa-clock" style="margin-right:4px;"></i> ${formatearFecha(item.fecha)}
+                            </div>
+                        </div>
+                        <div class="crm-timeline-body">
+                            ${escaparHTML(item.descripcion)}
+                        </div>
+                        <div class="crm-timeline-meta">
+                            <i class="fas fa-user-circle"></i>
+                            <span>Registrado por: <strong>${escaparHTML(item.responsable || "Admin")}</strong></span>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }).join("");
+    };
+
+    function obtenerVisualInteraccion(tipo) {
+        const valor = String(tipo || "").toLowerCase();
+        if (valor === "llamada") return { icono: "fa-phone", bg: "#10b981" };
+        if (valor === "correo") return { icono: "fa-envelope", bg: "#3b82f6" };
+        if (valor === "whatsapp") return { icono: "fa-comments", bg: "#059669" };
+        if (valor === "reunión" || valor === "reunion") return { icono: "fa-handshake", bg: "#8b5cf6" };
+        return { icono: "fa-sticky-note", bg: "#f59e0b" };
+    }
+
+    function formatearFecha(fecha) {
+        if (!fecha) return "";
+        const objeto = new Date(String(fecha).replace(" ", "T"));
+        if (isNaN(objeto.getTime())) return escaparHTML(fecha);
+        return objeto.toLocaleString("es-MX", {
+            day: "2-digit", month: "2-digit", year: "numeric",
+            hour: "2-digit", minute: "2-digit"
+        });
+    }
+
+    function escaparHTML(valor) {
+        return String(valor ?? "")
+            .replaceAll("&", "&amp;")
+            .replaceAll("<", "&lt;")
+            .replaceAll(">", "&gt;")
+            .replaceAll('"', "&quot;")
+            .replaceAll("'", "&#039;");
+    }
+
+    window.volverNavegacionTimeline = function () {
+        if (selectedClienteId) {
+            loadExternalView("crm-detalle-cliente.html", null);
+        } else {
+            loadExternalView("crm-clientes.html", null);
+        }
+    };
+
+    // Inicialización
+    cargarClientesEnDropdown();
+    cargarInteracciones();
+    autoRefreshInterval = setInterval(cargarInteracciones, 5000);
+
+    window.addEventListener('crm-interaction-updated', function listener() {
+        cargarInteracciones();
+    });
+})();
+</script>

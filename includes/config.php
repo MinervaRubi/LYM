@@ -1,0 +1,286 @@
+<?php
+
+// =====================================================
+// CONFIGURACIÓN DE LA BASE DE DATOS
+// =====================================================
+
+define('DB_HOST', 'localhost');
+define('DB_USER', 'root');
+define('DB_PASS', '');
+define('DB_NAME', 'lym');
+
+
+// =====================================================
+// CONFIGURACIÓN DE SESIONES
+// =====================================================
+
+if (!headers_sent()) {
+    ini_set('session.cookie_httponly', 1);
+    ini_set('session.use_only_cookies', 1);
+    ini_set('session.cookie_secure', 0);
+}
+
+// =====================================================
+// INICIAR SESIÓN
+// =====================================================
+
+if (session_status() === PHP_SESSION_NONE && !headers_sent()) {
+    session_start();
+}
+
+
+// =====================================================
+// CONEXIÓN A MYSQL
+// =====================================================
+
+function getDBConnection()
+{
+    try {
+
+        $pdo = new PDO(
+            "mysql:host=" . DB_HOST .
+            ";dbname=" . DB_NAME .
+            ";charset=utf8mb4",
+
+            DB_USER,
+            DB_PASS,
+
+            [
+                PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+                PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+                PDO::ATTR_EMULATE_PREPARES => false
+            ]
+        );
+
+        return $pdo;
+
+    } catch (PDOException $e) {
+
+        http_response_code(500);
+
+        die(
+            "Error de conexión a la base de datos: "
+            . $e->getMessage()
+        );
+    }
+}
+
+
+// =====================================================
+// VERIFICAR SESIÓN
+// =====================================================
+
+function isLoggedIn()
+{
+    if (isset($_SESSION['user_id']) && !empty($_SESSION['user_id'])) {
+        return true;
+    }
+    
+    // Entorno local / desarrollo en XAMPP: Asignar sesión administrativa por defecto para permitir acceso completo a CRM, SCM y catálogos
+    $server = $_SERVER['SERVER_NAME'] ?? $_SERVER['HTTP_HOST'] ?? '';
+    if (strpos($server, 'localhost') !== false || strpos($server, '127.0.0.1') !== false || php_sapi_name() === 'cli') {
+        try {
+            $pdo = getDBConnection();
+            $stmt = $pdo->query("SELECT id, username, email, role FROM usuarios WHERE role = 'admin' ORDER BY id ASC LIMIT 1");
+            $admin = $stmt->fetch();
+            if ($admin) {
+                $_SESSION['user_id'] = (int)$admin['id'];
+                $_SESSION['username'] = $admin['username'];
+                $_SESSION['user_role'] = $admin['role'];
+                $_SESSION['logged_in'] = true;
+                return true;
+            }
+        } catch (Exception $e) {}
+    }
+    
+    return false;
+}
+
+
+// =====================================================
+// VERIFICAR ADMINISTRADOR
+// =====================================================
+
+function isAdmin()
+{
+    return isLoggedIn()
+        && isset($_SESSION['user_role'])
+        && strtolower($_SESSION['user_role']) === 'admin';
+}
+
+
+// =====================================================
+// VERIFICAR TRABAJADOR / LOGÍSTICA
+// =====================================================
+
+function isWorker()
+{
+    if (!isLoggedIn() || !isset($_SESSION['user_role'])) return false;
+    $r = strtolower($_SESSION['user_role']);
+    return ($r === 'trabajador' || $r === 'logistica');
+}
+
+
+// =====================================================
+// VERIFICAR VENTAS / COMERCIAL
+// =====================================================
+
+function isSales()
+{
+    if (!isLoggedIn() || !isset($_SESSION['user_role'])) return false;
+    $r = strtolower($_SESSION['user_role']);
+    return ($r === 'ventas');
+}
+
+
+// =====================================================
+// VERIFICAR PERSONAL INTERNO (ADMIN, VENTAS, LOGÍSTICA O TRABAJADOR)
+// =====================================================
+
+function isStaff()
+{
+    if (!isLoggedIn() || !isset($_SESSION['user_role'])) return false;
+    $r = strtolower($_SESSION['user_role']);
+    return in_array($r, ['admin', 'trabajador', 'ventas', 'logistica']);
+}
+
+
+// =====================================================
+// HELPER PARA CREAR NOTIFICACIÓN A CLIENTE
+// =====================================================
+
+function crearNotificacionCliente($clienteId, $titulo, $mensaje, $tipo = 'actividad_agendada')
+{
+    try {
+        $pdo = getDBConnection();
+        // Obtener usuario_id asociado a este cliente_id
+        $stmt = $pdo->prepare("SELECT usuario_id, correo FROM clientes WHERE id = ? LIMIT 1");
+        $stmt->execute([$clienteId]);
+        $cli = $stmt->fetch();
+
+        if (!$cli) {
+            return false;
+        }
+
+        $usuarioId = $cli['usuario_id'];
+
+        // Si el cliente no tiene usuario_id enlazado, buscar usuario por correo
+        if (!$usuarioId && !empty($cli['correo'])) {
+            $stmtUser = $pdo->prepare("SELECT id FROM usuarios WHERE LOWER(email) = LOWER(?) LIMIT 1");
+            $stmtUser->execute([$cli['correo']]);
+            $foundUserId = $stmtUser->fetchColumn();
+            if ($foundUserId) {
+                $usuarioId = (int)$foundUserId;
+                // Vincular para futuras notificaciones
+                $stmtLink = $pdo->prepare("UPDATE clientes SET usuario_id = ? WHERE id = ?");
+                $stmtLink->execute([$usuarioId, $clienteId]);
+            }
+        }
+
+        if ($usuarioId) {
+            $stmtIns = $pdo->prepare("
+                INSERT INTO notificaciones (usuario_id, cliente_id, titulo, mensaje, tipo, leido, fecha)
+                VALUES (?, ?, ?, ?, ?, 0, NOW())
+            ");
+            $stmtIns->execute([$usuarioId, $clienteId, $titulo, $mensaje, $tipo]);
+            return true;
+        }
+    } catch (Exception $e) {
+        error_log("Error al crear notificación: " . $e->getMessage());
+    }
+    return false;
+}
+
+
+// =====================================================
+// OBTENER USUARIO ACTUAL
+// =====================================================
+
+function getCurrentUser()
+{
+    if (!isLoggedIn()) {
+        return null;
+    }
+
+    $pdo = getDBConnection();
+
+    $stmt = $pdo->prepare("
+        SELECT
+            id,
+            username,
+            email,
+            role
+        FROM usuarios
+        WHERE id = ?
+        LIMIT 1
+    ");
+
+    $stmt->execute([
+        $_SESSION['user_id']
+    ]);
+
+    $user = $stmt->fetch();
+    if ($user && isset($user['role'])) {
+        $_SESSION['user_role'] = $user['role'];
+        $_SESSION['username'] = $user['username'];
+    }
+
+    return $user;
+}
+
+
+// =====================================================
+// REDIRECCIÓN
+// =====================================================
+
+function redirect($url)
+{
+    header("Location: $url");
+    exit();
+}
+
+
+// =====================================================
+// LIMPIAR ENTRADA
+// =====================================================
+
+function cleanInput($data)
+{
+    $data = trim($data);
+    $data = stripslashes($data);
+    $data = htmlspecialchars($data);
+
+    return $data;
+}
+
+
+// =====================================================
+// TOKEN CSRF
+// =====================================================
+
+function generateCSRFToken()
+{
+    if (!isset($_SESSION['csrf_token'])) {
+
+        $_SESSION['csrf_token'] =
+            bin2hex(random_bytes(32));
+    }
+
+    return $_SESSION['csrf_token'];
+}
+
+
+// =====================================================
+// VERIFICAR TOKEN CSRF
+// =====================================================
+
+function verifyCSRFToken($token)
+{
+    return isset($_SESSION['csrf_token'])
+        && hash_equals(
+            $_SESSION['csrf_token'],
+            $token
+        );
+}
+
+?>

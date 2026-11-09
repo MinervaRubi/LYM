@@ -1,0 +1,187 @@
+<!-- ==============================================================
+     PANTALLA 3: LISTADO DE CLIENTES (LYM CRM)
+     ARCHIVO: crm-clientes.html
+============================================================== -->
+<style>
+    .crm-header-flex {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin-bottom: 1.5rem;
+    }
+</style>
+
+<div style="display: flex; flex-direction: column; gap: 1.5rem;">
+    <!-- CABECERA -->
+    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+        <div>
+            <h2 style="font-size: 1.6rem; font-weight: 800; color: var(--text-heading); margin:0;">Clientes</h2>
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin-top:2px;">Listado, búsqueda y administración de clientes</p>
+        </div>
+        <button class="crm-btn crm-btn-primary" onclick="abrirModalGlobalCliente()" style="background: linear-gradient(135deg, #10b981, #059669); border:none; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);">
+            <i class="fas fa-user-plus"></i> <span>+ Nuevo cliente</span>
+        </button>
+    </div>
+
+    <!-- BARRA DE BÚSQUEDA Y FILTROS -->
+    <div class="crm-card" style="display: flex; align-items: center; justify-content: space-between; gap: 1.25rem; flex-wrap: wrap; padding: 1rem 1.25rem;">
+        <div class="crm-input-group" style="flex: 1; min-width: 260px;">
+            <i class="fas fa-search"></i>
+            <input type="text" class="crm-input" id="inputBuscarCliente" placeholder="Buscar por nombre, correo o empresa..." oninput="filtrarClientesTabla()">
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;">
+            <div style="display: flex; align-items: center; gap: 8px; font-size: 0.85rem; font-weight: 600; color: var(--text-heading);">
+                <label>Estado:</label>
+                <select class="crm-select" id="selectFiltroEstado" onchange="filtrarClientesTabla()">
+                    <option value="todos">Todos</option>
+                    <option value="activo">Activo</option>
+                    <option value="inactivo">Inactivo</option>
+                </select>
+            </div>
+
+            <div style="display: flex; align-items: center; gap: 8px; font-size: 0.85rem; font-weight: 600; color: var(--text-heading);">
+                <label>Etapa CRM:</label>
+                <select class="crm-select" id="selectFiltroEtapa" onchange="filtrarClientesTabla()">
+                    <option value="todas">Todas</option>
+                    <option value="Prospecto">Prospecto</option>
+                    <option value="Activo">Activo</option>
+                    <option value="Frecuente">Frecuente</option>
+                    <option value="Inactivo">Inactivo</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <!-- TABLA DE CLIENTES -->
+    <div class="crm-table-container">
+        <table class="crm-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Nombre</th>
+                    <th>Empresa</th>
+                    <th>Correo</th>
+                    <th>Teléfono</th>
+                    <th>Etapa CRM</th>
+                    <th>Estado</th>
+                    <th style="text-align: right;">Acciones</th>
+                </tr>
+            </thead>
+            <tbody id="tbodyClientes">
+                <tr>
+                    <td colspan="8" style="text-align: center; padding: 2.5rem; color: var(--text-muted);">
+                        <i class="fas fa-spinner fa-spin fa-2x" style="color:var(--primary); margin-bottom:8px;"></i>
+                        <div>Cargando clientes desde MySQL...</div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+(function initClientesList() {
+    window.filtrarClientesTabla = async function() {
+        const search = document.getElementById('inputBuscarCliente').value.trim();
+        const estado = document.getElementById('selectFiltroEstado').value;
+        const etapa = document.getElementById('selectFiltroEtapa').value;
+
+        const tbody = document.getElementById('tbodyClientes');
+        tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; padding:2rem; color:var(--text-muted);"><i class="fas fa-spinner fa-spin"></i> Filtrando clientes...</td></tr>`;
+
+        try {
+            const url = `php/crm_api.php?resource=clientes&search=${encodeURIComponent(search)}&estado=${encodeURIComponent(estado)}&etapa=${encodeURIComponent(etapa)}`;
+            const resp = await fetch(url);
+            const data = await resp.json();
+
+            if (data.success && Array.isArray(data.clientes)) {
+                if (data.clientes.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; padding:2rem; color:var(--text-muted);">No se encontraron clientes con los filtros seleccionados.</td></tr>`;
+                    return;
+                }
+
+                tbody.innerHTML = data.clientes.map(c => {
+                    const badgeClass = getEtapaBadgeClass(c.etapa_crm);
+                    const isActivo = String(c.estado).toLowerCase() === 'activo';
+                    
+                    return `
+                        <tr>
+                            <td><strong style="color:var(--text-muted);">#${c.id}</strong></td>
+                            <td><strong style="color:var(--text-heading); font-size:0.92rem;">${escapeHtml(c.nombre)}</strong></td>
+                            <td>${escapeHtml(c.empresa)}</td>
+                            <td>${escapeHtml(c.correo)}</td>
+                            <td>${escapeHtml(c.telefono)}</td>
+                            <td><span class="badge ${badgeClass}"><span class="badge-dot"></span>${escapeHtml(c.etapa_crm)}</span></td>
+                            <td><span class="badge ${isActivo ? 'badge-activo' : 'badge-inactivo'}">${isActivo ? 'Activo' : 'Inactivo'}</span></td>
+                            <td style="text-align: right;">
+                                <div style="display:flex; justify-content:flex-end; gap:6px;">
+                                    <button class="crm-btn-icon" title="Ver Detalle" onclick="verDetalleCliente(${c.id}, '${escapeHtml(c.nombre)}')"><i class="fas fa-eye"></i></button>
+                                    <button class="crm-btn-icon" title="Editar Cliente" onclick="abrirModalGlobalEditarCliente(${c.id}, '${escapeHtml(c.nombre)}', '${escapeHtml(c.correo)}', '${escapeHtml(c.telefono)}', '${escapeHtml(c.empresa)}', '${escapeHtml(c.estado)}')"><i class="fas fa-edit"></i></button>
+                                    <button class="crm-btn-icon" title="Cambiar Etapa" onclick="abrirModalGlobalEtapa(${c.id}, '${escapeHtml(c.nombre)}', '${escapeHtml(c.etapa_crm)}')"><i class="fas fa-tags"></i></button>
+                                    <button class="crm-btn-icon" title="Sugerir Descuento" style="color:#6366f1;" onclick="abrirModalGlobalSugerirDescuento(${c.id})"><i class="fas fa-percent"></i></button>
+                                    <button class="crm-btn-icon" title="Nueva Interacción" onclick="abrirModalGlobalInteraccion(${c.id})"><i class="fas fa-comment-plus"></i></button>
+                                    <button class="crm-btn-icon" title="Eliminar Cliente" style="color:var(--danger);" onclick="eliminarClienteConfirm(${c.id})"><i class="fas fa-trash-alt"></i></button>
+                                </div>
+                            </td>
+                        </tr>
+                    `;
+                }).join('');
+            }
+        } catch (e) {
+            tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; color:var(--danger); padding:1.5rem;">Error al conectar con MySQL: ${e.message}</td></tr>`;
+        }
+    };
+    function getEtapaBadgeClass(etapa) {
+        const e = String(etapa || '').toLowerCase();
+        if (e === 'activo') return 'badge-activo';
+        if (e === 'frecuente') return 'badge-frecuente';
+        if (e === 'inactivo') return 'badge-inactivo';
+        return 'badge-prospecto';
+    }
+    window.verDetalleCliente = function(id, nombre) {
+        window.clienteSeleccionadoCRM = { id: id, nombre: nombre };
+        sessionStorage.setItem("clienteSeleccionadoCRM", JSON.stringify(window.clienteSeleccionadoCRM));
+        loadExternalView('crm-detalle-cliente.html', null);
+    };
+
+    window.eliminarClienteConfirm = async function(id) {
+        const confirmed = await mostrarConfirmacion(
+            '¿Seguro que deseas eliminar este cliente de la base de datos?\nEsta acción no se puede deshacer.',
+            {
+                titulo: 'Eliminar Cliente',
+                tipo: 'danger',
+                esPeligroso: true,
+                textoConfirmar: 'Eliminar Cliente',
+                textoCancelar: 'Cancelar'
+            }
+        );
+        if (!confirmed) return;
+
+        try {
+            const resp = await fetch('php/crm_api.php?resource=eliminar_cliente', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id: id })
+            });
+            const data = await resp.json();
+            if (data.success) {
+                mostrarNotificacion('Cliente eliminado correctamente', 'success');
+                filtrarClientesTabla();
+            } else {
+                mostrarNotificacion(data.error || 'No se pudo eliminar el cliente', 'error');
+            }
+        } catch (e) {
+            mostrarNotificacion('Error al eliminar cliente: ' + e.message, 'error');
+        }
+    };
+
+    function escapeHtml(str) {
+        return String(str || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/'/g, "&#039;");
+    }
+
+    filtrarClientesTabla();
+})();
+</script>

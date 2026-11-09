@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Tazas Personalizadas | LYM</title>
+
+    <link rel="stylesheet" href="Proyecto.css">
+    <link rel="stylesheet" href="notifications.css">
+
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="notifications.js"></script>
+</head>
+
+<body>
+
+    <div class="container" style="padding-top:120px; padding-bottom:60px;">
+
+
+        <div class="back-button">
+            <a href="sistema.html" class="btn-back">
+                <i class="fas fa-arrow-left"></i>
+                Volver a la tienda
+            </a>
+        </div>
+
+        <div class="producto-card">
+            <div class="producto-container">
+
+                <!-- Imagen -->
+                <div class="producto-image">
+                    <img src="imagen/taza.jpeg" alt="Taza personalizada" style="width:200px;">
+                    <div class="producto-overlay">
+                        <span class="precio">Desde $85</span>
+                    </div>
+                </div>
+
+                <!-- Información -->
+                <div class="producto-content">
+                    <h3>Tazas Personalizadas</h3>
+
+                    <ul class="producto-features">
+                        <li><i class="fas fa-check"></i> Diseños personalizados</li>
+                        <li><i class="fas fa-check"></i> Alta calidad de impresión</li>
+                        <li><i class="fas fa-check"></i> Ideales para regalo</li>
+                    </ul>
+
+                    <h4>Selecciona tu taza:</h4>
+
+                    <select class="select-producto" id="opcionesProducto" data-producto="Taza personalizada"
+                        data-producto-id="1"
+                        data-mensaje="mensajeAgregado">
+                        <option value="85">Taza blanca estándar - $85</option>
+                        <option value="95">Taza mágica (cambia con calor) - $95</option>
+                        <option value="120">Taza con asa y/o interior de color - $120</option>
+                    </select>
+
+                    <label for="cantidadProducto">Cantidad:</label>
+                    <input type="number" id="cantidadProducto" min="1" max="100" value="1">
+                    <br><br>
+
+                    <!-- Botones -->
+                    <div class="producto-actions" style="display:flex; gap:12px; flex-wrap:wrap;">
+                        <button class="btn btn-primary" onclick="agregarCarritoDesdeSelect('opcionesProducto')">
+                            <i class="fas fa-cart-plus"></i> Agregar al carrito
+                        </button>
+
+                        <a href="carrito.html" class="btn btn-outline">
+                            <i class="fas fa-shopping-cart"></i> Ver carrito
+                        </a>
+
+                        <a href="prodrelacionados .html" class="btn btn-outline">
+                            Productos relacionados
+                        </a>
+                    </div>
+
+                    <div data-eval-producto="Tazas Personalizadas"></div>
+
+                    <div id="resenasProductoDetalle" style="margin-top: 20px;"></div>
+
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        function agregarCarritoDesdeSelect(selectId) {
+
+            const select = document.getElementById(selectId);
+            const cantidadInput = document.getElementById("cantidadProducto");
+
+            // seguridad
+            if (!select || !cantidadInput) {
+                mostrarNotificacion("Error: no se encontró el producto o la cantidad", "error");
+                return;
+            }
+
+            const producto = select.dataset.producto;
+            const productoId = select.dataset.productoId ? Number(select.dataset.productoId) : 1;
+
+            const descripcion = select.options[select.selectedIndex].text;
+            const precio = Number(select.value);
+            let cantidad = Number(cantidadInput.value);
+
+            // evitar cantidades inválidas
+            if (isNaN(cantidad) || cantidad <= 0) {
+                cantidad = 1;
+                cantidadInput.value = 1;
+            }
+
+            let carrito = JSON.parse(localStorage.getItem("carrito")) || [];
+
+            // buscar si ya existe
+            const existente = carrito.find(item =>
+                item.producto === producto && item.descripcion === descripcion
+            );
+
+            if (existente) {
+                existente.cantidad += cantidad;
+                if (!existente.producto_id) existente.producto_id = productoId;
+            } else {
+                carrito.push({
+                    producto: producto,
+                    producto_id: productoId,
+                    descripcion: descripcion,
+                    precio: precio,
+                    cantidad: cantidad
+                });
+            }
+
+            // guardar
+            localStorage.setItem("carrito", JSON.stringify(carrito));
+
+            // Notificación visual Toast
+            mostrarNotificacion(`"${descripcion}" agregado al carrito (${cantidad} pza${cantidad > 1 ? 's' : ''}).`, 'success', 'Producto Agregado');
+
+            cantidadInput.value = 1;
+        }
+    </script>
+
+    <!-- EVALUACIONES LYM -->
+    <script src="evaluaciones.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            if (typeof renderEvaluacionesProductoDetalle === 'function') {
+                renderEvaluacionesProductoDetalle('Tazas Personalizadas', 'resenasProductoDetalle');
+            }
+        });
+    </script>
+
+</body>
+
+</html>
