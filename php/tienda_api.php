@@ -421,8 +421,9 @@ try {
     // ==============================================================
     if ($resource === 'promociones') {
         // Validar un cupón específico
-        if (isset($_GET['validar_codigo'])) {
-            $codigo = strtoupper(trim($_GET['validar_codigo']));
+        $codigoBuscado = isset($_GET['codigo']) ? trim($_GET['codigo']) : (isset($_GET['validar_codigo']) ? trim($_GET['validar_codigo']) : '');
+        if (!empty($codigoBuscado)) {
+            $codigo = strtoupper($codigoBuscado);
             $stmt = $pdo->prepare("
                 SELECT * FROM promociones 
                 WHERE UPPER(codigo) = ? AND estado = 'activo'
@@ -434,9 +435,18 @@ try {
             $promo = $stmt->fetch();
 
             if ($promo) {
+                $pct = (float)$promo['valor'];
                 echo json_encode([
                     'success' => true,
                     'valido' => true,
+                    'cupon' => [
+                        'id' => (int)$promo['id'],
+                        'codigo' => $promo['codigo'],
+                        'porcentaje' => $pct,
+                        'tipo_descuento' => $promo['tipo_descuento'],
+                        'valor' => $pct,
+                        'nombre' => $promo['nombre']
+                    ],
                     'promocion' => $promo,
                     'mensaje' => "Cupón aplicado: {$promo['nombre']}"
                 ]);

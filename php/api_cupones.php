@@ -23,6 +23,32 @@ try {
         exit();
     }
 
+    // 1. Buscar en tabla promociones
+    $stmtPromo = $pdo->prepare("
+        SELECT id, nombre, valor, codigo, estado 
+        FROM promociones 
+        WHERE UPPER(TRIM(codigo)) = UPPER(?) AND estado = 'activo'
+        LIMIT 1
+    ");
+    $stmtPromo->execute([$codigo]);
+    $promo = $stmtPromo->fetch(PDO::FETCH_ASSOC);
+
+    if ($promo) {
+        $pct = (float)$promo['valor'];
+        echo json_encode([
+            'success' => true,
+            'cupon' => [
+                'id' => (int)$promo['id'],
+                'codigo' => $promo['codigo'],
+                'porcentaje' => $pct,
+                'nombre' => $promo['nombre']
+            ],
+            'message' => "¡Cupón de {$pct}% de descuento aplicado con éxito!"
+        ]);
+        exit();
+    }
+
+    // 2. Fallback a solicitudes_descuento
     $stmt = $pdo->prepare("
         SELECT id, cliente_id, porcentaje, motivo, estado, codigo_cupon
         FROM solicitudes_descuento
@@ -45,7 +71,7 @@ try {
     } else {
         echo json_encode([
             'success' => false,
-            'error' => 'Cupón no válido o no se encuentra aprobado por el administrador.'
+            'error' => 'Cupón no válido o no se encuentra activo.'
         ]);
     }
 } catch (Exception $e) {
