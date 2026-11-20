@@ -44,6 +44,16 @@
 </div>
 
 <script>
+    if (typeof mostrarNotificacion !== 'function') {
+        function mostrarNotificacion(msg, tipo = 'info') {
+            if (typeof showNotification === 'function') {
+                showNotification(msg, tipo);
+            } else {
+                alert(msg);
+            }
+        }
+    }
+
     async function cargarImpuestosAdmin() {
         try {
             const resp = await fetch("php/tienda_api.php?resource=impuestos");

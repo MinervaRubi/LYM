@@ -59,6 +59,24 @@
 </div>
 
 <script>
+    if (typeof escapeHtml !== 'function') {
+        function escapeHtml(str) {
+            return String(str || '').replace(/[&<>"']/g, function(m) {
+                return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m];
+            });
+        }
+    }
+
+    if (typeof mostrarNotificacion !== 'function') {
+        function mostrarNotificacion(msg, tipo = 'info') {
+            if (typeof showNotification === 'function') {
+                showNotification(msg, tipo);
+            } else {
+                alert(msg);
+            }
+        }
+    }
+
     async function cargarListaPromociones() {
         const tbody = document.getElementById("tablaPromocionesBody");
         if (!tbody) return;
@@ -79,7 +97,7 @@
                         <tr>
                             <td><strong style="color:var(--primary); font-family:monospace; font-size:1.05rem;">${escapeHtml(c.codigo)}</strong></td>
                             <td style="font-weight:700; color:#10b981;">${c.porcentaje}% OFF</td>
-                            <td>${c.fecha_fin || 'Sin límite'}</td>
+                            <td>${escapeHtml(c.fecha_fin || 'Sin límite')}</td>
                             <td>
                                 <span class="crm-badge" style="background:${isActivo ? '#dcfce7' : '#fee2e2'}; color:${isActivo ? '#15803d' : '#b91c1c'};">
                                     ${isActivo ? 'Activo' : 'Inactivo'}
@@ -93,9 +111,12 @@
                         </tr>
                     `;
                 }).join('');
+            } else {
+                tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:#ef4444; padding:20px;">${escapeHtml(data.error || 'No se pudieron obtener las promociones.')}</td></tr>`;
             }
         } catch (e) {
-            tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:#ef4444; padding:20px;">Error al consultar cupones.</td></tr>`;
+            console.error("Error al consultar promociones:", e);
+            tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:#ef4444; padding:20px;">Error al consultar cupones (${escapeHtml(e.message)}).</td></tr>`;
         }
     }
 

@@ -694,6 +694,22 @@
     <script>
         let currentLoadedView = 'crm-dashboard.html';
 
+        function escapeHtml(str) {
+            return String(str || '').replace(/[&<>"']/g, function(m) {
+                return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m];
+            });
+        }
+        window.escapeHtml = escapeHtml;
+
+        function mostrarNotificacion(msg, tipo = 'info', titulo = '') {
+            if (typeof showNotification === 'function') {
+                showNotification(msg, tipo);
+            } else {
+                alert(msg);
+            }
+        }
+        window.mostrarNotificacion = mostrarNotificacion;
+
         /* MANEJO DE ACORDEONES CRM Y SCM */
         function toggleAccordion(module) {
             if (module === 'CRM') {

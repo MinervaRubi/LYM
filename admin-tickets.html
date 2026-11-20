@@ -65,6 +65,24 @@
 </div>
 
 <script>
+    if (typeof escapeHtml !== 'function') {
+        function escapeHtml(str) {
+            return String(str || '').replace(/[&<>"']/g, function(m) {
+                return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m];
+            });
+        }
+    }
+
+    if (typeof mostrarNotificacion !== 'function') {
+        function mostrarNotificacion(msg, tipo = 'info') {
+            if (typeof showNotification === 'function') {
+                showNotification(msg, tipo);
+            } else {
+                alert(msg);
+            }
+        }
+    }
+
     let ticketsAdminEnMemoria = [];
 
     async function cargarTicketsAdmin() {
