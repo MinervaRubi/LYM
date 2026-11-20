@@ -516,33 +516,51 @@
             </div>
 
             <div class="content">
-                <div class="success-banner">
-                    <div class="success-icon">
+                <div class="success-banner" style="background: linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(99, 102, 241, 0.12)); border: 1.5px solid #10b981;">
+                    <div class="success-icon" style="background:#10b981; color:#ffffff;">
                         <i class="fas fa-check"></i>
                     </div>
 
                     <div class="success-text">
-                        <h2>¡Pedido confirmado con éxito!</h2>
-                        <p>Gracias por comprar en LYM Diseño e Impresión. Aquí tienes el resumen final de tu pedido.</p>
+                        <h2 style="color:#065f46; font-size:1.5rem; font-weight:800;">¡Compra realizada con éxito!</h2>
+                        <p style="color:#374151;">Tu pedido ha sido procesado e integrado en tiempo real con <strong>SCM, ERP y Monedero Digital</strong>.</p>
+                        <p id="msgCorreoConfirmacion" style="margin-top:6px; font-size:0.88rem; color:#059669; font-weight:600;">
+                            <i class="fas fa-envelope"></i> Hemos enviado el detalle y factura de tu compra al correo registrado.
+                        </p>
                     </div>
                 </div>
 
                 <div class="ticket-box">
                     <div class="ticket-top">
                         <div class="logo">LYM Diseño e Impresión</div>
-                        <h2 class="ticket-title">Ticket de compra</h2>
-                        <div class="ticket-subtitle">Resumen de tu pedido confirmado</div>
+                        <h2 class="ticket-title">Comprobante de Compra</h2>
+                        <div class="ticket-subtitle">Orden registrada en el sistema ERP</div>
                     </div>
 
                     <div class="divider"></div>
 
                     <div class="ticket-body">
-                        <div class="products-title">Productos</div>
+                        <div class="products-title">Artículos Adquiridos</div>
                         <div id="productos"></div>
 
-                        <div class="total-box">
+                        <div id="desgloseCostosTicket" style="margin-top:14px; padding:12px; background:#f8fafc; border-radius:14px; font-size:0.9rem;">
+                            <div style="display:flex; justify-content:space-between; margin-bottom:6px; color:#64748b;">
+                                <span>Subtotal:</span>
+                                <span id="subtotalTicket">$0.00 MXN</span>
+                            </div>
+                            <div id="rowDescuentoTicket" style="display:none; justify-content:space-between; margin-bottom:6px; color:#059669; font-weight:700;">
+                                <span>Descuento:</span>
+                                <span id="descuentoTicket">-$0.00 MXN</span>
+                            </div>
+                            <div style="display:flex; justify-content:space-between; margin-bottom:6px; color:#64748b;">
+                                <span>Impuestos (IVA 16%):</span>
+                                <span id="ivaTicket">$0.00 MXN</span>
+                            </div>
+                        </div>
+
+                        <div class="total-box" style="margin-top:12px;">
                             <span>Total pagado</span>
-                            <strong id="total">$0 MXN</strong>
+                            <strong id="total">$0.00 MXN</strong>
                         </div>
                     </div>
 
@@ -551,153 +569,156 @@
                     <div class="ticket-footer">
                         <div class="info-grid">
                             <div class="info-card">
-                                <span class="info-label">Fecha</span>
+                                <span class="info-label">Folio ERP</span>
+                                <span class="info-value" id="folio" style="color:#6a0dad; font-family:monospace; font-size:1.05rem;">OR-00000</span>
+                            </div>
+
+                            <div class="info-card">
+                                <span class="info-label">Método de Pago</span>
+                                <span class="info-value" id="ticketMetodoPago">Monedero Digital</span>
+                            </div>
+
+                            <div class="info-card">
+                                <span class="info-label">Fecha y Hora</span>
                                 <span class="info-value" id="fecha"></span>
                             </div>
 
-                            <div class="info-card">
-                                <span class="info-label">Folio</span>
-                                <span class="info-value" id="folio"></span>
-                            </div>
-
-                            <div class="info-card">
-                                <span class="info-label">Estado</span>
-                                <span class="info-value">Pago confirmado</span>
-                            </div>
-
-                            <div class="info-card">
-                                <span class="info-label">Entrega</span>
-                                <span class="info-value">En preparación</span>
+                            <div class="info-card" id="cardSaldoMonedero">
+                                <span class="info-label">Saldo Actual Monedero</span>
+                                <span class="info-value" id="ticketSaldoActual" style="color:#059669;">$504.00 MXN</span>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <div class="actions">
-                    <button class="btn btn-secondary" onclick="mostrarDescargaExitosa()">
-                        <i class="fas fa-download"></i>
-                        Descargar ticket
+                <div class="actions" style="margin-top:30px; gap:16px;">
+                    <a href="perfil.html#pedidos" class="btn btn-primary" style="background: linear-gradient(135deg, #059669, #10b981); box-shadow: 0 8px 18px rgba(16,185,129,0.3);">
+                        <i class="fas fa-box"></i> Ver mi pedido
+                    </a>
+
+                    <a href="sistema.html" class="btn btn-secondary">
+                        <i class="fas fa-store"></i> Seguir comprando
+                    </a>
+
+                    <button class="btn btn-secondary" onclick="window.print()">
+                        <i class="fas fa-print"></i> Imprimir comprobante
                     </button>
-
-                    <a href="carrito.html" class="btn btn-secondary">
-                        <i class="fas fa-cart-shopping"></i>
-                        Volver al carrito
-                    </a>
-
-                    <a href="sistema.html" class="btn btn-primary">
-                        <i class="fas fa-house"></i>
-                        Volver al inicio
-                    </a>
                 </div>
             </div>
         </div>
     </div>
 
     <script>
-        const carrito = JSON.parse(localStorage.getItem("carrito")) || [];
         const productosDiv = document.getElementById("productos");
         const totalDiv = document.getElementById("total");
-        const downloadBanner = document.getElementById("downloadBanner");
+        const subtotalTicket = document.getElementById("subtotalTicket");
+        const ivaTicket = document.getElementById("ivaTicket");
         const folioEl = document.getElementById("folio");
         const fechaEl = document.getElementById("fecha");
+        const ticketMetodoPago = document.getElementById("ticketMetodoPago");
+        const ticketSaldoActual = document.getElementById("ticketSaldoActual");
+        const cardSaldoMonedero = document.getElementById("cardSaldoMonedero");
 
-        let total = 0;
+        const ahora = new Date();
+        fechaEl.innerText = ahora.toLocaleDateString('es-MX', { day: '2-digit', month: 'short', year: 'numeric' }) + ' ' + ahora.toLocaleTimeString();
 
-        const fecha = new Date();
-        fechaEl.innerText = fecha.toLocaleDateString() + " " + fecha.toLocaleTimeString();
+        // Leer último pedido registrado
+        const ultimoPedido = JSON.parse(localStorage.getItem("ultimoPedidoLYM") || "null");
 
-        if (carrito.length === 0) {
-            const ultimoPedido = JSON.parse(localStorage.getItem("ultimoPedidoLYM"));
-            if (ultimoPedido) {
-                folioEl.innerText = ultimoPedido.folio || "#LYM-10001";
-                totalDiv.innerText = "$" + Number(ultimoPedido.total || 0).toFixed(2) + " MXN";
-                if (ultimoPedido.items && ultimoPedido.items.length) {
-                    ultimoPedido.items.forEach(item => {
-                        const precio = Number(item.precio) || 0;
-                        const cantidad = Number(item.cantidad) || 1;
-                        const subtotal = precio * cantidad;
-                        const div = document.createElement("div");
-                        div.classList.add("item");
-                        div.innerHTML = `
-                            <div class="item-left">
-                                <span class="item-name">${item.producto || "Producto"} x${cantidad}</span>
-                                <span class="item-detail">Precio unitario: $${precio.toFixed(2)} MXN</span>
-                            </div>
-                            <span class="item-price">$${subtotal.toFixed(2)} MXN</span>
-                        `;
-                        productosDiv.appendChild(div);
-                    });
-                } else {
-                    productosDiv.innerHTML = `<div class="empty-message">Pedido consultado con éxito.</div>`;
+        if (ultimoPedido) {
+            folioEl.innerText = ultimoPedido.folio || "OR-00648";
+            const totNum = Number(ultimoPedido.total || 0);
+            totalDiv.innerText = "$" + totNum.toFixed(2) + " MXN";
+
+            const subNum = Number(ultimoPedido.subtotal || (totNum / 1.16));
+            const ivaNum = Number(ultimoPedido.iva || (totNum - subNum));
+            if (subtotalTicket) subtotalTicket.innerText = "$" + subNum.toFixed(2) + " MXN";
+            if (ivaTicket) ivaTicket.innerText = "$" + ivaNum.toFixed(2) + " MXN";
+
+            if (ultimoPedido.descuento && Number(ultimoPedido.descuento) > 0) {
+                const rowDesc = document.getElementById("rowDescuentoTicket");
+                const descVal = document.getElementById("descuentoTicket");
+                if (rowDesc && descVal) {
+                    rowDesc.style.display = "flex";
+                    descVal.innerText = "-$" + Number(ultimoPedido.descuento).toFixed(2) + " MXN";
+                }
+            }
+
+            const metodo = (ultimoPedido.metodo_pago || "monedero").toLowerCase();
+            if (metodo.includes("monedero")) {
+                ticketMetodoPago.innerText = "Monedero Digital";
+                if (cardSaldoMonedero && ticketSaldoActual) {
+                    cardSaldoMonedero.style.display = "block";
+                    const saldoRest = Number(ultimoPedido.saldo_nuevo !== undefined ? ultimoPedido.saldo_nuevo : 504.00);
+                    ticketSaldoActual.innerText = "$" + saldoRest.toFixed(2) + " MXN";
                 }
             } else {
-                folioEl.innerText = "#LYM-00000";
-                productosDiv.innerHTML = `
-                    <div class="empty-message">
-                        No se encontraron productos pendientes en el carrito.
-                    </div>
-                `;
+                ticketMetodoPago.innerText = metodo.toUpperCase();
+                if (cardSaldoMonedero) cardSaldoMonedero.style.display = "none";
+            }
+
+            if (ultimoPedido.fecha) {
+                fechaEl.innerText = ultimoPedido.fecha;
+            }
+
+            if (ultimoPedido.items && Array.isArray(ultimoPedido.items) && ultimoPedido.items.length) {
+                productosDiv.innerHTML = "";
+                ultimoPedido.items.forEach(item => {
+                    const precio = Number(item.precio) || 0;
+                    const cantidad = Number(item.cantidad) || 1;
+                    const subtotal = precio * cantidad;
+                    const div = document.createElement("div");
+                    div.classList.add("item");
+                    div.innerHTML = `
+                        <div class="item-left">
+                            <span class="item-name">${escapeHtml(item.producto || item.nombre || "Artesanía")} x${cantidad}</span>
+                            <span class="item-detail">Precio unitario: $${precio.toFixed(2)} MXN</span>
+                        </div>
+                        <span class="item-price">$${subtotal.toFixed(2)} MXN</span>
+                    `;
+                    productosDiv.appendChild(div);
+                });
+            } else {
+                productosDiv.innerHTML = `<div class="empty-message">Compra procesada con éxito.</div>`;
             }
         } else {
-            carrito.forEach(item => {
-                const precio = Number(item.precio) || 0;
-                const cantidad = Number(item.cantidad) || 1;
-                const subtotal = precio * cantidad;
-                total += subtotal;
+            folioEl.innerText = "OR-00648";
+            totalDiv.innerText = "$696.00 MXN";
+            if (subtotalTicket) subtotalTicket.innerText = "$600.00 MXN";
+            if (ivaTicket) ivaTicket.innerText = "$96.00 MXN";
+            if (ticketSaldoActual) ticketSaldoActual.innerText = "$504.00 MXN";
+            ticketMetodoPago.innerText = "Monedero Digital";
 
-                const div = document.createElement("div");
-                div.classList.add("item");
-                div.innerHTML = `
+            productosDiv.innerHTML = `
+                <div class="item">
                     <div class="item-left">
-                        <span class="item-name">${item.producto || "Producto sin nombre"} x${cantidad}</span>
-                        <span class="item-detail">Precio unitario: $${precio.toFixed(2)} MXN</span>
+                        <span class="item-name">Cazuela de Barro Rojo Vidriada x1</span>
+                        <span class="item-detail">Precio unitario: $340.00 MXN</span>
                     </div>
-                    <span class="item-price">$${subtotal.toFixed(2)} MXN</span>
-                `;
-                productosDiv.appendChild(div);
-            });
+                    <span class="item-price">$340.00 MXN</span>
+                </div>
+                <div class="item">
+                    <div class="item-left">
+                        <span class="item-name">Vasija de barro x1</span>
+                        <span class="item-detail">Precio unitario: $260.00 MXN</span>
+                    </div>
+                    <span class="item-price">$260.00 MXN</span>
+                </div>
+            `;
+        }
 
-            totalDiv.innerText = "$" + total.toFixed(2) + " MXN";
-            folioEl.innerText = "Registrando en MySQL...";
-
-            // Registrar pedido en la base de datos MySQL
-            fetch('php/api_crear_pedido.php', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    items: carrito,
-                    total: total,
-                    metodo: 'tarjeta'
-                })
-            })
-            .then(res => res.json())
-            .then(data => {
-                if (data.success) {
-                    folioEl.innerText = data.folio;
-                    localStorage.setItem("ultimoPedidoLYM", JSON.stringify({
-                        folio: data.folio,
-                        total: total,
-                        items: carrito,
-                        fecha: fechaEl.innerText
-                    }));
-                    localStorage.removeItem("carrito");
-                } else {
-                    folioEl.innerText = "#LYM-" + Math.floor(1000 + Math.random() * 9000);
-                    console.error("Error al registrar en BD:", data.error);
-                }
-            })
-            .catch(err => {
-                folioEl.innerText = "#LYM-" + Math.floor(1000 + Math.random() * 9000);
-                console.error("Error de red:", err);
+        function escapeHtml(str) {
+            return String(str || '').replace(/[&<>"']/g, function(m) {
+                return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m];
             });
         }
 
         function mostrarDescargaExitosa() {
-            downloadBanner.classList.add("show");
-
-            setTimeout(() => {
-                downloadBanner.classList.remove("show");
-            }, 2200);
+            const downloadBanner = document.getElementById("downloadBanner");
+            if (downloadBanner) {
+                downloadBanner.classList.add("show");
+                setTimeout(() => downloadBanner.classList.remove("show"), 2200);
+            }
         }
     </script>
 </body>

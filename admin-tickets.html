@@ -1,0 +1,176 @@
+<div class="crm-card">
+    <div class="crm-card-header" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+        <div>
+            <h3 class="crm-card-title"><i class="fas fa-headset" style="color:#7c3aed;"></i> Bandeja de Tickets de Atención a Clientes</h3>
+            <p class="crm-card-subtitle">Atiende solicitudes de soporte, quejas y consultas generadas por los compradores.</p>
+        </div>
+        <button class="crm-btn crm-btn-secondary" onclick="cargarTicketsAdmin()">
+            <i class="fas fa-rotate"></i> Actualizar Bandeja
+        </button>
+    </div>
+
+    <div style="overflow-x:auto; margin-top:16px;">
+        <table class="crm-table">
+            <thead>
+                <tr>
+                    <th>Folio</th>
+                    <th>Cliente</th>
+                    <th>Asunto y Mensaje</th>
+                    <th>Fecha</th>
+                    <th>Estado</th>
+                    <th>Respuesta / Acción</th>
+                </tr>
+            </thead>
+            <tbody id="tablaAdminTicketsBody">
+                <tr>
+                    <td colspan="6" style="text-align:center; padding:30px; color:#94a3b8;">
+                        <i class="fas fa-spinner fa-spin"></i> Cargando tickets...
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- MODAL RESPONDER TICKET -->
+<div class="crm-modal-overlay" id="modalResponderTicket" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:9999; align-items:center; justify-content:center; padding:20px;">
+    <div style="background:#fff; border-radius:18px; max-width:520px; width:100%; padding:24px; box-shadow:0 15px 40px rgba(0,0,0,0.2);">
+        <h4 style="margin:0 0 10px 0; color:#1e293b;"><i class="fas fa-reply" style="color:var(--primary);"></i> Responder Ticket <span id="lblTicketFolioModal">T-103</span></h4>
+        <p id="lblTicketAsuntoModal" style="color:#64748b; font-size:0.9rem; margin-bottom:14px;"></p>
+
+        <form onsubmit="guardarRespuestaTicket(event)">
+            <input type="hidden" id="inputTicketIdResponder">
+            <div class="crm-form-group">
+                <label class="crm-form-label">Cambiar Estado:</label>
+                <select id="selectNuevoEstadoTicket" class="crm-form-select">
+                    <option value="Respondido">Respondido</option>
+                    <option value="En proceso">En proceso</option>
+                    <option value="Cerrado">Cerrado</option>
+                </select>
+            </div>
+
+            <div class="crm-form-group">
+                <label class="crm-form-label">Mensaje de Respuesta al Cliente:</label>
+                <textarea id="textareaRespuestaTicket" class="crm-form-textarea" rows="4" required placeholder="Escribe la respuesta oficial..."></textarea>
+            </div>
+
+            <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:16px;">
+                <button type="button" class="crm-btn crm-btn-secondary" onclick="cerrarModalResponderTicket()">Cancelar</button>
+                <button type="submit" class="crm-btn crm-btn-primary" id="btnEnviarRespuestaTicket">
+                    <i class="fas fa-paper-plane"></i> Enviar Respuesta
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    let ticketsAdminEnMemoria = [];
+
+    async function cargarTicketsAdmin() {
+        const tbody = document.getElementById("tablaAdminTicketsBody");
+        if (!tbody) return;
+
+        try {
+            const resp = await fetch("php/tienda_api.php?resource=tickets&accion=todos_los_tickets");
+            const data = await resp.json();
+
+            if (data.success && Array.isArray(data.tickets)) {
+                ticketsAdminEnMemoria = data.tickets;
+                if (data.tickets.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:24px; color:#94a3b8;">No hay tickets pendientes.</td></tr>`;
+                    return;
+                }
+
+                tbody.innerHTML = data.tickets.map(t => {
+                    const est = t.estado || 'En proceso';
+                    let badgeColor = '#fef3c7; color:#b45309';
+                    if (est.toLowerCase().includes('respondido')) badgeColor = '#dcfce7; color:#15803d';
+                    if (est.toLowerCase().includes('cerrado')) badgeColor = '#f1f5f9; color:#64748b';
+
+                    return `
+                        <tr>
+                            <td><strong style="color:var(--primary); font-family:monospace;">${escapeHtml(t.folio || ('T-' + t.id))}</strong></td>
+                            <td><strong>${escapeHtml(t.cliente_nombre || ('Cliente #' + t.cliente_id))}</strong></td>
+                            <td>
+                                <strong style="color:#1e293b;">${escapeHtml(t.asunto)}</strong>
+                                <div style="font-size:0.82rem; color:#64748b; margin-top:2px;">${escapeHtml(t.mensaje)}</div>
+                                ${t.respuesta ? `<div style="font-size:0.8rem; color:#059669; margin-top:4px; font-weight:600;"><i class="fas fa-check"></i> Resp: ${escapeHtml(t.respuesta)}</div>` : ''}
+                            </td>
+                            <td>${t.created_at || 'Reciente'}</td>
+                            <td>
+                                <span class="crm-badge" style="background:${badgeColor}; font-weight:700;">
+                                    ${escapeHtml(est)}
+                                </span>
+                            </td>
+                            <td>
+                                <button class="crm-btn crm-btn-secondary crm-btn-sm" onclick="abrirModalResponderTicket(${t.id})">
+                                    <i class="fas fa-reply"></i> Responder
+                                </button>
+                            </td>
+                        </tr>
+                    `;
+                }).join('');
+            }
+        } catch (e) {
+            tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:#ef4444; padding:20px;">Error al consultar tickets.</td></tr>`;
+        }
+    }
+
+    function abrirModalResponderTicket(id) {
+        const t = ticketsAdminEnMemoria.find(x => x.id == id);
+        if (!t) return;
+
+        document.getElementById("inputTicketIdResponder").value = t.id;
+        document.getElementById("lblTicketFolioModal").textContent = t.folio || ('T-' + t.id);
+        document.getElementById("lblTicketAsuntoModal").textContent = `Asunto: ${t.asunto} | Cliente: ${t.cliente_nombre || t.cliente_id}`;
+        document.getElementById("textareaRespuestaTicket").value = t.respuesta || "";
+        document.getElementById("selectNuevoEstadoTicket").value = t.estado || "Respondido";
+
+        const modal = document.getElementById("modalResponderTicket");
+        modal.style.display = "flex";
+    }
+
+    function cerrarModalResponderTicket() {
+        document.getElementById("modalResponderTicket").style.display = "none";
+    }
+
+    async function guardarRespuestaTicket(e) {
+        e.preventDefault();
+        const id = document.getElementById("inputTicketIdResponder").value;
+        const respText = document.getElementById("textareaRespuestaTicket").value.trim();
+        const est = document.getElementById("selectNuevoEstadoTicket").value;
+        const btn = document.getElementById("btnEnviarRespuestaTicket");
+
+        btn.disabled = true;
+        btn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Guardando...`;
+
+        try {
+            const resp = await fetch("php/tienda_api.php?resource=tickets", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    id: id,
+                    accion: "responder",
+                    respuesta: respText,
+                    estado: est
+                })
+            });
+            const d = await resp.json();
+            if (d.success) {
+                mostrarNotificacion("Respuesta enviada y ticket actualizado.", "success");
+                cerrarModalResponderTicket();
+                cargarTicketsAdmin();
+            } else {
+                mostrarNotificacion(d.error || "Error al actualizar", "error");
+            }
+        } catch (err) {
+            mostrarNotificacion("Error de conexión", "error");
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = `<i class="fas fa-paper-plane"></i> Enviar Respuesta`;
+        }
+    }
+
+    cargarTicketsAdmin();
+</script>

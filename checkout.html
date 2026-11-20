@@ -566,63 +566,125 @@
 
                     <div class="metodos-pago">
                         <img src="https://upload.wikimedia.org/wikipedia/commons/4/41/Visa_Logo.png" alt="Visa">
-                        <img src="https://upload.wikimedia.org/wikipedia/commons/0/04/Mastercard-logo.png"
-                            alt="Mastercard">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/0/04/Mastercard-logo.png" alt="Mastercard">
                         <img src="https://upload.wikimedia.org/wikipedia/commons/b/b5/PayPal.svg" alt="PayPal">
                         <img src="https://upload.wikimedia.org/wikipedia/commons/5/5e/Oxxo_Logo.svg" alt="OXXO">
                     </div>
 
                     <div class="payment-options">
-                        <!-- TARJETA -->
-                        <a href="Tarjeta.html" class="payment-btn card-option">
+                        <!-- 1. MONEDERO DIGITAL (PANTALLA 5 & 6) -->
+                        <div class="payment-btn ewallet-card" id="btnOpcionMonedero" onclick="abrirModalPagoMonedero()" style="cursor:pointer; border:2px solid #10b981; background: linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(99, 102, 241, 0.08));">
+                            <div class="payment-left">
+                                <div class="payment-icon-box" style="background: rgba(16, 185, 129, 0.2);">
+                                    <i class="fa-solid fa-wallet" style="color:#059669; font-size: 22px;"></i>
+                                </div>
+
+                                <div class="payment-text">
+                                    <strong style="color:#065f46; font-size:15px;"><i class="fa-solid fa-star" style="color:#f59e0b; margin-right:4px;"></i> Monedero Digital LYM</strong>
+                                    <span id="txtSaldoMonederoDesc" style="color:#047857; font-weight:600;">Consultando saldo en vivo...</span>
+                                </div>
+                            </div>
+
+                            <div class="ewallet-credit" id="ewalletCreditBadge" style="background:#10b981; color:#fff; font-size:14px; box-shadow:0 4px 10px rgba(16,185,129,0.3);">$0.00 MXN</div>
+                        </div>
+
+                        <!-- 2. TARJETA -->
+                        <div class="payment-btn card-option" onclick="procesarPagoGenerico('tarjeta')" style="cursor:pointer;">
                             <div class="payment-left">
                                 <div class="payment-icon-box">
                                     <i class="fa-solid fa-credit-card" style="color:#667eea; font-size: 20px;"></i>
                                 </div>
 
                                 <div class="payment-text">
-                                    <strong>Pago con tarjeta</strong>
-                                    <span>Visa, Mastercard y más</span>
+                                    <strong>Pago con tarjeta de crédito/débito</strong>
+                                    <span>Visa, Mastercard y Carnet</span>
                                 </div>
                             </div>
 
                             <i class="fa-solid fa-chevron-right payment-arrow"></i>
-                        </a>
-                        <!-- PAYPAL CON IMAGEN -->
-                        <a href="ticket.html" class="payment-btn paypal-option">
+                        </div>
+
+                        <!-- 3. PAYPAL -->
+                        <div class="payment-btn paypal-option" onclick="procesarPagoGenerico('paypal')" style="cursor:pointer;">
                             <div class="payment-left">
                                 <div class="payment-icon-box">
-                                    <img src="https://upload.wikimedia.org/wikipedia/commons/b/b5/PayPal.svg"
-                                        alt="PayPal">
+                                    <img src="https://upload.wikimedia.org/wikipedia/commons/b/b5/PayPal.svg" alt="PayPal">
                                 </div>
 
                                 <div class="payment-text">
                                     <strong>Pagar con PayPal</strong>
-                                    <span>Usa tu cuenta PayPal para completar el pago</span>
+                                    <span>Pago instantáneo y protección al comprador</span>
                                 </div>
                             </div>
 
                             <i class="fa-solid fa-chevron-right payment-arrow"></i>
-                        </a>
+                        </div>
 
-                        <!-- EWALLET SOLO VISUAL -->
-                        <div class="ewallet-card">
+                        <!-- 4. TRANSFERENCIA SPEI -->
+                        <div class="payment-btn card-option" onclick="procesarPagoGenerico('transferencia')" style="cursor:pointer;">
                             <div class="payment-left">
-                                <div class="payment-icon-box" style="background: rgba(16, 185, 129, 0.15);">
-                                    <i class="fa-solid fa-wallet" style="color:#10b981; font-size: 20px;"></i>
+                                <div class="payment-icon-box" style="background:rgba(245,158,11,0.15);">
+                                    <i class="fa-solid fa-building-columns" style="color:#d97706; font-size: 18px;"></i>
                                 </div>
 
                                 <div class="payment-text">
-                                    <strong>E-Wallet</strong>
-                                    <span>Crédito disponible en tu monedero digital</span>
+                                    <strong>Transferencia bancaria / SPEI / OXXO</strong>
+                                    <span>Genera tu referencia para pagar</span>
                                 </div>
                             </div>
 
-                            <div class="ewallet-credit">$1500 MXN</div>
+                            <i class="fa-solid fa-chevron-right payment-arrow"></i>
                         </div>
                     </div>
 
-                    <div id="paypal-button-container"></div>
+                    <div id="paypal-button-container" style="display:none;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL PANTALLA 6: PAGO CON MONEDERO DIGITAL -->
+    <div id="modalPagoMonedero" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(15,23,42,0.65); backdrop-filter:blur(5px); z-index:9999; align-items:center; justify-content:center; padding:16px;">
+        <div style="background:#ffffff; border-radius:26px; max-width:520px; width:100%; overflow:hidden; box-shadow:0 25px 60px rgba(0,0,0,0.25); border:1.5px solid #10b981; animation:fadeIn 0.25s ease;">
+            <div style="background: linear-gradient(135deg, #059669, #10b981); color:#ffffff; padding:22px 24px; display:flex; justify-content:space-between; align-items:center;">
+                <div style="display:flex; align-items:center; gap:12px;">
+                    <div style="width:42px; height:42px; border-radius:50%; background:rgba(255,255,255,0.2); display:flex; align-items:center; justify-content:center; font-size:19px;">
+                        <i class="fa-solid fa-wallet"></i>
+                    </div>
+                    <div>
+                        <h3 style="margin:0; font-size:1.25rem; font-weight:800;">Pago con Monedero</h3>
+                        <p style="margin:2px 0 0; font-size:0.85rem; opacity:0.95;">Confirma la deducción de tu saldo digital</p>
+                    </div>
+                </div>
+                <button type="button" onclick="cerrarModalPagoMonedero()" style="background:none; border:none; color:#ffffff; font-size:26px; cursor:pointer; line-height:1;">&times;</button>
+            </div>
+
+            <div style="padding:24px;">
+                <div style="background:#f0fdf4; border:1px solid #bbf7d0; border-radius:18px; padding:18px; margin-bottom:20px;">
+                    <div style="display:flex; justify-content:space-between; margin-bottom:12px; font-size:0.95rem; color:#374151;">
+                        <span><i class="fa-solid fa-wallet" style="color:#059669; margin-right:6px;"></i> Saldo disponible:</span>
+                        <strong id="modalSaldoDisponible" style="color:#065f46; font-size:1.15rem;">$1,200.00 MXN</strong>
+                    </div>
+                    <div style="display:flex; justify-content:space-between; margin-bottom:12px; font-size:0.95rem; color:#374151;">
+                        <span><i class="fa-solid fa-receipt" style="color:#6366f1; margin-right:6px;"></i> Total a pagar (con IVA 16%):</span>
+                        <strong id="modalTotalPagar" style="color:#b91c1c; font-size:1.15rem;">$696.00 MXN</strong>
+                    </div>
+                    <hr style="border:0; border-top:1px dashed #86efac; margin:12px 0;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; font-size:1.02rem;">
+                        <span style="font-weight:700; color:#1f2937;"><i class="fa-solid fa-piggy-bank" style="color:#10b981; margin-right:6px;"></i> Saldo después del pago:</span>
+                        <strong id="modalSaldoRestante" style="color:#059669; font-size:1.35rem;">$504.00 MXN</strong>
+                    </div>
+                </div>
+
+                <div id="msgAlertaSaldo" style="display:none; padding:12px 14px; border-radius:12px; font-size:0.9rem; font-weight:600; margin-bottom:18px;"></div>
+
+                <div style="display:flex; gap:12px; justify-content:flex-end; flex-wrap:wrap;">
+                    <button type="button" class="btn-lym btn-secundario" onclick="cerrarModalPagoMonedero()">
+                        Cancelar
+                    </button>
+                    <button type="button" id="btnConfirmarPagoMonedero" class="btn-lym btn-primario" style="background:linear-gradient(135deg, #059669, #10b981); box-shadow:0 8px 18px rgba(16,185,129,0.3);" onclick="confirmarPagoConMonedero()">
+                        <i class="fa-solid fa-circle-check"></i> Confirmar pago
+                    </button>
                 </div>
             </div>
         </div>
@@ -630,46 +692,131 @@
 
     <script>
         let carrito = JSON.parse(localStorage.getItem("carrito")) || [];
+        let desglose = JSON.parse(sessionStorage.getItem("desgloseCompra") || "null");
+        let saldoMonederoActual = 1200.00;
+        let clienteActual = { id: 1, nombre: "Juan Pérez", email: "juan@example.com", direccion: "Av. Tecnológico #123, Aguascalientes, Ags." };
 
         if (carrito.length === 0) {
             carrito = [
-                {
-                    producto: "Taza personalizada LYM",
-                    precio: 85,
-                    cantidad: 1
-                }
+                { id: 1, producto: "Taza Estándar Artesanal", precio: 84.15, cantidad: 2, descripcion: "Taza de cerámica" },
+                { id: 2, producto: "Tapete Afelpado", precio: 300.00, cantidad: 1, descripcion: "Tapete artesanal suave" }
             ];
-
             localStorage.setItem("carrito", JSON.stringify(carrito));
         }
 
         const resumenPago = document.getElementById("resumen-pago");
 
-        function mostrarResumen() {
-            let html = `<div class="productos-lista">`;
-            let total = 0;
+        async function inicializarCheckout() {
+            // 1. Obtener datos de sesión / cliente
+            try {
+                const rS = await fetch("php/check_session.php");
+                const dS = await rS.json();
+                if (dS.authenticated && dS.user) {
+                    clienteActual.id = dS.user.id || 1;
+                    clienteActual.nombre = dS.user.nombre || dS.user.username || "Juan Pérez";
+                    clienteActual.email = dS.user.email || "";
+                }
+            } catch (e) {}
 
-            carrito.forEach(producto => {
-                const precio = Number(producto.precio) || 0;
-                const cantidad = Number(producto.cantidad) || 1;
-                const subtotal = precio * cantidad;
-                total += subtotal;
+            // 2. Obtener saldo de monedero y dirección del cliente
+            try {
+                const rM = await fetch("php/tienda_api.php?resource=monedero&cliente_id=" + clienteActual.id);
+                const dM = await rM.json();
+                if (dM.success) {
+                    saldoMonederoActual = parseFloat(dM.saldo) || 0;
+                    if (dM.cliente && dM.cliente.direccion) {
+                        clienteActual.direccion = dM.cliente.direccion;
+                    }
+                    if (dM.cliente && dM.cliente.nombre) {
+                        clienteActual.nombre = dM.cliente.nombre;
+                    }
+                }
+            } catch (e) {}
 
-                html += `
+            // Actualizar vista de monedero
+            const txtDesc = document.getElementById("txtSaldoMonederoDesc");
+            const tagBadge = document.getElementById("ewalletCreditBadge");
+            if (txtDesc) txtDesc.textContent = `Saldo disponible: $${saldoMonederoActual.toFixed(2)} MXN`;
+            if (tagBadge) tagBadge.textContent = `$${saldoMonederoActual.toFixed(2)} MXN`;
+
+            mostrarResumenCompleto();
+        }
+
+        function mostrarResumenCompleto() {
+            let subtotal = 0;
+            let itemsHtml = '';
+
+            carrito.forEach(p => {
+                const precio = Number(p.precio) || 0;
+                const cant = Number(p.cantidad) || 1;
+                const sub = precio * cant;
+                subtotal += sub;
+
+                itemsHtml += `
                     <div class="producto-item">
                         <div class="producto-info">
-                            <span class="producto-nombre">${producto.producto || "Producto sin nombre"}</span>
-                            <span class="producto-detalle">Cantidad: ${cantidad} | Precio unitario: $${precio.toFixed(2)} MXN</span>
+                            <span class="producto-nombre">${p.producto || p.nombre || "Artesanía"}</span>
+                            <span class="producto-detalle">Cantidad: ${cant} | Unitario: $${precio.toFixed(2)} MXN</span>
                         </div>
-                        <div class="producto-subtotal">$${subtotal.toFixed(2)}</div>
+                        <div class="producto-subtotal">$${sub.toFixed(2)}</div>
                     </div>
                 `;
             });
 
-            html += `</div>
-                <div class="total-box">
-                    <span>Total a pagar</span>
-                    <strong>$${total.toFixed(2)} MXN</strong>
+            let descuento = desglose ? Number(desglose.descuento || 0) : 0;
+            let tasaIva = desglose ? Number(desglose.tasa_iva || 16.0) : 16.0;
+            let subtotalConDesc = Math.max(0, subtotal - descuento);
+            let iva = subtotalConDesc * (tasaIva / 100);
+            let total = subtotalConDesc + iva;
+
+            // Guardar cálculo exacto
+            desglose = {
+                subtotal: subtotal,
+                descuento: descuento,
+                cupon: desglose ? desglose.cupon : null,
+                tasa_iva: tasaIva,
+                iva: iva,
+                total: total,
+                items: carrito
+            };
+            sessionStorage.setItem("desgloseCompra", JSON.stringify(desglose));
+
+            let html = `
+                <!-- DATOS DE ENTREGA -->
+                <div style="background:#ffffff; border-radius:18px; padding:16px 18px; margin-bottom:18px; box-shadow:var(--shadow-soft); border-left:5px solid #10b981;">
+                    <div style="font-size:0.82rem; font-weight:700; color:#059669; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:6px;">
+                        <i class="fa-solid fa-location-dot"></i> Domicilio de entrega
+                    </div>
+                    <div style="font-weight:700; color:#1f2937; font-size:1rem;">${escapeHtml(clienteActual.nombre)}</div>
+                    <div style="color:#4b5563; font-size:0.9rem; margin-top:2px;">${escapeHtml(clienteActual.direccion)}</div>
+                    <div style="color:#6b7280; font-size:0.8rem; margin-top:4px;"><i class="fa-solid fa-clock"></i> Entrega estimada: 2 a 4 días hábiles</div>
+                </div>
+
+                <div class="productos-lista">
+                    ${itemsHtml}
+                </div>
+
+                <!-- DESGLOSE DE COSTOS TRANSPARENTE -->
+                <div style="background:#ffffff; border-radius:18px; padding:16px; margin-top:16px; box-shadow:var(--shadow-soft);">
+                    <div style="display:flex; justify-content:space-between; margin-bottom:8px; font-size:0.92rem; color:#4b5563;">
+                        <span>Subtotal:</span>
+                        <span>$${subtotal.toFixed(2)} MXN</span>
+                    </div>
+                    ${descuento > 0 ? `
+                        <div style="display:flex; justify-content:space-between; margin-bottom:8px; font-size:0.92rem; color:#059669; font-weight:700;">
+                            <span>Descuento aplicado:</span>
+                            <span>-$${descuento.toFixed(2)} MXN</span>
+                        </div>
+                    ` : ''}
+                    <div style="display:flex; justify-content:space-between; margin-bottom:8px; font-size:0.92rem; color:#4b5563;">
+                        <span>Impuestos (IVA ${tasaIva}%):</span>
+                        <span>$${iva.toFixed(2)} MXN</span>
+                    </div>
+                    <hr style="border:0; border-top:1px dashed #e5e7eb; margin:10px 0;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; font-size:1.15rem; font-weight:800; color:#2d1e40;">
+                        <span>Total a pagar:</span>
+                        <span style="color:#6a0dad;">$${total.toFixed(2)} MXN</span>
+                    </div>
                 </div>
             `;
 
@@ -677,54 +824,153 @@
             return total;
         }
 
-        const total = mostrarResumen();
+        // ==============================================================
+        // CONTROL DEL MODAL DE MONEDERO (PANTALLA 6)
+        // ==============================================================
+        function abrirModalPagoMonedero() {
+            if (!carrito || carrito.length === 0) {
+                mostrarNotificacion("Tu carrito está vacío.", "warning");
+                return;
+            }
 
-        function irPagoTarjeta() {
-            window.location.href = "ticket.html";
+            const total = desglose ? Number(desglose.total) : 0;
+            const restante = saldoMonederoActual - total;
+
+            document.getElementById("modalSaldoDisponible").textContent = `$${saldoMonederoActual.toFixed(2)} MXN`;
+            document.getElementById("modalTotalPagar").textContent = `$${total.toFixed(2)} MXN`;
+            document.getElementById("modalSaldoRestante").textContent = `$${restante.toFixed(2)} MXN`;
+
+            const alerta = document.getElementById("msgAlertaSaldo");
+            const btnConfirm = document.getElementById("btnConfirmarPagoMonedero");
+
+            if (restante >= 0) {
+                alerta.style.display = "block";
+                alerta.style.background = "#dcfce7";
+                alerta.style.color = "#15803d";
+                alerta.style.border = "1px solid #86efac";
+                alerta.innerHTML = `<i class="fa-solid fa-check"></i> Saldo suficiente para cubrir el total de tu orden.`;
+                btnConfirm.disabled = false;
+                btnConfirm.style.opacity = "1";
+                btnConfirm.innerHTML = `<i class="fa-solid fa-circle-check"></i> Confirmar pago ($${total.toFixed(2)})`;
+            } else {
+                alerta.style.display = "block";
+                alerta.style.background = "#fee2e2";
+                alerta.style.color = "#b91c1c";
+                alerta.style.border = "1px solid #fca5a5";
+                alerta.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> Saldo insuficiente en tu monedero (faltan $${Math.abs(restante).toFixed(2)} MXN). Recarga fondos en tu perfil o utiliza otro método.`;
+                btnConfirm.disabled = true;
+                btnConfirm.style.opacity = "0.5";
+            }
+
+            const modal = document.getElementById("modalPagoMonedero");
+            modal.style.display = "flex";
         }
 
-        if (typeof paypal !== "undefined") {
-            paypal.Buttons({
-                style: {
-                    layout: 'vertical',
-                    color: 'blue',
-                    shape: 'pill',
-                    label: 'pay'
-                },
+        function cerrarModalPagoMonedero() {
+            document.getElementById("modalPagoMonedero").style.display = "none";
+        }
 
-                createOrder: function (data, actions) {
-                    if (total <= 0) {
-                        mostrarNotificacion("El carrito está vacío. Agrega productos antes de pagar.", "warning");
-                        return;
-                    }
+        async function confirmarPagoConMonedero() {
+            const btn = document.getElementById("btnConfirmarPagoMonedero");
+            btn.disabled = true;
+            btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Procesando en ERP & SCM...`;
 
-                    return actions.order.create({
-                        purchase_units: [{
-                            amount: {
-                                value: total.toFixed(2)
-                            },
-                            description: "Compra en LYM Diseño e Impresión"
-                        }]
-                    });
-                },
+            try {
+                const total = desglose ? Number(desglose.total) : 0;
+                const payload = {
+                    cliente_id: clienteActual.id,
+                    nombre: clienteActual.nombre,
+                    direccion: clienteActual.direccion,
+                    metodo_pago: 'monedero',
+                    subtotal: desglose ? desglose.subtotal : total,
+                    descuento: desglose ? desglose.descuento : 0,
+                    cupon: desglose ? desglose.cupon : null,
+                    iva: desglose ? desglose.iva : 0,
+                    total: total,
+                    items: carrito
+                };
 
-                onApprove: function (data, actions) {
-                    return actions.order.capture().then(function (orderData) {
-                        const nombre = orderData.payer.name.given_name || "cliente";
-                        mostrarNotificacion("¡Gracias por tu compra, " + nombre + "! Procesando tu orden...", "success", "Pago Exitoso");
-                        localStorage.removeItem("carrito");
-                        setTimeout(() => {
-                            window.location.href = "index.html";
-                        }, 1800);
-                    });
-                },
+                const resp = await fetch("php/tienda_api.php?resource=checkout_procesar", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(payload)
+                });
 
-                onError: function (err) {
-                    console.error("Error en PayPal:", err);
-                    mostrarNotificacion("Hubo un error con el pago. Por favor intenta nuevamente o revisa tus fondos.", "error", "Error de Pago");
+                const data = await resp.json();
+
+                if (data.success) {
+                    localStorage.setItem("ultimoPedidoLYM", JSON.stringify(data.orden));
+                    localStorage.removeItem("carrito");
+                    sessionStorage.removeItem("desgloseCompra");
+                    mostrarNotificacion("¡Compra realizada con éxito mediante Monedero Digital!", "success", "Pago Confirmado");
+                    setTimeout(() => {
+                        window.location.href = "ticket.html";
+                    }, 1000);
+                } else {
+                    mostrarNotificacion("Error al procesar: " + (data.error || "fondos insuficientes"), "error", "Error de Pago");
+                    btn.disabled = false;
+                    btn.innerHTML = `<i class="fa-solid fa-circle-check"></i> Intentar nuevamente`;
                 }
-            }).render('#paypal-button-container');
+            } catch (err) {
+                console.error(err);
+                mostrarNotificacion("Error de conexión al procesar el pago.", "error");
+                btn.disabled = false;
+                btn.innerHTML = `<i class="fa-solid fa-circle-check"></i> Confirmar pago`;
+            }
         }
+
+        async function procesarPagoGenerico(metodo) {
+            if (!carrito || carrito.length === 0) {
+                mostrarNotificacion("El carrito está vacío.", "warning");
+                return;
+            }
+
+            mostrarNotificacion(`Procesando orden con ${metodo.toUpperCase()}...`, "info");
+            try {
+                const total = desglose ? Number(desglose.total) : 0;
+                const payload = {
+                    cliente_id: clienteActual.id,
+                    nombre: clienteActual.nombre,
+                    direccion: clienteActual.direccion,
+                    metodo_pago: metodo,
+                    subtotal: desglose ? desglose.subtotal : total,
+                    descuento: desglose ? desglose.descuento : 0,
+                    cupon: desglose ? desglose.cupon : null,
+                    iva: desglose ? desglose.iva : 0,
+                    total: total,
+                    items: carrito
+                };
+
+                const resp = await fetch("php/tienda_api.php?resource=checkout_procesar", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(payload)
+                });
+
+                const data = await resp.json();
+
+                if (data.success) {
+                    localStorage.setItem("ultimoPedidoLYM", JSON.stringify(data.orden));
+                    localStorage.removeItem("carrito");
+                    sessionStorage.removeItem("desgloseCompra");
+                    window.location.href = "ticket.html";
+                } else {
+                    mostrarNotificacion("Error al registrar la orden: " + (data.error || "Intenta nuevamente"), "error");
+                }
+            } catch (e) {
+                window.location.href = "ticket.html";
+            }
+        }
+
+        function escapeHtml(str) {
+            return String(str || '').replace(/[&<>"']/g, function(m) {
+                return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m];
+            });
+        }
+
+        document.addEventListener("DOMContentLoaded", () => {
+            inicializarCheckout();
+        });
     </script>
 
 </body>

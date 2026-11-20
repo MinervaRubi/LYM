@@ -1,0 +1,144 @@
+<div class="crm-card">
+    <div class="crm-card-header" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+        <div>
+            <h3 class="crm-card-title"><i class="fas fa-wallet" style="color:#059669;"></i> Monedero Digital Admin</h3>
+            <p class="crm-card-subtitle">Auditoría de saldos de clientes, bonificaciones y movimientos en tiempo real.</p>
+        </div>
+        <button class="crm-btn crm-btn-primary" onclick="mostrarModalAbonarSaldo()" style="background:#059669;">
+            <i class="fas fa-hand-holding-dollar"></i> Bonificar Saldo a Cliente
+        </button>
+    </div>
+
+    <!-- PANEL BONIFICAR -->
+    <div id="panelAbonarSaldoBox" style="display:none; background:#f0fdf4; border:1px solid #bbf7d0; border-radius:14px; padding:20px; margin-bottom:24px;">
+        <h4 style="margin:0 0 12px 0; color:#065f46;"><i class="fas fa-gift"></i> Abonar Saldo Promocional o Reembolso</h4>
+        <form onsubmit="ejecutarAbonoSaldo(event)" style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:14px; align-items:flex-end;">
+            <div class="crm-form-group" style="margin:0;">
+                <label class="crm-form-label">Cliente Destino:</label>
+                <select id="mAbonarClienteSelect" class="crm-form-select" required>
+                    <option value="1">Cliente #1 - Juan Pérez ($504.00)</option>
+                    <option value="3">Cliente #3 - Carlos López ($1,200.00)</option>
+                </select>
+            </div>
+            <div class="crm-form-group" style="margin:0;">
+                <label class="crm-form-label">Monto a Abonar (MXN):</label>
+                <input type="number" id="mAbonarMonto" class="crm-form-input" min="10" step="10" required value="200">
+            </div>
+            <div class="crm-form-group" style="margin:0;">
+                <label class="crm-form-label">Concepto:</label>
+                <input type="text" id="mAbonarConcepto" class="crm-form-input" required value="Bono de Fidelización Admin">
+            </div>
+            <div style="display:flex; gap:8px;">
+                <button type="submit" class="crm-btn crm-btn-primary" style="background:#059669;">
+                    <i class="fas fa-check"></i> Aplicar Abono
+                </button>
+                <button type="button" class="crm-btn crm-btn-secondary" onclick="ocultarModalAbonarSaldo()">
+                    Cancelar
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- TABLA DE MOVIMIENTOS GENERALES -->
+    <h4 style="margin:16px 0 10px 0; color:#1e293b;"><i class="fas fa-clock-rotate-left"></i> Registro General de Transacciones de Monedero</h4>
+    <div style="overflow-x:auto;">
+        <table class="crm-table">
+            <thead>
+                <tr>
+                    <th>Fecha</th>
+                    <th>Cliente</th>
+                    <th>Concepto</th>
+                    <th>Monto</th>
+                    <th>Saldo Final</th>
+                </tr>
+            </thead>
+            <tbody id="tablaAdminMonederoBody">
+                <tr>
+                    <td colspan="5" style="text-align:center; padding:30px; color:#94a3b8;">
+                        <i class="fas fa-spinner fa-spin"></i> Cargando transacciones de la BD...
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    async function cargarMonederoAdmin() {
+        const tbody = document.getElementById("tablaAdminMonederoBody");
+        if (!tbody) return;
+
+        try {
+            const resp = await fetch("php/tienda_api.php?resource=monedero&accion=todos_los_movimientos");
+            const data = await resp.json();
+
+            if (data.success && Array.isArray(data.movimientos)) {
+                if (data.movimientos.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding:24px; color:#94a3b8;">No hay transacciones registradas.</td></tr>`;
+                    return;
+                }
+
+                tbody.innerHTML = data.movimientos.map(m => {
+                    const monto = parseFloat(m.monto) || 0;
+                    const isPos = monto >= 0;
+                    const saldoRes = parseFloat(m.saldo_resultante) || 0;
+
+                    return `
+                        <tr>
+                            <td>${m.created_at || 'Reciente'}</td>
+                            <td><strong>${escapeHtml(m.cliente_nombre || ('Cliente #' + m.cliente_id))}</strong></td>
+                            <td>${escapeHtml(m.concepto)}</td>
+                            <td style="font-weight:700; color:${isPos ? '#10b981' : '#ef4444'};">
+                                ${isPos ? '+' : ''}$${monto.toFixed(2)} MXN
+                            </td>
+                            <td style="font-weight:700; color:#4b0082;">$${saldoRes.toFixed(2)} MXN</td>
+                        </tr>
+                    `;
+                }).join('');
+            }
+        } catch (e) {
+            tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:#ef4444; padding:20px;">Error al obtener transacciones.</td></tr>`;
+        }
+    }
+
+    function mostrarModalAbonarSaldo() {
+        document.getElementById("panelAbonarSaldoBox").style.display = "block";
+    }
+
+    function ocultarModalAbonarSaldo() {
+        document.getElementById("panelAbonarSaldoBox").style.display = "none";
+    }
+
+    async function ejecutarAbonoSaldo(e) {
+        e.preventDefault();
+        const cid = document.getElementById("mAbonarClienteSelect").value;
+        const monto = parseFloat(document.getElementById("mAbonarMonto").value);
+        const conc = document.getElementById("mAbonarConcepto").value.trim();
+
+        try {
+            const resp = await fetch("php/tienda_api.php?resource=monedero", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    cliente_id: cid,
+                    accion: "recarga",
+                    monto: monto,
+                    concepto: conc,
+                    metodo: "bono_admin"
+                })
+            });
+            const d = await resp.json();
+            if (d.success) {
+                mostrarNotificacion("Abono de $" + monto.toFixed(2) + " aplicado correctamente.", "success");
+                ocultarModalAbonarSaldo();
+                cargarMonederoAdmin();
+            } else {
+                mostrarNotificacion(d.error || "Error al abonar", "error");
+            }
+        } catch (err) {
+            mostrarNotificacion("Error de conexión", "error");
+        }
+    }
+
+    cargarMonederoAdmin();
+</script>

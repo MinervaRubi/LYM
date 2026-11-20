@@ -1,0 +1,158 @@
+<div class="crm-card">
+    <div class="crm-card-header" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+        <div>
+            <h3 class="crm-card-title"><i class="fas fa-tags" style="color:var(--primary);"></i> Gestión de Promociones y Cupones</h3>
+            <p class="crm-card-subtitle">Crea y administra códigos de descuento promocionales para la tienda en línea.</p>
+        </div>
+        <button class="crm-btn crm-btn-primary" onclick="mostrarFormNuevoCupon()">
+            <i class="fas fa-plus"></i> Nuevo Cupón
+        </button>
+    </div>
+
+    <!-- FORMULARIO NUEVO CUPÓN -->
+    <div id="formNuevoCuponBox" style="display:none; background:#f8fafc; border:1px solid #e2e8f0; border-radius:14px; padding:20px; margin-bottom:24px;">
+        <h4 style="margin:0 0 12px 0; color:#1e293b;"><i class="fas fa-ticket"></i> Crear Código de Cupón</h4>
+        <form onsubmit="guardarNuevoCupon(event)" style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:14px; align-items:flex-end;">
+            <div class="crm-form-group" style="margin:0;">
+                <label class="crm-form-label">Código:</label>
+                <input type="text" id="mCuponCodigo" class="crm-form-input" required placeholder="Ej: VERANO20" style="text-transform:uppercase;">
+            </div>
+            <div class="crm-form-group" style="margin:0;">
+                <label class="crm-form-label">Descuento (%):</label>
+                <input type="number" id="mCuponPorcentaje" class="crm-form-input" min="1" max="90" required value="10">
+            </div>
+            <div class="crm-form-group" style="margin:0;">
+                <label class="crm-form-label">Fecha de Expiración:</label>
+                <input type="date" id="mCuponExpiracion" class="crm-form-input" required value="2027-12-31">
+            </div>
+            <div style="display:flex; gap:8px;">
+                <button type="submit" class="crm-btn crm-btn-primary" id="btnGuardarCupon">
+                    <i class="fas fa-save"></i> Guardar
+                </button>
+                <button type="button" class="crm-btn crm-btn-secondary" onclick="ocultarFormNuevoCupon()">
+                    Cancelar
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <div style="overflow-x:auto;">
+        <table class="crm-table">
+            <thead>
+                <tr>
+                    <th>Código</th>
+                    <th>Descuento</th>
+                    <th>Vigencia</th>
+                    <th>Estado</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody id="tablaPromocionesBody">
+                <tr>
+                    <td colspan="5" style="text-align:center; padding:30px; color:#94a3b8;">
+                        <i class="fas fa-spinner fa-spin"></i> Cargando promociones...
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    async function cargarListaPromociones() {
+        const tbody = document.getElementById("tablaPromocionesBody");
+        if (!tbody) return;
+
+        try {
+            const resp = await fetch("php/tienda_api.php?resource=promociones");
+            const data = await resp.json();
+
+            if (data.success && Array.isArray(data.promociones)) {
+                if (data.promociones.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding:24px; color:#94a3b8;">No hay cupones registrados.</td></tr>`;
+                    return;
+                }
+
+                tbody.innerHTML = data.promociones.map(c => {
+                    const isActivo = Number(c.activo) === 1;
+                    return `
+                        <tr>
+                            <td><strong style="color:var(--primary); font-family:monospace; font-size:1.05rem;">${escapeHtml(c.codigo)}</strong></td>
+                            <td style="font-weight:700; color:#10b981;">${c.porcentaje}% OFF</td>
+                            <td>${c.fecha_fin || 'Sin límite'}</td>
+                            <td>
+                                <span class="crm-badge" style="background:${isActivo ? '#dcfce7' : '#fee2e2'}; color:${isActivo ? '#15803d' : '#b91c1c'};">
+                                    ${isActivo ? 'Activo' : 'Inactivo'}
+                                </span>
+                            </td>
+                            <td>
+                                <button class="crm-btn crm-btn-secondary crm-btn-sm" onclick="toggleEstadoCupon(${c.id}, ${isActivo ? 0 : 1})">
+                                    ${isActivo ? 'Desactivar' : 'Activar'}
+                                </button>
+                            </td>
+                        </tr>
+                    `;
+                }).join('');
+            }
+        } catch (e) {
+            tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:#ef4444; padding:20px;">Error al consultar cupones.</td></tr>`;
+        }
+    }
+
+    function mostrarFormNuevoCupon() {
+        document.getElementById("formNuevoCuponBox").style.display = "block";
+    }
+
+    function ocultarFormNuevoCupon() {
+        document.getElementById("formNuevoCuponBox").style.display = "none";
+    }
+
+    async function guardarNuevoCupon(e) {
+        e.preventDefault();
+        const cod = document.getElementById("mCuponCodigo").value.trim().toUpperCase();
+        const pct = document.getElementById("mCuponPorcentaje").value;
+        const exp = document.getElementById("mCuponExpiracion").value;
+
+        try {
+            const resp = await fetch("php/tienda_api.php?resource=promociones", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    codigo: cod,
+                    porcentaje: pct,
+                    fecha_fin: exp
+                })
+            });
+            const d = await resp.json();
+            if (d.success) {
+                mostrarNotificacion("Cupón " + cod + " creado correctamente.", "success");
+                ocultarFormNuevoCupon();
+                cargarListaPromociones();
+            } else {
+                mostrarNotificacion(d.error || "Error al crear cupón", "error");
+            }
+        } catch (err) {
+            mostrarNotificacion("Error de conexión", "error");
+        }
+    }
+
+    async function toggleEstadoCupon(id, nuevoEstado) {
+        try {
+            const resp = await fetch("php/tienda_api.php?resource=promociones", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    id: id,
+                    activo: nuevoEstado
+                })
+            });
+            const d = await resp.json();
+            if (d.success) {
+                mostrarNotificacion("Estado de cupón actualizado.", "info");
+                cargarListaPromociones();
+            }
+        } catch (e) {}
+    }
+
+    cargarListaPromociones();
+</script>

@@ -250,7 +250,31 @@
                     </div>
                 </div>
 
-                <!-- 5. USUARIOS -->
+                <!-- 5. TIENDA ONLINE Y MONEDERO (ETAPA 4) -->
+                <div class="crm-accordion-wrapper" id="wrapperAccordionTienda">
+                    <button class="crm-nav-item crm-nav-accordion-btn" id="btnAccordionTienda" onclick="toggleAccordion('Tienda')">
+                        <i class="fas fa-store"></i>
+                        <span>Tienda & Monedero</span>
+                        <i class="fas fa-chevron-down crm-chevron" id="chevronTienda"></i>
+                    </button>
+                    
+                    <div class="crm-nav-sublist" id="submenuTienda">
+                        <button class="crm-nav-item crm-nav-subitem" id="tienda-nav-promociones" onclick="loadExternalView('admin-promociones.html', this, 'Tienda')">
+                            <i class="fas fa-tags"></i> <span>Promociones</span>
+                        </button>
+                        <button class="crm-nav-item crm-nav-subitem" id="tienda-nav-impuestos" onclick="loadExternalView('admin-impuestos.html', this, 'Tienda')">
+                            <i class="fas fa-percent"></i> <span>Impuestos (IVA 16%)</span>
+                        </button>
+                        <button class="crm-nav-item crm-nav-subitem" id="tienda-nav-monedero" onclick="loadExternalView('admin-monedero.html', this, 'Tienda')">
+                            <i class="fas fa-wallet"></i> <span>Monedero Admin</span>
+                        </button>
+                        <button class="crm-nav-item crm-nav-subitem" id="tienda-nav-tickets" onclick="loadExternalView('admin-tickets.html', this, 'Tienda')">
+                            <i class="fas fa-headset"></i> <span>Tickets Atención</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 6. USUARIOS -->
                 <button class="crm-nav-item" id="navItemUsuarios" onclick="loadExternalView('crm-usuarios.html', this, 'Usuarios')">
                     <i class="fas fa-user-shield"></i> <span>Usuarios</span>
                 </button>
@@ -716,6 +740,31 @@
                         loadExternalView('erp-inicio.html', document.getElementById("erp-nav-inicio"), 'ERP');
                     }
                 }
+            } else if (module === 'Tienda') {
+                const btn = document.getElementById("btnAccordionTienda");
+                const sub = document.getElementById("submenuTienda");
+                const isOpen = sub.classList.contains("show");
+
+                if (isOpen) {
+                    btn.classList.remove("open");
+                    sub.classList.remove("show");
+                } else {
+                    btn.classList.add("open");
+                    sub.classList.add("show");
+                    
+                    if (!currentLoadedView || !currentLoadedView.startsWith('admin-')) {
+                        loadExternalView('admin-promociones.html', document.getElementById("tienda-nav-promociones"), 'Tienda');
+                    }
+                }
+            }
+        }
+
+        function abrirAcordeonTienda() {
+            const btn = document.getElementById("btnAccordionTienda");
+            const sub = document.getElementById("submenuTienda");
+            if (btn && sub) {
+                btn.classList.add("open");
+                sub.classList.add("show");
             }
         }
 
@@ -919,6 +968,13 @@
                         bSection.style.display = "inline";
                         bSep.style.display = "inline";
                     }
+                } else if (button.closest("#submenuTienda") || moduleCategory === 'Tienda') {
+                    abrirAcordeonTienda();
+                    if (bSection && bSep) {
+                        bSection.textContent = "Tienda";
+                        bSection.style.display = "inline";
+                        bSep.style.display = "inline";
+                    }
                 } else {
                     if (bSection && bSep) {
                         bSection.style.display = "none";
@@ -948,6 +1004,13 @@
                     label = "Menú SCM";
                     const navInicio = document.getElementById("scm-nav-inicio");
                     if (navInicio) navInicio.classList.add("active");
+                }
+            } else if (moduleCategory === 'Tienda' || viewUrl.startsWith('admin-')) {
+                abrirAcordeonTienda();
+                if (bSection && bSep) {
+                    bSection.textContent = "Tienda";
+                    bSection.style.display = "inline";
+                    bSep.style.display = "inline";
                 }
             } else if (moduleCategory === 'CRM' || viewUrl.startsWith('crm-')) {
                 if (bSection && bSep) {

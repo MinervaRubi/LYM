@@ -66,15 +66,25 @@
                     <div id="emptyState" class="empty" style="display:none;">
                         Tu carrito está vacío.
                     </div>
+
+                    <!-- BOTÓN VACIAR CARRITO (ETAPA 4) -->
+                    <div id="cartFooterActions" style="display:flex; justify-content:space-between; align-items:center; margin-top:16px; padding-top:14px; border-top:1px solid #e2e8f0;">
+                        <button type="button" class="btn btn-outline" onclick="vaciarCarritoCompleto()" style="color:#ef4444; border-color:#fca5a5; font-size:0.85rem; padding:8px 14px;">
+                            <i class="fas fa-trash-can"></i> Vaciar carrito
+                        </button>
+                        <a href="sistema.html#productos" style="color:#7c3aed; font-size:0.88rem; font-weight:600; text-decoration:none;">
+                            <i class="fas fa-plus"></i> Continuar comprando
+                        </a>
+                    </div>
                 </div>
 
                 <!-- Resumen -->
                 <aside class="cart-card summary">
-                    <h2>Resumen</h2>
+                    <h2>Resumen de Compra</h2>
 
                     <div class="summary-row">
                         <span>Subtotal</span>
-                        <span id="subtotalTxt">$0</span>
+                        <span id="subtotalTxt">$0.00</span>
                     </div>
 
                     <!-- CUPÓN DE DESCUENTO -->
@@ -83,7 +93,7 @@
                             <i class="fas fa-tags" style="color:#6366f1;"></i> ¿Tienes un cupón de descuento?
                         </label>
                         <div style="display:flex; gap:6px;">
-                            <input type="text" id="inputCodigoCupon" placeholder="Ej: DESC20-AILY-888" style="flex:1; padding:7px 10px; font-size:0.82rem; border:1px solid #cbd5e1; border-radius:6px; text-transform:uppercase;">
+                            <input type="text" id="inputCodigoCupon" placeholder="Ej: BIENVENIDO10" style="flex:1; padding:7px 10px; font-size:0.82rem; border:1px solid #cbd5e1; border-radius:6px; text-transform:uppercase;">
                             <button type="button" id="btnAplicarCupon" class="btn btn-outline" style="padding:6px 10px; font-size:0.78rem; font-weight:700;">Aplicar</button>
                         </div>
                         <div id="cuponFeedback" style="display:none; font-size:0.78rem; margin-top:6px; font-weight:600;"></div>
@@ -94,14 +104,14 @@
                         <span id="descuentoCuponTxt">-$0.00</span>
                     </div>
 
-                    <div class="summary-row">
-                        <span>Envío <small>(demo)</small></span>
-                        <span id="shippingTxt">$0</span>
+                    <div class="summary-row" style="color:#475569;">
+                        <span>Impuestos (<span id="txtTasaIva">IVA 16%</span>)</span>
+                        <span id="ivaTxt">$0.00</span>
                     </div>
 
                     <div class="summary-row total">
-                        <span>Total</span>
-                        <span id="totalTxt">$0</span>
+                        <span>Total a pagar</span>
+                        <span id="totalTxt">$0.00</span>
                     </div>
 
                     <div class="summary-actions">
@@ -109,8 +119,8 @@
                             <i class="fas fa-arrow-left"></i> Seguir comprando
                         </a>
 
-                        <a href="datospersonales.html" id="btnContinuarPago" class="btn btn-primary btn-block">
-                            <i class="fas fa-credit-card"></i> Continuar a pago
+                        <a href="checkout.html" id="btnContinuarPago" class="btn btn-primary btn-block">
+                            <i class="fas fa-credit-card"></i> Proceder al Pago
                         </a>
                     </div>
 
@@ -138,6 +148,22 @@
             // Imagen por defecto si no viene guardada
             const IMG_DEFAULT = "imagenes/default.png"; // <-- cambia a tu ruta real
 
+            const ivaTxt = document.getElementById("ivaTxt");
+            const txtTasaIva = document.getElementById("txtTasaIva");
+            let tasaIvaGlobal = 16.0;
+
+            // Obtener tasa de IVA configurada en la BD
+            fetch("php/tienda_api.php?resource=impuestos")
+                .then(r => r.json())
+                .then(d => {
+                    if (d.success && d.impuestos && d.impuestos.length > 0) {
+                        tasaIvaGlobal = parseFloat(d.impuestos[0].tasa) || 16.0;
+                        if (txtTasaIva) txtTasaIva.textContent = `IVA ${tasaIvaGlobal}%`;
+                        renderCarrito();
+                    }
+                })
+                .catch(() => {});
+
             // -------- FUNCION RENDER ----------
             function renderCarrito() {
 
@@ -145,15 +171,20 @@
 
                 if (carrito.length === 0) {
                     emptyState.style.display = "block";
-                    subtotalTxt.textContent = "$0";
-                    shippingTxt.textContent = "$0";
-                    totalTxt.textContent = "$0";
+                    const cartFooter = document.getElementById("cartFooterActions");
+                    if (cartFooter) cartFooter.style.display = "none";
+                    subtotalTxt.textContent = "$0.00";
+                    if (ivaTxt) ivaTxt.textContent = "$0.00";
+                    totalTxt.textContent = "$0.00";
                     itemsCount.textContent = "0 artículos";
+                    sessionStorage.removeItem("desgloseCompra");
                     localStorage.setItem("carrito", JSON.stringify(carrito));
                     return;
                 }
 
                 emptyState.style.display = "none";
+                const cartFooter = document.getElementById("cartFooterActions");
+                if (cartFooter) cartFooter.style.display = "flex";
 
                 let subtotal = 0;
                 let totalArticulos = 0;
@@ -183,22 +214,22 @@
           <!-- INFO -->
           <div style="flex:1;">
             <strong>${item.producto}</strong><br>
-            <small>${item.descripcion}</small><br>
-            <small>Precio: $${Number(item.precio).toFixed(2)}</small>
+            <small style="color:#64748b;">${item.descripcion || 'Artesanía LYM'}</small><br>
+            <small style="font-weight:600; color:#4b0082;">Precio: $${Number(item.precio).toFixed(2)}</small>
           </div>
 
           <!-- CANTIDAD -->
           <div style="display:flex; align-items:center; gap:8px;">
-            <button onclick="cambiarCantidad(${index}, -1)">−</button>
-            <span>${item.cantidad}</span>
-            <button onclick="cambiarCantidad(${index}, 1)">+</button>
+            <button onclick="cambiarCantidad(${index}, -1)" style="width:32px; height:32px; border-radius:8px; border:1px solid #cbd5e1; background:#f8fafc; font-weight:700; cursor:pointer;">−</button>
+            <span style="font-weight:700; min-width:24px; text-align:center;">${item.cantidad}</span>
+            <button onclick="cambiarCantidad(${index}, 1)" style="width:32px; height:32px; border-radius:8px; border:1px solid #cbd5e1; background:#f8fafc; font-weight:700; cursor:pointer;">+</button>
           </div>
 
           <!-- TOTAL + QUITAR -->
           <div style="width:110px; text-align:right;">
-            <strong>$${itemTotal.toFixed(2)}</strong><br>
-            <button onclick="eliminarItem(${index})" style="color:red; border:none; background:none; cursor:pointer;">
-              Quitar
+            <strong style="color:#2d1e40; font-size:1.05rem;">$${itemTotal.toFixed(2)}</strong><br>
+            <button onclick="eliminarItem(${index})" style="color:#ef4444; border:none; background:none; cursor:pointer; font-size:0.85rem; font-weight:600; margin-top:4px;">
+              <i class="fas fa-trash-alt"></i> Quitar
             </button>
           </div>
         `;
@@ -206,10 +237,7 @@
                     contenedor.appendChild(card);
                 });
 
-                // envio demo
-                let envio = subtotal >= 500 ? 0 : 80;
                 let descuento = 0;
-
                 if (cuponAplicado && cuponAplicado.porcentaje > 0 && subtotal > 0) {
                     descuento = subtotal * (Number(cuponAplicado.porcentaje) / 100);
                     rowDescuentoCupon.style.display = "flex";
@@ -219,16 +247,26 @@
                     rowDescuentoCupon.style.display = "none";
                 }
 
-                let total = Math.max(0, subtotal - descuento) + envio;
+                let subtotalConDescuento = Math.max(0, subtotal - descuento);
+                let iva = subtotalConDescuento * (tasaIvaGlobal / 100);
+                let total = subtotalConDescuento + iva;
 
                 subtotalTxt.textContent = "$" + subtotal.toFixed(2);
-                shippingTxt.textContent = "$" + envio.toFixed(2);
+                if (ivaTxt) ivaTxt.textContent = "$" + iva.toFixed(2);
                 totalTxt.textContent = "$" + total.toFixed(2);
                 itemsCount.textContent = totalArticulos + (totalArticulos === 1 ? " artículo" : " artículos");
 
+                sessionStorage.setItem("desgloseCompra", JSON.stringify({
+                    subtotal: subtotal,
+                    descuento: descuento,
+                    cupon: cuponAplicado ? cuponAplicado.codigo : null,
+                    tasa_iva: tasaIvaGlobal,
+                    iva: iva,
+                    total: total,
+                    items: carrito
+                }));
+
                 localStorage.setItem("carrito", JSON.stringify(carrito));
-                console.log("CARRITO:", carrito);
-                carrito.forEach((it, i) => console.log(i, it.producto, "imagen=", it.imagen));
             }
 
             // -------- CUPÓN DE DESCUENTO ----------
@@ -261,8 +299,13 @@
                 btnAplicarCupon.textContent = "...";
 
                 try {
-                    const resp = await fetch("php/api_cupones.php?codigo=" + encodeURIComponent(codigo));
-                    const data = await resp.json();
+                    let resp = await fetch("php/tienda_api.php?resource=promociones&codigo=" + encodeURIComponent(codigo));
+                    let data = await resp.json();
+
+                    if (!data.success) {
+                        resp = await fetch("php/api_cupones.php?codigo=" + encodeURIComponent(codigo));
+                        data = await resp.json();
+                    }
 
                     cuponFeedback.style.display = "block";
                     if (data.success && data.cupon) {
@@ -302,12 +345,22 @@
                 });
             }
 
+            // -------- VACIAR CARRITO COMPLETO ----------
+            window.vaciarCarritoCompleto = function () {
+                if (!carrito || carrito.length === 0) return;
+                carrito = [];
+                localStorage.removeItem("carrito");
+                sessionStorage.removeItem("desgloseCompra");
+                renderCarrito();
+                mostrarNotificacion("Se ha vaciado todo el carrito.", "info", "Carrito Vacío");
+            };
+
             // -------- CAMBIAR CANTIDAD ----------
             window.cambiarCantidad = function (index, cambio) {
                 carrito[index].cantidad += cambio;
 
                 if (carrito[index].cantidad <= 0) {
-                    const desc = carrito[index]?.descripcion || "Producto";
+                    const desc = carrito[index]?.producto || carrito[index]?.descripcion || "Producto";
                     carrito.splice(index, 1);
                     mostrarNotificacion(`"${desc}" eliminado del carrito.`, "info");
                 }
@@ -317,7 +370,7 @@
 
             // -------- ELIMINAR ----------
             window.eliminarItem = function (index) {
-                const desc = carrito[index]?.descripcion || "Producto";
+                const desc = carrito[index]?.producto || carrito[index]?.descripcion || "Producto";
                 carrito.splice(index, 1);
                 mostrarNotificacion(`"${desc}" eliminado del carrito.`, "info");
                 renderCarrito();

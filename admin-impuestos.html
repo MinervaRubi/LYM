@@ -1,0 +1,88 @@
+<div class="crm-card">
+    <div class="crm-card-header">
+        <h3 class="crm-card-title"><i class="fas fa-percent" style="color:var(--primary);"></i> Configuración de Impuestos (IVA)</h3>
+        <p class="crm-card-subtitle">Administra la tasa tributaria oficial aplicada a los productos y ventas en línea.</p>
+    </div>
+
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:24px; align-items:start; margin-top:20px;">
+        <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:18px; padding:24px;">
+            <h4 style="margin:0 0 10px 0; color:#1e293b;"><i class="fas fa-sliders" style="color:var(--primary);"></i> Tasa de IVA General</h4>
+            <p style="font-size:0.85rem; color:#64748b; margin-bottom:18px;">Actualmente fijada conforme a la normativa fiscal vigente (16.00%).</p>
+
+            <form onsubmit="actualizarTasaIVA(event)">
+                <div class="crm-form-group">
+                    <label class="crm-form-label">Nombre del Impuesto:</label>
+                    <input type="text" id="impuestoNombre" class="crm-form-input" value="IVA General" readonly style="background:#fff;">
+                </div>
+
+                <div class="crm-form-group">
+                    <label class="crm-form-label">Porcentaje / Tasa (%):</label>
+                    <div style="display:flex; align-items:center; gap:8px;">
+                        <input type="number" id="impuestoTasa" class="crm-form-input" step="0.5" min="0" max="50" required value="16.0" style="font-size:1.2rem; font-weight:800; color:var(--primary);">
+                        <span style="font-size:1.2rem; font-weight:800; color:#64748b;">%</span>
+                    </div>
+                </div>
+
+                <div style="display:flex; justify-content:flex-end; margin-top:16px;">
+                    <button type="submit" class="crm-btn crm-btn-primary" id="btnGuardarIVA">
+                        <i class="fas fa-save"></i> Actualizar Tasa de Impuesto
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <div style="background:#ffffff; border:1px solid #ebd9fc; border-radius:18px; padding:24px; box-shadow:0 4px 15px rgba(106,13,173,0.05);">
+            <h4 style="margin:0 0 12px 0; color:var(--primary);"><i class="fas fa-info-circle"></i> Impacto en el Flujo de Compra</h4>
+            <ul style="color:#475569; font-size:0.9rem; line-height:1.7; padding-left:20px; margin:0;">
+                <li><strong>Carrito (`carrito.html`):</strong> Calcula de forma automática e inmediata el desglose del subtotal y el <strong>16% de IVA</strong>.</li>
+                <li><strong>Checkout (`checkout.html`):</strong> Desglosa Subtotal, IVA y Total a cobrar.</li>
+                <li><strong>Monedero Digital:</strong> Valida que el saldo del cliente cubra el total exacto con impuestos incluidos ($696.00).</li>
+                <li><strong>Ticket y ERP:</strong> Se almacena en la tabla <code>erp_ordenes</code> con trazabilidad fiscal.</li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<script>
+    async function cargarImpuestosAdmin() {
+        try {
+            const resp = await fetch("php/tienda_api.php?resource=impuestos");
+            const data = await resp.json();
+            if (data.success && data.impuestos && data.impuestos.length > 0) {
+                const imp = data.impuestos[0];
+                document.getElementById("impuestoNombre").value = imp.nombre || 'IVA';
+                document.getElementById("impuestoTasa").value = parseFloat(imp.tasa) || 16.0;
+            }
+        } catch (e) {}
+    }
+
+    async function actualizarTasaIVA(e) {
+        e.preventDefault();
+        const tasa = parseFloat(document.getElementById("impuestoTasa").value);
+        const btn = document.getElementById("btnGuardarIVA");
+
+        btn.disabled = true;
+        btn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Guardando...`;
+
+        try {
+            const resp = await fetch("php/tienda_api.php?resource=impuestos", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ tasa: tasa })
+            });
+            const data = await resp.json();
+            if (data.success) {
+                mostrarNotificacion("Tasa de IVA actualizada al " + tasa + "%.", "success");
+            } else {
+                mostrarNotificacion(data.error || "Error al actualizar", "error");
+            }
+        } catch (err) {
+            mostrarNotificacion("Error de conexión", "error");
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = `<i class="fas fa-save"></i> Actualizar Tasa de Impuesto`;
+        }
+    }
+
+    cargarImpuestosAdmin();
+</script>

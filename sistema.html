@@ -204,6 +204,226 @@
             right: 0;
             padding: 16px;
         }
+
+        /* Estilos Etapa 4 - Detalle de Producto y Stock en Vivo SCM */
+        .stock-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 0.78rem;
+            font-weight: 700;
+            padding: 4px 10px;
+            border-radius: 999px;
+            margin-top: 6px;
+            width: fit-content;
+        }
+        .stock-badge.en-stock {
+            background: #dcfce7;
+            color: #15803d;
+            border: 1px solid #bbf7d0;
+        }
+        .stock-badge.agotado {
+            background: #fee2e2;
+            color: #b91c1c;
+            border: 1px solid #fecaca;
+        }
+        .producto-card-img-box {
+            position: relative;
+            width: 100%;
+            height: 190px;
+            background: #fdfaff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            border-bottom: 1px solid #f1f5f9;
+        }
+        .producto-card-img-box img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.35s ease;
+        }
+        .producto-card:hover .producto-card-img-box img {
+            transform: scale(1.06);
+        }
+        .producto-card-img-box i.card-icon-fallback {
+            font-size: 3.5rem;
+            color: #7c3aed;
+        }
+        .card-price-overlay {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            background: rgba(45, 30, 64, 0.88);
+            backdrop-filter: blur(6px);
+            color: #ffffff;
+            font-weight: 800;
+            font-size: 0.95rem;
+            padding: 4px 12px;
+            border-radius: 999px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.18);
+        }
+        .card-actions-flex {
+            display: flex;
+            gap: 8px;
+            margin-top: 14px;
+        }
+        .card-actions-flex .btn-ver-detalle {
+            flex: 1;
+            padding: 9px 12px;
+            background: linear-gradient(135deg, #6a0dad, #7c3aed);
+            color: #ffffff;
+            border: none;
+            border-radius: 12px;
+            font-size: 0.86rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+        .card-actions-flex .btn-ver-detalle:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(106, 13, 173, 0.25);
+        }
+        .card-actions-flex .btn-cart-direct {
+            padding: 9px 14px;
+            border: 1.5px solid #dec8ff;
+            background: #fdfaff;
+            color: #6a0dad;
+            border-radius: 12px;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .card-actions-flex .btn-cart-direct:hover {
+            background: #7c3aed;
+            color: #ffffff;
+            border-color: #7c3aed;
+        }
+
+        /* Modal Etapa 4 - Detalle de Producto */
+        .modal-etapa4-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(15, 23, 42, 0.65);
+            backdrop-filter: blur(5px);
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .modal-etapa4-content {
+            background: #ffffff;
+            border-radius: 24px;
+            max-width: 820px;
+            width: 100%;
+            overflow: hidden;
+            box-shadow: 0 25px 60px rgba(0,0,0,0.25);
+            position: relative;
+            display: grid;
+            grid-template-columns: 1fr 1.1fr;
+            max-height: 90vh;
+            overflow-y: auto;
+            border: 1px solid #ebd9fc;
+        }
+        @media (max-width: 760px) {
+            .modal-etapa4-content {
+                grid-template-columns: 1fr;
+            }
+        }
+        .modal-etapa4-close {
+            position: absolute;
+            top: 14px;
+            right: 16px;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.95);
+            border: 1.5px solid #dec8ff;
+            color: #4b0082;
+            font-size: 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+            transition: all 0.2s;
+        }
+        .modal-etapa4-close:hover {
+            background: #ef4444;
+            color: #fff;
+            border-color: #ef4444;
+        }
+        .modal-img-col {
+            background: #fdfaff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 30px;
+            border-right: 1px solid #ebd9fc;
+        }
+        .modal-img-col img {
+            max-width: 100%;
+            max-height: 320px;
+            object-fit: contain;
+            border-radius: 16px;
+            box-shadow: 0 8px 24px rgba(106, 13, 173, 0.12);
+        }
+        .modal-info-col {
+            padding: 32px 28px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        .qty-picker {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin: 16px 0;
+        }
+        .qty-picker-btn {
+            width: 38px;
+            height: 38px;
+            border-radius: 10px;
+            border: 1.5px solid #dec8ff;
+            background: #fdfaff;
+            color: #4b0082;
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .qty-picker-btn:hover:not(:disabled) {
+            background: #7c3aed;
+            color: #fff;
+            border-color: #7c3aed;
+        }
+        .qty-picker-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+        .qty-picker-input {
+            width: 55px;
+            height: 38px;
+            text-align: center;
+            font-weight: 700;
+            font-size: 1.05rem;
+            border: 1.5px solid #dec8ff;
+            border-radius: 10px;
+            color: #2d1e40;
+            outline: none;
+        }
     </style>
 </head>
 
@@ -2048,13 +2268,30 @@
             cargarCatalogoDesdeBD();
         }
 
+        let catalogoProductosEnMemoria = [];
+        let productoSeleccionadoModal = null;
+
+        function actualizarBadgeCarrito() {
+            try {
+                const carrito = JSON.parse(localStorage.getItem("carrito")) || [];
+                const totalItems = carrito.reduce((sum, item) => sum + (Number(item.cantidad) || 1), 0);
+                const badge = document.getElementById("cartBadge");
+                if (badge) {
+                    badge.textContent = totalItems;
+                    badge.style.display = totalItems > 0 ? "inline-flex" : "none";
+                }
+            } catch (e) {
+                console.error("Error al actualizar badge de carrito:", e);
+            }
+        }
+
         async function cargarCatalogoDesdeBD() {
             const gridP = document.getElementById('dynamicProductosGrid');
             const gridPaq = document.getElementById('dynamicPaquetesGrid');
             const countInfo = document.getElementById('searchResultsCount');
 
             if (gridP) {
-                gridP.innerHTML = '<div style="grid-column: 1/-1; text-align:center; padding: 40px; color:#64748b;"><i class="fas fa-spinner fa-spin fa-2x" style="color:#7c3aed; margin-bottom:10px;"></i><div>Buscando productos en la base de datos MySQL...</div></div>';
+                gridP.innerHTML = '<div style="grid-column: 1/-1; text-align:center; padding: 40px; color:#64748b;"><i class="fas fa-spinner fa-spin fa-2x" style="color:#7c3aed; margin-bottom:10px;"></i><div>Buscando productos y stock en vivo SCM...</div></div>';
             }
 
             try {
@@ -2063,16 +2300,15 @@
                 if (filtroCategoria && filtroCategoria !== 'todos') params.append('category', filtroCategoria);
                 if (filtroOrden) params.append('sort', filtroOrden);
 
-                const resp = await fetch('php/get_products.php?' + params.toString());
+                const resp = await fetch('php/tienda_api.php?resource=catalogo&' + params.toString());
                 const data = await resp.json();
 
                 if (data.success) {
                     const productos = data.productos || [];
-                    const paquetes = data.paquetes || [];
+                    catalogoProductosEnMemoria = productos;
 
                     if (countInfo) {
-                        const totalRes = productos.length + paquetes.length;
-                        countInfo.innerHTML = `<span><i class="fas fa-database" style="color:#10b981;"></i> MySQL: <strong>${productos.length}</strong> producto${productos.length === 1 ? '' : 's'} y <strong>${paquetes.length}</strong> paquete${paquetes.length === 1 ? '' : 's'} encontrados</span>`;
+                        countInfo.innerHTML = `<span><i class="fas fa-database" style="color:#10b981;"></i> Catálogo SCM: <strong>${productos.length}</strong> producto${productos.length === 1 ? '' : 's'} disponible${productos.length === 1 ? '' : 's'}</span>`;
                     }
 
                     if (gridP) {
@@ -2087,23 +2323,41 @@
                             `;
                         } else {
                             gridP.innerHTML = productos.map(p => {
-                                const icon = p.image_icon || 'fas fa-box';
-                                const cat = (p.category ? p.category.toLowerCase() : 'tazas');
-                                const enlace = cat + '.html';
+                                const stockNum = parseInt(p.stock, 10) || 0;
+                                const tieneStock = stockNum > 0;
+                                const imgPath = p.imagen || (p.image_icon && p.image_icon.includes('.') ? 'imagen/' + p.image_icon : '');
+                                const iconClass = (p.image_icon && !p.image_icon.includes('.')) ? p.image_icon : 'fas fa-box';
+
+                                const imgHtml = imgPath 
+                                    ? `<img src="${escapeHtml(imgPath)}" alt="${escapeHtml(p.nombre)}" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';"><i class="${iconClass} card-icon-fallback" style="display:none;"></i>`
+                                    : `<i class="${iconClass} card-icon-fallback"></i>`;
+
+                                const stockHtml = tieneStock 
+                                    ? `<span class="stock-badge en-stock"><i class="fas fa-boxes-stacked"></i> En stock (${stockNum} piezas)</span>`
+                                    : `<span class="stock-badge agotado"><i class="fas fa-times-circle"></i> Agotado</span>`;
+
                                 return `
                                     <div class="producto-card">
-                                        <div class="producto-image">
-                                            <i class="${icon}"></i>
-                                            <div class="producto-overlay">
-                                                <span class="precio">Desde $${parseFloat(p.price).toFixed(2)}</span>
+                                        <div class="producto-card-img-box">
+                                            ${imgHtml}
+                                            <div class="card-price-overlay">$${parseFloat(p.precio).toFixed(2)}</div>
+                                        </div>
+                                        <div class="producto-card-body">
+                                            <div>
+                                                <span style="font-size:0.75rem; font-weight:700; color:#7c3aed; text-transform:uppercase; letter-spacing:0.5px;">${escapeHtml(p.categoria || 'Artesanía')}</span>
+                                                <h3>${escapeHtml(p.nombre)}</h3>
+                                                <p class="card-desc">${escapeHtml(p.descripcion || 'Pieza artesanal personalizada con los más altos estándares de calidad.')}</p>
+                                                ${stockHtml}
                                             </div>
-                                        </div>
-                                        <div class="producto-content">
-                                            <h3>${escapeHtml(p.name)}</h3>
-                                            <div data-eval-producto="${escapeHtml(p.name)}"></div>
-                                        </div>
-                                        <div class="btn-producto">
-                                            <a href="${enlace}" class="btn-producto">Seleccionar</a>
+                                            <div class="card-actions-flex">
+                                                <button type="button" class="btn-ver-detalle" onclick="abrirDetalleProducto(${p.id})">
+                                                    <i class="fas fa-eye"></i> Ver detalle
+                                                </button>
+                                                <button type="button" class="btn-cart-direct" onclick="agregarAlCarritoDirecto(${p.id})" title="Agregar al carrito" ${!tieneStock ? 'disabled style="opacity:0.4; cursor:not-allowed;"' : ''}>
+                                                    <i class="fas fa-cart-plus"></i>
+                                                </button>
+                                            </div>
+                                            <div data-eval-producto="${escapeHtml(p.nombre)}" style="margin-top:10px;"></div>
                                         </div>
                                     </div>
                                 `;
@@ -2115,43 +2369,258 @@
                         }
                     }
 
-                    if (gridPaq) {
-                        if (paquetes.length === 0) {
-                            gridPaq.innerHTML = '<div style="grid-column: 1/-1; text-align:center; padding:20px; color:#64748b;">No hay paquetes disponibles para esta búsqueda.</div>';
-                        } else {
-                            gridPaq.innerHTML = paquetes.map(pq => {
-                                const itemsList = Array.isArray(pq.items) ? pq.items.map(it => `<li>${escapeHtml(it)}</li>`).join('') : '';
-                                const isFeatured = Number(pq.featured) === 1;
-                                const enlace = (pq.name.toLowerCase().includes('viajero') ? 'viajero' : (pq.name.toLowerCase().includes('deport') ? 'deportivo' : (pq.name.toLowerCase().includes('potter') ? 'potterhead' : 'basico'))) + '.html';
-                                return `
-                                    <a href="${enlace}" class="paquete-link">
-                                        <div class="paquete-card ${isFeatured ? 'featured' : ''}">
-                                            ${isFeatured ? '<span class="nuevo-badge">Más vendido</span>' : ''}
-                                            <div class="paquete-header">
-                                                <h3>${escapeHtml(pq.name)}</h3>
-                                                <div class="precio-paquete">$${parseFloat(pq.price).toFixed(2)}</div>
-                                            </div>
-                                            <div class="paquete-content">
-                                                <ul>${itemsList}</ul>
-                                            </div>
-                                        </div>
-                                    </a>
-                                `;
-                            }).join('');
-                        }
-                    }
+                    actualizarBadgeCarrito();
                 }
             } catch (e) {
                 console.error("Error al consultar productos:", e);
                 if (gridP) {
-                    gridP.innerHTML = `<div style="grid-column: 1/-1; text-align:center; padding: 30px; color:#ef4444;"><i class="fas fa-triangle-exclamation"></i> Error al conectar con la base de datos MySQL: ${e.message}</div>`;
+                    gridP.innerHTML = `<div style="grid-column: 1/-1; text-align:center; padding: 30px; color:#ef4444;"><i class="fas fa-triangle-exclamation"></i> Error al conectar con el catálogo en tiempo real: ${e.message}</div>`;
                 }
             }
         }
+
+        // ==============================================================
+        // MODAL DE DETALLE DE PRODUCTO (PANTALLA 3)
+        // ==============================================================
+        function abrirDetalleProducto(prodId) {
+            const p = catalogoProductosEnMemoria.find(item => item.id == prodId);
+            if (!p) {
+                mostrarNotificacion("Producto no encontrado en catálogo.", "warning");
+                return;
+            }
+
+            productoSeleccionadoModal = p;
+
+            const modal = document.getElementById("modalDetalleProducto");
+            const modalImg = document.getElementById("modalProdImg");
+            const modalIconBox = document.getElementById("modalProdIconBox");
+            const modalIcon = document.getElementById("modalProdIcon");
+            const modalNombre = document.getElementById("modalProdNombre");
+            const modalDesc = document.getElementById("modalProdDesc");
+            const modalCat = document.getElementById("modalProdCat");
+            const modalLog = document.getElementById("modalProdLogistica");
+            const modalStock = document.getElementById("modalProdStockBadge");
+            const modalPrecio = document.getElementById("modalProdPrecio");
+            const modalQty = document.getElementById("modalProdQty");
+            const btnAdd = document.getElementById("btnModalAddToCart");
+            const btnBuy = document.getElementById("btnModalBuyNow");
+
+            modalNombre.textContent = p.nombre;
+            modalDesc.textContent = p.descripcion || "Artesanía elaborada a mano con materiales de primera calidad.";
+            modalCat.textContent = p.categoria || "Artesanía";
+            modalLog.textContent = `SCM ${p.estrategia_logistica || 'PULL'}`;
+
+            const stockNum = parseInt(p.stock, 10) || 0;
+            const tieneStock = stockNum > 0;
+
+            if (tieneStock) {
+                modalStock.className = "stock-badge en-stock";
+                modalStock.innerHTML = `<i class="fas fa-boxes-stacked"></i> En stock (${stockNum} piezas)`;
+                modalQty.value = 1;
+                modalQty.max = stockNum;
+                btnAdd.disabled = false;
+                btnBuy.disabled = false;
+                btnAdd.style.opacity = "1";
+                btnBuy.style.opacity = "1";
+            } else {
+                modalStock.className = "stock-badge agotado";
+                modalStock.innerHTML = `<i class="fas fa-times-circle"></i> Agotado en inventario`;
+                modalQty.value = 0;
+                modalQty.max = 0;
+                btnAdd.disabled = true;
+                btnBuy.disabled = true;
+                btnAdd.style.opacity = "0.5";
+                btnBuy.style.opacity = "0.5";
+            }
+
+            const imgPath = p.imagen || (p.image_icon && p.image_icon.includes('.') ? 'imagen/' + p.image_icon : '');
+            if (imgPath) {
+                modalImg.src = imgPath;
+                modalImg.style.display = "block";
+                modalIconBox.style.display = "none";
+            } else {
+                modalImg.style.display = "none";
+                modalIconBox.style.display = "block";
+                modalIcon.className = (p.image_icon || "fas fa-box") + " fa-5x";
+            }
+
+            modalPrecio.textContent = `$${parseFloat(p.precio).toFixed(2)} MXN`;
+            actualizarSubtotalModal();
+
+            modal.style.display = "flex";
+        }
+
+        function cerrarDetalleProducto() {
+            const modal = document.getElementById("modalDetalleProducto");
+            if (modal) modal.style.display = "none";
+            productoSeleccionadoModal = null;
+        }
+
+        function cerrarDetalleSiFondo(e) {
+            if (e.target && e.target.id === "modalDetalleProducto") {
+                cerrarDetalleProducto();
+            }
+        }
+
+        function cambiarQtyModal(delta) {
+            if (!productoSeleccionadoModal) return;
+            const stockNum = parseInt(productoSeleccionadoModal.stock, 10) || 0;
+            if (stockNum <= 0) return;
+
+            const input = document.getElementById("modalProdQty");
+            let actual = parseInt(input.value, 10) || 1;
+            let nueva = actual + delta;
+
+            if (nueva < 1) nueva = 1;
+            if (nueva > stockNum) {
+                nueva = stockNum;
+                mostrarNotificacion(`Solo hay ${stockNum} piezas disponibles en stock SCM.`, "warning");
+            }
+
+            input.value = nueva;
+            actualizarSubtotalModal();
+        }
+
+        function actualizarSubtotalModal() {
+            if (!productoSeleccionadoModal) return;
+            const qty = parseInt(document.getElementById("modalProdQty").value, 10) || 1;
+            const precio = parseFloat(productoSeleccionadoModal.precio) || 0;
+            const subtotal = qty * precio;
+            const lbl = document.getElementById("modalSubtotalLive");
+            if (lbl) {
+                lbl.textContent = `Subtotal: $${subtotal.toFixed(2)}`;
+            }
+        }
+
+        function agregarProductoAlStorage(p, cantidad) {
+            let carrito = JSON.parse(localStorage.getItem("carrito")) || [];
+            const stockNum = parseInt(p.stock, 10) || 0;
+
+            const idx = carrito.findIndex(it => (it.id && it.id == p.id) || it.producto === p.nombre);
+            let imgFinal = p.imagen || (p.image_icon && p.image_icon.includes('.') ? 'imagen/' + p.image_icon : 'imagen/taza.jpeg');
+
+            if (idx > -1) {
+                const totalNueva = (Number(carrito[idx].cantidad) || 0) + cantidad;
+                if (totalNueva > stockNum) {
+                    mostrarNotificacion(`No puedes agregar más de ${stockNum} piezas (límite de inventario SCM).`, "warning", "Stock Insuficiente");
+                    return false;
+                }
+                carrito[idx].cantidad = totalNueva;
+            } else {
+                if (cantidad > stockNum) {
+                    mostrarNotificacion(`Stock insuficiente. Disponible: ${stockNum}`, "warning");
+                    return false;
+                }
+                carrito.push({
+                    id: p.id,
+                    producto: p.nombre,
+                    precio: parseFloat(p.precio),
+                    cantidad: cantidad,
+                    imagen: imgFinal,
+                    descripcion: p.descripcion || p.categoria || "Artesanía"
+                });
+            }
+
+            localStorage.setItem("carrito", JSON.stringify(carrito));
+            actualizarBadgeCarrito();
+            return true;
+        }
+
+        function confirmarAgregarCarrito() {
+            if (!productoSeleccionadoModal) return;
+            const qty = parseInt(document.getElementById("modalProdQty").value, 10) || 1;
+            if (qty <= 0) return;
+
+            if (agregarProductoAlStorage(productoSeleccionadoModal, qty)) {
+                mostrarNotificacion(`¡Se agregaron ${qty} pieza(s) de "${productoSeleccionadoModal.nombre}" al carrito!`, "success", "Carrito Actualizado");
+                cerrarDetalleProducto();
+            }
+        }
+
+        function comprarAhoraMismo() {
+            if (!productoSeleccionadoModal) return;
+            const qty = parseInt(document.getElementById("modalProdQty").value, 10) || 1;
+            if (qty <= 0) return;
+
+            if (agregarProductoAlStorage(productoSeleccionadoModal, qty)) {
+                cerrarDetalleProducto();
+                window.location.href = "carrito.html";
+            }
+        }
+
+        function agregarAlCarritoDirecto(prodId) {
+            const p = catalogoProductosEnMemoria.find(item => item.id == prodId);
+            if (!p) return;
+            const stockNum = parseInt(p.stock, 10) || 0;
+            if (stockNum <= 0) {
+                mostrarNotificacion("Este producto se encuentra agotado en inventario.", "warning");
+                return;
+            }
+
+            if (agregarProductoAlStorage(p, 1)) {
+                mostrarNotificacion(`¡"${p.nombre}" agregado al carrito!`, "success", "Agregado");
+            }
+        }
+
+        document.addEventListener("DOMContentLoaded", () => {
+            actualizarBadgeCarrito();
+        });
     </script>
 
     <!-- EVALUACIONES LYM -->
     <script src="evaluaciones.js"></script>
+
+    <!-- MODAL DETALLE DE PRODUCTO (ETAPA 4) -->
+    <div id="modalDetalleProducto" class="modal-etapa4-overlay" style="display:none;" onclick="cerrarDetalleSiFondo(event)">
+        <div class="modal-etapa4-content" onclick="event.stopPropagation()">
+            <button type="button" class="modal-etapa4-close" onclick="cerrarDetalleProducto()" title="Cerrar">&times;</button>
+            <div class="modal-img-col">
+                <img id="modalProdImg" src="imagen/taza.jpeg" alt="Producto">
+                <div id="modalProdIconBox" style="display:none; text-align:center;">
+                    <i id="modalProdIcon" class="fas fa-box fa-5x" style="color:#7c3aed;"></i>
+                </div>
+            </div>
+            <div class="modal-info-col">
+                <div>
+                    <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; margin-bottom:8px;">
+                        <span id="modalProdCat" style="background:#f3e8ff; color:#7c3aed; font-size:0.8rem; font-weight:700; padding:3px 10px; border-radius:999px;">Categoría</span>
+                        <span id="modalProdLogistica" style="background:#f1f5f9; color:#475569; font-size:0.75rem; font-weight:700; padding:3px 8px; border-radius:6px;">SCM PULL</span>
+                    </div>
+                    <h2 id="modalProdNombre" style="color:#2d1e40; font-size:1.45rem; font-weight:800; margin:0 0 8px 0;">Nombre del Producto</h2>
+                    <p id="modalProdDesc" style="color:#64748b; font-size:0.92rem; line-height:1.5; margin:0 0 14px 0;">Descripción detallada de la artesanía.</p>
+                    
+                    <div id="modalProdStockBadge" class="stock-badge en-stock">
+                        <i class="fas fa-boxes-stacked"></i> En stock (15 piezas)
+                    </div>
+
+                    <div style="margin-top:20px;">
+                        <div style="font-size:0.85rem; color:#64748b; font-weight:600;">Precio unitario:</div>
+                        <div id="modalProdPrecio" style="font-size:1.6rem; font-weight:800; color:#6a0dad;">$0.00 MXN</div>
+                    </div>
+
+                    <!-- SELECTOR DE CANTIDAD -->
+                    <div style="margin-top:16px;">
+                        <label style="font-size:0.85rem; font-weight:700; color:#475569;">Cantidad a ordenar:</label>
+                        <div class="qty-picker">
+                            <button type="button" class="qty-picker-btn" onclick="cambiarQtyModal(-1)">−</button>
+                            <input type="number" id="modalProdQty" class="qty-picker-input" value="1" min="1" readonly>
+                            <button type="button" class="qty-picker-btn" id="btnQtyPlusModal" onclick="cambiarQtyModal(1)">+</button>
+                            <span id="modalSubtotalLive" style="margin-left:auto; font-weight:700; color:#2d1e40; font-size:1rem;">Subtotal: $0.00</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="display:flex; gap:10px; margin-top:24px; flex-wrap:wrap;">
+                    <button type="button" id="btnModalAddToCart" class="btn btn-outline" style="flex:1; border-color:#7c3aed; color:#7c3aed; font-weight:700;" onclick="confirmarAgregarCarrito()">
+                        <i class="fas fa-cart-plus"></i> Agregar al carrito
+                    </button>
+                    <button type="button" id="btnModalBuyNow" class="btn btn-primary" style="flex:1;" onclick="comprarAhoraMismo()">
+                        <i class="fas fa-bolt"></i> Comprar ahora
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 
 </body>
 
