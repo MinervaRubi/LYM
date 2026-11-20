@@ -1247,6 +1247,12 @@
                     <input type="password" id="loginPassword" required>
                 </div>
 
+                <div style="display:flex; justify-content:flex-end; margin-top:-6px; margin-bottom:14px;">
+                    <a href="#" onclick="abrirRecuperarModal(event)" style="font-size:0.85rem; color:#7c3aed; font-weight:600; text-decoration:none;">
+                        <i class="fas fa-key"></i> ¿Olvidaste tu contraseña?
+                    </a>
+                </div>
+
                 <div class="form-actions">
                     <button type="submit" class="btn btn-primary">Iniciar Sesión</button>
                     <button type="button" class="btn btn-secondary" onclick="closeModal('loginModal')">Cancelar</button>
@@ -1290,6 +1296,76 @@
                         onclick="closeModal('registerModal')">Cancelar</button>
                 </div>
             </form>
+        </div>
+    </div>
+
+    <!-- Modal de Recuperación de Contraseña (Mercado Libre Style con Código de Verificación OTP) -->
+    <div id="recuperarModal" class="modal">
+        <div class="modal-content" style="max-width: 440px;">
+            <div class="modal-header">
+                <h2><i class="fas fa-shield-halved" style="color:#7c3aed;"></i> Seguridad de Cuenta</h2>
+                <span class="close" onclick="closeModal('recuperarModal')">&times;</span>
+            </div>
+
+            <!-- PASO 1: Ingresar correo para enviar código -->
+            <div id="recuperarPaso1">
+                <p style="font-size:0.9rem; color:#64748b; margin-bottom:16px;">
+                    Ingresa el correo electrónico asociado a tu cuenta. Te enviaremos un <strong>código de seguridad de 6 dígitos</strong> para restablecer tu contraseña.
+                </p>
+
+                <form onsubmit="solicitarCodigoRecuperacion(event)">
+                    <div class="form-group">
+                        <label for="recuperarEmail">Correo Electrónico:</label>
+                        <input type="email" id="recuperarEmail" placeholder="ejemplo@gmail.com" required class="form-control" style="width:100%; padding:10px 14px; border-radius:10px; border:1px solid #d1d5db;">
+                    </div>
+
+                    <div id="msgRecuperarStatus1" style="display:none; font-size:0.85rem; padding:10px; border-radius:8px; margin-bottom:12px;"></div>
+
+                    <div class="form-actions" style="margin-top:16px;">
+                        <button type="submit" class="btn btn-primary" id="btnSolicitarCodigo" style="width:100%; justify-content:center;">
+                            <i class="fas fa-paper-plane"></i> Enviar Código de Seguridad
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- PASO 2: Ingresar código de 6 dígitos y nueva contraseña -->
+            <div id="recuperarPaso2" style="display:none;">
+                <div style="background:#eff6ff; border:1px solid #bfdbfe; border-radius:10px; padding:12px; margin-bottom:16px; font-size:0.85rem; color:#1e40af;">
+                    <i class="fas fa-envelope-open-text"></i> Hemos enviado un código de 6 dígitos a <strong id="txtCorreoDestinoOtp">tu correo</strong>.
+                </div>
+
+                <form onsubmit="confirmarNuevaPasswordConOtp(event)">
+                    <div class="form-group">
+                        <label for="recuperarOtpCodigo">Código de Seguridad (6 dígitos):</label>
+                        <input type="text" id="recuperarOtpCodigo" maxlength="6" placeholder="123456" required class="form-control" style="width:100%; padding:10px; border-radius:10px; border:1px solid #d1d5db; text-align:center; font-size:1.3rem; font-weight:800; letter-spacing:6px; color:#4338ca;">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="recuperarNuevaPass">Nueva Contraseña (mínimo 6 caracteres):</label>
+                        <input type="password" id="recuperarNuevaPass" minlength="6" required class="form-control" placeholder="••••••••" style="width:100%; padding:10px 14px; border-radius:10px; border:1px solid #d1d5db;">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="recuperarConfirmPass">Confirmar Nueva Contraseña:</label>
+                        <input type="password" id="recuperarConfirmPass" minlength="6" required class="form-control" placeholder="••••••••" style="width:100%; padding:10px 14px; border-radius:10px; border:1px solid #d1d5db;">
+                    </div>
+
+                    <div id="msgRecuperarStatus2" style="display:none; font-size:0.85rem; padding:10px; border-radius:8px; margin-bottom:12px;"></div>
+
+                    <div class="form-actions" style="margin-top:16px;">
+                        <button type="submit" class="btn btn-primary" id="btnConfirmarOtp" style="width:100%; justify-content:center;">
+                            <i class="fas fa-check-circle"></i> Restablecer Contraseña
+                        </button>
+                    </div>
+
+                    <div style="text-align:center; margin-top:10px;">
+                        <button type="button" onclick="volverAPaso1Recuperar()" style="background:none; border:none; color:#64748b; font-size:0.85rem; cursor:pointer; text-decoration:underline;">
+                            Reenviar código a otro correo
+                        </button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
 
@@ -1383,6 +1459,130 @@
         function closeModal(modalId) {
             const m = document.getElementById(modalId);
             if (m) m.style.display = 'none';
+        }
+
+        // ========= Flujo de Recuperación de Contraseña con Código OTP (Estilo Mercado Libre) =========
+        function abrirRecuperarModal(e) {
+            if (e) e.preventDefault();
+            closeModal('loginModal');
+            document.getElementById('recuperarPaso1').style.display = 'block';
+            document.getElementById('recuperarPaso2').style.display = 'none';
+            document.getElementById('msgRecuperarStatus1').style.display = 'none';
+            document.getElementById('msgRecuperarStatus2').style.display = 'none';
+            document.getElementById('recuperarModal').style.display = 'flex';
+        }
+
+        function volverAPaso1Recuperar() {
+            document.getElementById('recuperarPaso1').style.display = 'block';
+            document.getElementById('recuperarPaso2').style.display = 'none';
+            document.getElementById('msgRecuperarStatus1').style.display = 'none';
+        }
+
+        let correoRecuperacionActual = '';
+
+        async function solicitarCodigoRecuperacion(e) {
+            e.preventDefault();
+            const emailInput = document.getElementById('recuperarEmail');
+            const email = emailInput.value.trim();
+            const btn = document.getElementById('btnSolicitarCodigo');
+            const msg = document.getElementById('msgRecuperarStatus1');
+
+            if (!email) return;
+
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Enviando código seguro...';
+            msg.style.display = 'none';
+
+            try {
+                const resp = await fetch('php/recuperar_password.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        accion: 'solicitar_codigo',
+                        email: email
+                    })
+                });
+
+                const data = await resp.json();
+
+                if (data.success) {
+                    correoRecuperacionActual = email;
+                    document.getElementById('txtCorreoDestinoOtp').textContent = email;
+                    document.getElementById('recuperarPaso1').style.display = 'none';
+                    document.getElementById('recuperarPaso2').style.display = 'block';
+                    showSuccessBanner(data.message || 'Código enviado a tu correo');
+                } else {
+                    msg.style.display = 'block';
+                    msg.style.background = '#fee2e2';
+                    msg.style.color = '#b91c1c';
+                    msg.textContent = data.error || 'Error al solicitar código';
+                }
+            } catch (err) {
+                msg.style.display = 'block';
+                msg.style.background = '#fee2e2';
+                msg.style.color = '#b91c1c';
+                msg.textContent = 'Error de conexión con el servidor.';
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-paper-plane"></i> Enviar Código de Seguridad';
+            }
+        }
+
+        async function confirmarNuevaPasswordConOtp(e) {
+            e.preventDefault();
+            const codigo = document.getElementById('recuperarOtpCodigo').value.trim();
+            const pass1 = document.getElementById('recuperarNuevaPass').value;
+            const pass2 = document.getElementById('recuperarConfirmPass').value;
+            const btn = document.getElementById('btnConfirmarOtp');
+            const msg = document.getElementById('msgRecuperarStatus2');
+
+            if (pass1 !== pass2) {
+                msg.style.display = 'block';
+                msg.style.background = '#fee2e2';
+                msg.style.color = '#b91c1c';
+                msg.textContent = 'Las contraseñas no coinciden.';
+                return;
+            }
+
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Verificando código...';
+            msg.style.display = 'none';
+
+            try {
+                const resp = await fetch('php/recuperar_password.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        accion: 'cambiar_password',
+                        email: correoRecuperacionActual,
+                        codigo: codigo,
+                        password: pass1
+                    })
+                });
+
+                const data = await resp.json();
+
+                if (data.success) {
+                    showSuccessBanner(data.message || 'Contraseña restablecida con éxito');
+                    closeModal('recuperarModal');
+                    setTimeout(() => {
+                        showLoginModal();
+                    }, 600);
+                } else {
+                    msg.style.display = 'block';
+                    msg.style.background = '#fee2e2';
+                    msg.style.color = '#b91c1c';
+                    msg.textContent = data.error || 'Código incorrecto o expirado.';
+                }
+            } catch (err) {
+                msg.style.display = 'block';
+                msg.style.background = '#fee2e2';
+                msg.style.color = '#b91c1c';
+                msg.textContent = 'Error al comunicarse con el servidor.';
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-check-circle"></i> Restablecer Contraseña';
+            }
         }
 
         // Cerrar modal al click afuera

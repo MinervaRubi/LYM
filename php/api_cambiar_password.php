@@ -55,9 +55,25 @@ try {
     $stmtUpd = $pdo->prepare("UPDATE usuarios SET password_hash = ? WHERE id = ?");
     $stmtUpd->execute([$newHash, $userId]);
 
+    // Enviar notificación de seguridad al correo del cliente
+    try {
+        require_once __DIR__ . '/../includes/mailer.php';
+        require_once __DIR__ . '/../includes/plantillas_correo.php';
+        $stmtU = $pdo->prepare("SELECT username, email FROM usuarios WHERE id = ? LIMIT 1");
+        $stmtU->execute([$userId]);
+        $uInfo = $stmtU->fetch();
+        if ($uInfo && !empty($uInfo['email']) && filter_var($uInfo['email'], FILTER_VALIDATE_EMAIL)) {
+            $mailer = new LYMMailer($pdo);
+            $htmlNotif = LYMPlantillasCorreo::passwordCambiada(['nombre' => $uInfo['username']]);
+            $mailer->enviar($uInfo['email'], "Aviso de Seguridad: Contraseña Modificada - LYM", $htmlNotif, 'seguridad', 'PASS-CHG');
+        }
+    } catch (Exception $eMail) {
+        error_log("Aviso correo cambio password: " . $eMail->getMessage());
+    }
+
     echo json_encode([
         'success' => true,
-        'message' => '¡Tu contraseña ha sido actualizada exitosamente!'
+        'message' => '¡Tu contraseña ha sido actualizada exitosamente! Se ha enviado un aviso de seguridad a tu correo.'
     ]);
 
 } catch (Exception $e) {

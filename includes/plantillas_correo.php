@@ -247,4 +247,64 @@ HTML;
 
         return self::envolverPlantilla("Prueba de Conexión Exitosa - Tienda Oficial LYM", $body);
     }
+
+    /**
+     * Correo Oficial de Bienvenida al Registrarse
+     */
+    public static function bienvenidaCliente($datos) {
+        $nombre = htmlspecialchars($datos['nombre'] ?? 'Cliente');
+        $email = htmlspecialchars($datos['email'] ?? '');
+
+        $body = <<<HTML
+        <div style="text-align:center; margin-bottom: 24px;">
+            <div style="display:inline-block; width:52px; height:52px; line-height:52px; background:#eff6ff; color:#4338ca; border-radius:50%; font-size:26px; font-weight:bold; margin-bottom:10px;">👋</div>
+            <h2 style="margin:0; color:#1e293b; font-size:22px; font-weight:800;">¡Te damos la bienvenida a LYM, {$nombre}!</h2>
+            <p style="margin:6px 0 0; color:#64748b; font-size:14px;">Tu cuenta ha sido creada exitosamente en nuestra tienda oficial.</p>
+        </div>
+
+        <p>Hola <strong>{$nombre}</strong>,</p>
+        <p>Ya puedes comenzar a personalizar tus productos favoritos, utilizar tu Monedero Digital para recibir reembolsos y gestionar tus órdenes en tiempo real.</p>
+
+        <div class="card" style="font-size:14px;">
+            <div style="margin-bottom:8px;"><strong>👤 Usuario:</strong> {$nombre}</div>
+            <div style="margin-bottom:8px;"><strong>📧 Correo registrado:</strong> {$email}</div>
+            <div><strong>🎁 Beneficio de Bienvenida:</strong> Acceso a promociones y Monedero Digital LYM.</div>
+        </div>
+
+        <div style="text-align:center;">
+            <a href="http://localhost/sistema.html" class="btn">Explorar Catálogo y Comenzar</a>
+        </div>
+HTML;
+
+        return self::envolverPlantilla("¡Bienvenido a LYM Diseño e Impresión!", $body);
+    }
+
+    /**
+     * Notificación de Seguridad: Contraseña Modificada Exitosamente
+     */
+    public static function passwordCambiada($datos) {
+        $nombre = htmlspecialchars($datos['nombre'] ?? 'Usuario');
+        $fecha = date('d/m/Y H:i:s');
+
+        $body = <<<HTML
+        <div style="text-align:center; margin-bottom: 24px;">
+            <div style="display:inline-block; width:52px; height:52px; line-height:52px; background:#dcfce7; color:#15803d; border-radius:50%; font-size:26px; font-weight:bold; margin-bottom:10px;">🛡️</div>
+            <h2 style="margin:0; color:#1e293b; font-size:22px; font-weight:800;">Aviso de Seguridad: Contraseña Modificada</h2>
+            <p style="margin:6px 0 0; color:#64748b; font-size:14px;">La contraseña de tu cuenta LYM ha sido actualizada exitosamente.</p>
+        </div>
+
+        <p>Hola <strong>{$nombre}</strong>,</p>
+        <p>Te informamos que el día <strong>{$fecha}</strong> se actualizó correctamente la contraseña de acceso para tu cuenta.</p>
+
+        <div class="card" style="font-size:13px; color:#475569; background:#fffbeb; border-color:#fef3c7;">
+            ⚠️ <strong>¿No fuiste tú?</strong> Si no realizaste este cambio, por favor contacta de inmediato a nuestro equipo de atención o restablece tu contraseña para proteger tu cuenta.
+        </div>
+
+        <div style="text-align:center;">
+            <a href="http://localhost/sistema.html" class="btn">Iniciar Sesión en LYM</a>
+        </div>
+HTML;
+
+        return self::envolverPlantilla("Aviso de Seguridad: Contraseña Actualizada - LYM", $body);
+    }
 }

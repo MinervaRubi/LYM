@@ -292,6 +292,20 @@ try {
     // =================================================
     $pdo->commit();
 
+    // Enviar correo oficial de bienvenida al nuevo cliente
+    try {
+        require_once __DIR__ . '/../includes/mailer.php';
+        require_once __DIR__ . '/../includes/plantillas_correo.php';
+        $mailer = new LYMMailer($pdo);
+        $htmlBienvenida = LYMPlantillasCorreo::bienvenidaCliente([
+            'nombre' => $username,
+            'email' => $email
+        ]);
+        $mailer->enviar($email, "¡Bienvenido a LYM Diseño e Impresión, {$username}!", $htmlBienvenida, 'bienvenida', 'REG-' . $user_id);
+    } catch (Exception $eMail) {
+        error_log("Aviso correo bienvenida: " . $eMail->getMessage());
+    }
+
 
     // =================================================
     // OBTENER USUARIO CREADO
