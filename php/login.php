@@ -140,6 +140,8 @@ try {
     $_SESSION['username'] = $user['username'];
 
     $_SESSION['user_role'] = $user['role'];
+    $_SESSION['role'] = $user['role'];
+    $_SESSION['rol'] = $user['role'];
 
     $_SESSION['logged_in'] = true;
 

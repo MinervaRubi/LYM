@@ -218,17 +218,32 @@ try {
     // ==============================================================
     // 3. MONEDERO ELECTRÓNICO (PANTALLAS 6, 10 Y 11)
     // ==============================================================
+    // 3. MONEDERO ELECTRÓNICO (PANTALLAS 6, 8, 10 Y 11)
+    // ==============================================================
     if ($resource === 'monedero') {
-        $cliente = getClienteActual($pdo);
-        if (!$cliente) {
-            http_response_code(404);
-            echo json_encode(['success' => false, 'error' => 'Cliente no identificado']);
-            exit();
-        }
-        $clienteId = (int)$cliente['id'];
-
         // GET: Consultar saldo e historial de movimientos
         if ($method === 'GET') {
+            $esAdmin = (isset($_GET['accion']) && $_GET['accion'] === 'todos_los_movimientos') || isset($_GET['todos']);
+
+            if ($esAdmin) {
+                $stmtMovs = $pdo->query("
+                    SELECT m.*, c.nombre AS cliente_nombre, c.correo AS cliente_correo 
+                    FROM monedero_movimientos m 
+                    LEFT JOIN clientes c ON m.cliente_id = c.id 
+                    ORDER BY m.fecha DESC, m.id DESC LIMIT 100
+                ");
+                $movimientos = $stmtMovs->fetchAll();
+
+                echo json_encode([
+                    'success' => true,
+                    'movimientos' => $movimientos
+                ]);
+                exit();
+            }
+
+            $cliente = getClienteActual($pdo);
+            $clienteId = $cliente ? (int)$cliente['id'] : 1;
+
             $stmtSaldo = $pdo->prepare("SELECT saldo_monedero, nombre, correo FROM clientes WHERE id = ?");
             $stmtSaldo->execute([$clienteId]);
             $cData = $stmtSaldo->fetch();
@@ -246,8 +261,8 @@ try {
             echo json_encode([
                 'success' => true,
                 'cliente_id' => $clienteId,
-                'nombre' => $cData['nombre'],
-                'correo' => $cData['correo'],
+                'nombre' => $cData['nombre'] ?? 'Cliente',
+                'correo' => $cData['correo'] ?? '',
                 'saldo_monedero' => $saldo,
                 'saldo_formato' => '$' . number_format($saldo, 2),
                 'movimientos' => $movimientos
@@ -255,10 +270,15 @@ try {
             exit();
         }
 
-        // POST: Recargar saldo en el monedero
+        // POST: Recargar o bonificar saldo en el monedero
         if ($method === 'POST') {
+            $cliente = getClienteActual($pdo);
+            $clienteSesionId = $cliente ? (int)$cliente['id'] : 1;
+            $targetId = isset($input['cliente_id']) && (int)$input['cliente_id'] > 0 ? (int)$input['cliente_id'] : $clienteSesionId;
+
             $montoRecarga = (float)($input['monto'] ?? 0);
             $metodoPago = cleanInput($input['metodo_pago'] ?? 'Tarjeta');
+            $conceptoInput = cleanInput($input['concepto'] ?? '');
 
             if ($montoRecarga <= 0) {
                 http_response_code(400);
@@ -270,28 +290,29 @@ try {
             try {
                 // Actualizar saldo del cliente
                 $stmtUpd = $pdo->prepare("UPDATE clientes SET saldo_monedero = saldo_monedero + ? WHERE id = ?");
-                $stmtUpd->execute([$montoRecarga, $clienteId]);
+                $stmtUpd->execute([$montoRecarga, $targetId]);
 
                 // Obtener saldo resultante
-                $stmtNew = $pdo->prepare("SELECT saldo_monedero FROM clientes WHERE id = ?");
-                $stmtNew->execute([$clienteId]);
-                $nuevoSaldo = (float)$stmtNew->fetchColumn();
+                $stmtNew = $pdo->prepare("SELECT saldo_monedero, nombre FROM clientes WHERE id = ?");
+                $stmtNew->execute([$targetId]);
+                $cRow = $stmtNew->fetch();
+                $nuevoSaldo = (float)($cRow['saldo_monedero'] ?? 0.00);
 
                 $ref = 'REC-' . strtoupper(substr(uniqid(), -5));
-                $concepto = "Recarga de saldo ({$metodoPago})";
+                $concepto = !empty($conceptoInput) ? $conceptoInput : "Recarga de saldo ({$metodoPago})";
 
                 // Registrar en bitácora de movimientos
                 $stmtMov = $pdo->prepare("
                     INSERT INTO monedero_movimientos (cliente_id, tipo, monto, saldo_resultante, concepto, referencia, fecha)
                     VALUES (?, 'recarga', ?, ?, ?, ?, NOW())
                 ");
-                $stmtMov->execute([$clienteId, $montoRecarga, $nuevoSaldo, $concepto, $ref]);
+                $stmtMov->execute([$targetId, $montoRecarga, $nuevoSaldo, $concepto, $ref]);
 
                 $pdo->commit();
 
                 echo json_encode([
                     'success' => true,
-                    'message' => '¡Recarga exitosa! Se abonaron $' . number_format($montoRecarga, 2) . ' a tu Monedero.',
+                    'message' => '¡Abono exitoso! Se abonaron $' . number_format($montoRecarga, 2) . ' al Monedero de ' . ($cRow['nombre'] ?? 'Cliente') . '.',
                     'monto' => $montoRecarga,
                     'nuevo_saldo' => $nuevoSaldo,
                     'saldo_formato' => '$' . number_format($nuevoSaldo, 2),
@@ -318,6 +339,11 @@ try {
             if (!empty($impuestos)) {
                 $ivaPrincipal = (float)$impuestos[0]['porcentaje'];
             }
+            foreach ($impuestos as &$imp) {
+                $imp['tasa'] = (float)$imp['porcentaje'];
+            }
+            unset($imp);
+
             echo json_encode([
                 'success' => true,
                 'iva_porcentaje' => $ivaPrincipal,
@@ -328,8 +354,8 @@ try {
 
         // POST/PUT: Configurar tasa de impuesto (Admin)
         if ($method === 'POST' || $method === 'PUT') {
-            $porcentaje = max(0, (float)($input['porcentaje'] ?? 16.00));
-            $nombre = cleanInput($input['nombre'] ?? 'IVA');
+            $porcentaje = max(0, (float)($input['porcentaje'] ?? $input['tasa'] ?? 16.00));
+            $nombre = cleanInput($input['nombre'] ?? 'IVA General');
 
             $stmt = $pdo->prepare("UPDATE impuestos SET porcentaje = ?, nombre = ? WHERE id = 1");
             $stmt->execute([$porcentaje, $nombre]);
@@ -337,7 +363,8 @@ try {
             echo json_encode([
                 'success' => true,
                 'message' => 'Tasa de impuesto actualizada correctamente',
-                'porcentaje' => $porcentaje
+                'porcentaje' => $porcentaje,
+                'tasa' => $porcentaje
             ]);
             exit();
         }
@@ -377,10 +404,16 @@ try {
             exit();
         }
 
-        // Listar promociones activas
+        // Listar promociones (para admin y tienda)
         if ($method === 'GET') {
-            $stmt = $pdo->query("SELECT * FROM promociones WHERE estado = 'activo' ORDER BY id DESC");
+            $stmt = $pdo->query("SELECT * FROM promociones ORDER BY id DESC");
             $promos = $stmt->fetchAll();
+            foreach ($promos as &$pr) {
+                $pr['porcentaje'] = (float)$pr['valor'];
+                $pr['activo'] = ($pr['estado'] === 'activo') ? 1 : 0;
+            }
+            unset($pr);
+
             echo json_encode([
                 'success' => true,
                 'promociones' => $promos
@@ -388,45 +421,64 @@ try {
             exit();
         }
 
-        // Crear nueva promoción (Admin)
+        // Crear o actualizar promoción (Admin)
         if ($method === 'POST') {
-            $nombre = cleanInput($input['nombre'] ?? '');
-            $descripcion = cleanInput($input['descripcion'] ?? '');
-            $tipo = cleanInput($input['tipo_descuento'] ?? 'porcentaje');
-            $valor = (float)($input['valor'] ?? 10);
+            // Actualizar estado de cupón existente (Activar / Desactivar)
+            if (isset($input['id']) && (isset($input['activo']) || isset($input['estado']))) {
+                $idPromo = (int)$input['id'];
+                $nuevoEst = !empty($input['estado']) ? cleanInput($input['estado']) : ((int)$input['activo'] === 1 ? 'activo' : 'inactivo');
+                $stmtUpd = $pdo->prepare("UPDATE promociones SET estado = ? WHERE id = ?");
+                $stmtUpd->execute([$nuevoEst, $idPromo]);
+
+                echo json_encode([
+                    'success' => true,
+                    'message' => 'Estado de promoción actualizado a ' . $nuevoEst
+                ]);
+                exit();
+            }
+
+            // Crear nuevo cupón
             $codigo = strtoupper(cleanInput($input['codigo'] ?? uniqid('PROMO-')));
+            $valor = (float)($input['valor'] ?? $input['porcentaje'] ?? 10);
+            $nombre = cleanInput($input['nombre'] ?? ("Cupón " . $codigo));
+            $descripcion = cleanInput($input['descripcion'] ?? "Descuento del {$valor}%");
+            $fechaFin = !empty($input['fecha_fin']) ? cleanInput($input['fecha_fin']) : null;
 
             $stmt = $pdo->prepare("
-                INSERT INTO promociones (nombre, descripcion, tipo_descuento, valor, codigo, estado, created_at)
-                VALUES (?, ?, ?, ?, ?, 'activo', NOW())
+                INSERT INTO promociones (nombre, descripcion, tipo_descuento, valor, codigo, fecha_fin, estado, created_at)
+                VALUES (?, ?, 'porcentaje', ?, ?, ?, 'activo', NOW())
             ");
-            $stmt->execute([$nombre, $descripcion, $tipo, $valor, $codigo]);
+            $stmt->execute([$nombre, $descripcion, $valor, $codigo, $fechaFin]);
 
             echo json_encode([
                 'success' => true,
                 'message' => 'Promoción creada exitosamente',
-                'id' => $pdo->lastInsertId()
+                'id' => (int)$pdo->lastInsertId()
             ]);
             exit();
         }
     }
 
     // ==============================================================
-    // 6. ATENCIÓN A CLIENTES (TICKETS DE SOPORTE) (PANTALLA 12)
+    // 6. ATENCIÓN A CLIENTES (TICKETS DE SOPORTE) (PANTALLA 10 Y 12)
     // ==============================================================
     if ($resource === 'tickets') {
         $cliente = getClienteActual($pdo);
         $clienteId = $cliente ? (int)$cliente['id'] : 1;
 
-        // GET: Listar tickets del cliente actual (o todos si admin)
+        // GET: Listar tickets
         if ($method === 'GET') {
-            $esAdmin = isset($_GET['todos']) && (($_SESSION['rol'] ?? '') === 'admin');
+            $esAdmin = (isset($_GET['accion']) && $_GET['accion'] === 'todos_los_tickets') 
+                       || isset($_GET['todos']) 
+                       || (($_SESSION['rol'] ?? '') === 'admin')
+                       || (($_SESSION['user_role'] ?? '') === 'admin');
+
             if ($esAdmin) {
                 $stmt = $pdo->query("
                     SELECT t.*, c.nombre AS cliente_nombre, c.correo AS cliente_correo 
                     FROM tickets_atencion t
-                    JOIN clientes c ON t.cliente_id = c.id
-                    ORDER BY t.fecha DESC
+                    LEFT JOIN clientes c ON t.cliente_id = c.id
+                    ORDER BY t.fecha DESC, t.id DESC
                 ");
                 $tickets = $stmt->fetchAll();
             } else {
@@ -434,7 +486,7 @@ try {
                     SELECT id, folio, asunto, mensaje, estado, respuesta, fecha, fecha_respuesta 
                     FROM tickets_atencion 
                     WHERE cliente_id = ? 
-                    ORDER BY fecha DESC
+                    ORDER BY fecha DESC, id DESC
                 ");
                 $stmt->execute([$clienteId]);
                 $tickets = $stmt->fetchAll();
@@ -447,10 +499,38 @@ try {
             exit();
         }
 
-        // POST: Crear nuevo ticket de atención
+        // POST: Crear nuevo ticket o responder ticket existente
         if ($method === 'POST') {
+            // Responder a un ticket (Admin)
+            if ((isset($input['accion']) && $input['accion'] === 'responder') || isset($input['respuesta'])) {
+                $ticketId = (int)($input['id'] ?? $input['ticket_id'] ?? 0);
+                $respuesta = cleanInput($input['respuesta'] ?? '');
+                $nuevoEstado = cleanInput($input['estado'] ?? 'Respondido');
+
+                if ($ticketId <= 0 || empty($respuesta)) {
+                    http_response_code(400);
+                    echo json_encode(['success' => false, 'error' => 'ID de ticket y mensaje de respuesta son obligatorios']);
+                    exit();
+                }
+
+                $stmtUpd = $pdo->prepare("
+                    UPDATE tickets_atencion 
+                    SET respuesta = ?, estado = ?, fecha_respuesta = NOW(), usuario_respuesta_id = ?
+                    WHERE id = ?
+                ");
+                $stmtUpd->execute([$respuesta, $nuevoEstado, $_SESSION['user_id'] ?? 1, $ticketId]);
+
+                echo json_encode([
+                    'success' => true,
+                    'message' => 'Respuesta enviada y ticket actualizado.'
+                ]);
+                exit();
+            }
+
+            // Crear nuevo ticket (Cliente)
             $asunto = cleanInput($input['asunto'] ?? '');
             $mensaje = cleanInput($input['mensaje'] ?? '');
+            $cid = isset($input['cliente_id']) && (int)$input['cliente_id'] > 0 ? (int)$input['cliente_id'] : $clienteId;
 
             if (empty($asunto) || empty($mensaje)) {
                 http_response_code(400);
@@ -475,7 +555,7 @@ try {
                 INSERT INTO tickets_atencion (folio, cliente_id, asunto, mensaje, estado, fecha)
                 VALUES (?, ?, ?, ?, 'En proceso', NOW())
             ");
-            $stmtIns->execute([$folio, $clienteId, $asunto, $mensaje]);
+            $stmtIns->execute([$folio, $cid, $asunto, $mensaje]);
             $ticketId = (int)$pdo->lastInsertId();
 
             echo json_encode([
@@ -488,9 +568,9 @@ try {
             exit();
         }
 
-        // PUT: Responder y actualizar estado de ticket (Admin)
+        // PUT: Responder y actualizar estado de ticket (Admin alternativo)
         if ($method === 'PUT') {
-            $ticketId = (int)($input['ticket_id'] ?? 0);
+            $ticketId = (int)($input['ticket_id'] ?? $input['id'] ?? 0);
             $respuesta = cleanInput($input['respuesta'] ?? '');
             $nuevoEstado = cleanInput($input['estado'] ?? 'Respondido');
 

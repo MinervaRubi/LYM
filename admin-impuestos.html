@@ -51,7 +51,7 @@
             if (data.success && data.impuestos && data.impuestos.length > 0) {
                 const imp = data.impuestos[0];
                 document.getElementById("impuestoNombre").value = imp.nombre || 'IVA';
-                document.getElementById("impuestoTasa").value = parseFloat(imp.tasa) || 16.0;
+                document.getElementById("impuestoTasa").value = parseFloat(imp.porcentaje || imp.tasa) || 16.0;
             }
         } catch (e) {}
     }
@@ -68,7 +68,7 @@
             const resp = await fetch("php/tienda_api.php?resource=impuestos", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ tasa: tasa })
+                body: JSON.stringify({ porcentaje: tasa, tasa: tasa })
             });
             const data = await resp.json();
             if (data.success) {
