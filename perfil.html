@@ -1157,10 +1157,22 @@
             }
         }
 
-        function cerrarSesionCliente() {
-            fetch('php/logout.php')
-                .then(() => window.location.href = "sistema.html")
-                .catch(() => window.location.href = "sistema.html");
+        async function cerrarSesionCliente() {
+            try {
+                await fetch('php/logout.php', {
+                    method: 'POST',
+                    credentials: 'same-origin',
+                    cache: 'no-store'
+                });
+            } catch (e) {
+                console.error("Error al cerrar sesión:", e);
+            } finally {
+                try {
+                    localStorage.removeItem("usuario");
+                    sessionStorage.clear();
+                } catch(e) {}
+                window.location.href = "sistema.html";
+            }
         }
 
         function escapeHtml(str) {

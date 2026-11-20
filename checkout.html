@@ -880,6 +880,7 @@
                 const payload = {
                     cliente_id: clienteActual.id,
                     nombre: clienteActual.nombre,
+                    correo: clienteActual.email,
                     direccion: clienteActual.direccion,
                     metodo_pago: 'monedero',
                     subtotal: desglose ? desglose.subtotal : total,
@@ -931,6 +932,7 @@
                 const payload = {
                     cliente_id: clienteActual.id,
                     nombre: clienteActual.nombre,
+                    correo: clienteActual.email,
                     direccion: clienteActual.direccion,
                     metodo_pago: metodo,
                     subtotal: desglose ? desglose.subtotal : total,

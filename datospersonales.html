@@ -743,8 +743,15 @@
             console.log("Abrir modal admin");
         }
 
-        function logout() {
-            console.log("Cerrar sesión");
+        async function logout() {
+            try {
+                await fetch('php/logout.php', { method: 'POST', credentials: 'same-origin', cache: 'no-store' });
+            } catch(e) {}
+            try {
+                localStorage.removeItem("usuario");
+                sessionStorage.clear();
+            } catch(e) {}
+            window.location.href = "sistema.html";
         }
     </script>
 

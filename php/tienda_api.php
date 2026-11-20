@@ -650,14 +650,22 @@ try {
         }
 
         $cliente = getClienteActual($pdo);
+        if (isset($input['cliente_id']) && is_numeric($input['cliente_id'])) {
+            $stmtCli = $pdo->prepare("SELECT * FROM clientes WHERE id = ? LIMIT 1");
+            $stmtCli->execute([(int)$input['cliente_id']]);
+            $foundCli = $stmtCli->fetch();
+            if ($foundCli) {
+                $cliente = $foundCli;
+            }
+        }
         $clienteId = $cliente ? (int)$cliente['id'] : 1;
 
         $items = isset($input['items']) && is_array($input['items']) ? $input['items'] : [];
-        $nombreCompleto = cleanInput($input['nombre_completo'] ?? ($cliente['nombre'] ?? 'Cliente General'));
+        $nombreCompleto = cleanInput($input['nombre_completo'] ?? ($input['nombre'] ?? ($cliente['nombre'] ?? 'Cliente General')));
         $direccion = cleanInput($input['direccion'] ?? ($cliente['direccion'] ?? 'Av. Tecnológico #123'));
         $metodoPago = cleanInput($input['metodo_pago'] ?? 'Monedero');
-        $codigoPromocion = strtoupper(cleanInput($input['codigo_promocion'] ?? ''));
-        $notas = cleanInput($input['notas'] ?? 'Compra en línea Etapa 4');
+        $codigoPromocion = strtoupper(cleanInput($input['codigo_promocion'] ?? ($input['cupon'] ?? '')));
+        $notas = cleanInput($input['notas'] ?? 'Compra en línea');
 
         if (empty($items)) {
             http_response_code(400);
@@ -860,7 +868,7 @@ try {
             try {
                 require_once __DIR__ . '/../includes/mailer.php';
                 require_once __DIR__ . '/../includes/plantillas_correo.php';
-                $destCorreo = $cliente['correo'] ?? '';
+                $destCorreo = !empty($input['correo']) ? $input['correo'] : (!empty($cliente['correo']) ? $cliente['correo'] : ($_SESSION['email'] ?? ''));
                 if (!empty($destCorreo) && filter_var($destCorreo, FILTER_VALIDATE_EMAIL)) {
                     $mailer = new LYMMailer($pdo);
                     $htmlEmail = LYMPlantillasCorreo::compraConfirmada([

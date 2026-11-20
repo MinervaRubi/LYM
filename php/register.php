@@ -328,6 +328,15 @@ try {
 
     $user = $stmt->fetch();
 
+    // =================================================
+    // CREAR SESIÓN AUTOMÁTICA
+    // =================================================
+    $_SESSION['user_id'] = (int) $user['id'];
+    $_SESSION['username'] = $user['username'];
+    $_SESSION['user_role'] = $user['role'];
+    $_SESSION['role'] = $user['role'];
+    $_SESSION['rol'] = $user['role'];
+    $_SESSION['logged_in'] = true;
 
     // =================================================
     // RESPUESTA
@@ -338,7 +347,12 @@ try {
     echo json_encode([
         'success' => true,
         'message' => 'Usuario registrado exitosamente',
-        'user' => $user,
+        'user' => [
+            'id' => (int)$user['id'],
+            'username' => $user['username'],
+            'email' => $user['email'],
+            'role' => $user['role']
+        ],
         'cliente_id' => $cliente_id
     ]);
 

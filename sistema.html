@@ -2005,45 +2005,19 @@
                 // ==========================================
                 // ÉXITO
                 // ==========================================
-
-                showSuccessBanner(
-                    "Registro exitoso"
-                );
-
+                currentUser = data.user;
+                updateUIForLoggedInUser();
 
                 // Limpiar formulario
-
-                document
-                    .getElementById('registerUsername')
-                    .value = "";
-
-                document
-                    .getElementById('registerEmail')
-                    .value = "";
-
-                document
-                    .getElementById('registerPassword')
-                    .value = "";
-
-                document
-                    .getElementById('registerConfirmPassword')
-                    .value = "";
-
+                document.getElementById('registerUsername').value = "";
+                document.getElementById('registerEmail').value = "";
+                document.getElementById('registerPassword').value = "";
+                document.getElementById('registerConfirmPassword').value = "";
 
                 // Cerrar registro
+                closeModal('registerModal');
 
-                closeModal(
-                    'registerModal'
-                );
-
-
-                // Abrir login
-
-                setTimeout(() => {
-
-                    showLoginModal();
-
-                }, 800);
+                showSuccessBanner("¡Bienvenido, " + (data.user?.username || '') + "! Te enviamos un correo oficial de bienvenida.");
 
 
             } catch (error) {
@@ -2067,50 +2041,34 @@
         // =====================================================
 
         async function logout() {
-
             try {
-
                 const response = await fetch(
                     "php/logout.php",
                     {
                         method: "POST",
+                        headers: { "Accept": "application/json" },
                         credentials: "same-origin",
                         cache: "no-store"
                     }
                 );
-
-
                 if (!response.ok) {
-
-                    console.warn(
-                        "logout.php respondió:",
-                        response.status
-                    );
+                    console.warn("logout.php respondió:", response.status);
                 }
-
-
             } catch (error) {
-
-                console.error(
-                    "Error cerrando sesión:",
-                    error
-                );
-
+                console.error("Error cerrando sesión:", error);
             } finally {
-
+                currentUser = null;
+                try {
+                    localStorage.removeItem("usuario");
+                    sessionStorage.clear();
+                } catch(e) {}
                 updateUIForLoggedOutUser();
-
-
-                showSuccessBanner(
-                    "Sesión cerrada"
-                );
-
-
+                const dropdown = document.getElementById("userDropdown");
+                if (dropdown) dropdown.classList.remove("show-dropdown");
+                showSuccessBanner("Sesión cerrada correctamente");
                 setTimeout(() => {
-
                     window.location.reload();
-
-                }, 500);
+                }, 400);
             }
         }
 
