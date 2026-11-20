@@ -757,9 +757,9 @@
                 const resp = await fetch('php/check_session.php');
                 const data = await resp.json();
                 if (data.authenticated && data.user) {
-                    clienteIdActivo = data.user.id || 1;
-                    const nombre = data.user.nombre || data.user.username || "Juan Pérez";
-                    const email = data.user.email || "juan@example.com";
+                    clienteIdActivo = data.user.cliente_id || data.user.id || 1;
+                    const nombre = data.user.nombre || data.user.username || "Cliente";
+                    const email = data.user.email || "";
 
                     document.getElementById('sidebarNombreUsuario').textContent = nombre;
                     document.getElementById('sidebarEmailUsuario').textContent = email;
@@ -768,12 +768,16 @@
                     document.getElementById('perfilUsername').value = data.user.username || nombre;
                     document.getElementById('perfilEmail').value = email;
                     document.getElementById('dirNombre').value = nombre;
+                    if (data.user.direccion) {
+                        const dirInput = document.getElementById('dirCalle');
+                        if (dirInput && !dirInput.value.trim()) dirInput.value = data.user.direccion;
+                    }
                 }
             } catch (e) {
                 console.error("Error al cargar sesión:", e);
             }
 
-            cargarDatosMonedero();
+            await cargarDatosMonedero();
         }
 
         // ==============================================================
@@ -785,7 +789,9 @@
                 const data = await resp.json();
 
                 if (data.success) {
-                    const saldo = parseFloat(data.saldo) || 0;
+                    if (data.cliente_id) clienteIdActivo = data.cliente_id;
+                    const saldoRaw = data.saldo_monedero !== undefined ? data.saldo_monedero : (data.saldo !== undefined ? data.saldo : 0);
+                    const saldo = parseFloat(saldoRaw) || 0;
                     document.getElementById('heroSaldoMonedero').textContent = `$${saldo.toFixed(2)} MXN`;
                     document.getElementById('lblClienteIdMonedero').textContent = clienteIdActivo;
 
@@ -794,7 +800,8 @@
                         if (dirInput && !dirInput.value.trim()) dirInput.value = data.cliente.direccion;
                     }
 
-                    renderHistorialMonedero(data.historial || []);
+                    const listaMovs = data.movimientos || data.historial || [];
+                    renderHistorialMonedero(listaMovs);
                 }
             } catch (e) {
                 console.error("Error al consultar monedero:", e);
@@ -805,7 +812,7 @@
             const tbody = document.getElementById('tablaHistorialMonederoBody');
             if (!tbody) return;
 
-            if (historial.length === 0) {
+            if (!Array.isArray(historial) || historial.length === 0) {
                 tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; color:#94a3b8; padding:24px;">No tienes movimientos registrados en tu monedero.</td></tr>`;
                 return;
             }
@@ -814,11 +821,12 @@
                 const monto = parseFloat(m.monto) || 0;
                 const isPos = monto >= 0;
                 const saldoRes = parseFloat(m.saldo_resultante) || 0;
+                const fecha = m.fecha || m.created_at || 'Reciente';
 
                 return `
                     <tr>
-                        <td><i class="far fa-calendar" style="color:#94a3b8; margin-right:6px;"></i>${m.created_at || 'Reciente'}</td>
-                        <td><strong>${escapeHtml(m.concepto)}</strong></td>
+                        <td><i class="far fa-calendar" style="color:#94a3b8; margin-right:6px;"></i>${escapeHtml(fecha)}</td>
+                        <td><strong>${escapeHtml(m.concepto || 'Movimiento')}</strong></td>
                         <td style="font-weight:700; color:${isPos ? '#10b981' : '#ef4444'};">
                             ${isPos ? '+' : ''}$${monto.toFixed(2)} MXN
                         </td>
@@ -861,9 +869,10 @@
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({
                         cliente_id: clienteIdActivo,
-                        accion: "recarga",
                         monto: monto,
-                        metodo: selectMetodo.value
+                        metodo_pago: selectMetodo.value,
+                        metodo: selectMetodo.value,
+                        concepto: `Recarga de saldo (${selectMetodo.value})`
                     })
                 });
 
@@ -871,7 +880,9 @@
 
                 if (data.success) {
                     mostrarNotificacion(`¡Recarga exitosa! Se han acreditado $${monto.toFixed(2)} MXN a tu monedero.`, "success", "Saldo Acreditado");
-                    cargarDatosMonedero();
+                    inp.value = "";
+                    document.querySelectorAll(".btn-monto-recarga").forEach(b => b.classList.remove("active"));
+                    await cargarDatosMonedero();
                 } else {
                     mostrarNotificacion(data.error || "Error al recargar saldo.", "error");
                 }

@@ -18,13 +18,36 @@ try {
         if ($user) {
             $_SESSION['user_role'] = $user['role'];
             $_SESSION['username'] = $user['username'];
+
+            // Obtener datos del cliente vinculado
+            $pdo = getDBConnection();
+            $stmtCli = $pdo->prepare("SELECT id, nombre, saldo_monedero, direccion FROM clientes WHERE usuario_id = ? LIMIT 1");
+            $stmtCli->execute([(int)$user['id']]);
+            $cliRow = $stmtCli->fetch(PDO::FETCH_ASSOC);
+
+            if (!$cliRow && !empty($user['email'])) {
+                $stmtCliMail = $pdo->prepare("SELECT id, nombre, saldo_monedero, direccion FROM clientes WHERE LOWER(correo) = LOWER(?) LIMIT 1");
+                $stmtCliMail->execute([$user['email']]);
+                $cliRow = $stmtCliMail->fetch(PDO::FETCH_ASSOC);
+                if ($cliRow) {
+                    $pdo->prepare("UPDATE clientes SET usuario_id = ? WHERE id = ?")->execute([(int)$user['id'], (int)$cliRow['id']]);
+                }
+            }
+
+            $clienteIdReal = $cliRow ? (int)$cliRow['id'] : (int)$user['id'];
+            $saldoReal = $cliRow ? (float)$cliRow['saldo_monedero'] : 1200.00;
+
             echo json_encode([
                 'authenticated' => true,
                 'user' => [
                     'id' => (int)$user['id'],
+                    'cliente_id' => $clienteIdReal,
                     'username' => $user['username'],
+                    'nombre' => $cliRow['nombre'] ?? $user['username'],
                     'email' => $user['email'],
-                    'role' => $user['role']
+                    'role' => $user['role'],
+                    'saldo_monedero' => $saldoReal,
+                    'direccion' => $cliRow['direccion'] ?? ''
                 ]
             ]);
         } else {

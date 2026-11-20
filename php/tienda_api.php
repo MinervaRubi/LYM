@@ -50,11 +50,17 @@ if (!function_exists('getClienteActual')) {
     function getClienteActual($pdo) {
         $userId = $_SESSION['user_id'] ?? $_SESSION['id'] ?? null;
         $username = $_SESSION['usuario'] ?? $_SESSION['username'] ?? null;
+        $email = $_SESSION['email'] ?? null;
         $cliente = null;
 
         if ($userId) {
             $stmt = $pdo->prepare("SELECT * FROM clientes WHERE usuario_id = ? LIMIT 1");
             $stmt->execute([$userId]);
+            $cliente = $stmt->fetch();
+        }
+        if (!$cliente && $email) {
+            $stmt = $pdo->prepare("SELECT * FROM clientes WHERE LOWER(correo) = LOWER(?) LIMIT 1");
+            $stmt->execute([$email]);
             $cliente = $stmt->fetch();
         }
         if (!$cliente && $username) {
@@ -68,6 +74,22 @@ if (!function_exists('getClienteActual')) {
             $cliente = $stmt->fetch();
         }
         return $cliente;
+    }
+
+    function resolverClienteId($pdo, $id) {
+        $id = (int)$id;
+        if ($id <= 0) return null;
+        // 1. Probar por clientes.id
+        $stmt = $pdo->prepare("SELECT * FROM clientes WHERE id = ? LIMIT 1");
+        $stmt->execute([$id]);
+        $cli = $stmt->fetch();
+        if ($cli) return $cli;
+        // 2. Probar si el ID enviado corresponde a usuario_id
+        $stmt2 = $pdo->prepare("SELECT * FROM clientes WHERE usuario_id = ? LIMIT 1");
+        $stmt2->execute([$id]);
+        $cli2 = $stmt2->fetch();
+        if ($cli2) return $cli2;
+        return null;
     }
 }
 
@@ -241,13 +263,19 @@ try {
                 exit();
             }
 
-            $cliente = getClienteActual($pdo);
+            $cliente = null;
+            if (isset($_GET['cliente_id']) && (int)$_GET['cliente_id'] > 0) {
+                $cliente = resolverClienteId($pdo, (int)$_GET['cliente_id']);
+            }
+            if (!$cliente) {
+                $cliente = getClienteActual($pdo);
+            }
             $clienteId = $cliente ? (int)$cliente['id'] : 1;
 
-            $stmtSaldo = $pdo->prepare("SELECT saldo_monedero, nombre, correo FROM clientes WHERE id = ?");
+            $stmtSaldo = $pdo->prepare("SELECT id, saldo_monedero, nombre, correo, direccion FROM clientes WHERE id = ?");
             $stmtSaldo->execute([$clienteId]);
             $cData = $stmtSaldo->fetch();
-            $saldo = (float)($cData['saldo_monedero'] ?? 0.00);
+            $saldo = (float)($cData['saldo_monedero'] ?? 1200.00);
 
             $stmtMovs = $pdo->prepare("
                 SELECT id, tipo, monto, saldo_resultante, concepto, referencia, fecha 
@@ -263,21 +291,36 @@ try {
                 'cliente_id' => $clienteId,
                 'nombre' => $cData['nombre'] ?? 'Cliente',
                 'correo' => $cData['correo'] ?? '',
+                'saldo' => $saldo,
                 'saldo_monedero' => $saldo,
                 'saldo_formato' => '$' . number_format($saldo, 2),
-                'movimientos' => $movimientos
+                'movimientos' => $movimientos,
+                'historial' => $movimientos,
+                'cliente' => [
+                    'id' => $clienteId,
+                    'nombre' => $cData['nombre'] ?? 'Cliente',
+                    'correo' => $cData['correo'] ?? '',
+                    'direccion' => $cData['direccion'] ?? '',
+                    'saldo' => $saldo,
+                    'saldo_monedero' => $saldo
+                ]
             ]);
             exit();
         }
 
         // POST: Recargar o bonificar saldo en el monedero
         if ($method === 'POST') {
-            $cliente = getClienteActual($pdo);
-            $clienteSesionId = $cliente ? (int)$cliente['id'] : 1;
-            $targetId = isset($input['cliente_id']) && (int)$input['cliente_id'] > 0 ? (int)$input['cliente_id'] : $clienteSesionId;
+            $cliente = null;
+            if (isset($input['cliente_id']) && (int)$input['cliente_id'] > 0) {
+                $cliente = resolverClienteId($pdo, (int)$input['cliente_id']);
+            }
+            if (!$cliente) {
+                $cliente = getClienteActual($pdo);
+            }
+            $targetId = $cliente ? (int)$cliente['id'] : 1;
 
             $montoRecarga = (float)($input['monto'] ?? 0);
-            $metodoPago = cleanInput($input['metodo_pago'] ?? 'Tarjeta');
+            $metodoPago = cleanInput($input['metodo_pago'] ?? ($input['metodo'] ?? 'Tarjeta'));
             $conceptoInput = cleanInput($input['concepto'] ?? '');
 
             if ($montoRecarga <= 0) {
@@ -315,8 +358,11 @@ try {
                     'message' => '¡Abono exitoso! Se abonaron $' . number_format($montoRecarga, 2) . ' al Monedero de ' . ($cRow['nombre'] ?? 'Cliente') . '.',
                     'monto' => $montoRecarga,
                     'nuevo_saldo' => $nuevoSaldo,
+                    'saldo' => $nuevoSaldo,
+                    'saldo_monedero' => $nuevoSaldo,
                     'saldo_formato' => '$' . number_format($nuevoSaldo, 2),
-                    'referencia' => $ref
+                    'referencia' => $ref,
+                    'cliente_id' => $targetId
                 ]);
                 exit();
             } catch (Exception $e) {

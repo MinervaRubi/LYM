@@ -712,9 +712,10 @@
                 const rS = await fetch("php/check_session.php");
                 const dS = await rS.json();
                 if (dS.authenticated && dS.user) {
-                    clienteActual.id = dS.user.id || 1;
-                    clienteActual.nombre = dS.user.nombre || dS.user.username || "Juan Pérez";
+                    clienteActual.id = dS.user.cliente_id || dS.user.id || 1;
+                    clienteActual.nombre = dS.user.nombre || dS.user.username || "Cliente";
                     clienteActual.email = dS.user.email || "";
+                    if (dS.user.direccion) clienteActual.direccion = dS.user.direccion;
                 }
             } catch (e) {}
 
@@ -723,7 +724,9 @@
                 const rM = await fetch("php/tienda_api.php?resource=monedero&cliente_id=" + clienteActual.id);
                 const dM = await rM.json();
                 if (dM.success) {
-                    saldoMonederoActual = parseFloat(dM.saldo) || 0;
+                    if (dM.cliente_id) clienteActual.id = dM.cliente_id;
+                    const rawSaldo = dM.saldo_monedero !== undefined ? dM.saldo_monedero : dM.saldo;
+                    saldoMonederoActual = parseFloat(rawSaldo) || 0;
                     if (dM.cliente && dM.cliente.direccion) {
                         clienteActual.direccion = dM.cliente.direccion;
                     }

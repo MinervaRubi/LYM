@@ -472,8 +472,9 @@
                         </button>
 
                         <div class="user-dropdown" id="userDropdown">
-                            <a href="perfil.html#monedero" class="dropdown-item">
-                                <i class="fas fa-wallet" style="color:#059669;"></i> Mi Monedero Digital
+                            <a href="perfil.html#monedero" class="dropdown-item" style="display:flex; justify-content:space-between; align-items:center;">
+                                <span><i class="fas fa-wallet" style="color:#059669; margin-right:8px;"></i> Mi Monedero Digital</span>
+                                <span id="navUserMonederoBadge" style="background:#ecfdf5; color:#059669; font-weight:700; font-size:0.75rem; padding:2px 8px; border-radius:12px; border:1px solid #a7f3d0;">$0.00</span>
                             </a>
 
                             <a href="perfil.html#pedidos" class="dropdown-item">
@@ -1645,6 +1646,12 @@
                 } else {
                     gestorLink.style.display = 'none';
                 }
+            }
+
+            // Actualizar badge de saldo del monedero en el menú
+            const monBadge = document.getElementById('navUserMonederoBadge');
+            if (monBadge && currentUser?.saldo_monedero !== undefined) {
+                monBadge.textContent = '$' + Number(currentUser.saldo_monedero).toFixed(2);
             }
 
             // Auto-llenar campos del formulario de contacto para el cliente autenticado
