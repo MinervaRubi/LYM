@@ -409,8 +409,8 @@ try {
                 SELECT 
                     d.id,
                     d.cliente_id,
-                    c.nombre AS cliente_nombre,
-                    c.correo AS cliente_correo,
+                    COALESCE(c.nombre, CONCAT('Cliente #', d.cliente_id)) AS cliente_nombre,
+                    COALESCE(c.correo, '') AS cliente_correo,
                     COALESCE(c.empresa, 'Particular') AS cliente_empresa,
                     d.trabajador_id,
                     COALESCE(ut.username, 'Empleado') AS trabajador_nombre,
@@ -424,7 +424,7 @@ try {
                     d.fecha_solicitud,
                     d.fecha_resolucion
                 FROM solicitudes_descuento d
-                JOIN clientes c ON c.id = d.cliente_id
+                LEFT JOIN clientes c ON c.id = d.cliente_id
                 LEFT JOIN usuarios ut ON ut.id = d.trabajador_id
                 LEFT JOIN usuarios ua ON ua.id = d.admin_id
             ";
@@ -701,9 +701,9 @@ try {
             }
 
             $stmtSol = $pdo->prepare("
-                SELECT d.*, c.nombre AS cliente_nombre, c.correo AS cliente_correo, c.usuario_id
+                SELECT d.*, COALESCE(c.nombre, CONCAT('Cliente #', d.cliente_id)) AS cliente_nombre, COALESCE(c.correo, '') AS cliente_correo, c.usuario_id
                 FROM solicitudes_descuento d
-                JOIN clientes c ON c.id = d.cliente_id
+                LEFT JOIN clientes c ON c.id = d.cliente_id
                 WHERE d.id = ?
             ");
             $stmtSol->execute([$id]);
