@@ -1,399 +1,369 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Configuración de Correo Oficial SMTP - LYM</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --primary: #4338ca;
-            --primary-light: #6366f1;
-            --secondary: #059669;
-            --bg: #f8fafc;
-            --card-bg: #ffffff;
-            --text-dark: #0f172a;
-            --text-muted: #64748b;
-            --border: #e2e8f0;
-            --radius: 16px;
-            --shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.01);
-        }
-
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Poppins', sans-serif; }
-        body { background: var(--bg); color: var(--text-dark); padding: 24px; }
-        
-        .header-title { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; flex-wrap: wrap; gap: 14px; }
-        .header-title h2 { font-size: 1.6rem; font-weight: 800; color: #1e1b4b; display: flex; align-items: center; gap: 12px; }
-        .header-title h2 i { color: #ea4335; }
-        .header-title p { color: var(--text-muted); font-size: 0.9rem; margin-top: 4px; }
-
-        .grid-layout { display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 24px; }
-        @media (max-width: 992px) { .grid-layout { grid-template-columns: 1fr; } }
-
-        .card { background: var(--card-bg); border-radius: var(--radius); padding: 24px; border: 1px solid var(--border); box-shadow: var(--shadow); margin-bottom: 24px; }
-        .card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; border-bottom: 1px solid var(--border); padding-bottom: 12px; }
-        .card-header h3 { font-size: 1.15rem; font-weight: 700; color: #1e293b; display: flex; align-items: center; gap: 8px; }
-
-        .form-group { margin-bottom: 16px; }
-        .form-group label { display: block; font-size: 0.85rem; font-weight: 600; color: #334155; margin-bottom: 6px; }
-        .form-control { width: 100%; padding: 10px 14px; border-radius: 10px; border: 1px solid var(--border); font-size: 0.9rem; background: #fdfdfd; transition: 0.2s; }
-        .form-control:focus { outline: none; border-color: var(--primary-light); box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15); }
-        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
-
-        .btn { padding: 12px 22px; border-radius: 999px; border: none; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; font-size: 0.92rem; transition: 0.3s ease; }
-        .btn-primary { background: linear-gradient(135deg, var(--primary), var(--primary-light)); color: white; box-shadow: 0 4px 14px rgba(67, 56, 202, 0.25); }
-        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(67, 56, 202, 0.35); }
-        .btn-success { background: linear-gradient(135deg, #059669, #10b981); color: white; }
-        .btn-success:hover { transform: translateY(-2px); }
-
-        .guide-box { background: #f0fdf4; border: 1.5px solid #bbf7d0; border-radius: 14px; padding: 18px; font-size: 0.88rem; line-height: 1.6; color: #166534; }
-        .guide-box ol { padding-left: 20px; margin-top: 8px; }
-        .guide-box li { margin-bottom: 6px; }
-        .guide-box a { color: #15803d; font-weight: 700; text-decoration: underline; }
-
-        .test-box { background: linear-gradient(135deg, #eef2ff, #faf5ff); border: 1.5px solid #c7d2fe; border-radius: 16px; padding: 22px; }
-        
-        .alert { padding: 12px 16px; border-radius: 10px; font-size: 0.88rem; margin-top: 14px; display: none; }
-        .alert-success { background: #dcfce7; color: #15803d; border: 1px solid #86efac; }
-        .alert-danger { background: #fee2e2; color: #b91c1c; border: 1px solid #fca5a5; }
-
-        .log-console { background: #0f172a; color: #38bdf8; font-family: monospace; font-size: 0.82rem; padding: 14px; border-radius: 10px; margin-top: 12px; max-height: 200px; overflow-y: auto; display: none; white-space: pre-wrap; word-break: break-all; }
-
-        .badge-status { padding: 4px 10px; border-radius: 999px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; }
-        .badge-enviado { background: #dcfce7; color: #15803d; }
-        .badge-fallido { background: #fee2e2; color: #b91c1c; }
-
-        .table-responsive { overflow-x: auto; margin-top: 10px; }
-        table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
-        th { text-align: left; padding: 12px 10px; border-bottom: 2px solid var(--border); color: #64748b; font-weight: 700; text-transform: uppercase; font-size: 0.75rem; }
-        td { padding: 12px 10px; border-bottom: 1px solid var(--border); vertical-align: middle; }
-        tr:hover td { background: #f8fafc; }
-    </style>
-</head>
-<body>
-
-    <div class="header-title">
+<div class="crm-card">
+    <div class="crm-card-header" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
         <div>
-            <h2><i class="fas fa-envelope-open-text"></i> Servidor de Correo Oficial (Gmail SMTP)</h2>
-            <p>Configuración del remitente oficial de la tienda para enviar recibos, facturas, comprobantes y alertas de seguridad reales.</p>
+            <h3 class="crm-card-title">
+                <i class="fas fa-envelope-open-text" style="color:var(--primary);"></i> Servidor de Correo Oficial (Gmail SMTP)
+            </h3>
+            <p class="crm-card-subtitle">Configuración del remitente oficial de la tienda para enviar recibos, comprobantes de compra y alertas de seguridad reales.</p>
         </div>
-        <button class="btn btn-primary" onclick="cargarConfiguracion()">
+        <button type="button" class="crm-btn crm-btn-secondary" onclick="cargarConfiguracion()">
             <i class="fas fa-sync-alt"></i> Actualizar Datos
         </button>
     </div>
 
-    <div class="grid-layout">
-        <!-- Columna Izquierda: Configuración -->
-        <div>
-            <div class="card">
-                <div class="card-header">
-                    <h3><i class="fas fa-cog"></i> Credenciales de la Tienda Oficial</h3>
-                    <span id="badgePassword" style="font-size:0.8rem; font-weight:700; color:#059669; display:none;">
-                        <i class="fas fa-check-circle"></i> Contraseña configurada
-                    </span>
+    <!-- GRID PRINCIPAL DE 2 COLUMNAS -->
+    <div style="display:grid; grid-template-columns:1.2fr 0.8fr; gap:24px; align-items:start; margin-top:20px;">
+        
+        <!-- COLUMNA IZQUIERDA: FORMULARIO DE CREDENCIALES -->
+        <div style="background:#f8fafc; border:1px solid var(--border-color); border-radius:var(--radius-lg); padding:24px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:18px; padding-bottom:12px; border-bottom:1px solid #e2e8f0;">
+                <h4 style="margin:0; font-size:1.05rem; font-weight:700; color:var(--text-heading); display:flex; align-items:center; gap:8px;">
+                    <i class="fas fa-key" style="color:var(--primary);"></i> Credenciales de la Tienda Oficial
+                </h4>
+                <span id="badgePassword" class="crm-badge" style="background:#dcfce7; color:#15803d; font-size:0.75rem; display:none;">
+                    <i class="fas fa-check-circle"></i> Configurada
+                </span>
+            </div>
+
+            <form id="formSmtp" onsubmit="guardarConfig(event)">
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:14px;">
+                    <div class="crm-form-group" style="margin:0;">
+                        <label class="crm-form-label"><i class="fas fa-server" style="color:var(--primary); margin-right:4px;"></i> Servidor SMTP:</label>
+                        <input type="text" class="crm-form-input" id="servidor_smtp" value="smtp.gmail.com" required>
+                    </div>
+                    <div class="crm-form-group" style="margin:0;">
+                        <label class="crm-form-label"><i class="fas fa-plug" style="color:var(--primary); margin-right:4px;"></i> Puerto:</label>
+                        <input type="number" class="crm-form-input" id="puerto_smtp" value="465" required>
+                    </div>
                 </div>
 
-                <form id="formSmtp" onsubmit="guardarConfig(event)">
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label><i class="fas fa-server"></i> Servidor SMTP</label>
-                            <input type="text" class="form-control" id="servidor_smtp" value="smtp.gmail.com" required>
-                        </div>
-                        <div class="form-group">
-                            <label><i class="fas fa-plug"></i> Puerto</label>
-                            <input type="number" class="form-control" id="puerto_smtp" value="465" required>
-                        </div>
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:14px;">
+                    <div class="crm-form-group" style="margin:0;">
+                        <label class="crm-form-label"><i class="fas fa-shield-alt" style="color:var(--primary); margin-right:4px;"></i> Cifrado de Seguridad:</label>
+                        <select class="crm-form-input" id="seguridad">
+                            <option value="ssl" selected>SSL (Recomendado para puerto 465)</option>
+                            <option value="tls">TLS / STARTTLS (Para puerto 587)</option>
+                        </select>
                     </div>
-
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label><i class="fas fa-shield-alt"></i> Cifrado de Seguridad</label>
-                            <select class="form-control" id="seguridad">
-                                <option value="ssl" selected>SSL (Recomendado para puerto 465)</option>
-                                <option value="tls">TLS / STARTTLS (Para puerto 587)</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label><i class="fas fa-toggle-on"></i> Estado del Módulo</label>
-                            <select class="form-control" id="activo">
-                                <option value="1" selected>Activo (Envíos en tiempo real habilitados)</option>
-                                <option value="0">Desactivado</option>
-                            </select>
-                        </div>
+                    <div class="crm-form-group" style="margin:0;">
+                        <label class="crm-form-label"><i class="fas fa-toggle-on" style="color:var(--primary); margin-right:4px;"></i> Estado del Módulo:</label>
+                        <select class="crm-form-input" id="activo">
+                            <option value="1" selected>Activo (Envíos habilitados)</option>
+                            <option value="0">Desactivado</option>
+                        </select>
                     </div>
+                </div>
 
-                    <div class="form-group">
-                        <label><i class="fas fa-user-tag"></i> Nombre Oficial del Remitente</label>
-                        <input type="text" class="form-control" id="remitente_nombre" value="LYM Diseño e Impresión Oficial" required>
+                <div class="crm-form-group" style="margin-bottom:14px;">
+                    <label class="crm-form-label"><i class="fas fa-user-tag" style="color:var(--primary); margin-right:4px;"></i> Nombre Oficial del Remitente:</label>
+                    <input type="text" class="crm-form-input" id="remitente_nombre" value="LYM Diseño e Impresión Oficial" required>
+                </div>
+
+                <div class="crm-form-group" style="margin-bottom:14px;">
+                    <label class="crm-form-label"><i class="fab fa-google" style="color:#ea4335; margin-right:4px;"></i> Correo Gmail Oficial (Usuario SMTP):</label>
+                    <input type="email" class="crm-form-input" id="usuario_smtp" placeholder="ejemplo.tienda@gmail.com" required>
+                </div>
+
+                <div class="crm-form-group" style="margin-bottom:18px;">
+                    <label class="crm-form-label"><i class="fas fa-lock" style="color:var(--primary); margin-right:4px;"></i> Contraseña de Aplicación de Google (16 letras):</label>
+                    <div style="position:relative;">
+                        <input type="password" class="crm-form-input" id="password_smtp" placeholder="Dejar en blanco para conservar la actual" style="padding-right:45px;">
+                        <button type="button" onclick="togglePasswordVisibility()" style="position:absolute; right:12px; top:50%; transform:translateY(-50%); background:none; border:none; color:#64748b; cursor:pointer;">
+                            <i class="fas fa-eye" id="eyeIcon"></i>
+                        </button>
                     </div>
+                    <small style="color:var(--text-muted); font-size:0.75rem; display:block; margin-top:4px;">
+                        * Por seguridad, Google no permite contraseñas habituales. Utiliza una contraseña de aplicación de 16 caracteres.
+                    </small>
+                </div>
 
-                    <div class="form-group">
-                        <label><i class="fab fa-google"></i> Correo Gmail Oficial (Usuario SMTP)</label>
-                        <input type="email" class="form-control" id="usuario_smtp" placeholder="ejemplo.tienda@gmail.com" required>
-                    </div>
+                <button type="submit" class="crm-btn crm-btn-primary" style="width:100%; justify-content:center; padding:12px; font-size:0.95rem;">
+                    <i class="fas fa-save"></i> Guardar Credenciales Oficiales
+                </button>
+            </form>
 
-                    <div class="form-group">
-                        <label><i class="fas fa-key"></i> Contraseña de Aplicación de Google (16 caracteres)</label>
-                        <div style="position:relative;">
-                            <input type="password" class="form-control" id="password_smtp" placeholder="Dejar en blanco para conservar la actual" style="padding-right:45px;">
-                            <button type="button" onclick="togglePasswordVisibility()" style="position:absolute; right:12px; top:50%; transform:translateY(-50%); background:none; border:none; color:#64748b; cursor:pointer;">
-                                <i class="fas fa-eye" id="eyeIcon"></i>
-                            </button>
-                        </div>
-                        <small style="color:var(--text-muted); font-size:0.75rem; display:block; margin-top:4px;">
-                            * Por seguridad, no uses tu contraseña personal normal. Genera una contraseña de aplicación específica en tu cuenta Google.
-                        </small>
-                    </div>
-
-                    <button type="submit" class="btn btn-primary" style="width:100%; justify-content:center; margin-top:10px;">
-                        <i class="fas fa-save"></i> Guardar Configuración Oficial
-                    </button>
-                </form>
-
-                <div id="alertConfig" class="alert"></div>
-            </div>
+            <div id="alertConfig" style="display:none; margin-top:14px; padding:12px 16px; border-radius:10px; font-size:0.88rem; font-weight:600;"></div>
         </div>
 
-        <!-- Columna Derecha: Guía y Prueba en Vivo -->
-        <div>
-            <!-- Probador en Vivo -->
-            <div class="card test-box">
-                <h3 style="color:#3730a3; margin-bottom:12px; display:flex; align-items:center; gap:8px;">
-                    <i class="fas fa-paper-plane"></i> Probador en Vivo
-                </h3>
-                <p style="font-size:0.85rem; color:#475569; margin-bottom:14px;">
-                    Escribe tu dirección personal de Gmail u Outlook para probar el envío y comprobar que te llega el correo de inmediato.
+        <!-- COLUMNA DERECHA: PROBADOR EN VIVO Y GUÍA -->
+        <div style="display:flex; flex-direction:column; gap:20px;">
+            
+            <!-- PROBADOR EN VIVO -->
+            <div style="background:#ffffff; border:1px solid #ebd9fc; border-radius:var(--radius-lg); padding:22px; box-shadow:0 4px 15px rgba(107,70,193,0.04);">
+                <h4 style="margin:0 0 8px 0; font-size:1.05rem; font-weight:700; color:var(--text-heading); display:flex; align-items:center; gap:8px;">
+                    <i class="fas fa-paper-plane" style="color:var(--primary);"></i> Probador en Vivo
+                </h4>
+                <p style="font-size:0.84rem; color:var(--text-body); margin-bottom:14px; line-height:1.5;">
+                    Escribe tu dirección personal de correo para verificar el envío inmediato y comprobar que recibes el correo de confirmación.
                 </p>
 
-                <div class="form-group">
-                    <label style="color:#1e293b;"><i class="fas fa-at"></i> Correo Electrónico Destino</label>
-                    <input type="email" class="form-control" id="correoDestinoPrueba" placeholder="tu_correo_personal@gmail.com" style="background:#ffffff;">
+                <div class="crm-form-group" style="margin-bottom:14px;">
+                    <label class="crm-form-label"><i class="fas fa-at" style="color:var(--primary); margin-right:4px;"></i> Correo Electrónico Destino:</label>
+                    <input type="email" class="crm-form-input" id="correoDestinoPrueba" placeholder="tu_correo_personal@gmail.com">
                 </div>
 
-                <button type="button" class="btn btn-success" style="width:100%; justify-content:center;" onclick="ejecutarPrueba()" id="btnPrueba">
+                <button type="button" class="crm-btn" style="background:linear-gradient(135deg, #10b981, #059669); color:#ffffff; width:100%; justify-content:center; font-weight:700; padding:12px;" onclick="ejecutarPrueba()" id="btnPrueba">
                     <i class="fas fa-paper-plane"></i> Enviar Correo de Prueba en Vivo
                 </button>
 
-                <div id="alertPrueba" class="alert"></div>
-                <div id="logConsole" class="log-console"></div>
+                <div id="alertPrueba" style="display:none; margin-top:12px; padding:12px 16px; border-radius:10px; font-size:0.88rem; font-weight:600;"></div>
+                <div id="logConsole" style="background:#0f172a; color:#38bdf8; font-family:monospace; font-size:0.8rem; padding:12px; border-radius:10px; margin-top:12px; max-height:180px; overflow-y:auto; display:none; white-space:pre-wrap; word-break:break-all;"></div>
             </div>
 
-            <!-- Guía paso a paso para Gmail -->
-            <div class="card guide-box">
-                <h4 style="display:flex; align-items:center; gap:8px; font-weight:800;">
-                    <i class="fab fa-google"></i> ¿Cómo obtener la contraseña de Gmail en 3 pasos?
+            <!-- GUÍA PASO A PASO GOOGLE -->
+            <div style="background:#f0fdf4; border:1px solid #bbf7d0; border-radius:var(--radius-lg); padding:20px;">
+                <h4 style="margin:0 0 10px 0; font-size:0.95rem; font-weight:700; color:#166534; display:flex; align-items:center; gap:8px;">
+                    <i class="fab fa-google" style="color:#16a34a;"></i> ¿Cómo obtener la contraseña de Gmail en 3 pasos?
                 </h4>
-                <ol>
+                <ol style="padding-left:18px; margin:0; font-size:0.84rem; color:#166534; line-height:1.65;">
                     <li>Abre tu cuenta Google y ve a <strong>Seguridad</strong> (debes tener la <strong>Verificación en 2 pasos</strong> activada).</li>
-                    <li>Entra directamente al enlace de <a href="https://myaccount.google.com/apppasswords" target="_blank">Contraseñas de aplicaciones de Google <i class="fas fa-external-link-alt" style="font-size:0.75rem;"></i></a>.</li>
-                    <li>Escribe de nombre <em>"Tienda LYM"</em>, dale clic a <strong>Crear</strong> y copia la clave amarilla de 16 letras para pegarla en el campo de contraseña.</li>
+                    <li>Entra directamente a <a href="https://myaccount.google.com/apppasswords" target="_blank" style="color:#15803d; font-weight:700; text-decoration:underline;">Contraseñas de aplicaciones de Google <i class="fas fa-external-link-alt" style="font-size:0.7rem;"></i></a>.</li>
+                    <li>Escribe de nombre <em>"Tienda LYM"</em>, dale clic a <strong>Crear</strong> y copia la clave de 16 caracteres para pegarla en el campo de contraseña.</li>
                 </ol>
             </div>
+
         </div>
     </div>
+</div>
 
-    <!-- Bitácora de Envíos Recientes -->
-    <div class="card">
-        <div class="card-header">
-            <h3><i class="fas fa-history"></i> Bitácora de Auditoría de Correos Enviados</h3>
-            <span style="font-size:0.82rem; color:var(--text-muted);">Últimos movimientos registrados</span>
+<!-- CARD DE BITÁCORA DE AUDITORÍA -->
+<div class="crm-card" style="margin-top:24px;">
+    <div class="crm-card-header" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+        <div>
+            <h3 class="crm-card-title">
+                <i class="fas fa-history" style="color:var(--primary);"></i> Bitácora de Auditoría de Correos Enviados
+            </h3>
+            <p class="crm-card-subtitle">Registro cronológico de confirmaciones de compra, comprobantes y alertas emitidas.</p>
         </div>
-
-        <div class="table-responsive">
-            <table>
-                <thead>
-                    <tr>
-                        <th>Fecha</th>
-                        <th>Destinatario</th>
-                        <th>Asunto</th>
-                        <th>Tipo / Folio</th>
-                        <th>Estado</th>
-                        <th>Detalle Servidor</th>
-                    </tr>
-                </thead>
-                <tbody id="tablaBitacora">
-                    <tr><td colspan="6" style="text-align:center; color:#94a3b8; padding:20px;">Cargando bitácora...</td></tr>
-                </tbody>
-            </table>
-        </div>
+        <span class="crm-badge" style="background:#f1f5f9; color:#475569; font-size:0.78rem;">
+            <i class="fas fa-shield-alt"></i> Trazabilidad SMTP
+        </span>
     </div>
 
-    <script>
-        async function cargarConfiguracion() {
-            try {
-                const resp = await fetch('php/tienda_api.php?resource=correo');
-                const data = await resp.json();
+    <div style="overflow-x:auto;">
+        <table class="crm-table">
+            <thead>
+                <tr>
+                    <th>Fecha</th>
+                    <th>Destinatario</th>
+                    <th>Asunto</th>
+                    <th>Tipo / Folio</th>
+                    <th>Estado</th>
+                    <th>Detalle Servidor</th>
+                </tr>
+            </thead>
+            <tbody id="tablaBitacora">
+                <tr>
+                    <td colspan="6" style="text-align:center; color:#94a3b8; padding:24px;">
+                        <i class="fas fa-spinner fa-spin"></i> Cargando bitácora de correos...
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
 
-                if (data.success && data.config) {
-                    const c = data.config;
-                    document.getElementById('servidor_smtp').value = c.servidor_smtp || 'smtp.gmail.com';
-                    document.getElementById('puerto_smtp').value = c.puerto_smtp || 465;
-                    document.getElementById('seguridad').value = c.seguridad || 'ssl';
-                    document.getElementById('usuario_smtp').value = c.usuario_smtp || '';
-                    document.getElementById('remitente_nombre').value = c.remitente_nombre || 'LYM Diseño e Impresión Oficial';
-                    document.getElementById('activo').value = c.activo !== undefined ? c.activo : 1;
-
-                    if (c.has_password) {
-                        document.getElementById('badgePassword').style.display = 'inline-flex';
-                        document.getElementById('password_smtp').placeholder = '•••••••••••••••• (Guardada en sistema)';
-                    }
-                }
-
-                // Renderizar bitácora
-                if (data.bitacora) {
-                    renderizarBitacora(data.bitacora);
-                }
-            } catch (err) {
-                console.error("Error al cargar configuración:", err);
-            }
+<script>
+    if (typeof escapeHtml !== 'function') {
+        function escapeHtml(str) {
+            return String(str || '').replace(/[&<>"']/g, function(m) {
+                return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m];
+            });
         }
+    }
 
-        function renderizarBitacora(lista) {
-            const tbody = document.getElementById('tablaBitacora');
-            if (!lista || lista.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:#94a3b8; padding:20px;">No hay registros de correo todavía.</td></tr>';
-                return;
-            }
-
-            tbody.innerHTML = lista.map(item => {
-                const badge = item.estado === 'enviado' 
-                    ? '<span class="badge-status badge-enviado"><i class="fas fa-check"></i> Enviado</span>'
-                    : '<span class="badge-status badge-fallido"><i class="fas fa-times"></i> Fallido</span>';
-
-                return `
-                    <tr>
-                        <td style="white-space:nowrap; color:#64748b;">${item.fecha}</td>
-                        <td><strong>${escapeHtml(item.destinatario)}</strong></td>
-                        <td>${escapeHtml(item.asunto)}</td>
-                        <td><span style="background:#eef2ff; color:#3730a3; padding:4px 8px; border-radius:6px; font-weight:700; font-size:0.75rem;">${escapeHtml(item.referencia || item.tipo)}</span></td>
-                        <td>${badge}</td>
-                        <td style="font-size:0.78rem; color:#64748b; max-width:260px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${escapeHtml(item.mensaje_servidor || 'OK')}</td>
-                    </tr>
-                `;
-            }).join('');
-        }
-
-        async function guardarConfig(e) {
-            e.preventDefault();
-            const alertDiv = document.getElementById('alertConfig');
-            alertDiv.style.display = 'none';
-
-            const payload = {
-                accion: 'guardar_config',
-                servidor_smtp: document.getElementById('servidor_smtp').value.trim(),
-                puerto_smtp: parseInt(document.getElementById('puerto_smtp').value),
-                seguridad: document.getElementById('seguridad').value,
-                usuario_smtp: document.getElementById('usuario_smtp').value.trim(),
-                password_smtp: document.getElementById('password_smtp').value.trim(),
-                remitente_nombre: document.getElementById('remitente_nombre').value.trim(),
-                remitente_email: document.getElementById('usuario_smtp').value.trim(),
-                activo: parseInt(document.getElementById('activo').value)
-            };
-
-            try {
-                const resp = await fetch('php/tienda_api.php?resource=correo', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
-                const data = await resp.json();
-
-                if (data.success) {
-                    alertDiv.className = 'alert alert-success';
-                    alertDiv.innerHTML = '<i class="fas fa-check-circle"></i> ' + data.message;
-                    alertDiv.style.display = 'block';
-                    document.getElementById('password_smtp').value = '';
-                    cargarConfiguracion();
-                } else {
-                    alertDiv.className = 'alert alert-danger';
-                    alertDiv.innerHTML = '<i class="fas fa-exclamation-triangle"></i> ' + (data.error || 'Error al guardar');
-                    alertDiv.style.display = 'block';
-                }
-            } catch (err) {
-                alertDiv.className = 'alert alert-danger';
-                alertDiv.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Error de conexión con el servidor.';
-                alertDiv.style.display = 'block';
-            }
-        }
-
-        async function ejecutarPrueba() {
-            const correo = document.getElementById('correoDestinoPrueba').value.trim();
-            const alertDiv = document.getElementById('alertPrueba');
-            const logBox = document.getElementById('logConsole');
-            const btn = document.getElementById('btnPrueba');
-
-            if (!correo) {
-                alert("Por favor escribe tu correo electrónico destino.");
-                return;
-            }
-
-            btn.disabled = true;
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Conectando con Gmail...';
-            alertDiv.style.display = 'none';
-            logBox.style.display = 'none';
-
-            try {
-                const resp = await fetch('php/tienda_api.php?resource=correo', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        accion: 'probar',
-                        destinatario: correo
-                    })
-                });
-
-                const data = await resp.json();
-
-                if (data.success) {
-                    alertDiv.className = 'alert alert-success';
-                    alertDiv.innerHTML = '<strong>¡Éxito total!</strong> Correo enviado a <strong>' + escapeHtml(correo) + '</strong>. Revisa tu bandeja de entrada o spam.';
-                    alertDiv.style.display = 'block';
-                } else {
-                    alertDiv.className = 'alert alert-danger';
-                    alertDiv.innerHTML = '<strong>Error de entrega:</strong> ' + escapeHtml(data.error || 'No se pudo enviar el correo.');
-                    alertDiv.style.display = 'block';
-                }
-
-                if (data.log) {
-                    logBox.textContent = "=== TRAZA SMTP EN VIVO ===\n" + data.log;
-                    logBox.style.display = 'block';
-                }
-
-                cargarConfiguracion(); // refrescar bitácora
-            } catch (err) {
-                alertDiv.className = 'alert alert-danger';
-                alertDiv.innerHTML = 'Error de conexión al ejecutar la prueba.';
-                alertDiv.style.display = 'block';
-            } finally {
-                btn.disabled = false;
-                btn.innerHTML = '<i class="fas fa-paper-plane"></i> Enviar Correo de Prueba en Vivo';
-            }
-        }
-
-        function togglePasswordVisibility() {
-            const input = document.getElementById('password_smtp');
-            const icon = document.getElementById('eyeIcon');
-            if (input.type === 'password') {
-                input.type = 'text';
-                icon.className = 'fas fa-eye-slash';
+    if (typeof mostrarNotificacion !== 'function') {
+        function mostrarNotificacion(msg, tipo = 'info') {
+            if (typeof showNotification === 'function') {
+                showNotification(msg, tipo);
             } else {
-                input.type = 'password';
-                icon.className = 'fas fa-eye';
+                alert(msg);
             }
         }
+    }
 
-        function escapeHtml(text) {
-            if (!text) return '';
-            return text.toString()
-                .replace(/&/g, "&amp;")
-                .replace(/</g, "&lt;")
-                .replace(/>/g, "&gt;")
-                .replace(/"/g, "&quot;")
-                .replace(/'/g, "&#039;");
+    async function cargarConfiguracion() {
+        try {
+            const resp = await fetch('php/tienda_api.php?resource=correo');
+            const data = await resp.json();
+
+            if (data.success && data.config) {
+                const c = data.config;
+                document.getElementById('servidor_smtp').value = c.servidor_smtp || 'smtp.gmail.com';
+                document.getElementById('puerto_smtp').value = c.puerto_smtp || 465;
+                document.getElementById('seguridad').value = c.seguridad || 'ssl';
+                document.getElementById('usuario_smtp').value = c.usuario_smtp || '';
+                document.getElementById('remitente_nombre').value = c.remitente_nombre || 'LYM Diseño e Impresión Oficial';
+                document.getElementById('activo').value = c.activo !== undefined ? c.activo : 1;
+
+                if (c.has_password) {
+                    document.getElementById('badgePassword').style.display = 'inline-flex';
+                    document.getElementById('password_smtp').placeholder = '•••••••••••••••• (Guardada en sistema)';
+                }
+            }
+
+            if (data.bitacora) {
+                renderizarBitacora(data.bitacora);
+            }
+        } catch (err) {
+            console.error("Error al cargar configuración:", err);
+        }
+    }
+
+    function renderizarBitacora(lista) {
+        const tbody = document.getElementById('tablaBitacora');
+        if (!tbody) return;
+
+        if (!Array.isArray(lista) || lista.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:#94a3b8; padding:24px;">No hay registros de correo todavía.</td></tr>';
+            return;
         }
 
-        window.onload = cargarConfiguracion;
-    </script>
-</body>
-</html>
+        tbody.innerHTML = lista.map(item => {
+            const isEnviado = item.estado === 'enviado';
+            const badge = isEnviado
+                ? '<span class="crm-badge" style="background:#dcfce7; color:#15803d;"><i class="fas fa-check"></i> Enviado</span>'
+                : '<span class="crm-badge" style="background:#fee2e2; color:#b91c1c;"><i class="fas fa-times"></i> Fallido</span>';
+
+            return `
+                <tr>
+                    <td style="white-space:nowrap; color:#64748b;"><i class="far fa-clock" style="color:#94a3b8; margin-right:4px;"></i>${escapeHtml(item.fecha)}</td>
+                    <td><strong>${escapeHtml(item.destinatario)}</strong></td>
+                    <td>${escapeHtml(item.asunto)}</td>
+                    <td><span class="crm-badge" style="background:#eef2ff; color:#3730a3; font-weight:700;">${escapeHtml(item.referencia || item.tipo)}</span></td>
+                    <td>${badge}</td>
+                    <td style="font-size:0.8rem; color:#64748b; max-width:260px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${escapeHtml(item.mensaje_servidor || 'OK')}</td>
+                </tr>
+            `;
+        }).join('');
+    }
+
+    async function guardarConfig(e) {
+        e.preventDefault();
+        const alertDiv = document.getElementById('alertConfig');
+        alertDiv.style.display = 'none';
+
+        const payload = {
+            accion: 'guardar_config',
+            servidor_smtp: document.getElementById('servidor_smtp').value.trim(),
+            puerto_smtp: parseInt(document.getElementById('puerto_smtp').value),
+            seguridad: document.getElementById('seguridad').value,
+            usuario_smtp: document.getElementById('usuario_smtp').value.trim(),
+            password_smtp: document.getElementById('password_smtp').value.trim(),
+            remitente_nombre: document.getElementById('remitente_nombre').value.trim(),
+            remitente_email: document.getElementById('usuario_smtp').value.trim(),
+            activo: parseInt(document.getElementById('activo').value)
+        };
+
+        try {
+            const resp = await fetch('php/tienda_api.php?resource=correo', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            const data = await resp.json();
+
+            if (data.success) {
+                alertDiv.style.background = '#dcfce7';
+                alertDiv.style.color = '#15803d';
+                alertDiv.style.border = '1px solid #86efac';
+                alertDiv.innerHTML = '<i class="fas fa-check-circle"></i> ' + escapeHtml(data.message);
+                alertDiv.style.display = 'block';
+                document.getElementById('password_smtp').value = '';
+                mostrarNotificacion("Configuración guardada correctamente.", "success");
+                cargarConfiguracion();
+            } else {
+                alertDiv.style.background = '#fee2e2';
+                alertDiv.style.color = '#b91c1c';
+                alertDiv.style.border = '1px solid #fca5a5';
+                alertDiv.innerHTML = '<i class="fas fa-exclamation-triangle"></i> ' + escapeHtml(data.error || 'Error al guardar');
+                alertDiv.style.display = 'block';
+                mostrarNotificacion(data.error || "Error al guardar", "error");
+            }
+        } catch (err) {
+            alertDiv.style.background = '#fee2e2';
+            alertDiv.style.color = '#b91c1c';
+            alertDiv.style.border = '1px solid #fca5a5';
+            alertDiv.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Error de conexión con el servidor.';
+            alertDiv.style.display = 'block';
+            mostrarNotificacion("Error de conexión con el servidor.", "error");
+        }
+    }
+
+    async function ejecutarPrueba() {
+        const correo = document.getElementById('correoDestinoPrueba').value.trim();
+        const alertDiv = document.getElementById('alertPrueba');
+        const logBox = document.getElementById('logConsole');
+        const btn = document.getElementById('btnPrueba');
+
+        if (!correo) {
+            mostrarNotificacion("Por favor escribe tu correo electrónico destino.", "warning");
+            return;
+        }
+
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Conectando con Gmail...';
+        alertDiv.style.display = 'none';
+        logBox.style.display = 'none';
+
+        try {
+            const resp = await fetch('php/tienda_api.php?resource=correo', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    accion: 'probar',
+                    destinatario: correo
+                })
+            });
+
+            const data = await resp.json();
+
+            if (data.success) {
+                alertDiv.style.background = '#dcfce7';
+                alertDiv.style.color = '#15803d';
+                alertDiv.style.border = '1px solid #86efac';
+                alertDiv.innerHTML = '<strong>¡Éxito total!</strong> Correo enviado a <strong>' + escapeHtml(correo) + '</strong>. Revisa tu bandeja de entrada o spam.';
+                alertDiv.style.display = 'block';
+                mostrarNotificacion("Correo de prueba enviado con éxito.", "success");
+            } else {
+                alertDiv.style.background = '#fee2e2';
+                alertDiv.style.color = '#b91c1c';
+                alertDiv.style.border = '1px solid #fca5a5';
+                alertDiv.innerHTML = '<strong>Error de entrega:</strong> ' + escapeHtml(data.error || 'No se pudo enviar el correo.');
+                alertDiv.style.display = 'block';
+                mostrarNotificacion(data.error || "Error al enviar correo.", "error");
+            }
+
+            if (data.log) {
+                logBox.textContent = "=== TRAZA SMTP EN VIVO ===\n" + data.log;
+                logBox.style.display = 'block';
+            }
+
+            cargarConfiguracion();
+        } catch (err) {
+            alertDiv.style.background = '#fee2e2';
+            alertDiv.style.color = '#b91c1c';
+            alertDiv.style.border = '1px solid #fca5a5';
+            alertDiv.innerHTML = 'Error de conexión al ejecutar la prueba.';
+            alertDiv.style.display = 'block';
+            mostrarNotificacion("Error de conexión al probar correo.", "error");
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-paper-plane"></i> Enviar Correo de Prueba en Vivo';
+        }
+    }
+
+    function togglePasswordVisibility() {
+        const input = document.getElementById('password_smtp');
+        const icon = document.getElementById('eyeIcon');
+        if (input.type === 'password') {
+            input.type = 'text';
+            icon.className = 'fas fa-eye-slash';
+        } else {
+            input.type = 'password';
+            icon.className = 'fas fa-eye';
+        }
+    }
+
+    cargarConfiguracion();
+</script>
