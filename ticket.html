@@ -4,27 +4,24 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Confirmación de Pedido - LYM</title>
+    <title>Comprobante de Compra - LYM</title>
 
     <link rel="stylesheet" href="Proyecto.css" />
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap"
-        rel="stylesheet" />
+    <link rel="stylesheet" href="notifications.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
     <script src="notifications.js"></script>
 
     <style>
         :root {
-            --primary: #667eea;
-            --secondary: #764ba2;
+            --primary: #6a0dad;
+            --primary-light: #7c3aed;
+            --secondary: #4b0082;
             --accent: #f093fb;
             --success: #10b981;
-            --text-dark: #1f2937;
-            --text-light: #6b7280;
-            --border: #e5e7eb;
-            --white: #ffffff;
-            --bg-soft: #f8fafc;
-            --shadow: 0 14px 35px rgba(102, 126, 234, 0.18);
-            --shadow-soft: 0 8px 22px rgba(0, 0, 0, 0.08);
+            --text-dark: #1e293b;
+            --text-muted: #64748b;
+            --card-shadow: 0 15px 35px rgba(106, 13, 173, 0.08);
         }
 
         * {
@@ -33,699 +30,717 @@
 
         body {
             margin: 0;
-            font-family: "Poppins", sans-serif;
+            padding: 0;
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #f8fafc 0%, #f3e8ff 100%);
             min-height: 100vh;
             color: var(--text-dark);
-            background:
-                radial-gradient(circle at top left, rgba(240, 147, 251, 0.14), transparent 25%),
-                radial-gradient(circle at bottom right, rgba(102, 126, 234, 0.18), transparent 25%),
-                linear-gradient(135deg, #f8fafc 0%, #eef2ff 100%);
-            padding: 30px 16px;
+            padding-top: 105px;
+            padding-bottom: 60px;
         }
 
-        .page-wrapper {
-            max-width: 980px;
+        .ticket-page-container {
+            max-width: 900px;
             margin: 0 auto;
+            padding: 0 16px;
         }
 
-        .confirmation-card {
-            background: rgba(255, 255, 255, 0.97);
-            border-radius: 30px;
+        .ticket-wrapper-card {
+            background: #ffffff;
+            border-radius: 28px;
+            box-shadow: var(--card-shadow);
+            border: 1px solid #ebd9fc;
             overflow: hidden;
-            box-shadow: var(--shadow);
-            border: 1px solid rgba(255, 255, 255, 0.75);
         }
 
-        .header {
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            color: white;
-            padding: 28px 26px 22px;
+        .ticket-card-header {
+            background: linear-gradient(135deg, #6a0dad 0%, #4b0082 100%);
+            color: #ffffff;
+            padding: 30px 32px 24px;
+            position: relative;
         }
 
-        .header-top {
+        .ticket-header-top {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            gap: 14px;
-            flex-wrap: wrap;
             margin-bottom: 18px;
+            flex-wrap: wrap;
+            gap: 12px;
         }
 
-        .back-btn {
-            background: rgba(255, 255, 255, 0.18);
-            color: white;
-            border: 1px solid rgba(255, 255, 255, 0.28);
+        .ticket-back-btn {
+            background: rgba(255, 255, 255, 0.16);
+            color: #ffffff;
+            border: 1px solid rgba(255, 255, 255, 0.25);
             border-radius: 999px;
-            padding: 10px 16px;
-            font-family: inherit;
+            padding: 8px 16px;
+            font-size: 0.88rem;
             font-weight: 600;
-            cursor: pointer;
-            transition: 0.3s ease;
+            text-decoration: none;
             display: inline-flex;
             align-items: center;
             gap: 8px;
+            transition: all 0.2s ease;
         }
 
-        .back-btn:hover {
-            transform: translateY(-2px);
-            background: rgba(255, 255, 255, 0.25);
+        .ticket-back-btn:hover {
+            background: rgba(255, 255, 255, 0.28);
+            transform: translateY(-1px);
         }
 
-        .step-badge {
+        .ticket-step-pill {
             background: rgba(255, 255, 255, 0.18);
-            padding: 9px 14px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
             border-radius: 999px;
-            font-size: 13px;
+            padding: 6px 14px;
+            font-size: 0.82rem;
             font-weight: 700;
+            letter-spacing: 0.5px;
         }
 
-        .header h1 {
-            margin: 0 0 8px;
-            font-size: 2rem;
+        .ticket-hero-title {
+            margin: 0 0 6px 0;
+            font-size: 1.85rem;
             font-weight: 800;
             display: flex;
             align-items: center;
-            gap: 10px;
-            flex-wrap: wrap;
+            gap: 12px;
         }
 
-        .header p {
+        .ticket-hero-subtitle {
             margin: 0;
-            opacity: 0.95;
-            font-size: 0.98rem;
+            opacity: 0.9;
+            font-size: 0.96rem;
+            font-weight: 400;
         }
 
-        .progress-wrapper {
+        .ticket-stepper-box {
             margin-top: 24px;
-            background: rgba(255, 255, 255, 0.12);
-            border-radius: 22px;
-            padding: 18px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 18px;
+            padding: 16px 20px;
+            border: 1px solid rgba(255, 255, 255, 0.15);
         }
 
-        .progress-bar-line {
-            position: relative;
-            height: 6px;
-            background: rgba(255, 255, 255, 0.28);
-            border-radius: 999px;
-            overflow: hidden;
-            margin: 0 10px 20px;
-        }
-
-        .progress-bar-fill {
-            width: 100%;
-            height: 100%;
-            background: white;
-            border-radius: 999px;
-        }
-
-        .steps {
+        .ticket-stepper-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 10px;
+            gap: 12px;
             text-align: center;
         }
 
-        .step {
-            color: rgba(255, 255, 255, 0.82);
-            font-size: 13px;
-            font-weight: 600;
+        .step-node {
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 8px;
+            gap: 6px;
+            font-size: 0.82rem;
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.7);
         }
 
-        .step-circle {
-            width: 42px;
-            height: 42px;
+        .step-circle-icon {
+            width: 36px;
+            height: 36px;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-weight: 700;
-            background: rgba(255, 255, 255, 0.18);
-            border: 2px solid rgba(255, 255, 255, 0.3);
+            font-weight: 800;
+            font-size: 0.9rem;
+            background: rgba(255, 255, 255, 0.15);
+            border: 2px solid rgba(255, 255, 255, 0.25);
+            color: #ffffff;
         }
 
-        .step.active {
-            color: white;
+        .step-node.active {
+            color: #ffffff;
         }
 
-        .step.active .step-circle {
-            background: white;
-            color: var(--secondary);
-            border-color: white;
-            box-shadow: 0 8px 18px rgba(0, 0, 0, 0.15);
+        .step-node.active .step-circle-icon {
+            background: #ffffff;
+            color: #6a0dad;
+            border-color: #ffffff;
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.2);
         }
 
-        .content {
-            padding: 30px 24px 34px;
+        .ticket-main-content {
+            padding: 32px 28px 40px;
         }
 
-        .success-banner {
-            background: linear-gradient(135deg, rgba(16, 185, 129, 0.12), rgba(102, 126, 234, 0.10));
-            border: 1px solid rgba(16, 185, 129, 0.2);
-            border-radius: 24px;
-            padding: 20px;
+        .success-notification-bar {
+            background: linear-gradient(135deg, #ecfdf5 0%, #f0fdf4 100%);
+            border: 1.5px solid #a7f3d0;
+            border-radius: 18px;
+            padding: 18px 22px;
             display: flex;
             align-items: center;
             gap: 16px;
-            margin-bottom: 24px;
+            margin-bottom: 28px;
         }
 
-        .success-icon {
-            width: 58px;
-            height: 58px;
-            border-radius: 18px;
-            background: rgba(16, 185, 129, 0.15);
-            color: var(--success);
+        .success-badge-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 14px;
+            background: #10b981;
+            color: #ffffff;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 26px;
-            flex-shrink: 0;
-        }
-
-        .success-text h2 {
-            margin: 0 0 6px;
             font-size: 1.4rem;
-            color: var(--text-dark);
+            flex-shrink: 0;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
         }
 
-        .success-text p {
+        .success-notification-bar h3 {
+            margin: 0 0 4px 0;
+            color: #065f46;
+            font-size: 1.15rem;
+            font-weight: 800;
+        }
+
+        .success-notification-bar p {
             margin: 0;
-            color: var(--text-light);
-            font-size: 0.96rem;
+            color: #047857;
+            font-size: 0.88rem;
         }
 
-        .ticket-box {
-            background: #fff;
-            border-radius: 28px;
-            box-shadow: var(--shadow-soft);
-            overflow: hidden;
-            border: 1px solid rgba(102, 126, 234, 0.1);
-            max-width: 560px;
+        .physical-ticket-card {
+            background: #ffffff;
+            border-radius: 24px;
+            border: 2px dashed #dec8ff;
+            box-shadow: 0 8px 24px rgba(106, 13, 173, 0.05);
+            max-width: 600px;
             margin: 0 auto;
+            padding: 32px 30px;
+            position: relative;
         }
 
-        .ticket-top {
-            padding: 26px 22px 20px;
+        .ticket-brand-header {
             text-align: center;
-            background:
-                radial-gradient(circle at top left, rgba(240, 147, 251, 0.10), transparent 30%),
-                linear-gradient(135deg, #ffffff 0%, #f8faff 100%);
+            padding-bottom: 18px;
+            border-bottom: 1px dashed #cbd5e1;
+            margin-bottom: 20px;
         }
 
-        .logo {
+        .ticket-brand-logo {
+            font-size: 1.8rem;
             font-weight: 800;
-            font-size: 26px;
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            margin-bottom: 8px;
-        }
-
-        .ticket-title {
+            color: #6a0dad;
+            letter-spacing: -0.5px;
             margin: 0;
-            font-size: 1.55rem;
-            font-weight: 800;
-            color: var(--text-dark);
+            line-height: 1;
         }
 
-        .ticket-subtitle {
-            margin-top: 6px;
-            color: var(--text-light);
-            font-size: 14px;
-        }
-
-        .divider {
-            border-top: 1px dashed #d1d5db;
-            margin: 0 22px;
-        }
-
-        .ticket-body {
-            padding: 20px 22px;
-        }
-
-        .products-title {
-            font-size: 14px;
-            font-weight: 700;
-            color: var(--secondary);
-            margin-bottom: 14px;
+        .ticket-brand-logo span {
+            display: block;
+            font-size: 0.8rem;
+            font-weight: 500;
+            color: #64748b;
+            letter-spacing: 2px;
             text-transform: uppercase;
-            letter-spacing: 0.4px;
+            margin-top: 4px;
         }
 
-        .item {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            gap: 12px;
-            margin: 12px 0;
-            font-size: 14px;
-        }
-
-        .item-left {
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-        }
-
-        .item-name {
-            font-weight: 600;
-            color: var(--text-dark);
-        }
-
-        .item-detail {
-            font-size: 12px;
-            color: var(--text-light);
-        }
-
-        .item-price {
+        .ticket-folio-badge {
+            display: inline-block;
+            background: #f5f3ff;
+            color: #6a0dad;
+            border: 1.5px solid #dec8ff;
+            padding: 6px 14px;
+            border-radius: 10px;
+            font-family: 'JetBrains Mono', monospace;
             font-weight: 700;
-            color: var(--secondary);
-            white-space: nowrap;
+            font-size: 1.15rem;
+            margin-top: 12px;
+            box-shadow: 0 2px 6px rgba(106, 13, 173, 0.08);
         }
 
-        .total-box {
-            margin: 18px 0 6px;
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            color: white;
-            border-radius: 20px;
-            padding: 16px 18px;
+        .ticket-meta-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            background: #f8fafc;
+            border-radius: 14px;
+            padding: 14px 16px;
+            margin-bottom: 20px;
+            border: 1px solid #f1f5f9;
+        }
+
+        .ticket-meta-item small {
+            display: block;
+            color: var(--text-muted);
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .ticket-meta-item strong {
+            display: block;
+            color: var(--text-dark);
+            font-size: 0.9rem;
+            margin-top: 2px;
+        }
+
+        .ticket-items-title {
+            font-size: 0.85rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: #64748b;
+            letter-spacing: 0.5px;
+            margin-bottom: 12px;
+        }
+
+        .ticket-item-row {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            gap: 10px;
+            padding: 10px 0;
+            border-bottom: 1px solid #f1f5f9;
         }
 
-        .total-box strong {
-            font-size: 1.4rem;
+        .ticket-item-row:last-child {
+            border-bottom: none;
         }
 
-        .ticket-footer {
-            padding: 18px 22px 24px;
+        .ticket-item-left strong {
+            display: block;
+            font-size: 0.92rem;
+            color: var(--text-dark);
         }
 
-        .info-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 12px;
+        .ticket-item-left small {
+            color: var(--text-muted);
+            font-size: 0.78rem;
+        }
+
+        .ticket-item-price {
+            font-weight: 700;
+            color: var(--text-dark);
+            font-size: 0.95rem;
+            text-align: right;
+        }
+
+        .ticket-totals-box {
+            background: #faf5ff;
+            border: 1.5px solid #dec8ff;
+            border-radius: 16px;
+            padding: 16px 18px;
             margin-top: 18px;
         }
 
-        .info-card {
-            background: #f8fafc;
-            border-radius: 18px;
-            padding: 14px;
-            border: 1px solid #edf2f7;
+        .ticket-totals-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.88rem;
+            color: #475569;
+            margin-bottom: 6px;
         }
 
-        .info-label {
-            display: block;
-            font-size: 12px;
-            color: var(--text-light);
-            margin-bottom: 5px;
-        }
-
-        .info-value {
-            font-size: 14px;
+        .ticket-totals-row.discount {
+            color: #059669;
             font-weight: 700;
-            color: var(--text-dark);
-            word-break: break-word;
         }
 
-        .empty-message {
-            text-align: center;
-            padding: 14px 8px;
-            color: var(--text-light);
-            font-size: 14px;
+        .ticket-totals-row.grand-total {
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1.5px dashed #c084fc;
+            font-size: 1.25rem;
+            font-weight: 800;
+            color: #4b0082;
+            margin-bottom: 0;
         }
 
-        .actions {
-            margin-top: 28px;
+        .ticket-wallet-impact-card {
+            background: linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%);
+            border: 1.5px solid #86efac;
+            border-radius: 16px;
+            padding: 14px 18px;
+            margin-top: 18px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .ticket-wallet-impact-card .wallet-info span {
+            display: block;
+            font-size: 0.78rem;
+            color: #166534;
+            font-weight: 600;
+        }
+
+        .ticket-wallet-impact-card .wallet-info strong {
+            display: block;
+            font-size: 1.15rem;
+            color: #15803d;
+            font-weight: 800;
+            margin-top: 2px;
+        }
+
+        .ticket-action-buttons {
             display: flex;
             justify-content: center;
-            gap: 14px;
+            gap: 12px;
+            margin-top: 32px;
             flex-wrap: wrap;
         }
 
-        .btn {
+        .btn-ticket-primary {
+            background: linear-gradient(135deg, #6a0dad, #7c3aed);
+            color: #ffffff;
             border: none;
-            cursor: pointer;
-            padding: 13px 22px;
-            border-radius: 999px;
-            font-family: inherit;
+            padding: 12px 24px;
+            border-radius: 12px;
             font-weight: 700;
-            transition: 0.3s ease;
+            font-size: 0.92rem;
+            text-decoration: none;
             display: inline-flex;
             align-items: center;
             gap: 8px;
-            text-decoration: none;
+            box-shadow: 0 6px 18px rgba(106, 13, 173, 0.25);
+            cursor: pointer;
+            transition: all 0.2s ease;
         }
 
-        .btn-secondary {
-            background: #eef1ff;
-            color: #5a4b8a;
-        }
-
-        .btn-secondary:hover {
-            background: #dde3ff;
+        .btn-ticket-primary:hover {
             transform: translateY(-2px);
+            box-shadow: 0 8px 22px rgba(106, 13, 173, 0.35);
         }
 
-        .btn-primary {
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            color: white;
-            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.25);
-        }
-
-        .btn-primary:hover {
-            transform: translateY(-2px);
-        }
-
-        .download-banner {
-            position: fixed;
-            top: 24px;
-            right: 24px;
-            background: linear-gradient(135deg, #10b981, #059669);
-            color: white;
-            padding: 14px 18px;
-            border-radius: 16px;
-            box-shadow: 0 14px 30px rgba(16, 185, 129, 0.28);
-            display: flex;
-            align-items: center;
-            gap: 10px;
+        .btn-ticket-secondary {
+            background: #ffffff;
+            color: #475569;
+            border: 1.5px solid #cbd5e1;
+            padding: 12px 20px;
+            border-radius: 12px;
             font-weight: 700;
-            z-index: 2000;
-            opacity: 0;
-            transform: translateY(-18px);
-            pointer-events: none;
-            transition: all 0.35s ease;
+            font-size: 0.92rem;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
         }
 
-        .download-banner.show {
-            opacity: 1;
-            transform: translateY(0);
+        .btn-ticket-secondary:hover {
+            background: #f8fafc;
+            border-color: #94a3b8;
+            color: #1e293b;
         }
 
-        @media (max-width: 768px) {
-            .header h1 {
-                font-size: 1.6rem;
+        @media print {
+            body {
+                background: #ffffff !important;
+                padding: 0 !important;
             }
 
-            .steps {
-                grid-template-columns: 1fr;
-                gap: 14px;
+            .header,
+            .ticket-card-header,
+            .success-notification-bar,
+            .ticket-action-buttons,
+            .ticket-back-btn,
+            .step-badge,
+            .ticket-stepper-box {
+                display: none !important;
             }
 
-            .content {
-                padding: 22px 14px 26px;
+            .ticket-wrapper-card {
+                box-shadow: none !important;
+                border: none !important;
             }
 
-            .success-banner {
-                align-items: flex-start;
-            }
-
-            .info-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .item,
-            .total-box {
-                flex-direction: column;
-                align-items: flex-start;
-            }
-
-            .download-banner {
-                left: 16px;
-                right: 16px;
-                top: 16px;
+            .physical-ticket-card {
+                border: 1px solid #000 !important;
+                box-shadow: none !important;
+                max-width: 100% !important;
+                padding: 20px !important;
             }
         }
     </style>
 </head>
 
 <body>
-    <div class="download-banner" id="downloadBanner">
-        <i class="fas fa-circle-check"></i>
-        <span>Descarga exitosa</span>
-    </div>
 
-    <div class="page-wrapper">
-        <div class="confirmation-card">
-
-            <div class="header">
-                <div class="header-top">
-                    <button class="back-btn" onclick="history.back()">
-                        <i class="fas fa-arrow-left"></i>
-                        Volver
-                    </button>
-
-                    <div class="step-badge">Paso 3 de 3</div>
+    <header class="header">
+        <nav class="nav">
+            <div class="nav-container">
+                <div class="logo">
+                    <h1>LYM</h1>
+                    <span>diseño e impresión</span>
                 </div>
 
-                <h1>
-                    <i class="fas fa-circle-check"></i>
-                    Confirmación de pedido
+                <ul class="nav-menu">
+                    <li><a href="sistema.html">Inicio</a></li>
+                    <li><a href="sistema.html#productos">Productos</a></li>
+                    <li><a href="perfil.html#pedidos">Mis Pedidos</a></li>
+                    <li><a href="perfil.html#monedero">Mi Monedero</a></li>
+                </ul>
+
+                <div class="auth-buttons">
+                    <a href="sistema.html" class="btn btn-outline">
+                        <i class="fas fa-store"></i> Volver a la Tienda
+                    </a>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main class="ticket-page-container">
+        <div class="ticket-wrapper-card">
+
+            <div class="ticket-card-header">
+                <div class="ticket-header-top">
+                    <a href="sistema.html" class="ticket-back-btn">
+                        <i class="fas fa-arrow-left"></i> Volver a la tienda
+                    </a>
+                    <span class="ticket-step-pill">Paso 3 de 3 • Finalizado</span>
+                </div>
+
+                <h1 class="ticket-hero-title">
+                    <i class="fas fa-circle-check" style="color: #34d399;"></i> Confirmación de Pedido
                 </h1>
-                <p>Tu compra en LYM quedó registrada correctamente</p>
+                <p class="ticket-hero-subtitle">Tu compra en LYM ha sido procesada e integrada en tiempo real.</p>
 
-                <div class="progress-wrapper">
-                    <div class="progress-bar-line">
-                        <div class="progress-bar-fill"></div>
-                    </div>
-
-                    <div class="steps">
-                        <div class="step">
-                            <div class="step-circle">1</div>
-                            <span>Domicilio</span>
+                <div class="ticket-stepper-box">
+                    <div class="ticket-stepper-grid">
+                        <div class="step-node">
+                            <div class="step-circle-icon"><i class="fas fa-check"></i></div>
+                            <span>1. Domicilio</span>
                         </div>
-
-                        <div class="step">
-                            <div class="step-circle">2</div>
-                            <span>Método de pago</span>
+                        <div class="step-node">
+                            <div class="step-circle-icon"><i class="fas fa-check"></i></div>
+                            <span>2. Método de pago</span>
                         </div>
-
-                        <div class="step active">
-                            <div class="step-circle">3</div>
-                            <span>Confirmación</span>
+                        <div class="step-node active">
+                            <div class="step-circle-icon"><i class="fas fa-receipt"></i></div>
+                            <span>3. Comprobante</span>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div class="content">
-                <div class="success-banner" style="background: linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(99, 102, 241, 0.12)); border: 1.5px solid #10b981;">
-                    <div class="success-icon" style="background:#10b981; color:#ffffff;">
-                        <i class="fas fa-check"></i>
-                    </div>
+            <div class="ticket-main-content">
 
-                    <div class="success-text">
-                        <h2 style="color:#065f46; font-size:1.5rem; font-weight:800;">¡Compra realizada con éxito!</h2>
-                        <p style="color:#374151;">Tu pedido ha sido procesado e integrado en tiempo real con <strong>SCM, ERP y Monedero Digital</strong>.</p>
-                        <p id="msgCorreoConfirmacion" style="margin-top:6px; font-size:0.88rem; color:#059669; font-weight:600;">
-                            <i class="fas fa-envelope"></i> Hemos enviado el detalle y factura de tu compra al correo registrado.
+                <div class="success-notification-bar">
+                    <div class="success-badge-icon">
+                        <i class="fas fa-paper-plane"></i>
+                    </div>
+                    <div>
+                        <h3>¡Compra realizada con éxito!</h3>
+                        <p id="msgCorreoConfirmacion">
+                            <i class="fas fa-envelope"></i> Hemos enviado tu factura y comprobante oficial al correo registrado.
                         </p>
                     </div>
                 </div>
 
-                <div class="ticket-box">
-                    <div class="ticket-top">
-                        <div class="logo">LYM Diseño e Impresión</div>
-                        <h2 class="ticket-title">Comprobante de Compra</h2>
-                        <div class="ticket-subtitle">Orden registrada en el sistema ERP</div>
+                <div class="physical-ticket-card" id="printableTicketArea">
+
+                    <div class="ticket-brand-header">
+                        <div class="ticket-brand-logo">
+                            LYM
+                            <span>Diseño e Impresión Oficial</span>
+                        </div>
+                        <div class="ticket-folio-badge" id="folio">
+                            OR-00000
+                        </div>
+                        <div style="font-size:0.75rem; color:#94a3b8; margin-top:4px;">
+                            Orden registrada en el sistema ERP LYM
+                        </div>
                     </div>
 
-                    <div class="divider"></div>
-
-                    <div class="ticket-body">
-                        <div class="products-title">Artículos Adquiridos</div>
-                        <div id="productos"></div>
-
-                        <div id="desgloseCostosTicket" style="margin-top:14px; padding:12px; background:#f8fafc; border-radius:14px; font-size:0.9rem;">
-                            <div style="display:flex; justify-content:space-between; margin-bottom:6px; color:#64748b;">
-                                <span>Subtotal:</span>
-                                <span id="subtotalTicket">$0.00 MXN</span>
-                            </div>
-                            <div id="rowDescuentoTicket" style="display:none; justify-content:space-between; margin-bottom:6px; color:#059669; font-weight:700;">
-                                <span>Descuento:</span>
-                                <span id="descuentoTicket">-$0.00 MXN</span>
-                            </div>
-                            <div style="display:flex; justify-content:space-between; margin-bottom:6px; color:#64748b;">
-                                <span>Impuestos (IVA 16%):</span>
-                                <span id="ivaTicket">$0.00 MXN</span>
-                            </div>
+                    <div class="ticket-meta-grid">
+                        <div class="ticket-meta-item">
+                            <small>Fecha y Hora</small>
+                            <strong id="fecha">--/--/---- --:--</strong>
                         </div>
+                        <div class="ticket-meta-item">
+                            <small>Método de Pago</small>
+                            <strong id="ticketMetodoPago" style="color:#6a0dad;">Monedero Digital</strong>
+                        </div>
+                        <div class="ticket-meta-item" style="grid-column: span 2;">
+                            <small>Cliente y Domicilio de Entrega</small>
+                            <strong id="ticketClienteInfo">Cliente General • Av. Tecnológico #123</strong>
+                        </div>
+                    </div>
 
-                        <div class="total-box" style="margin-top:12px;">
+                    <div class="ticket-items-title">
+                        <i class="fas fa-box-open" style="color:#7c3aed; margin-right:6px;"></i> Artículos Adquiridos
+                    </div>
+                    <div id="productos">
+                    </div>
+
+                    <div class="ticket-totals-box">
+                        <div class="ticket-totals-row">
+                            <span>Subtotal</span>
+                            <span id="subtotalTicket">$0.00 MXN</span>
+                        </div>
+                        <div class="ticket-totals-row discount" id="rowDescuentoTicket" style="display:none;">
+                            <span>Descuento aplicado (<span id="txtCuponLabel">BIENVENIDO10</span>)</span>
+                            <span id="descuentoTicket">-$0.00 MXN</span>
+                        </div>
+                        <div class="ticket-totals-row">
+                            <span>Impuestos (IVA 16%)</span>
+                            <span id="ivaTicket">$0.00 MXN</span>
+                        </div>
+                        <div class="ticket-totals-row grand-total">
                             <span>Total pagado</span>
-                            <strong id="total">$0.00 MXN</strong>
+                            <span id="total">$0.00 MXN</span>
                         </div>
                     </div>
 
-                    <div class="divider"></div>
-
-                    <div class="ticket-footer">
-                        <div class="info-grid">
-                            <div class="info-card">
-                                <span class="info-label">Folio ERP</span>
-                                <span class="info-value" id="folio" style="color:#6a0dad; font-family:monospace; font-size:1.05rem;">OR-00000</span>
-                            </div>
-
-                            <div class="info-card">
-                                <span class="info-label">Método de Pago</span>
-                                <span class="info-value" id="ticketMetodoPago">Monedero Digital</span>
-                            </div>
-
-                            <div class="info-card">
-                                <span class="info-label">Fecha y Hora</span>
-                                <span class="info-value" id="fecha"></span>
-                            </div>
-
-                            <div class="info-card" id="cardSaldoMonedero">
-                                <span class="info-label">Saldo Actual Monedero</span>
-                                <span class="info-value" id="ticketSaldoActual" style="color:#059669;">$504.00 MXN</span>
+                    <div class="ticket-wallet-impact-card" id="cardSaldoMonedero">
+                        <div style="display:flex; align-items:center; gap:12px;">
+                            <i class="fas fa-wallet" style="font-size:1.8rem; color:#10b981;"></i>
+                            <div class="wallet-info">
+                                <span>Saldo Restante en Monedero Digital</span>
+                                <strong id="ticketSaldoActual">$0.00 MXN</strong>
                             </div>
                         </div>
+                        <a href="perfil.html#monedero" class="btn-ticket-secondary" style="padding:6px 12px; font-size:0.78rem; border-color:#86efac; color:#15803d;">
+                            Ver Monedero
+                        </a>
                     </div>
+
                 </div>
 
-                <div class="actions" style="margin-top:30px; gap:16px;">
-                    <a href="perfil.html#pedidos" class="btn btn-primary" style="background: linear-gradient(135deg, #059669, #10b981); box-shadow: 0 8px 18px rgba(16,185,129,0.3);">
-                        <i class="fas fa-box"></i> Ver mi pedido
-                    </a>
-
-                    <a href="sistema.html" class="btn btn-secondary">
-                        <i class="fas fa-store"></i> Seguir comprando
-                    </a>
-
-                    <button class="btn btn-secondary" onclick="window.print()">
+                <div class="ticket-action-buttons">
+                    <button type="button" class="btn-ticket-primary" onclick="window.print()">
                         <i class="fas fa-print"></i> Imprimir comprobante
                     </button>
+                    <a href="perfil.html#pedidos" class="btn-ticket-secondary">
+                        <i class="fas fa-boxes-stacked"></i> Ver en Mis Pedidos
+                    </a>
+                    <a href="sistema.html" class="btn-ticket-secondary">
+                        <i class="fas fa-shopping-bag"></i> Seguir comprando
+                    </a>
                 </div>
+
             </div>
         </div>
-    </div>
+    </main>
 
     <script>
-        const productosDiv = document.getElementById("productos");
-        const totalDiv = document.getElementById("total");
-        const subtotalTicket = document.getElementById("subtotalTicket");
-        const ivaTicket = document.getElementById("ivaTicket");
-        const folioEl = document.getElementById("folio");
-        const fechaEl = document.getElementById("fecha");
-        const ticketMetodoPago = document.getElementById("ticketMetodoPago");
-        const ticketSaldoActual = document.getElementById("ticketSaldoActual");
-        const cardSaldoMonedero = document.getElementById("cardSaldoMonedero");
+        document.addEventListener("DOMContentLoaded", () => {
+            const productosDiv = document.getElementById("productos");
+            const totalDiv = document.getElementById("total");
+            const subtotalTicket = document.getElementById("subtotalTicket");
+            const ivaTicket = document.getElementById("ivaTicket");
+            const folioEl = document.getElementById("folio");
+            const fechaEl = document.getElementById("fecha");
+            const ticketMetodoPago = document.getElementById("ticketMetodoPago");
+            const ticketSaldoActual = document.getElementById("ticketSaldoActual");
+            const cardSaldoMonedero = document.getElementById("cardSaldoMonedero");
+            const ticketClienteInfo = document.getElementById("ticketClienteInfo");
+            const msgCorreoConfirmacion = document.getElementById("msgCorreoConfirmacion");
 
-        const ahora = new Date();
-        fechaEl.innerText = ahora.toLocaleDateString('es-MX', { day: '2-digit', month: 'short', year: 'numeric' }) + ' ' + ahora.toLocaleTimeString();
+            const ahora = new Date();
+            fechaEl.innerText = ahora.toLocaleDateString('es-MX', { day: '2-digit', month: 'short', year: 'numeric' }) + ' ' + ahora.toLocaleTimeString();
 
-        // Leer último pedido registrado
-        const ultimoPedido = JSON.parse(localStorage.getItem("ultimoPedidoLYM") || "null");
+            const ultimoPedido = JSON.parse(localStorage.getItem("ultimoPedidoLYM") || "null");
 
-        if (ultimoPedido) {
-            folioEl.innerText = ultimoPedido.folio || "OR-00648";
-            const totNum = Number(ultimoPedido.total || 0);
-            totalDiv.innerText = "$" + totNum.toFixed(2) + " MXN";
+            if (ultimoPedido) {
+                folioEl.innerText = ultimoPedido.folio || "OR-00001";
+                const totNum = Number(ultimoPedido.total || 0);
+                totalDiv.innerText = "$" + totNum.toFixed(2) + " MXN";
 
-            if (ultimoPedido.correo_cliente) {
-                const msgCorreoEl = document.getElementById("msgCorreoConfirmacion");
-                if (msgCorreoEl) {
-                    msgCorreoEl.innerHTML = `<i class="fas fa-envelope"></i> Hemos enviado tu factura y comprobante oficial al correo: <strong>${escapeHtml(ultimoPedido.correo_cliente)}</strong>.`;
+                if (ultimoPedido.correo_cliente) {
+                    if (msgCorreoConfirmacion) {
+                        msgCorreoConfirmacion.innerHTML = `<i class="fas fa-envelope"></i> Hemos enviado tu factura y comprobante oficial al correo: <strong>${escapeHtml(ultimoPedido.correo_cliente)}</strong>.`;
+                    }
                 }
-            }
 
-            const subNum = Number(ultimoPedido.subtotal || (totNum / 1.16));
-            const ivaNum = Number(ultimoPedido.iva || (totNum - subNum));
-            if (subtotalTicket) subtotalTicket.innerText = "$" + subNum.toFixed(2) + " MXN";
-            if (ivaTicket) ivaTicket.innerText = "$" + ivaNum.toFixed(2) + " MXN";
+                if (ticketClienteInfo) {
+                    const nom = ultimoPedido.nombre_cliente || "Cliente LYM";
+                    const dir = ultimoPedido.direccion || "Domicilio registrado";
+                    ticketClienteInfo.innerText = `${nom} • ${dir}`;
+                }
 
-            if (ultimoPedido.descuento && Number(ultimoPedido.descuento) > 0) {
+                const subNum = Number(ultimoPedido.subtotal || (totNum / 1.16));
+                const ivaNum = Number(ultimoPedido.iva !== undefined ? ultimoPedido.iva : (totNum - subNum));
+                if (subtotalTicket) subtotalTicket.innerText = "$" + subNum.toFixed(2) + " MXN";
+                if (ivaTicket) ivaTicket.innerText = "$" + ivaNum.toFixed(2) + " MXN";
+
+                if (ultimoPedido.descuento && Number(ultimoPedido.descuento) > 0) {
+                    const rowDesc = document.getElementById("rowDescuentoTicket");
+                    const descVal = document.getElementById("descuentoTicket");
+                    const cuponLbl = document.getElementById("txtCuponLabel");
+                    if (rowDesc && descVal) {
+                        rowDesc.style.display = "flex";
+                        descVal.innerText = "-$" + Number(ultimoPedido.descuento).toFixed(2) + " MXN";
+                        if (cuponLbl && ultimoPedido.cupon) cuponLbl.innerText = ultimoPedido.cupon;
+                    }
+                }
+
+                const metodo = String(ultimoPedido.metodo_pago || "monedero").toLowerCase();
+                if (metodo.includes("monedero")) {
+                    ticketMetodoPago.innerText = "Monedero Digital";
+                    if (cardSaldoMonedero && ticketSaldoActual) {
+                        cardSaldoMonedero.style.display = "flex";
+                        const saldoRest = Number(ultimoPedido.saldo_nuevo !== undefined ? ultimoPedido.saldo_nuevo : (ultimoPedido.saldo_actual || 0));
+                        ticketSaldoActual.innerText = "$" + saldoRest.toFixed(2) + " MXN";
+                    }
+                } else {
+                    ticketMetodoPago.innerText = metodo.toUpperCase();
+                    if (cardSaldoMonedero) cardSaldoMonedero.style.display = "none";
+                }
+
+                if (ultimoPedido.fecha) {
+                    fechaEl.innerText = ultimoPedido.fecha;
+                }
+
+                if (ultimoPedido.items && Array.isArray(ultimoPedido.items) && ultimoPedido.items.length) {
+                    productosDiv.innerHTML = "";
+                    ultimoPedido.items.forEach(item => {
+                        const precio = Number(item.precio || item.precio_unitario || 0);
+                        const cantidad = Number(item.cantidad || 1);
+                        const subtotal = precio * cantidad;
+                        const row = document.createElement("div");
+                        row.className = "ticket-item-row";
+                        row.innerHTML = `
+                            <div class="ticket-item-left">
+                                <strong>${escapeHtml(item.producto || item.nombre || item.name || "Producto LYM")} <span style="color:#7c3aed;">x${cantidad}</span></strong>
+                                <small>Precio unitario: $${precio.toFixed(2)} MXN</small>
+                            </div>
+                            <div class="ticket-item-price">$${subtotal.toFixed(2)} MXN</div>
+                        `;
+                        productosDiv.appendChild(row);
+                    });
+                } else {
+                    productosDiv.innerHTML = `<div style="padding:14px; text-align:center; color:#64748b;">Artículos registrados con éxito.</div>`;
+                }
+            } else {
+                folioEl.innerText = "OR-00023";
+                totalDiv.innerText = "$443.70 MXN";
+                if (subtotalTicket) subtotalTicket.innerText = "$425.00 MXN";
+                if (ivaTicket) ivaTicket.innerText = "$61.20 MXN";
+                if (ticketSaldoActual) ticketSaldoActual.innerText = "$1,756.30 MXN";
                 const rowDesc = document.getElementById("rowDescuentoTicket");
                 const descVal = document.getElementById("descuentoTicket");
                 if (rowDesc && descVal) {
                     rowDesc.style.display = "flex";
-                    descVal.innerText = "-$" + Number(ultimoPedido.descuento).toFixed(2) + " MXN";
+                    descVal.innerText = "-$42.50 MXN";
                 }
-            }
-
-            const metodo = (ultimoPedido.metodo_pago || "monedero").toLowerCase();
-            if (metodo.includes("monedero")) {
-                ticketMetodoPago.innerText = "Monedero Digital";
-                if (cardSaldoMonedero && ticketSaldoActual) {
-                    cardSaldoMonedero.style.display = "block";
-                    const saldoRest = Number(ultimoPedido.saldo_nuevo !== undefined ? ultimoPedido.saldo_nuevo : 504.00);
-                    ticketSaldoActual.innerText = "$" + saldoRest.toFixed(2) + " MXN";
-                }
-            } else {
-                ticketMetodoPago.innerText = metodo.toUpperCase();
-                if (cardSaldoMonedero) cardSaldoMonedero.style.display = "none";
-            }
-
-            if (ultimoPedido.fecha) {
-                fechaEl.innerText = ultimoPedido.fecha;
-            }
-
-            if (ultimoPedido.items && Array.isArray(ultimoPedido.items) && ultimoPedido.items.length) {
-                productosDiv.innerHTML = "";
-                ultimoPedido.items.forEach(item => {
-                    const precio = Number(item.precio) || 0;
-                    const cantidad = Number(item.cantidad) || 1;
-                    const subtotal = precio * cantidad;
-                    const div = document.createElement("div");
-                    div.classList.add("item");
-                    div.innerHTML = `
-                        <div class="item-left">
-                            <span class="item-name">${escapeHtml(item.producto || item.nombre || "Artesanía")} x${cantidad}</span>
-                            <span class="item-detail">Precio unitario: $${precio.toFixed(2)} MXN</span>
+                productosDiv.innerHTML = `
+                    <div class="ticket-item-row">
+                        <div class="ticket-item-left">
+                            <strong>Sudaderas Personalizadas de Algodón <span style="color:#7c3aed;">x1</span></strong>
+                            <small>Precio unitario: $425.00 MXN</small>
                         </div>
-                        <span class="item-price">$${subtotal.toFixed(2)} MXN</span>
-                    `;
-                    productosDiv.appendChild(div);
-                });
-            } else {
-                productosDiv.innerHTML = `<div class="empty-message">Compra procesada con éxito.</div>`;
+                        <div class="ticket-item-price">$425.00 MXN</div>
+                    </div>
+                `;
             }
-        } else {
-            folioEl.innerText = "OR-00648";
-            totalDiv.innerText = "$696.00 MXN";
-            if (subtotalTicket) subtotalTicket.innerText = "$600.00 MXN";
-            if (ivaTicket) ivaTicket.innerText = "$96.00 MXN";
-            if (ticketSaldoActual) ticketSaldoActual.innerText = "$504.00 MXN";
-            ticketMetodoPago.innerText = "Monedero Digital";
-
-            productosDiv.innerHTML = `
-                <div class="item">
-                    <div class="item-left">
-                        <span class="item-name">Cazuela de Barro Rojo Vidriada x1</span>
-                        <span class="item-detail">Precio unitario: $340.00 MXN</span>
-                    </div>
-                    <span class="item-price">$340.00 MXN</span>
-                </div>
-                <div class="item">
-                    <div class="item-left">
-                        <span class="item-name">Vasija de barro x1</span>
-                        <span class="item-detail">Precio unitario: $260.00 MXN</span>
-                    </div>
-                    <span class="item-price">$260.00 MXN</span>
-                </div>
-            `;
-        }
+        });
 
         function escapeHtml(str) {
             return String(str || '').replace(/[&<>"']/g, function(m) {
                 return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m];
             });
-        }
-
-        function mostrarDescargaExitosa() {
-            const downloadBanner = document.getElementById("downloadBanner");
-            if (downloadBanner) {
-                downloadBanner.classList.add("show");
-                setTimeout(() => downloadBanner.classList.remove("show"), 2200);
-            }
         }
     </script>
 </body>
