@@ -67,6 +67,23 @@ try {
     $stmtTask->execute([$clienteId, $descTarea]);
     $taskId = (int)$pdo->lastInsertId();
 
+    // Enviar correo de confirmación al contacto
+    try {
+        require_once __DIR__ . '/../includes/mailer.php';
+        require_once __DIR__ . '/../includes/plantillas_correo.php';
+        $mailer = new LYMMailer($pdo);
+        $htmlContacto = LYMPlantillasCorreo::ticketNotificacion([
+            'folio' => 'MSG-' . $taskId,
+            'cliente_nombre' => $nombre,
+            'asunto' => "Hemos recibido tu mensaje: {$asunto}",
+            'mensaje' => $mensaje,
+            'estado' => 'Recibido'
+        ]);
+        $mailer->enviar($correo, "Hemos recibido tu consulta: {$asunto} - LYM Oficial", $htmlContacto, 'contacto', 'MSG-' . $taskId);
+    } catch (Exception $eMail) {
+        error_log("Aviso correo contacto: " . $eMail->getMessage());
+    }
+
     echo json_encode([
         'success' => true,
         'message' => '¡Tu mensaje ha sido enviado correctamente! Ha quedado registrado como tarea pendiente en la agenda del administrador.',

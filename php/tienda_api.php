@@ -520,6 +520,34 @@ try {
                 ");
                 $stmtUpd->execute([$respuesta, $nuevoEstado, $_SESSION['user_id'] ?? 1, $ticketId]);
 
+                // Enviar correo de respuesta oficial al cliente
+                try {
+                    require_once __DIR__ . '/../includes/mailer.php';
+                    require_once __DIR__ . '/../includes/plantillas_correo.php';
+                    $stmtTData = $pdo->prepare("
+                        SELECT t.*, c.nombre AS cliente_nombre, c.correo AS cliente_correo 
+                        FROM tickets_atencion t 
+                        JOIN clientes c ON t.cliente_id = c.id 
+                        WHERE t.id = ?
+                    ");
+                    $stmtTData->execute([$ticketId]);
+                    $tData = $stmtTData->fetch();
+                    if ($tData && !empty($tData['cliente_correo']) && filter_var($tData['cliente_correo'], FILTER_VALIDATE_EMAIL)) {
+                        $mailer = new LYMMailer($pdo);
+                        $htmlEmail = LYMPlantillasCorreo::ticketNotificacion([
+                            'folio' => $tData['folio'],
+                            'cliente_nombre' => $tData['cliente_nombre'],
+                            'asunto' => $tData['asunto'],
+                            'mensaje' => $tData['mensaje'],
+                            'respuesta' => $respuesta,
+                            'estado' => $nuevoEstado
+                        ]);
+                        $mailer->enviar($tData['cliente_correo'], "Respuesta a tu Ticket {$tData['folio']}: {$tData['asunto']} - LYM Soporte", $htmlEmail, 'ticket', $tData['folio']);
+                    }
+                } catch (Exception $eMail) {
+                    error_log("Aviso correo respuesta ticket: " . $eMail->getMessage());
+                }
+
                 echo json_encode([
                     'success' => true,
                     'message' => 'Respuesta enviada y ticket actualizado.'
@@ -557,6 +585,28 @@ try {
             ");
             $stmtIns->execute([$folio, $cid, $asunto, $mensaje]);
             $ticketId = (int)$pdo->lastInsertId();
+
+            // Enviar correo de confirmación de ticket al cliente
+            try {
+                require_once __DIR__ . '/../includes/mailer.php';
+                require_once __DIR__ . '/../includes/plantillas_correo.php';
+                $stmtCli = $pdo->prepare("SELECT nombre, correo FROM clientes WHERE id = ?");
+                $stmtCli->execute([$cid]);
+                $clienteTicket = $stmtCli->fetch();
+                if ($clienteTicket && !empty($clienteTicket['correo']) && filter_var($clienteTicket['correo'], FILTER_VALIDATE_EMAIL)) {
+                    $mailer = new LYMMailer($pdo);
+                    $htmlEmail = LYMPlantillasCorreo::ticketNotificacion([
+                        'folio' => $folio,
+                        'cliente_nombre' => $clienteTicket['nombre'] ?? 'Cliente',
+                        'asunto' => $asunto,
+                        'mensaje' => $mensaje,
+                        'estado' => 'En proceso'
+                    ]);
+                    $mailer->enviar($clienteTicket['correo'], "Confirmación de Ticket {$folio}: {$asunto} - LYM Soporte", $htmlEmail, 'ticket', $folio);
+                }
+            } catch (Exception $eMail) {
+                error_log("Aviso correo ticket nuevo: " . $eMail->getMessage());
+            }
 
             echo json_encode([
                 'success' => true,
@@ -804,10 +854,62 @@ try {
 
             $pdo->commit();
 
+            // Disparar envío de correo oficial de compra
+            $correoEnviado = false;
+            $correoMensaje = null;
+            try {
+                require_once __DIR__ . '/../includes/mailer.php';
+                require_once __DIR__ . '/../includes/plantillas_correo.php';
+                $destCorreo = $cliente['correo'] ?? '';
+                if (!empty($destCorreo) && filter_var($destCorreo, FILTER_VALIDATE_EMAIL)) {
+                    $mailer = new LYMMailer($pdo);
+                    $htmlEmail = LYMPlantillasCorreo::compraConfirmada([
+                        'folio' => $folioOrden,
+                        'cliente_nombre' => $nombreCompleto,
+                        'direccion' => $direccion,
+                        'metodo_pago' => (strtolower($metodoPago) === 'monedero' ? 'Monedero Digital' : $metodoPago),
+                        'subtotal' => $subtotal,
+                        'descuento' => $descuento,
+                        'iva' => $impuestosMonto,
+                        'total' => $totalFinal,
+                        'items' => $itemsValidados
+                    ]);
+                    $envioRes = $mailer->enviar($destCorreo, "Comprobante de Compra {$folioOrden} - Tienda Oficial LYM", $htmlEmail, 'compra', $folioOrden);
+                    $correoEnviado = !empty($envioRes['success']);
+                    $correoMensaje = $envioRes['message'] ?? ($envioRes['error'] ?? null);
+                }
+            } catch (Exception $eMail) {
+                error_log("Aviso de correo checkout: " . $eMail->getMessage());
+            }
+
+            $ordenResumen = [
+                'id' => $ordenId,
+                'folio' => $folioOrden,
+                'metodo_pago' => (strtolower($metodoPago) === 'monedero' ? 'Monedero' : $metodoPago),
+                'saldo_disponible_anterior' => $saldoActualCliente,
+                'total' => $totalFinal,
+                'total_pagado' => $totalFinal,
+                'saldo_nuevo' => $saldoRestante,
+                'saldo_actual' => $saldoRestante,
+                'subtotal' => $subtotal,
+                'descuento' => $descuento,
+                'impuestos' => $impuestosMonto,
+                'iva' => $impuestosMonto,
+                'tasa_iva' => $tasaIva,
+                'correo_cliente' => $cliente['correo'] ?? 'juan@ejemplo.com',
+                'nombre_cliente' => $nombreCompleto,
+                'direccion' => $direccion,
+                'items' => $itemsValidados,
+                'fecha' => date('d M Y, H:i')
+            ];
+
             // Retornar datos idénticos a Pantalla 7 de la guía
             echo json_encode([
                 'success' => true,
                 'message' => '¡Compra realizada con éxito!',
+                'correo_enviado' => $correoEnviado,
+                'correo_mensaje' => $correoMensaje,
+                'orden' => $ordenResumen,
                 'orden_id' => $ordenId,
                 'folio' => $folioOrden,
                 'metodo_pago' => (strtolower($metodoPago) === 'monedero' ? 'Monedero' : $metodoPago),
@@ -890,6 +992,119 @@ try {
             echo json_encode([
                 'success' => true,
                 'message' => 'Perfil actualizado exitosamente'
+            ]);
+            exit();
+        }
+    }
+
+    // ==============================================================
+    // 9. CONFIGURACIÓN Y PRUEBA DE CORREO OFICIAL (SMTP GMAIL)
+    // ==============================================================
+    if ($resource === 'correo') {
+        require_once __DIR__ . '/../includes/mailer.php';
+        require_once __DIR__ . '/../includes/plantillas_correo.php';
+
+        // GET: Consultar configuración actual y bitácora de envíos
+        if ($method === 'GET') {
+            $stmtCfg = $pdo->query("SELECT * FROM configuracion_correo ORDER BY id DESC LIMIT 1");
+            $cfg = $stmtCfg->fetch();
+
+            if (!$cfg) {
+                $cfg = [
+                    'servidor_smtp' => 'smtp.gmail.com',
+                    'puerto_smtp' => 465,
+                    'seguridad' => 'ssl',
+                    'usuario_smtp' => '',
+                    'remitente_nombre' => 'LYM Diseño e Impresión Oficial',
+                    'remitente_email' => '',
+                    'activo' => 1,
+                    'has_password' => false
+                ];
+            } else {
+                $cfg['has_password'] = !empty($cfg['password_smtp']);
+                unset($cfg['password_smtp']); // Nunca exponer la contraseña en texto plano
+            }
+
+            // Bitácora de correos recientes
+            $stmtBit = $pdo->query("SELECT * FROM bitacora_correos ORDER BY id DESC LIMIT 50");
+            $bitacora = $stmtBit->fetchAll();
+
+            echo json_encode([
+                'success' => true,
+                'config' => $cfg,
+                'bitacora' => $bitacora
+            ]);
+            exit();
+        }
+
+        // POST: Guardar configuración o enviar correo de prueba
+        if ($method === 'POST') {
+            $accion = $input['accion'] ?? 'guardar_config';
+
+            // Enviar correo de prueba en vivo
+            if ($accion === 'probar') {
+                $destinatario = cleanInput($input['destinatario'] ?? '');
+                if (empty($destinatario) || !filter_var($destinatario, FILTER_VALIDATE_EMAIL)) {
+                    http_response_code(400);
+                    echo json_encode(['success' => false, 'error' => 'Debes especificar un correo destinatario válido (ej. tu_correo@gmail.com).']);
+                    exit();
+                }
+
+                $stmtCfg = $pdo->query("SELECT * FROM configuracion_correo WHERE activo = 1 ORDER BY id DESC LIMIT 1");
+                $cfgActual = $stmtCfg->fetch();
+                $remitente = $cfgActual['usuario_smtp'] ?? 'notificaciones@lym.com';
+
+                $mailer = new LYMMailer($pdo);
+                $htmlPrueba = LYMPlantillasCorreo::correoPrueba($destinatario, $remitente);
+
+                $resEnvio = $mailer->enviar(
+                    $destinatario, 
+                    "Verificación de Conexión SMTP - Tienda Oficial LYM", 
+                    $htmlPrueba, 
+                    'prueba', 
+                    'TEST-' . date('His')
+                );
+
+                echo json_encode($resEnvio);
+                exit();
+            }
+
+            // Guardar configuración SMTP
+            $servidor = cleanInput($input['servidor_smtp'] ?? 'smtp.gmail.com');
+            $puerto = (int)($input['puerto_smtp'] ?? 465);
+            $seguridad = in_array(strtolower($input['seguridad'] ?? ''), ['ssl', 'tls']) ? strtolower($input['seguridad']) : 'ssl';
+            $usuario = cleanInput($input['usuario_smtp'] ?? '');
+            $password = trim($input['password_smtp'] ?? '');
+            $remitenteNombre = cleanInput($input['remitente_nombre'] ?? 'LYM Diseño e Impresión Oficial');
+            $remitenteEmail = cleanInput($input['remitente_email'] ?? $usuario);
+            $activo = isset($input['activo']) ? (int)$input['activo'] : 1;
+
+            // Obtener configuración previa
+            $stmtPrev = $pdo->query("SELECT id, password_smtp FROM configuracion_correo ORDER BY id DESC LIMIT 1");
+            $prev = $stmtPrev->fetch();
+
+            if ($prev) {
+                // Si la contraseña vino vacía en el update, conservamos la que ya estaba guardada
+                $pwdToSave = !empty($password) ? $password : $prev['password_smtp'];
+
+                $stmtUpd = $pdo->prepare("
+                    UPDATE configuracion_correo 
+                    SET servidor_smtp = ?, puerto_smtp = ?, seguridad = ?, usuario_smtp = ?, password_smtp = ?, remitente_nombre = ?, remitente_email = ?, activo = ?
+                    WHERE id = ?
+                ");
+                $stmtUpd->execute([$servidor, $puerto, $seguridad, $usuario, $pwdToSave, $remitenteNombre, $remitenteEmail, $activo, $prev['id']]);
+            } else {
+                $stmtIns = $pdo->prepare("
+                    INSERT INTO configuracion_correo 
+                    (servidor_smtp, puerto_smtp, seguridad, usuario_smtp, password_smtp, remitente_nombre, remitente_email, activo)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                ");
+                $stmtIns->execute([$servidor, $puerto, $seguridad, $usuario, $password, $remitenteNombre, $remitenteEmail, $activo]);
+            }
+
+            echo json_encode([
+                'success' => true,
+                'message' => 'Configuración de correo oficial guardada exitosamente.'
             ]);
             exit();
         }

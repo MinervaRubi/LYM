@@ -271,6 +271,9 @@
                         <button class="crm-nav-item crm-nav-subitem" id="tienda-nav-tickets" onclick="loadExternalView('admin-tickets.html', this, 'Tienda')">
                             <i class="fas fa-headset"></i> <span>Tickets Atención</span>
                         </button>
+                        <button class="crm-nav-item crm-nav-subitem" id="tienda-nav-correo" onclick="loadExternalView('admin-correo.html', this, 'Tienda')">
+                            <i class="fas fa-envelope-open-text"></i> <span>Correo Oficial SMTP</span>
+                        </button>
                     </div>
                 </div>
 
@@ -288,6 +291,9 @@
             <!-- CUENTA Y CONFIGURACIÓN -->
             <div class="crm-nav-group" style="margin-top: auto;">
                 <div class="crm-nav-label">Sistema y Cuenta</div>
+                <button class="crm-nav-item" id="navItemCorreoOficial" onclick="loadExternalView('admin-correo.html', this, 'Sistema')">
+                    <i class="fas fa-envelope"></i> <span>Correo SMTP Oficial</span>
+                </button>
                 <button class="crm-nav-item" id="navItemConfiguracion" onclick="abrirModalCambiarPassCRM()">
                     <i class="fas fa-cog"></i> <span>Configuración</span>
                 </button>

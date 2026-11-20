@@ -630,6 +630,13 @@
             const totNum = Number(ultimoPedido.total || 0);
             totalDiv.innerText = "$" + totNum.toFixed(2) + " MXN";
 
+            if (ultimoPedido.correo_cliente) {
+                const msgCorreoEl = document.getElementById("msgCorreoConfirmacion");
+                if (msgCorreoEl) {
+                    msgCorreoEl.innerHTML = `<i class="fas fa-envelope"></i> Hemos enviado tu factura y comprobante oficial al correo: <strong>${escapeHtml(ultimoPedido.correo_cliente)}</strong>.`;
+                }
+            }
+
             const subNum = Number(ultimoPedido.subtotal || (totNum / 1.16));
             const ivaNum = Number(ultimoPedido.iva || (totNum - subNum));
             if (subtotalTicket) subtotalTicket.innerText = "$" + subNum.toFixed(2) + " MXN";

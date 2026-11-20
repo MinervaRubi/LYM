@@ -14,7 +14,7 @@ define('DB_NAME', 'lym');
 // CONFIGURACIÓN DE SESIONES
 // =====================================================
 
-if (!headers_sent()) {
+if (!headers_sent() && session_status() === PHP_SESSION_NONE) {
     ini_set('session.cookie_httponly', 1);
     ini_set('session.use_only_cookies', 1);
     ini_set('session.cookie_secure', 0);
@@ -244,13 +244,15 @@ function redirect($url)
 // LIMPIAR ENTRADA
 // =====================================================
 
-function cleanInput($data)
-{
-    $data = trim($data);
-    $data = stripslashes($data);
-    $data = htmlspecialchars($data);
+if (!function_exists('cleanInput')) {
+    function cleanInput($data)
+    {
+        $data = trim($data);
+        $data = stripslashes($data);
+        $data = htmlspecialchars($data);
 
-    return $data;
+        return $data;
+    }
 }
 
 
