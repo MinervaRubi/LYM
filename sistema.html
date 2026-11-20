@@ -1371,6 +1371,24 @@
 
 
     <script>
+        // ========= Detección de Archivo Local (file:// vs localhost) =========
+        if (window.location.protocol === 'file:') {
+            window.addEventListener('DOMContentLoaded', () => {
+                const banner = document.createElement('div');
+                banner.id = 'bannerLocalFileWarning';
+                banner.style.cssText = 'background:#ef4444; color:#fff; text-align:center; padding:12px 18px; font-weight:700; font-size:14px; position:fixed; top:0; left:0; width:100%; z-index:999999; box-shadow:0 4px 20px rgba(0,0,0,0.35); display:flex; align-items:center; justify-content:center; gap:12px; flex-wrap:wrap;';
+                banner.innerHTML = `
+                    <i class="fas fa-triangle-exclamation" style="font-size:20px; color:#fef08a;"></i>
+                    <span>Estás abriendo la página como archivo local (file://). Para que el registro, las compras y el envío de correos funcionen, debes acceder por XAMPP:</span>
+                    <a href="http://localhost/sistema.html" style="background:#fef08a; color:#1e1b4b; padding:8px 18px; border-radius:999px; text-decoration:none; font-weight:800; display:inline-flex; align-items:center; gap:6px; box-shadow:0 2px 8px rgba(0,0,0,0.2);">
+                        <i class="fas fa-external-link-alt"></i> Clic aquí para abrir en http://localhost/sistema.html
+                    </a>
+                `;
+                document.body.prepend(banner);
+                document.body.style.paddingTop = '60px';
+            });
+        }
+
         // ========= Notificaciones Toast Globales =========
         function showSuccessBanner(texto = "Operación exitosa", tipo = null) {
             if (!tipo) {
