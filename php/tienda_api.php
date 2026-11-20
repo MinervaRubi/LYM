@@ -1003,7 +1003,14 @@ try {
     // 8. PERFIL DEL CLIENTE (PANTALLA 10)
     // ==============================================================
     if ($resource === 'cliente_perfil') {
-        $cliente = getClienteActual($pdo);
+        $cid = (int)($_GET['cliente_id'] ?? ($input['cliente_id'] ?? 0));
+        $cliente = null;
+        if ($cid > 0) {
+            $cliente = resolverClienteId($pdo, $cid);
+        }
+        if (!$cliente) {
+            $cliente = getClienteActual($pdo);
+        }
         if (!$cliente) {
             http_response_code(404);
             echo json_encode(['success' => false, 'error' => 'Cliente no encontrado']);
@@ -1019,13 +1026,27 @@ try {
 
             // Listar últimos pedidos
             $stmtListPed = $pdo->prepare("
-                SELECT id, folio, total, estado, fecha, notas 
+                SELECT id, folio, subtotal, total, estado, fecha, notas, created_at 
                 FROM erp_ordenes 
                 WHERE cliente_id = ? 
-                ORDER BY id DESC LIMIT 10
+                ORDER BY id DESC LIMIT 25
             ");
             $stmtListPed->execute([$clienteId]);
             $pedidos = $stmtListPed->fetchAll();
+
+            foreach ($pedidos as &$p) {
+                $metodo = 'Monedero';
+                if (!empty($p['notas'])) {
+                    if (stripos($p['notas'], 'tarjeta') !== false) $metodo = 'Tarjeta';
+                    elseif (stripos($p['notas'], 'paypal') !== false) $metodo = 'PayPal';
+                    elseif (stripos($p['notas'], 'efectivo') !== false) $metodo = 'Efectivo';
+                    elseif (stripos($p['notas'], 'transferencia') !== false) $metodo = 'Transferencia';
+                    elseif (stripos($p['notas'], 'monedero') !== false) $metodo = 'Monedero';
+                }
+                $p['metodo_pago'] = $metodo;
+                $p['created_at'] = $p['fecha'] ?: ($p['created_at'] ?? 'Reciente');
+            }
+            unset($p);
 
             echo json_encode([
                 'success' => true,
@@ -1037,9 +1058,10 @@ try {
                     'direccion' => $cliente['direccion'] ?? 'Av. Tecnológico #123',
                     'saldo_monedero' => (float)$cliente['saldo_monedero'],
                     'saldo_formato' => '$' . number_format((float)$cliente['saldo_monedero'], 2),
-                    'total_pedidos' => (int)$pedStats['total'],
-                    'total_gastado' => (float)$pedStats['total_gastado']
+                    'total_pedidos' => (int)($pedStats['total'] ?? count($pedidos)),
+                    'total_gastado' => (float)($pedStats['total_gastado'] ?? 0)
                 ],
+                'pedidos' => $pedidos,
                 'ultimos_pedidos' => $pedidos
             ]);
             exit();
@@ -1059,6 +1081,99 @@ try {
             ]);
             exit();
         }
+    }
+
+    // ==============================================================
+    // 8.1 DETALLE DE PEDIDO POR FOLIO O ID (TICKET Y SEGUIMIENTO)
+    // ==============================================================
+    if ($resource === 'pedido_detalle') {
+        $folio = trim($_GET['folio'] ?? '');
+        $pedidoId = (int)($_GET['id'] ?? 0);
+
+        $orden = null;
+        if (!empty($folio)) {
+            $stmtOrd = $pdo->prepare("
+                SELECT o.*, c.nombre AS cliente_nombre, c.correo AS cliente_correo, c.telefono AS cliente_telefono, c.direccion AS cliente_direccion, c.saldo_monedero
+                FROM erp_ordenes o
+                LEFT JOIN clientes c ON o.cliente_id = c.id
+                WHERE o.folio = ? LIMIT 1
+            ");
+            $stmtOrd->execute([$folio]);
+            $orden = $stmtOrd->fetch();
+        } elseif ($pedidoId > 0) {
+            $stmtOrd = $pdo->prepare("
+                SELECT o.*, c.nombre AS cliente_nombre, c.correo AS cliente_correo, c.telefono AS cliente_telefono, c.direccion AS cliente_direccion, c.saldo_monedero
+                FROM erp_ordenes o
+                LEFT JOIN clientes c ON o.cliente_id = c.id
+                WHERE o.id = ? LIMIT 1
+            ");
+            $stmtOrd->execute([$pedidoId]);
+            $orden = $stmtOrd->fetch();
+        }
+
+        if (!$orden) {
+            http_response_code(404);
+            echo json_encode(['success' => false, 'error' => 'Pedido no encontrado']);
+            exit();
+        }
+
+        // Obtener partidas
+        $stmtItems = $pdo->prepare("
+            SELECT producto_id, nombre_producto, cantidad, precio_unitario, subtotal
+            FROM erp_orden_detalles
+            WHERE orden_id = ?
+            ORDER BY id ASC
+        ");
+        $stmtItems->execute([$orden['id']]);
+        $items = $stmtItems->fetchAll();
+
+        // Extraer método de pago y dirección de notas
+        $metodo = 'Monedero';
+        if (!empty($orden['notas'])) {
+            if (stripos($orden['notas'], 'tarjeta') !== false) $metodo = 'Tarjeta';
+            elseif (stripos($orden['notas'], 'paypal') !== false) $metodo = 'PayPal';
+            elseif (stripos($orden['notas'], 'efectivo') !== false) $metodo = 'Efectivo';
+            elseif (stripos($orden['notas'], 'transferencia') !== false) $metodo = 'Transferencia';
+            elseif (stripos($orden['notas'], 'monedero') !== false) $metodo = 'Monedero';
+        }
+        $dir = !empty($orden['cliente_direccion']) ? $orden['cliente_direccion'] : 'Domicilio registrado';
+        if (!empty($orden['notas']) && preg_match('/Entrega:\s*(.+?)(?:\.\s*Compra|\.\s*$|$)/i', $orden['notas'], $mDir)) {
+            $dir = trim($mDir[1]);
+        }
+        $ivaMonto = 0.00;
+        if (!empty($orden['notas']) && preg_match('/IVA \(\d+%\):\s*\$([0-9,.]+)/i', $orden['notas'], $mIva)) {
+            $ivaMonto = (float)str_replace(',', '', $mIva[1]);
+        }
+
+        echo json_encode([
+            'success' => true,
+            'pedido' => [
+                'id' => $orden['id'],
+                'folio' => $orden['folio'],
+                'fecha' => $orden['fecha'] ?: $orden['created_at'],
+                'subtotal' => (float)$orden['subtotal'],
+                'iva' => $ivaMonto,
+                'total' => (float)$orden['total'],
+                'estado' => $orden['estado'],
+                'metodo_pago' => $metodo,
+                'nombre_cliente' => $orden['cliente_nombre'],
+                'correo_cliente' => $orden['cliente_correo'],
+                'direccion' => $dir,
+                'saldo_actual' => (float)$orden['saldo_monedero'],
+                'items' => array_map(function($it) {
+                    return [
+                        'producto_id' => $it['producto_id'],
+                        'producto' => $it['nombre_producto'],
+                        'nombre' => $it['nombre_producto'],
+                        'cantidad' => (int)$it['cantidad'],
+                        'precio' => (float)$it['precio_unitario'],
+                        'precio_unitario' => (float)$it['precio_unitario'],
+                        'subtotal' => (float)$it['subtotal']
+                    ];
+                }, $items)
+            ]
+        ]);
+        exit();
     }
 
     // ==============================================================

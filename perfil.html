@@ -725,15 +725,15 @@
     <script>
         let clienteIdActivo = 1;
 
-        document.addEventListener("DOMContentLoaded", () => {
+        document.addEventListener("DOMContentLoaded", async () => {
+            await cargarPerfilYSesion();
+
             // Revisar si viene con hash (ej. #pedidos o #monedero)
             const hash = window.location.hash ? window.location.hash.replace('#', '') : 'monedero';
             const btnTarget = document.querySelector(`.perfil-nav-btn[data-tab="${hash}"]`);
             if (btnTarget) {
                 cambiarTabPerfil(hash, btnTarget);
             }
-
-            cargarPerfilYSesion();
         });
 
         function cambiarTabPerfil(tabName, btn) {
@@ -901,38 +901,52 @@
             const tbody = document.getElementById('tablaPedidosBody');
             if (!tbody) return;
 
+            tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:#94a3b8; padding:30px;"><i class="fas fa-spinner fa-spin"></i> Consultando pedidos en MySQL...</td></tr>`;
+
             try {
                 const resp = await fetch('php/tienda_api.php?resource=cliente_perfil&cliente_id=' + clienteIdActivo);
                 const data = await resp.json();
 
-                if (data.success && Array.isArray(data.pedidos)) {
-                    if (data.pedidos.length === 0) {
+                const lista = data.pedidos || data.ultimos_pedidos || [];
+
+                if (data.success && Array.isArray(lista)) {
+                    if (lista.length === 0) {
                         tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:#94a3b8; padding:30px;">Aún no tienes pedidos registrados en el ERP. <a href="sistema.html#productos" style="color:#7c3aed; font-weight:700;">¡Empieza a comprar!</a></td></tr>`;
                         return;
                     }
 
-                    tbody.innerHTML = data.pedidos.map(p => {
+                    tbody.innerHTML = lista.map(p => {
                         const tot = parseFloat(p.total) || 0;
-                        const estado = p.estado || 'Pendiente';
+                        const estado = p.estado || 'Procesada';
                         let badgeClass = 'proceso';
-                        if (estado.toLowerCase() === 'entregado') badgeClass = 'respondido';
-                        if (estado.toLowerCase() === 'cancelado') badgeClass = 'cerrado';
+                        const estLow = estado.toLowerCase();
+                        if (estLow.includes('entregado') || estLow.includes('procesada') || estLow.includes('aprobado')) {
+                            badgeClass = 'respondido';
+                        } else if (estLow.includes('cancelado')) {
+                            badgeClass = 'cerrado';
+                        }
+
+                        const folio = p.folio || ('OR-' + p.id);
+                        const fecha = p.created_at || p.fecha || 'Reciente';
+                        const metodo = p.metodo_pago || 'Monedero';
 
                         return `
                             <tr>
-                                <td><strong style="color:#7c3aed; font-family:monospace;">${escapeHtml(p.folio || ('OR-' + p.id))}</strong></td>
-                                <td>${p.created_at || 'Reciente'}</td>
+                                <td><strong style="color:#7c3aed; font-family:monospace; font-size:1rem;">${escapeHtml(folio)}</strong></td>
+                                <td><i class="far fa-clock" style="color:#94a3b8; margin-right:4px;"></i>${escapeHtml(fecha)}</td>
                                 <td style="font-weight:700; color:#2d1e40;">$${tot.toFixed(2)} MXN</td>
-                                <td><span style="font-size:0.85rem; text-transform:uppercase; font-weight:600; color:#475569;">${escapeHtml(p.metodo_pago || 'Monedero')}</span></td>
+                                <td><span style="font-size:0.85rem; text-transform:uppercase; font-weight:600; color:#475569;"><i class="fas fa-credit-card" style="color:#7c3aed; margin-right:4px;"></i>${escapeHtml(metodo)}</span></td>
                                 <td><span class="badge-status ${badgeClass}"><i class="fas fa-circle-dot"></i> ${escapeHtml(estado)}</span></td>
                                 <td>
-                                    <button class="btn btn-outline" style="padding:4px 10px; font-size:0.75rem;" onclick="verComprobantePedido('${escapeHtml(p.folio || p.id)}')">
+                                    <button class="btn btn-outline" style="padding:6px 12px; font-size:0.8rem; display:inline-flex; align-items:center; gap:6px;" onclick="verComprobantePedido('${escapeHtml(folio)}')">
                                         <i class="fas fa-receipt"></i> Ver Ticket
                                     </button>
                                 </td>
                             </tr>
                         `;
                     }).join('');
+                } else {
+                    tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:#94a3b8; padding:30px;">Aún no tienes pedidos registrados en el ERP. <a href="sistema.html#productos" style="color:#7c3aed; font-weight:700;">¡Empieza a comprar!</a></td></tr>`;
                 }
             } catch (e) {
                 tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:#ef4444; padding:20px;">Error al consultar pedidos en el servidor.</td></tr>`;
@@ -940,7 +954,7 @@
         }
 
         function verComprobantePedido(folio) {
-            window.location.href = "ticket.html";
+            window.location.href = "ticket.html?folio=" + encodeURIComponent(folio);
         }
 
         // ==============================================================

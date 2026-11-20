@@ -625,7 +625,7 @@
     </main>
 
     <script>
-        document.addEventListener("DOMContentLoaded", () => {
+        document.addEventListener("DOMContentLoaded", async () => {
             const productosDiv = document.getElementById("productos");
             const totalDiv = document.getElementById("total");
             const subtotalTicket = document.getElementById("subtotalTicket");
@@ -641,7 +641,30 @@
             const ahora = new Date();
             fechaEl.innerText = ahora.toLocaleDateString('es-MX', { day: '2-digit', month: 'short', year: 'numeric' }) + ' ' + ahora.toLocaleTimeString();
 
-            const ultimoPedido = JSON.parse(localStorage.getItem("ultimoPedidoLYM") || "null");
+            const urlParams = new URLSearchParams(window.location.search);
+            const folioParam = urlParams.get('folio');
+            const idParam = urlParams.get('id');
+
+            let ultimoPedido = null;
+
+            if (folioParam || idParam) {
+                try {
+                    const q = folioParam ? ('folio=' + encodeURIComponent(folioParam)) : ('id=' + encodeURIComponent(idParam));
+                    const resp = await fetch('php/tienda_api.php?resource=pedido_detalle&' + q);
+                    const resJson = await resp.json();
+                    if (resJson.success && resJson.pedido) {
+                        ultimoPedido = resJson.pedido;
+                    }
+                } catch(e) {
+                    console.error("Error al obtener detalle de pedido:", e);
+                }
+            }
+
+            if (!ultimoPedido) {
+                try {
+                    ultimoPedido = JSON.parse(localStorage.getItem("ultimoPedidoLYM") || "null");
+                } catch(e) {}
+            }
 
             if (ultimoPedido) {
                 folioEl.innerText = ultimoPedido.folio || "OR-00001";
@@ -650,7 +673,7 @@
 
                 if (ultimoPedido.correo_cliente) {
                     if (msgCorreoConfirmacion) {
-                        msgCorreoConfirmacion.innerHTML = `<i class="fas fa-envelope"></i> Hemos enviado tu factura y comprobante oficial al correo: <strong>${escapeHtml(ultimoPedido.correo_cliente)}</strong>.`;
+                        msgCorreoConfirmacion.innerHTML = `<i class="fas fa-envelope"></i> Hemos enviado tu comprobante oficial al correo: <strong>${escapeHtml(ultimoPedido.correo_cliente)}</strong>.`;
                     }
                 }
 
