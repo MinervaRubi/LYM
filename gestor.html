@@ -819,6 +819,12 @@
         }
 
         function irAInicioGestor(btn) {
+            const esSoporte = (window.currentUserCRM && String(window.currentUserCRM.username).toLowerCase() === 'soporte');
+            if (esSoporte) {
+                const btnTickets = document.getElementById("tienda-nav-tickets");
+                loadExternalView('admin-tickets.html', btnTickets, 'Tienda');
+                return;
+            }
             document.querySelectorAll(".crm-nav-item, .crm-nav-subitem").forEach(el => el.classList.remove("active"));
             if (btn) btn.classList.add("active");
             
@@ -876,6 +882,13 @@
 
             if (overrideRol) {
                 window.rolActivoERP = String(overrideRol).toLowerCase();
+            }
+            const esSoporte = (window.currentUserCRM && String(window.currentUserCRM.username).toLowerCase() === 'soporte')
+                           || (String(overrideRol).toLowerCase() === 'soporte');
+            if (esSoporte) {
+                window.enModuloERP = false;
+                barra.style.display = 'none';
+                return;
             }
             let rol = window.rolActivoERP || 'admin';
             if (rol === 'trabajador') rol = 'logistica';
@@ -1541,6 +1554,49 @@
             };
 
             // ==============================================================
+            // PERFIL EXCLUSIVO: SOPORTE (TIPO ADMINISTRADOR - SOLO ATENDER CLIENTES)
+            // ==============================================================
+            const currentUsername = String(window.currentUserCRM?.username || '').toLowerCase();
+            const esSoporte = (role === 'soporte' || currentUsername === 'soporte');
+
+            if (esSoporte) {
+                // Ocultar absolutamente todo excepto Atender Clientes
+                setVisible(btnInicio, false);
+                setVisible(btnWrapCRM, false);
+                setVisible(btnWrapSCM, false);
+                setVisible(btnWrapERP, false);
+                setVisible(btnUsuarios, false);
+                setVisible(btnTrabajadores, false);
+
+                // Ocultar barra superior de pestañas del ERP (cero relleno)
+                const barraERP = document.getElementById("barraPestanasERP");
+                if (barraERP) barraERP.style.display = 'none';
+
+                // Ocultar botón "+ Interacción"
+                const btnTopInteraccion = document.querySelector(".crm-user-profile .crm-btn-primary");
+                if (btnTopInteraccion) btnTopInteraccion.style.display = 'none';
+
+                // En Tienda & Monedero: solo Tickets Atención
+                setVisible(wrapTienda, true, 'block');
+                setVisible(tiendaPromos, false);
+                setVisible(tiendaImpuestos, false);
+                setVisible(tiendaMonedero, false);
+                setVisible(tiendaCorreo, false);
+                setVisible(tiendaTickets, true, 'flex');
+
+                // En Sistema y Cuenta: ocultar correo oficial y configuración
+                const navCorreoOficial = document.getElementById("navItemCorreoOficial");
+                setVisible(navCorreoOficial, false);
+                setVisible(btnConfiguracion, false);
+
+                abrirAcordeonTienda();
+
+                // Cargar inmediatamente la pantalla de Tickets de Atención
+                loadExternalView("admin-tickets.html", tiendaTickets, "Tienda");
+                return;
+            }
+
+            // ==============================================================
             // PRESERVAR ÍNTEGROS TODOS LOS APARTADOS DEL SIDEBAR
             // (Dashboard, CRM, SCM, ERP, Tienda & Monedero, Usuarios, Trabajadores)
             // ==============================================================
@@ -1665,19 +1721,17 @@
             abrirAcordeonSCM();
             abrirAcordeonERP();
 
-            // CASO USUARIO SOPORTE: Carga directamente en la pantalla de Tickets de Atención (tal como en la imagen)
-            const currentUsername = String(window.currentUserCRM?.username || '').toLowerCase();
-            if (currentUsername === 'soporte') {
-                abrirAcordeonTienda();
-                loadExternalView("admin-tickets.html", tiendaTickets, "Tienda");
-                actualizarPestanasERP("admin-tickets.html", 'admin', true);
-            } else if (!currentLoadedView) {
-                // Si no hay vista cargada actualmente, cargar el dashboard general
+            // Si no hay vista cargada actualmente, cargar el dashboard general
+            if (!currentLoadedView) {
                 loadExternalView("crm-dashboard.html", btnInicio, "Dashboard");
-                actualizarPestanasERP(currentLoadedView, role);
-            } else {
-                actualizarPestanasERP(currentLoadedView, role);
             }
+
+            // Sincronizar selector en erp-inicio si está presente en el DOM
+            const selInicio = document.getElementById("erpInicioSelectRol");
+            if (selInicio) selInicio.value = (role === 'trabajador' ? 'logistica' : role);
+
+            // Actualizar la barra superior de pestañas dinámicas del ERP
+            actualizarPestanasERP(currentLoadedView, role);
         }
 
         function bloquearAccesoCRM(mensaje) {
