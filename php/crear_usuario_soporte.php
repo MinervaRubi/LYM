@@ -18,7 +18,7 @@ try {
     $password = 'soporte123';
     $email = 'soporte@lym.com';
     $hash = password_hash($password, PASSWORD_DEFAULT);
-    $role = 'soporte';
+    $role = 'admin';
 
     // 2. Verificar si ya existe el usuario
     $stmt = $pdo->prepare("SELECT id, username FROM usuarios WHERE LOWER(username) = LOWER(?) OR LOWER(email) = LOWER(?)");

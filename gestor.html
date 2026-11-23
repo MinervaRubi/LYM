@@ -142,6 +142,9 @@
                             <i class="fas fa-tags"></i> <span>Descuentos y Promos</span>
                             <span id="badgeDescuentosSidebar" class="crm-badge" style="display:none; background:#ef4444; color:white; font-size:0.7rem; padding:1px 6px; border-radius:10px; margin-left:auto; font-weight:700;">0</span>
                         </button>
+                        <button class="crm-nav-item crm-nav-subitem" id="navItemAtencionClientes" onclick="loadExternalView('admin-tickets.html', this, 'CRM')">
+                            <i class="fas fa-headset"></i> <span>Atención a Clientes</span>
+                        </button>
                         <button class="crm-nav-item crm-nav-subitem" id="navItemActividad" onclick="loadExternalView('crm-actividad.html', this, 'CRM')">
                             <i class="fas fa-clipboard-list"></i> <span>Mi Actividad</span>
                         </button>
@@ -819,9 +822,11 @@
         }
 
         function irAInicioGestor(btn) {
-            if (window.currentUserCRM && String(window.currentUserCRM.role).toLowerCase() === 'soporte') {
-                const btnTickets = document.getElementById("tienda-nav-tickets");
-                loadExternalView('admin-tickets.html', btnTickets, 'Tienda');
+            const esSoporte = (window.currentUserCRM && String(window.currentUserCRM.username).toLowerCase() === 'soporte')
+                           || (window.currentUserCRM && String(window.currentUserCRM.role).toLowerCase() === 'soporte');
+            if (esSoporte) {
+                const btnAtencion = document.getElementById("navItemAtencionClientes") || document.getElementById("tienda-nav-tickets");
+                loadExternalView('admin-tickets.html', btnAtencion, 'CRM');
                 return;
             }
             document.querySelectorAll(".crm-nav-item, .crm-nav-subitem").forEach(el => el.classList.remove("active"));
@@ -882,12 +887,15 @@
             if (overrideRol) {
                 window.rolActivoERP = String(overrideRol).toLowerCase();
             }
-            let rol = window.rolActivoERP || 'admin';
-            if (rol === 'soporte') {
+            const esSoporte = (window.currentUserCRM && String(window.currentUserCRM.username).toLowerCase() === 'soporte')
+                           || (String(overrideRol).toLowerCase() === 'soporte')
+                           || (String(window.rolActivoERP).toLowerCase() === 'soporte');
+            if (esSoporte) {
                 window.enModuloERP = false;
                 barra.style.display = 'none';
                 return;
             }
+            let rol = window.rolActivoERP || 'admin';
             if (rol === 'trabajador') rol = 'logistica';
             if (rol !== 'ventas' && rol !== 'logistica') rol = 'admin';
 
@@ -1508,6 +1516,7 @@
             const crmInteracciones = document.getElementById("navItemInteracciones");
             const crmEvaluaciones = document.getElementById("navItemEvaluaciones");
             const crmDescuentos = document.getElementById("navItemDescuentos");
+            const crmAtencion = document.getElementById("navItemAtencionClientes");
             const crmActividad = document.getElementById("navItemActividad");
             const crmReportes = document.getElementById("navItemReportes");
 
@@ -1536,19 +1545,32 @@
             const erpConfig = document.getElementById("erp-nav-config");
             const erpRoles = document.getElementById("erp-nav-roles");
 
+            // Elementos de Tienda & Monedero
+            const wrapTienda = document.getElementById("wrapperAccordionTienda");
+            const tiendaPromos = document.getElementById("tienda-nav-promociones");
+            const tiendaImpuestos = document.getElementById("tienda-nav-impuestos");
+            const tiendaMonedero = document.getElementById("tienda-nav-monedero");
+            const tiendaTickets = document.getElementById("tienda-nav-tickets");
+            const tiendaCorreo = document.getElementById("tienda-nav-correo");
+
             // Helper para visibilidad
             const setVisible = (el, show, displayType = 'flex') => {
                 if (el) el.style.display = show ? displayType : 'none';
             };
 
             // ==============================================================
-            // CASO EXCLUSIVO: ROL SOPORTE TÉCNICO (Tickets y Correos)
+            // CASO EXCLUSIVO: ADMIN DE ATENCIÓN A CLIENTES (SOPORTE)
+            // (Acceso exclusivo a la pantalla de CRM > Atención a Clientes)
             // ==============================================================
-            if (role === 'soporte') {
+            const currentUsername = String(window.currentUserCRM?.username || '').toLowerCase();
+            const esSoporte = (role === 'soporte' || currentUsername === 'soporte');
+
+            if (esSoporte) {
+                // Ocultar Dashboard, SCM, ERP, Tienda, Usuarios, Trabajadores
                 setVisible(btnInicio, false);
-                setVisible(btnWrapCRM, false);
                 setVisible(btnWrapSCM, false);
                 setVisible(btnWrapERP, false);
+                setVisible(wrapTienda, false);
                 setVisible(btnUsuarios, false);
                 setVisible(btnTrabajadores, false);
 
@@ -1556,36 +1578,29 @@
                 const barraERP = document.getElementById("barraPestanasERP");
                 if (barraERP) barraERP.style.display = 'none';
 
-                // Ocultar botón "+ Interacción" de la barra superior
+                // Ocultar botón "+ Interacción" del topbar
                 const btnTopInteraccion = document.querySelector(".crm-user-profile .crm-btn-primary");
                 if (btnTopInteraccion) btnTopInteraccion.style.display = 'none';
 
-                // Tienda & Monedero: solo Tickets y Correo
-                const wrapTienda = document.getElementById("wrapperAccordionTienda");
-                const tiendaPromos = document.getElementById("tienda-nav-promociones");
-                const tiendaImpuestos = document.getElementById("tienda-nav-impuestos");
-                const tiendaMonedero = document.getElementById("tienda-nav-monedero");
-                const tiendaTickets = document.getElementById("tienda-nav-tickets");
-                const tiendaCorreo = document.getElementById("tienda-nav-correo");
-
-                setVisible(wrapTienda, true, 'block');
-                setVisible(tiendaPromos, false);
-                setVisible(tiendaImpuestos, false);
-                setVisible(tiendaMonedero, false);
-                setVisible(tiendaTickets, true, 'flex');
-                setVisible(tiendaCorreo, true, 'flex');
+                // En CRM: Mostrar ÚNICAMENTE "Atención a Clientes"
+                setVisible(btnWrapCRM, true, 'block');
+                setVisible(crmClientes, false);
+                setVisible(crmInteracciones, false);
+                setVisible(crmEvaluaciones, false);
+                setVisible(crmDescuentos, false);
+                setVisible(crmAtencion, true, 'flex');
+                setVisible(crmActividad, false);
+                setVisible(crmReportes, false);
 
                 // Sistema y Cuenta
                 const navCorreoOficial = document.getElementById("navItemCorreoOficial");
-                setVisible(navCorreoOficial, true, 'flex');
+                setVisible(navCorreoOficial, false);
                 setVisible(btnConfiguracion, true, 'flex');
 
-                abrirAcordeonTienda();
+                abrirAcordeonCRM();
 
-                // Cargar directamente la vista de Tickets de Atención
-                if (!currentLoadedView || currentLoadedView === 'crm-dashboard.html') {
-                    loadExternalView('admin-tickets.html', tiendaTickets, 'Tienda');
-                }
+                // Cargar inmediatamente la pantalla de Atención a Clientes bajo CRM
+                loadExternalView('admin-tickets.html', crmAtencion, 'CRM');
                 return;
             }
 
@@ -1602,13 +1617,16 @@
             setVisible(btnTrabajadores, true, 'flex');
             setVisible(btnConfiguracion, true, 'flex');
 
+            // Subitems originales CRM (todos visibles e intactos)
+            setVisible(crmClientes, true, 'flex');
+            setVisible(crmInteracciones, true, 'flex');
+            setVisible(crmEvaluaciones, true, 'flex');
+            setVisible(crmDescuentos, true, 'flex');
+            setVisible(crmAtencion, true, 'flex');
+            setVisible(crmActividad, true, 'flex');
+            setVisible(crmReportes, true, 'flex');
+
             // Tienda & Monedero para Admin / Ventas / Logística
-            const wrapTienda = document.getElementById("wrapperAccordionTienda");
-            const tiendaPromos = document.getElementById("tienda-nav-promociones");
-            const tiendaImpuestos = document.getElementById("tienda-nav-impuestos");
-            const tiendaMonedero = document.getElementById("tienda-nav-monedero");
-            const tiendaTickets = document.getElementById("tienda-nav-tickets");
-            const tiendaCorreo = document.getElementById("tienda-nav-correo");
             setVisible(wrapTienda, true, 'block');
             setVisible(tiendaPromos, true, 'flex');
             setVisible(tiendaImpuestos, true, 'flex');
