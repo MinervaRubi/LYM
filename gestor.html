@@ -1479,7 +1479,7 @@
                 if (role === 'ventas') nombreRolEtiqueta = 'Ventas / Comercial';
                 else if (role === 'logistica') nombreRolEtiqueta = 'Logística / Almacén';
                 else if (role === 'trabajador') nombreRolEtiqueta = 'Logística (Operativo)';
-                else if (role === 'soporte') nombreRolEtiqueta = 'Soporte Técnico';
+                else if (role === 'soporte' || String(data.user.username || '').toLowerCase() === 'soporte') nombreRolEtiqueta = 'Soporte Técnico';
                 document.getElementById("gestorRole").textContent = nombreRolEtiqueta;
                 document.getElementById("topbarAvatar").textContent = data.user.username.charAt(0).toUpperCase();
 

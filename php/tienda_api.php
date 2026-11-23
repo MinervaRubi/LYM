@@ -583,7 +583,7 @@ try {
                     $stmtTData = $pdo->prepare("
                         SELECT t.*, c.nombre AS cliente_nombre, c.correo AS cliente_correo 
                         FROM tickets_atencion t 
-                        JOIN clientes c ON t.cliente_id = c.id 
+                        LEFT JOIN clientes c ON t.cliente_id = c.id 
                         WHERE t.id = ?
                     ");
                     $stmtTData->execute([$ticketId]);

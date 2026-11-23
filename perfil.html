@@ -757,8 +757,8 @@
                 const resp = await fetch('php/check_session.php');
                 const data = await resp.json();
                 if (data.authenticated && data.user) {
-                    if (data.user.username === 'soporte') {
-                        window.location.href = 'gestor.html';
+                    if (String(data.user.username || '').toLowerCase() === 'soporte' || String(data.user.role || '').toLowerCase() === 'soporte') {
+                        window.location.replace('gestor.html');
                         return;
                     }
                     clienteIdActivo = data.user.cliente_id || data.user.id || 1;

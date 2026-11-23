@@ -4,27 +4,27 @@
             <h3 class="crm-card-title"><i class="fas fa-headset" style="color:#7c3aed;"></i> Bandeja de Tickets de Atención a Clientes</h3>
             <p class="crm-card-subtitle">Atiende solicitudes de soporte, quejas y consultas generadas por los compradores.</p>
         </div>
-        <button class="crm-btn crm-btn-secondary" onclick="window.cargarTicketsAdmin()">
+        <button class="crm-btn crm-btn-secondary" onclick="window.cargarTicketsAdmin()" style="cursor:pointer; display:flex; align-items:center; gap:6px;">
             <i class="fas fa-rotate"></i> Actualizar Bandeja
         </button>
     </div>
 
     <div style="overflow-x:auto; margin-top:16px;">
-        <table class="crm-table">
+        <table class="crm-table" style="width:100%; border-collapse:collapse;">
             <thead>
-                <tr>
-                    <th>Folio</th>
-                    <th>Cliente</th>
-                    <th>Asunto y Mensaje</th>
-                    <th>Fecha</th>
-                    <th>Estado</th>
-                    <th>Respuesta / Acción</th>
+                <tr style="border-bottom:2px solid #e2e8f0; text-align:left;">
+                    <th style="padding:12px; font-weight:700; color:#475569; font-size:0.8rem; text-transform:uppercase;">Folio</th>
+                    <th style="padding:12px; font-weight:700; color:#475569; font-size:0.8rem; text-transform:uppercase;">Cliente</th>
+                    <th style="padding:12px; font-weight:700; color:#475569; font-size:0.8rem; text-transform:uppercase;">Asunto y Mensaje</th>
+                    <th style="padding:12px; font-weight:700; color:#475569; font-size:0.8rem; text-transform:uppercase;">Fecha</th>
+                    <th style="padding:12px; font-weight:700; color:#475569; font-size:0.8rem; text-transform:uppercase;">Estado</th>
+                    <th style="padding:12px; font-weight:700; color:#475569; font-size:0.8rem; text-transform:uppercase;">Respuesta / Acción</th>
                 </tr>
             </thead>
             <tbody id="tablaAdminTicketsBody">
                 <tr>
-                    <td colspan="6" style="text-align:center; padding:30px; color:#94a3b8;">
-                        <i class="fas fa-spinner fa-spin"></i> Cargando tickets...
+                    <td colspan="6" style="text-align:center; padding:35px; color:#94a3b8;">
+                        <i class="fas fa-spinner fa-spin" style="font-size:1.5rem; color:#7c3aed; margin-bottom:8px; display:block;"></i> Cargando tickets...
                     </td>
                 </tr>
             </tbody>
@@ -33,30 +33,35 @@
 </div>
 
 <!-- MODAL RESPONDER TICKET -->
-<div class="crm-modal-overlay" id="modalResponderTicket" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:9999; align-items:center; justify-content:center; padding:20px;">
-    <div style="background:#fff; border-radius:18px; max-width:520px; width:100%; padding:24px; box-shadow:0 15px 40px rgba(0,0,0,0.2);">
-        <h4 style="margin:0 0 10px 0; color:#1e293b;"><i class="fas fa-reply" style="color:var(--primary);"></i> Responder Ticket <span id="lblTicketFolioModal">T-103</span></h4>
-        <p id="lblTicketAsuntoModal" style="color:#64748b; font-size:0.9rem; margin-bottom:14px;"></p>
+<div class="crm-modal-overlay" id="modalResponderTicket" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(15,23,42,0.65); backdrop-filter:blur(4px); z-index:999999; align-items:center; justify-content:center; padding:20px;" onclick="if(event.target === this) window.cerrarModalResponderTicket();">
+    <div class="crm-modal-dialog" style="background:#fff; border-radius:18px; max-width:540px; width:100%; padding:24px; box-shadow:0 25px 60px rgba(0,0,0,0.35); position:relative; z-index:1000000;" onclick="event.stopPropagation();">
+        <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:14px; border-bottom:1px solid #e2e8f0; padding-bottom:12px;">
+            <div>
+                <h4 style="margin:0 0 4px 0; color:#1e293b; font-size:1.15rem; font-weight:700;"><i class="fas fa-reply" style="color:var(--primary,#7c3aed);"></i> Responder Ticket <span id="lblTicketFolioModal" style="color:var(--primary,#7c3aed); font-family:monospace;">T-103</span></h4>
+                <div id="lblTicketAsuntoModal" style="color:#64748b; font-size:0.85rem;"></div>
+            </div>
+            <button type="button" onclick="window.cerrarModalResponderTicket()" style="background:none; border:none; color:#94a3b8; font-size:1.4rem; cursor:pointer; padding:0 6px; border-radius:6px; line-height:1;" title="Cerrar modal">&times;</button>
+        </div>
 
         <form onsubmit="window.guardarRespuestaTicket(event)">
             <input type="hidden" id="inputTicketIdResponder">
-            <div class="crm-form-group">
-                <label class="crm-form-label">Cambiar Estado:</label>
-                <select id="selectNuevoEstadoTicket" class="crm-form-select">
-                    <option value="Respondido">Respondido</option>
-                    <option value="En proceso">En proceso</option>
-                    <option value="Cerrado">Cerrado</option>
+            <div class="crm-form-group" style="margin-bottom:14px;">
+                <label class="crm-form-label" style="font-weight:600; color:#334155; margin-bottom:6px; display:block; font-size:0.88rem;">Cambiar Estado del Ticket:</label>
+                <select id="selectNuevoEstadoTicket" class="crm-form-select" style="width:100%; padding:10px 12px; border-radius:8px; border:1px solid #cbd5e1; font-size:0.9rem; background:#fff;">
+                    <option value="Respondido">✅ Respondido (Solución enviada)</option>
+                    <option value="En proceso">⏳ En proceso (En seguimiento)</option>
+                    <option value="Cerrado">🔒 Cerrado (Caso finalizado)</option>
                 </select>
             </div>
 
-            <div class="crm-form-group">
-                <label class="crm-form-label">Mensaje de Respuesta al Cliente:</label>
-                <textarea id="textareaRespuestaTicket" class="crm-form-textarea" rows="4" required placeholder="Escribe la respuesta oficial..."></textarea>
+            <div class="crm-form-group" style="margin-bottom:18px;">
+                <label class="crm-form-label" style="font-weight:600; color:#334155; margin-bottom:6px; display:block; font-size:0.88rem;">Mensaje de Respuesta Oficial:</label>
+                <textarea id="textareaRespuestaTicket" class="crm-form-textarea" rows="5" required placeholder="Escribe aquí la respuesta para el cliente..." style="width:100%; padding:12px; border-radius:8px; border:1px solid #cbd5e1; font-size:0.9rem; resize:vertical; font-family:inherit; box-sizing:border-box;"></textarea>
             </div>
 
-            <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:16px;">
-                <button type="button" class="crm-btn crm-btn-secondary" onclick="window.cerrarModalResponderTicket()">Cancelar</button>
-                <button type="submit" class="crm-btn crm-btn-primary" id="btnEnviarRespuestaTicket">
+            <div style="display:flex; justify-content:flex-end; gap:10px;">
+                <button type="button" class="crm-btn crm-btn-secondary" onclick="window.cerrarModalResponderTicket()" style="padding:9px 18px; cursor:pointer;">Cancelar</button>
+                <button type="submit" class="crm-btn crm-btn-primary" id="btnEnviarRespuestaTicket" style="padding:9px 20px; background:linear-gradient(135deg, #7c3aed, #6d28d9); color:white; border:none; border-radius:8px; font-weight:600; cursor:pointer; display:flex; align-items:center; gap:6px;">
                     <i class="fas fa-paper-plane"></i> Enviar Respuesta
                 </button>
             </div>
@@ -72,9 +77,11 @@
         });
     };
 
-    window.mostrarNotificacion = window.mostrarNotificacion || function(msg, tipo) {
+    window.mostrarNotificacion = function(msg, tipo) {
         if (typeof showNotification === 'function') {
             showNotification(msg, tipo || 'info');
+        } else if (typeof mostrarNotificacionGlobal === 'function') {
+            mostrarNotificacionGlobal(msg, tipo || 'info');
         } else {
             alert(msg);
         }
@@ -86,49 +93,58 @@
         const tbody = document.getElementById("tablaAdminTicketsBody");
         if (!tbody) return;
 
-        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:30px; color:#94a3b8;"><i class="fas fa-spinner fa-spin"></i> Cargando tickets...</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:35px; color:#94a3b8;"><i class="fas fa-spinner fa-spin" style="font-size:1.5rem; color:#7c3aed; margin-bottom:8px; display:block;"></i> Cargando tickets...</td></tr>';
 
         try {
             const resp = await fetch("php/tienda_api.php?resource=tickets&accion=todos_los_tickets&_t=" + Date.now(), { credentials: "same-origin" });
+            if (!resp.ok) {
+                throw new Error("HTTP " + resp.status + " " + resp.statusText);
+            }
             const data = await resp.json();
 
             if (data.success && Array.isArray(data.tickets)) {
                 window.ticketsAdminEnMemoria = data.tickets;
                 if (data.tickets.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:24px; color:#94a3b8;"><i class="fas fa-info-circle"></i> No hay tickets registrados actualmente.</td></tr>';
+                    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:30px; color:#94a3b8;"><i class="fas fa-inbox fa-2x" style="margin-bottom:8px; display:block;"></i> No hay tickets registrados actualmente.</td></tr>';
                     return;
                 }
 
                 tbody.innerHTML = data.tickets.map(t => {
                     const est = t.estado || 'En proceso';
-                    let badgeColor = '#fef3c7; color:#b45309';
-                    if (est.toLowerCase().includes('respondido')) badgeColor = '#dcfce7; color:#15803d';
-                    if (est.toLowerCase().includes('cerrado')) badgeColor = '#f1f5f9; color:#64748b';
+                    let badgeColor = '#fef3c7; color:#b45309; border:1px solid #fde68a';
+                    let iconEst = 'fa-clock';
+                    if (est.toLowerCase().includes('respondido')) {
+                        badgeColor = '#dcfce7; color:#15803d; border:1px solid #bbf7d0';
+                        iconEst = 'fa-check-circle';
+                    } else if (est.toLowerCase().includes('cerrado')) {
+                        badgeColor = '#f1f5f9; color:#64748b; border:1px solid #cbd5e1';
+                        iconEst = 'fa-lock';
+                    }
 
                     const folio = t.folio || ('T-' + t.id);
                     const clienteNom = t.cliente_nombre || ('Cliente #' + t.cliente_id);
                     const fechaStr = t.fecha || t.created_at || 'Reciente';
 
                     return `
-                        <tr>
-                            <td><strong style="color:var(--primary); font-family:monospace; font-size:0.95rem;">${window.escapeHtml(folio)}</strong></td>
-                            <td>
-                                <strong style="color:#0f172a;">${window.escapeHtml(clienteNom)}</strong>
-                                ${t.cliente_correo ? `<div style="font-size:0.75rem; color:#64748b;">${window.escapeHtml(t.cliente_correo)}</div>` : ''}
+                        <tr style="border-bottom:1px solid #f1f5f9; transition:background 0.2s;">
+                            <td style="padding:14px 12px;"><strong style="color:#7c3aed; font-family:monospace; font-size:1rem; font-weight:700;">${window.escapeHtml(folio)}</strong></td>
+                            <td style="padding:14px 12px;">
+                                <strong style="color:#0f172a; font-size:0.92rem;">${window.escapeHtml(clienteNom)}</strong>
+                                ${t.cliente_correo ? `<div style="font-size:0.78rem; color:#64748b; margin-top:2px;"><i class="fas fa-envelope" style="font-size:0.7rem;"></i> ${window.escapeHtml(t.cliente_correo)}</div>` : ''}
                             </td>
-                            <td>
-                                <strong style="color:#1e293b;">${window.escapeHtml(t.asunto || '')}</strong>
-                                <div style="font-size:0.82rem; color:#64748b; margin-top:2px;">${window.escapeHtml(t.mensaje || '')}</div>
-                                ${t.respuesta ? `<div style="font-size:0.8rem; color:#059669; margin-top:4px; font-weight:600;"><i class="fas fa-check-circle"></i> Resp: ${window.escapeHtml(t.respuesta)}</div>` : ''}
+                            <td style="padding:14px 12px; max-width:320px;">
+                                <strong style="color:#1e293b; font-size:0.92rem;">${window.escapeHtml(t.asunto || '')}</strong>
+                                <div style="font-size:0.83rem; color:#475569; margin-top:3px; line-height:1.4;">${window.escapeHtml(t.mensaje || '')}</div>
+                                ${t.respuesta ? `<div style="font-size:0.82rem; color:#059669; margin-top:6px; font-weight:600; background:#f0fdf4; padding:6px 10px; border-radius:6px; border-left:3px solid #10b981;"><i class="fas fa-comment-dots"></i> <strong>Respuesta:</strong> ${window.escapeHtml(t.respuesta)}</div>` : ''}
                             </td>
-                            <td style="font-size:0.82rem; color:#475569; white-space:nowrap;">${window.escapeHtml(fechaStr)}</td>
-                            <td>
-                                <span class="crm-badge" style="background:${badgeColor}; font-weight:700;">
-                                    ${window.escapeHtml(est)}
+                            <td style="padding:14px 12px; font-size:0.83rem; color:#475569; white-space:nowrap;">${window.escapeHtml(fechaStr)}</td>
+                            <td style="padding:14px 12px; white-space:nowrap;">
+                                <span class="crm-badge" style="background:${badgeColor}; font-weight:700; padding:4px 10px; border-radius:20px; font-size:0.78rem; display:inline-flex; align-items:center; gap:5px;">
+                                    <i class="fas ${iconEst}"></i> ${window.escapeHtml(est)}
                                 </span>
                             </td>
-                            <td>
-                                <button class="crm-btn crm-btn-secondary crm-btn-sm" onclick="window.abrirModalResponderTicket(${t.id})">
+                            <td style="padding:14px 12px; white-space:nowrap;">
+                                <button class="crm-btn crm-btn-primary crm-btn-sm" onclick="window.abrirModalResponderTicket(${t.id})" style="background:linear-gradient(135deg, #7c3aed, #6d28d9); color:white; border:none; padding:7px 14px; border-radius:8px; font-weight:600; cursor:pointer; box-shadow:0 2px 6px rgba(124,58,237,0.25);">
                                     <i class="fas fa-reply"></i> Responder
                                 </button>
                             </td>
@@ -136,31 +152,55 @@
                     `;
                 }).join('');
             } else {
-                tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:#ef4444; padding:20px;">${window.escapeHtml(data.error || 'No se pudieron consultar los tickets')}</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:#ef4444; padding:25px;">${window.escapeHtml(data.error || 'No se pudieron consultar los tickets')} <br><button class="crm-btn crm-btn-secondary crm-btn-sm" onclick="window.cargarTicketsAdmin()" style="margin-top:10px;"><i class="fas fa-rotate"></i> Reintentar</button></td></tr>`;
             }
         } catch (e) {
             console.error("Error al cargar tickets:", e);
-            tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:#ef4444; padding:20px;">Error al consultar tickets: ${window.escapeHtml(e.message)}</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:#ef4444; padding:25px;">Error al consultar tickets: ${window.escapeHtml(e.message)} <br><button class="crm-btn crm-btn-secondary crm-btn-sm" onclick="window.cargarTicketsAdmin()" style="margin-top:10px;"><i class="fas fa-rotate"></i> Reintentar</button></td></tr>`;
         }
     };
 
     window.abrirModalResponderTicket = function(id) {
         const t = (window.ticketsAdminEnMemoria || []).find(x => x.id == id);
-        if (!t) return;
+        if (!t) {
+            console.warn("Ticket no encontrado en memoria:", id);
+            return;
+        }
 
-        document.getElementById("inputTicketIdResponder").value = t.id;
-        document.getElementById("lblTicketFolioModal").textContent = t.folio || ('T-' + t.id);
-        document.getElementById("lblTicketAsuntoModal").textContent = `Asunto: ${t.asunto} | Cliente: ${t.cliente_nombre || t.cliente_id}`;
-        document.getElementById("textareaRespuestaTicket").value = t.respuesta || "";
-        document.getElementById("selectNuevoEstadoTicket").value = t.estado || "Respondido";
+        const inputId = document.getElementById("inputTicketIdResponder");
+        const lblFolio = document.getElementById("lblTicketFolioModal");
+        const lblAsunto = document.getElementById("lblTicketAsuntoModal");
+        const textareaResp = document.getElementById("textareaRespuestaTicket");
+        const selectEstado = document.getElementById("selectNuevoEstadoTicket");
+
+        if (inputId) inputId.value = t.id;
+        if (lblFolio) lblFolio.textContent = t.folio || ('T-' + t.id);
+        if (lblAsunto) lblAsunto.innerHTML = `<strong>Asunto:</strong> ${window.escapeHtml(t.asunto || '')} &bull; <strong>Cliente:</strong> ${window.escapeHtml(t.cliente_nombre || 'Cliente #' + t.cliente_id)}`;
+        if (textareaResp) {
+            textareaResp.value = t.respuesta || "";
+            setTimeout(() => textareaResp.focus(), 80);
+        }
+        if (selectEstado) selectEstado.value = t.estado || "Respondido";
 
         const modal = document.getElementById("modalResponderTicket");
-        if (modal) modal.style.display = "flex";
+        if (modal) {
+            modal.classList.add("active");
+            modal.style.display = "flex";
+            modal.style.opacity = "1";
+            modal.style.visibility = "visible";
+            modal.style.pointerEvents = "auto";
+        }
     };
 
     window.cerrarModalResponderTicket = function() {
         const modal = document.getElementById("modalResponderTicket");
-        if (modal) modal.style.display = "none";
+        if (modal) {
+            modal.classList.remove("active");
+            modal.style.display = "none";
+            modal.style.opacity = "0";
+            modal.style.visibility = "hidden";
+            modal.style.pointerEvents = "none";
+        }
     };
 
     window.guardarRespuestaTicket = async function(e) {
@@ -169,6 +209,11 @@
         const respText = document.getElementById("textareaRespuestaTicket").value.trim();
         const est = document.getElementById("selectNuevoEstadoTicket").value;
         const btn = document.getElementById("btnEnviarRespuestaTicket");
+
+        if (!respText) {
+            alert("Por favor ingresa un mensaje de respuesta para el cliente.");
+            return;
+        }
 
         if (btn) {
             btn.disabled = true;
@@ -204,6 +249,13 @@
             }
         }
     };
+
+    // Cerrar modal al presionar Escape
+    document.addEventListener("keydown", function(e) {
+        if (e.key === "Escape") {
+            window.cerrarModalResponderTicket();
+        }
+    });
 
     // Ejecución inmediata
     window.cargarTicketsAdmin();
