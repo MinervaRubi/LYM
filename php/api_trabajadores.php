@@ -21,7 +21,7 @@ try {
         $stmt = $pdo->query("
             SELECT id, username, email, role, created_at
             FROM usuarios
-            WHERE role IN ('trabajador', 'ventas', 'logistica')
+            WHERE role IN ('trabajador', 'ventas', 'logistica', 'soporte')
             ORDER BY id DESC
         ");
         $trabajadores = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -185,7 +185,7 @@ try {
         $password_hash = password_hash($password, PASSWORD_DEFAULT);
 
         // Insertar usuario con rol (trabajador, ventas, logistica)
-        $userRole = isset($input['role']) && in_array($input['role'], ['ventas', 'logistica', 'trabajador', 'admin']) ? $input['role'] : 'ventas';
+        $userRole = isset($input['role']) && in_array($input['role'], ['ventas', 'logistica', 'trabajador', 'soporte', 'admin']) ? $input['role'] : 'ventas';
         $stmtIns = $pdo->prepare("
             INSERT INTO usuarios (username, email, password_hash, role)
             VALUES (?, ?, ?, ?)

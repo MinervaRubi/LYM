@@ -120,7 +120,19 @@ function isStaff()
 {
     if (!isLoggedIn() || !isset($_SESSION['user_role'])) return false;
     $r = strtolower($_SESSION['user_role']);
-    return in_array($r, ['admin', 'trabajador', 'ventas', 'logistica']);
+    return in_array($r, ['admin', 'trabajador', 'ventas', 'logistica', 'soporte']);
+}
+
+
+// =====================================================
+// VERIFICAR SOPORTE TÉCNICO
+// =====================================================
+
+function isSupport()
+{
+    if (!isLoggedIn() || !isset($_SESSION['user_role'])) return false;
+    $r = strtolower($_SESSION['user_role']);
+    return ($r === 'soporte');
 }
 
 

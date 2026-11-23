@@ -524,10 +524,10 @@ try {
 
         // GET: Listar tickets
         if ($method === 'GET') {
+            $rolActual = strtolower($_SESSION['user_role'] ?? $_SESSION['rol'] ?? '');
             $esAdmin = (isset($_GET['accion']) && $_GET['accion'] === 'todos_los_tickets') 
                        || isset($_GET['todos']) 
-                       || (($_SESSION['rol'] ?? '') === 'admin')
-                       || (($_SESSION['user_role'] ?? '') === 'admin');
+                       || in_array($rolActual, ['admin', 'soporte', 'ventas', 'logistica']);
 
             if ($esAdmin) {
                 $stmt = $pdo->query("
