@@ -142,9 +142,6 @@
                             <i class="fas fa-tags"></i> <span>Descuentos y Promos</span>
                             <span id="badgeDescuentosSidebar" class="crm-badge" style="display:none; background:#ef4444; color:white; font-size:0.7rem; padding:1px 6px; border-radius:10px; margin-left:auto; font-weight:700;">0</span>
                         </button>
-                        <button class="crm-nav-item crm-nav-subitem" id="navItemAtencionClientes" onclick="loadExternalView('admin-tickets.html', this, 'CRM')">
-                            <i class="fas fa-headset"></i> <span>Atención a Clientes</span>
-                        </button>
                         <button class="crm-nav-item crm-nav-subitem" id="navItemActividad" onclick="loadExternalView('crm-actividad.html', this, 'CRM')">
                             <i class="fas fa-clipboard-list"></i> <span>Mi Actividad</span>
                         </button>
@@ -822,13 +819,6 @@
         }
 
         function irAInicioGestor(btn) {
-            const esSoporte = (window.currentUserCRM && String(window.currentUserCRM.username).toLowerCase() === 'soporte')
-                           || (window.currentUserCRM && String(window.currentUserCRM.role).toLowerCase() === 'soporte');
-            if (esSoporte) {
-                const btnAtencion = document.getElementById("navItemAtencionClientes") || document.getElementById("tienda-nav-tickets");
-                loadExternalView('admin-tickets.html', btnAtencion, 'CRM');
-                return;
-            }
             document.querySelectorAll(".crm-nav-item, .crm-nav-subitem").forEach(el => el.classList.remove("active"));
             if (btn) btn.classList.add("active");
             
@@ -886,14 +876,6 @@
 
             if (overrideRol) {
                 window.rolActivoERP = String(overrideRol).toLowerCase();
-            }
-            const esSoporte = (window.currentUserCRM && String(window.currentUserCRM.username).toLowerCase() === 'soporte')
-                           || (String(overrideRol).toLowerCase() === 'soporte')
-                           || (String(window.rolActivoERP).toLowerCase() === 'soporte');
-            if (esSoporte) {
-                window.enModuloERP = false;
-                barra.style.display = 'none';
-                return;
             }
             let rol = window.rolActivoERP || 'admin';
             if (rol === 'trabajador') rol = 'logistica';
@@ -1559,75 +1541,19 @@
             };
 
             // ==============================================================
-            // CASO EXCLUSIVO: ADMIN DE ATENCIÓN A CLIENTES (SOPORTE)
-            // (Acceso exclusivo a la pantalla de CRM > Atención a Clientes)
-            // ==============================================================
-            const currentUsername = String(window.currentUserCRM?.username || '').toLowerCase();
-            const esSoporte = (role === 'soporte' || currentUsername === 'soporte');
-
-            if (esSoporte) {
-                // Ocultar Dashboard, SCM, ERP, Tienda, Usuarios, Trabajadores
-                setVisible(btnInicio, false);
-                setVisible(btnWrapSCM, false);
-                setVisible(btnWrapERP, false);
-                setVisible(wrapTienda, false);
-                setVisible(btnUsuarios, false);
-                setVisible(btnTrabajadores, false);
-
-                // Ocultar barra superior de pestañas del ERP
-                const barraERP = document.getElementById("barraPestanasERP");
-                if (barraERP) barraERP.style.display = 'none';
-
-                // Ocultar botón "+ Interacción" del topbar
-                const btnTopInteraccion = document.querySelector(".crm-user-profile .crm-btn-primary");
-                if (btnTopInteraccion) btnTopInteraccion.style.display = 'none';
-
-                // En CRM: Mostrar ÚNICAMENTE "Atención a Clientes"
-                setVisible(btnWrapCRM, true, 'block');
-                setVisible(crmClientes, false);
-                setVisible(crmInteracciones, false);
-                setVisible(crmEvaluaciones, false);
-                setVisible(crmDescuentos, false);
-                setVisible(crmAtencion, true, 'flex');
-                setVisible(crmActividad, false);
-                setVisible(crmReportes, false);
-
-                // Sistema y Cuenta
-                const navCorreoOficial = document.getElementById("navItemCorreoOficial");
-                setVisible(navCorreoOficial, false);
-                setVisible(btnConfiguracion, true, 'flex');
-
-                abrirAcordeonCRM();
-
-                // Cargar inmediatamente la pantalla de Atención a Clientes bajo CRM
-                loadExternalView('admin-tickets.html', crmAtencion, 'CRM');
-                return;
-            }
-
-            // ==============================================================
-            // PRESERVAR ÍNTEGROS TODOS LOS APARTADOS PREVIOS DEL SIDEBAR
-            // (Dashboard, CRM con todos sus subitems, SCM con todos sus subitems,
-            // Usuarios, Trabajadores y Configuración)
+            // PRESERVAR ÍNTEGROS TODOS LOS APARTADOS DEL SIDEBAR
+            // (Dashboard, CRM, SCM, ERP, Tienda & Monedero, Usuarios, Trabajadores)
             // ==============================================================
             setVisible(btnInicio, true, 'flex');
             setVisible(btnWrapCRM, true, 'block');
             setVisible(btnWrapSCM, true, 'block');
             setVisible(btnWrapERP, true, 'block');
+            setVisible(wrapTienda, true, 'block');
             setVisible(btnUsuarios, true, 'flex');
             setVisible(btnTrabajadores, true, 'flex');
             setVisible(btnConfiguracion, true, 'flex');
 
-            // Subitems originales CRM (todos visibles e intactos)
-            setVisible(crmClientes, true, 'flex');
-            setVisible(crmInteracciones, true, 'flex');
-            setVisible(crmEvaluaciones, true, 'flex');
-            setVisible(crmDescuentos, true, 'flex');
-            setVisible(crmAtencion, true, 'flex');
-            setVisible(crmActividad, true, 'flex');
-            setVisible(crmReportes, true, 'flex');
-
-            // Tienda & Monedero para Admin / Ventas / Logística
-            setVisible(wrapTienda, true, 'block');
+            // Tienda & Monedero (Todos visibles tal como en la imagen)
             setVisible(tiendaPromos, true, 'flex');
             setVisible(tiendaImpuestos, true, 'flex');
             setVisible(tiendaMonedero, true, 'flex');
@@ -1649,6 +1575,9 @@
             setVisible(scmInv, true, 'flex');
             setVisible(scmMov, true, 'flex');
             setVisible(scmPed, true, 'flex');
+            setVisible(scmLog, true, 'flex');
+            setVisible(scmRep, true, 'flex');
+            setVisible(scmMad, true, 'flex');
             setVisible(scmLog, true, 'flex');
             setVisible(scmRep, true, 'flex');
             setVisible(scmMad, true, 'flex');
@@ -1736,17 +1665,19 @@
             abrirAcordeonSCM();
             abrirAcordeonERP();
 
-            // Si no hay vista cargada actualmente, cargar el dashboard general
-            if (!currentLoadedView) {
+            // CASO USUARIO SOPORTE: Carga directamente en la pantalla de Tickets de Atención (tal como en la imagen)
+            const currentUsername = String(window.currentUserCRM?.username || '').toLowerCase();
+            if (currentUsername === 'soporte') {
+                abrirAcordeonTienda();
+                loadExternalView("admin-tickets.html", tiendaTickets, "Tienda");
+                actualizarPestanasERP("admin-tickets.html", 'admin', true);
+            } else if (!currentLoadedView) {
+                // Si no hay vista cargada actualmente, cargar el dashboard general
                 loadExternalView("crm-dashboard.html", btnInicio, "Dashboard");
+                actualizarPestanasERP(currentLoadedView, role);
+            } else {
+                actualizarPestanasERP(currentLoadedView, role);
             }
-
-            // Sincronizar selector en erp-inicio si está presente en el DOM
-            const selInicio = document.getElementById("erpInicioSelectRol");
-            if (selInicio) selInicio.value = (role === 'trabajador' ? 'logistica' : role);
-
-            // Actualizar la barra superior de pestañas dinámicas del ERP
-            actualizarPestanasERP(currentLoadedView, role);
         }
 
         function bloquearAccesoCRM(mensaje) {

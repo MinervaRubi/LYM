@@ -83,7 +83,8 @@
         }
     }
 
-    let ticketsAdminEnMemoria = [];
+    window.ticketsAdminEnMemoria = [];
+    var ticketsAdminEnMemoria = window.ticketsAdminEnMemoria;
 
     async function cargarTicketsAdmin() {
         const tbody = document.getElementById("tablaAdminTicketsBody");
@@ -115,7 +116,7 @@
                                 <div style="font-size:0.82rem; color:#64748b; margin-top:2px;">${escapeHtml(t.mensaje)}</div>
                                 ${t.respuesta ? `<div style="font-size:0.8rem; color:#059669; margin-top:4px; font-weight:600;"><i class="fas fa-check"></i> Resp: ${escapeHtml(t.respuesta)}</div>` : ''}
                             </td>
-                            <td>${t.created_at || 'Reciente'}</td>
+                            <td>${escapeHtml(t.fecha || t.created_at || 'Reciente')}</td>
                             <td>
                                 <span class="crm-badge" style="background:${badgeColor}; font-weight:700;">
                                     ${escapeHtml(est)}
