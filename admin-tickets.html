@@ -4,7 +4,7 @@
             <h3 class="crm-card-title"><i class="fas fa-headset" style="color:#7c3aed;"></i> Bandeja de Tickets de Atención a Clientes</h3>
             <p class="crm-card-subtitle">Atiende solicitudes de soporte, quejas y consultas generadas por los compradores.</p>
         </div>
-        <button class="crm-btn crm-btn-secondary" onclick="cargarTicketsAdmin()">
+        <button class="crm-btn crm-btn-secondary" onclick="window.cargarTicketsAdmin()">
             <i class="fas fa-rotate"></i> Actualizar Bandeja
         </button>
     </div>
@@ -38,7 +38,7 @@
         <h4 style="margin:0 0 10px 0; color:#1e293b;"><i class="fas fa-reply" style="color:var(--primary);"></i> Responder Ticket <span id="lblTicketFolioModal">T-103</span></h4>
         <p id="lblTicketAsuntoModal" style="color:#64748b; font-size:0.9rem; margin-bottom:14px;"></p>
 
-        <form onsubmit="guardarRespuestaTicket(event)">
+        <form onsubmit="window.guardarRespuestaTicket(event)">
             <input type="hidden" id="inputTicketIdResponder">
             <div class="crm-form-group">
                 <label class="crm-form-label">Cambiar Estado:</label>
@@ -55,7 +55,7 @@
             </div>
 
             <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:16px;">
-                <button type="button" class="crm-btn crm-btn-secondary" onclick="cerrarModalResponderTicket()">Cancelar</button>
+                <button type="button" class="crm-btn crm-btn-secondary" onclick="window.cerrarModalResponderTicket()">Cancelar</button>
                 <button type="submit" class="crm-btn crm-btn-primary" id="btnEnviarRespuestaTicket">
                     <i class="fas fa-paper-plane"></i> Enviar Respuesta
                 </button>
@@ -65,39 +65,37 @@
 </div>
 
 <script>
-    if (typeof escapeHtml !== 'function') {
-        function escapeHtml(str) {
-            return String(str || '').replace(/[&<>"']/g, function(m) {
-                return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m];
-            });
+(function() {
+    window.escapeHtml = window.escapeHtml || function(str) {
+        return String(str || '').replace(/[&<>"']/g, function(m) {
+            return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m];
+        });
+    };
+
+    window.mostrarNotificacion = window.mostrarNotificacion || function(msg, tipo) {
+        if (typeof showNotification === 'function') {
+            showNotification(msg, tipo || 'info');
+        } else {
+            alert(msg);
         }
-    }
+    };
 
-    if (typeof mostrarNotificacion !== 'function') {
-        function mostrarNotificacion(msg, tipo = 'info') {
-            if (typeof showNotification === 'function') {
-                showNotification(msg, tipo);
-            } else {
-                alert(msg);
-            }
-        }
-    }
+    window.ticketsAdminEnMemoria = window.ticketsAdminEnMemoria || [];
 
-    window.ticketsAdminEnMemoria = [];
-    var ticketsAdminEnMemoria = window.ticketsAdminEnMemoria;
-
-    async function cargarTicketsAdmin() {
+    window.cargarTicketsAdmin = async function() {
         const tbody = document.getElementById("tablaAdminTicketsBody");
         if (!tbody) return;
 
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:30px; color:#94a3b8;"><i class="fas fa-spinner fa-spin"></i> Cargando tickets...</td></tr>';
+
         try {
-            const resp = await fetch("php/tienda_api.php?resource=tickets&accion=todos_los_tickets");
+            const resp = await fetch("php/tienda_api.php?resource=tickets&accion=todos_los_tickets&_t=" + Date.now(), { credentials: "same-origin" });
             const data = await resp.json();
 
             if (data.success && Array.isArray(data.tickets)) {
-                ticketsAdminEnMemoria = data.tickets;
+                window.ticketsAdminEnMemoria = data.tickets;
                 if (data.tickets.length === 0) {
-                    tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:24px; color:#94a3b8;">No hay tickets pendientes.</td></tr>`;
+                    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:24px; color:#94a3b8;"><i class="fas fa-info-circle"></i> No hay tickets registrados actualmente.</td></tr>';
                     return;
                 }
 
@@ -107,37 +105,47 @@
                     if (est.toLowerCase().includes('respondido')) badgeColor = '#dcfce7; color:#15803d';
                     if (est.toLowerCase().includes('cerrado')) badgeColor = '#f1f5f9; color:#64748b';
 
+                    const folio = t.folio || ('T-' + t.id);
+                    const clienteNom = t.cliente_nombre || ('Cliente #' + t.cliente_id);
+                    const fechaStr = t.fecha || t.created_at || 'Reciente';
+
                     return `
                         <tr>
-                            <td><strong style="color:var(--primary); font-family:monospace;">${escapeHtml(t.folio || ('T-' + t.id))}</strong></td>
-                            <td><strong>${escapeHtml(t.cliente_nombre || ('Cliente #' + t.cliente_id))}</strong></td>
+                            <td><strong style="color:var(--primary); font-family:monospace; font-size:0.95rem;">${window.escapeHtml(folio)}</strong></td>
                             <td>
-                                <strong style="color:#1e293b;">${escapeHtml(t.asunto)}</strong>
-                                <div style="font-size:0.82rem; color:#64748b; margin-top:2px;">${escapeHtml(t.mensaje)}</div>
-                                ${t.respuesta ? `<div style="font-size:0.8rem; color:#059669; margin-top:4px; font-weight:600;"><i class="fas fa-check"></i> Resp: ${escapeHtml(t.respuesta)}</div>` : ''}
+                                <strong style="color:#0f172a;">${window.escapeHtml(clienteNom)}</strong>
+                                ${t.cliente_correo ? `<div style="font-size:0.75rem; color:#64748b;">${window.escapeHtml(t.cliente_correo)}</div>` : ''}
                             </td>
-                            <td>${escapeHtml(t.fecha || t.created_at || 'Reciente')}</td>
+                            <td>
+                                <strong style="color:#1e293b;">${window.escapeHtml(t.asunto || '')}</strong>
+                                <div style="font-size:0.82rem; color:#64748b; margin-top:2px;">${window.escapeHtml(t.mensaje || '')}</div>
+                                ${t.respuesta ? `<div style="font-size:0.8rem; color:#059669; margin-top:4px; font-weight:600;"><i class="fas fa-check-circle"></i> Resp: ${window.escapeHtml(t.respuesta)}</div>` : ''}
+                            </td>
+                            <td style="font-size:0.82rem; color:#475569; white-space:nowrap;">${window.escapeHtml(fechaStr)}</td>
                             <td>
                                 <span class="crm-badge" style="background:${badgeColor}; font-weight:700;">
-                                    ${escapeHtml(est)}
+                                    ${window.escapeHtml(est)}
                                 </span>
                             </td>
                             <td>
-                                <button class="crm-btn crm-btn-secondary crm-btn-sm" onclick="abrirModalResponderTicket(${t.id})">
+                                <button class="crm-btn crm-btn-secondary crm-btn-sm" onclick="window.abrirModalResponderTicket(${t.id})">
                                     <i class="fas fa-reply"></i> Responder
                                 </button>
                             </td>
                         </tr>
                     `;
                 }).join('');
+            } else {
+                tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:#ef4444; padding:20px;">${window.escapeHtml(data.error || 'No se pudieron consultar los tickets')}</td></tr>`;
             }
         } catch (e) {
-            tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:#ef4444; padding:20px;">Error al consultar tickets.</td></tr>`;
+            console.error("Error al cargar tickets:", e);
+            tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:#ef4444; padding:20px;">Error al consultar tickets: ${window.escapeHtml(e.message)}</td></tr>`;
         }
-    }
+    };
 
-    function abrirModalResponderTicket(id) {
-        const t = ticketsAdminEnMemoria.find(x => x.id == id);
+    window.abrirModalResponderTicket = function(id) {
+        const t = (window.ticketsAdminEnMemoria || []).find(x => x.id == id);
         if (!t) return;
 
         document.getElementById("inputTicketIdResponder").value = t.id;
@@ -147,27 +155,31 @@
         document.getElementById("selectNuevoEstadoTicket").value = t.estado || "Respondido";
 
         const modal = document.getElementById("modalResponderTicket");
-        modal.style.display = "flex";
-    }
+        if (modal) modal.style.display = "flex";
+    };
 
-    function cerrarModalResponderTicket() {
-        document.getElementById("modalResponderTicket").style.display = "none";
-    }
+    window.cerrarModalResponderTicket = function() {
+        const modal = document.getElementById("modalResponderTicket");
+        if (modal) modal.style.display = "none";
+    };
 
-    async function guardarRespuestaTicket(e) {
-        e.preventDefault();
+    window.guardarRespuestaTicket = async function(e) {
+        if (e && e.preventDefault) e.preventDefault();
         const id = document.getElementById("inputTicketIdResponder").value;
         const respText = document.getElementById("textareaRespuestaTicket").value.trim();
         const est = document.getElementById("selectNuevoEstadoTicket").value;
         const btn = document.getElementById("btnEnviarRespuestaTicket");
 
-        btn.disabled = true;
-        btn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Guardando...`;
+        if (btn) {
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...';
+        }
 
         try {
             const resp = await fetch("php/tienda_api.php?resource=tickets", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
+                credentials: "same-origin",
                 body: JSON.stringify({
                     id: id,
                     accion: "responder",
@@ -177,19 +189,23 @@
             });
             const d = await resp.json();
             if (d.success) {
-                mostrarNotificacion("Respuesta enviada y ticket actualizado.", "success");
-                cerrarModalResponderTicket();
-                cargarTicketsAdmin();
+                window.mostrarNotificacion("Respuesta enviada y ticket actualizado.", "success");
+                window.cerrarModalResponderTicket();
+                window.cargarTicketsAdmin();
             } else {
-                mostrarNotificacion(d.error || "Error al actualizar", "error");
+                window.mostrarNotificacion(d.error || "Error al actualizar", "error");
             }
         } catch (err) {
-            mostrarNotificacion("Error de conexión", "error");
+            window.mostrarNotificacion("Error de conexión: " + err.message, "error");
         } finally {
-            btn.disabled = false;
-            btn.innerHTML = `<i class="fas fa-paper-plane"></i> Enviar Respuesta`;
+            if (btn) {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-paper-plane"></i> Enviar Respuesta';
+            }
         }
-    }
+    };
 
-    cargarTicketsAdmin();
+    // Ejecución inmediata
+    window.cargarTicketsAdmin();
+})();
 </script>
