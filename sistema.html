@@ -1828,8 +1828,8 @@
 
                 showSuccessBanner("Inicio de sesión exitoso");
 
-                // SOLO administradores pueden entrar al Gestor
-                if (currentUser.role === "admin") {
+                // Administradores o soporte entran directo al Gestor
+                if (currentUser.role === "admin" || currentUser.username === "soporte") {
 
                     setTimeout(() => {
                         window.location.href = "gestor.html";
